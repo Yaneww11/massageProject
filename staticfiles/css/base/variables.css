@@ -1,0 +1,8 @@
+:root {
+    --primary-color: #6b5446; /* Coffee Brown */
+    --secondary-color: #a29089; /* Soft Beige */
+    --font-color: #F5E9E2; /* Light Cream */
+    --button-bg: var(--primary-color);
+    --button-hover-bg: #5B3F2E; /* Darker Coffee Brown */
+    --background-color: #F5E9E2; /* Light Cream Background */
+}

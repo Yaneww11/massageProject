@@ -1,0 +1,21 @@
+/* Card component styling */
+.card {
+    background: var(--light-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+.card img {
+    width: 100%;
+    display: block;
+}
+
+.card-body {
+    padding: 1rem;
+}

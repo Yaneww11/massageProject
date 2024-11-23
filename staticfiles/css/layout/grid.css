@@ -1,0 +1,29 @@
+/* Base grid */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -15px;
+}
+
+.col {
+    padding: 15px;
+    flex: 1 0 100%;
+}
+
+/* Tablet (min-width: 768px) */
+@media (min-width: 768px) {
+    .col-6 {
+        flex: 0 0 50%;
+    }
+
+    .col-4 {
+        flex: 0 0 33.333%;
+    }
+}
+
+/* Desktop (min-width: 1024px) */
+@media (min-width: 1024px) {
+    .col-3 {
+        flex: 0 0 25%;
+    }
+}

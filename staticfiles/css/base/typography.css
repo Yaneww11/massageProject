@@ -1,0 +1,21 @@
+/* Base typography styles */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    margin-bottom: 1rem;
+    color: var(--dark-color);
+}
+
+p {
+    font-family: var(--font-body);
+    margin-bottom: 1rem;
+    color: var(--secondary-color);
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}

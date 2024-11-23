@@ -1,0 +1,26 @@
+.navbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+}
+
+/* Hamburger menu for small screens */
+.navbar .menu {
+    display: none;
+    flex-direction: column;
+}
+
+/* Show menu on mobile */
+.navbar.active .menu {
+    display: flex;
+}
+
+/* Tablet and larger screens */
+@media (min-width: 768px) {
+    .navbar .menu {
+        display: flex;
+        flex-direction: row;
+    }
+}

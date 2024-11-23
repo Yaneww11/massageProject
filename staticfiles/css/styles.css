@@ -1,0 +1,29 @@
+/*!* Base styles *!*/
+/*@import url('base/reset.css');*/
+/*@import url('base/variables.css');*/
+/*@import url('base/typography.css');*/
+
+/*!* Layout styles *!*/
+/*@import url('layout/header.css');*/
+/*@import url('layout/footer.css');*/
+/*@import url('layout/grid.css');*/
+
+/*!* Page-specific styles *!*/
+/*@import url('pages/home.css');*/
+/*@import url('pages/about.css');*/
+/*@import url('pages/services.css');*/
+
+/*!* Components styles *!*/
+/*@import url('components/buttons.css');*/
+/*@import url('components/cards.css');*/
+/*@import url('components/form.css');*/
+
+/*!* Responsive styles *!*/
+/*@import url('base/responsive.css');*/
+
+@import url('base/reset.css');
+@import url('base/variables.css');
+@import url('layout/navbar.css');
+@import url('pages/home.css');
+@import url('base/responsive.css');
+@import url('layout/footer.css');

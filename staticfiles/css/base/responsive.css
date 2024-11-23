@@ -1,0 +1,23 @@
+@media (max-width: 768px) {
+    .navbar .menu {
+        display: none;
+        flex-direction: column;
+        gap: 0.5rem;
+        background-color: var(--primary-color);
+        padding: 1rem;
+        border-radius: 8px;
+    }
+
+    .navbar .menu.active {
+        display: flex;
+    }
+
+    .navbar-toggle {
+        display: block;
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--font-color);
+        cursor: pointer;
+    }
+}
