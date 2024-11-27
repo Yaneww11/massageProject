@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <div class="container">
+        <h1>Предлагани масажи</h1>
+        <div class="cards">
+            <!-- Card 1 -->
+            <div class="card">
+                <img src="{% static 'images/massage-1.jpg' %}" alt="Swedish Massage">
+                <div class="card-content">
+                    <h2 class="card-title">Swedish Massage</h2>
+                    <p class="card-description">Relax and unwind with a soothing Swedish massage. Perfect for stress relief and muscle relaxation.</p>
+                    <a href="#" class="card-btn">Learn More</a>
+                </div>
+            </div>
+            <!-- Card 2 -->
+            <div class="card">
+                <img src="{% static 'images/massage-1.jpg' %}" alt="Deep Tissue Massage">
+                <div class="card-content">
+                    <h2 class="card-title">Deep Tissue Massage</h2>
+                    <p class="card-description">Target deep muscle layers to relieve chronic pain and tension. Ideal for athletes and active individuals.</p>
+                    <a href="#" class="card-btn">Learn More</a>
+                </div>
+            </div>
+            <!-- Card 3 -->
+            <div class="card">
+                <img src="{% static 'images/massage-1.jpg' %}" alt="Hot Stone Massage">
+                <div class="card-content">
+                    <h2 class="card-title">Hot Stone Massage</h2>
+                    <p class="card-description">Experience deep relaxation with warm stones placed on key areas of your body.</p>
+                    <a href="#" class="card-btn">Learn More</a>
+                </div>
+            </div>
+            <!-- Add more cards as needed -->
+            <!-- Card 3 -->
+            <div class="card">
+                <img src="{% static 'images/massage-1.jpg' %}" alt="Hot Stone Massage">
+                <div class="card-content">
+                    <h2 class="card-title">Hot Stone Massage</h2>
+                    <p class="card-description">Experience deep relaxation with warm stones placed on key areas of your body.</p>
+                    <a href="#" class="card-btn">Learn More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

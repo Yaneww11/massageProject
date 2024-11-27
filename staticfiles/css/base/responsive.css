@@ -20,4 +20,10 @@
         color: var(--font-color);
         cursor: pointer;
     }
+
+    footer {
+        flex-direction: row;
+        justify-content: space-between;
+        text-align: left;
+    }
 }

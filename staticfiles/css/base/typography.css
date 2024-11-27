@@ -1,13 +1,13 @@
-/* Base typography styles */
 h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-heading);
+    font-family: var(--heading-font-family);
     margin-bottom: 1rem;
     color: var(--dark-color);
 }
 
 p {
-    font-family: var(--font-body);
-    margin-bottom: 1rem;
+    font-family: var(--font-family);
+    font-weight: 400;
+    font-style: normal;
     color: var(--secondary-color);
 }
 
@@ -18,4 +18,9 @@ a {
 
 a:hover {
     text-decoration: underline;
+}
+
+.logo-text {
+    font-family: var(--heading-font-family);
+    font-size: 2rem;
 }

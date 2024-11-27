@@ -1,8 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+1p&display=swap');
+
 :root {
+    /* Colors */
     --primary-color: #6b5446; /* Coffee Brown */
     --secondary-color: #a29089; /* Soft Beige */
     --font-color: #F5E9E2; /* Light Cream */
-    --button-bg: var(--primary-color);
-    --button-hover-bg: #5B3F2E; /* Darker Coffee Brown */
+    --button-bg: var(--primary-color); /* Button Background Color */
+    --button-hover-bg: #5B3F2E; /* Darker Coffee Brown for Hover */
     --background-color: #F5E9E2; /* Light Cream Background */
+    --light-color: #FFFFFF; /* Pure White for Forms */
+    --dark-color: #3C2F2A; /* Deep Brown for contrast */
+
+    /* Typography */
+    --font-family: "M PLUS 1p", sans-serif; /* Primary Font */
+    --heading-font-family: 'Playfair Display', serif; /* Elegant Headings Font */
+    --font-size-base: 16px; /* Base Font Size */
+    --font-size-heading: 2rem; /* Heading Font Size */
+    --font-size-small: 0.875rem; /* Small Text Size */
+
+    /* Spacing */
+    --spacing-small: 0.5rem; /* Small Spacing */
+    --spacing-medium: 1rem; /* Medium Spacing */
+    --spacing-large: 2rem; /* Large Spacing */
+
+    /* Borders and Shadows */
+    --border-radius: 8px; /* Rounded Corners */
+    --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle Shadow */
+    --focus-outline: 2px solid var(--primary-color); /* Outline for Focus States */
+
+    /* Buttons */
+    --button-text-color: var(--font-color); /* Button Text Color */
+    --button-padding: 0.75rem 1.5rem; /* Button Padding */
 }

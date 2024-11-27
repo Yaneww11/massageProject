@@ -1,33 +1,14 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Massage Center</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
-    <!-- Header Section -->
-    <header class="navbar">
-        <a href="#" class="logo">Massage Center</a>
-{#        <button class="navbar-toggle" onclick="toggleMenu()">☰</button>#}
-        <div class="menu">
-            <a href="#">Home</a>
-            <a href="#">About</a>
-            <a href="#">Services</a>
-            <a href="#">Contact</a>
-        </div>
-    </header>
-
+{% block content %}
     <!-- Hero Section -->
     <section class="hero-section">
         <div class="hero-content">
-            <h1>Relax, Refresh, Rejuvenate</h1>
-            <p>Experience tranquility with our professional massage therapies.</p>
+            <h1>Добре дошли в масажно студио Сияние</h1>
+            <p>Потопете се в едно отпускащо и удовлетворително преживяване</p>
         </div>
     </section>
-    
+
     <!-- Carousel Section -->
     <section class="carousel-section">
         <div class="carousel">
@@ -44,43 +25,37 @@
             <button class="carousel-btn next" onclick="nextSlide()">&#10095;</button>
         </div>
     </section>
-    
+
     <!-- Offer Cards Section -->
     <section class="offers">
         <div class="container">
-            <h2>Our Offers</h2>
+            <h2>Предпочитани масажи</h2>
             <div class="card-container">
                 <div class="card">
                     <h3>Swedish Massage</h3>
                     <p>
                         A gentle massage that focuses on relaxation, stress relief, and improved circulation.
                     </p>
-                    <a href="#" class="btn btn-primary">See More</a>
+                    <a href="#" class="btn btn-primary">Научете повече</a>
                 </div>
                 <div class="card">
                     <h3>Deep Tissue Massage</h3>
                     <p>
                         A therapeutic massage targeting deep layers of muscle to relieve chronic tension.
                     </p>
-                    <a href="#" class="btn btn-primary">See More</a>
+                    <a href="#" class="btn btn-primary">Научете повече</a>
                 </div>
                 <div class="card">
                     <h3>Hot Stone Massage</h3>
                     <p>
                         A soothing massage using heated stones to relax and loosen tight muscles.
                     </p>
-                    <a href="#" class="btn btn-primary">See More</a>
+                    <a href="#" class="btn btn-primary">Научете повече</a>
                 </div>
             </div>
         </div>
     </section>
+    <script src="{% static 'js/carousel.js' %}"></script>
+    
+{% endblock %}
 
-    <!-- Footer Section -->
-    <footer>
-        <p>&copy; 2024 Massage Center. All rights reserved.</p>
-        <a href="#">Privacy Policy</a>
-    </footer>
-
-    <script src="{% static 'js/home.js' %}"></script>
-</body>
-</html>

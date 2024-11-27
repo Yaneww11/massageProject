@@ -14,11 +14,3 @@ footer a {
 footer a:hover {
     color: var(--secondary-color);
 }
-
-@media (min-width: 768px) {
-    footer {
-        flex-direction: row;
-        justify-content: space-between;
-        text-align: left;
-    }
-}

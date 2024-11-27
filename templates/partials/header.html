@@ -1,0 +1,23 @@
+{% load static %}
+
+<!-- Header Section -->
+<header class="navbar">
+    <a href="{% url 'index' %}" class="logo-container">
+        <!-- Logo SVG/Image -->
+        <img src="{% static 'images/logo.svg' %}" alt="Logo" class="logo-svg">
+        <p class="logo-text">Сияние</p>
+    </a>
+    <nav class="nav-links">
+        <a href="#">Запази час</a>
+        <a href="#">За студиото</a>
+        <a href="{% url 'massages_dashboard' %}">Видове масажи</a>
+        {% if True %}
+            <a href="#">Профил</a>
+        {% else %}
+            <a href="#">Вход</a>
+        {% endif %}
+    </nav>
+    <button class="mobile-menu-toggle" aria-label="Open menu">
+        <span class="hamburger-icon"></span>
+    </button>
+</header>
