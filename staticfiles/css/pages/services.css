@@ -21,8 +21,8 @@
 
         h1 {
             text-align: center;
-            margin-bottom: 2rem;
-            color: #333;
+            margin-bottom: 4rem;
+            color: var(--dark-color);
         }
 
         /* Cards */

@@ -1,0 +1,32 @@
+Models:
+Massage
+  - id: integer
+  - name: string
+  - description: text
+  - price: decimal
+  - duration: integer
+  - short_description: text
+  - image: image
+
+MessageReservation
+  - id: integer
+  - massage_id: foreign key - One massage has many hours
+  - hour: time
+  - day: date
+  - created_at: datetime
+  - updated_at: datetime
+
+Masseur
+  - id: integer
+  - name: string
+  - description: text
+  - image: image
+  - created_at: datetime
+  - updated_at: datetime
+
+MessageStudios
+  - id: integer
+  - name: string
+  - description: text
+  - main_image: image
+  - gallery: image
