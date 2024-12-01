@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section class="about-me">
+    <div class="description">
+        <h2>About Me and My Studio</h2>
+        <div class="about-content">
+            <div class="photo-info-container">
+                <!-- Photo Section -->
+                <div class="photo-wrapper">
+                    <img src="{% static 'images/measure.jpg' %}" alt="Masseur's Photo">
+                </div>
+                <!-- Info Section -->
+                <div class="info-section">
+                    <p>
+                        Welcome to my massage studio! I am a professional masseur with over [X years] of experience. My passion lies in helping people relax, rejuvenate, and feel their best. Whether you're seeking stress relief, pain management, or simply a moment of calm, my studio is designed to be a sanctuary of wellness.
+                    </p>
+                    <p>
+                        My studio offers a serene and private environment equipped with state-of-the-art facilities to ensure your utmost comfort. Each massage session is customized to your individual needs, combining various techniques for a truly transformative experience.
+                    </p>
+                </div>
+            </div>
+{#            <!-- Certificate Section -->#}
+{#            <div class="certificate-section">#}
+{#                <div class="certificate">#}
+{#                    <img src="{% static 'images/certificate.png' %}" alt="Certificate">#}
+{#                </div>#}
+{#            </div>#}
+        </div>
+    </div>
+</section>
+
+    
+{#<section class="working-hours">#}
+{#    <div class="description">#}
+{#        <h2>Working Hours</h2>#}
+{#        <p>Here are the hours I am available for appointments:</p>#}
+{#        <ul class="hours-list">#}
+{#            <li>Monday to Friday: 9:00 AM - 6:00 PM</li>#}
+{#            <li>Saturday: 10:00 AM - 4:00 PM</li>#}
+{#            <li>Sunday: Closed</li>#}
+{#        </ul>#}
+{#    </div>#}
+{#</section>#}
+
+<section class="comments">
+    <div class="description">
+        <h2>User Comments</h2>
+        <div class="comment-carousel">
+            <div class="carousel-wrapper">
+{#                {% for comment in comments %}#}
+{#                <div class="carousel-item">#}
+{#                    <strong>{{ comment.name }}</strong>#}
+{#                    <p>{{ comment.text }}</p>#}
+{#                </div>#}
+{#                {% empty %}#}
+{#                <div class="carousel-item">#}
+{#                    <strong>No Comments</strong>#}
+{#                    <p>Be the first to leave one!</p>#}
+{#                </div>#}
+{#                {% endfor %}#}
+                <div class="carousel-item">
+                    <strong>Yane</strong>
+                    <p>Da</p>
+                </div>
+                <div class="carousel-item">
+                    <strong>Trifon</strong>
+                    <p>Yes</p>
+                </div>
+            </div>
+            <button class="carousel-btn prev-btn">&laquo;</button>
+            <button class="carousel-btn next-btn">&raquo;</button>
+        </div>
+        <form class="comment-form" method="post">
+            {% csrf_token %}
+            <h3>Leave a Comment</h3>
+            <div class="form-group">
+                <label for="name">Your Name</label>
+                <input type="text" id="name" name="name" required placeholder="Enter your name">
+            </div>
+            <div class="form-group">
+                <label for="comment">Your Comment</label>
+                <textarea id="comment" name="comment" required placeholder="Write your comment here"></textarea>
+            </div>
+            <button type="submit" class="btn-primary">Submit</button>
+        </form>
+    </div>
+</section>
+
+<script src="{% static 'js/comments.js' %}"></script>
+{% endblock %}

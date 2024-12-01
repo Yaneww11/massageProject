@@ -1,0 +1,243 @@
+/* About Me Section */
+.about-me .description {
+    text-align: center;
+    margin: 3rem auto;
+    color: #5c3d2e;
+    max-width: 1200px;
+    padding: 0 1.5rem;
+}
+
+.about-me h2 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    font-family: 'Playfair Display', serif;
+    color: #7a5e4d;
+}
+
+/* Parent Container */
+.photo-info-container {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+/* Photo Section */
+.photo-wrapper {
+    flex: 1;
+    text-align: center;
+}
+
+.photo-wrapper img {
+    max-width: 350px;
+    border-radius: 50%;
+    border: 5px solid #7a5e4d;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.photo-wrapper img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* Info Section */
+.info-section {
+    flex: 2;
+    text-align: justify;
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: #5c3d2e;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.info-section p {
+    margin-bottom: 1rem;
+}
+
+/* Certificate Section */
+.certificate-section {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.certificate img {
+    max-width: 340px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.certificate img:hover {
+    transform: scale(1.4);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+
+
+/* Working Hours Section */
+.working-hours .description {
+    margin: 3rem auto;
+    text-align: center;
+}
+
+.working-hours h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    font-family: 'Playfair Display', serif;
+    color: #5c3d2e;
+}
+
+.hours-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 1.2rem;
+    color: #5c3d2e;
+    text-align: center;
+    line-height: 2;
+}
+
+/* Comments Section */
+.comments .description {
+    margin: 3rem auto;
+    text-align: center;
+    padding: 0 1.5rem;
+}
+
+.comments h2 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    font-family: 'Playfair Display', serif;
+    color: #5c3d2e;
+}
+
+/* Carousel */
+.comment-carousel {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-wrapper {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.carousel-item {
+    min-width: 100%;
+    background: #f9f5f0;
+    padding: 2rem;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-item strong {
+    font-size: 1.5rem;
+    color: #7a5e4d;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.carousel-item p {
+    font-size: 1.2rem;
+    color: #5c3d2e;
+    line-height: 1.6;
+}
+
+/* Carousel Buttons */
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #7a5e4d;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.carousel-btn:hover {
+    background: #5c3d2e;
+    transform: scale(1.1);
+}
+
+.prev-btn {
+    left: 10px;
+}
+
+.next-btn {
+    right: 10px;
+}
+
+/* Form */
+.comment-form {
+    max-width: 600px;
+    margin: 0 auto;
+    background: #f9f5f0;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+.comment-form h3 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: #5c3d2e;
+}
+
+.comment-form label {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #5c3d2e;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.comment-form input,
+.comment-form textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #7a5e4d;
+    border-radius: 4px;
+    font-size: 1rem;
+    background: #fff;
+    color: #5c3d2e;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.comment-form input:focus,
+.comment-form textarea:focus {
+    border-color: #5c3d2e;
+    outline: none;
+    box-shadow: 0 0 6px rgba(92, 61, 46, 0.5);
+}
+
+.comment-form button {
+    display: inline-block;
+    width: 100%;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    background: #7a5e4d;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.comment-form button:hover {
+    background-color: #5c3d2e;
+    transform: scale(1.05);
+}
+

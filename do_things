@@ -4,13 +4,14 @@ Massage
   - name: string
   - description: text
   - price: decimal
-  - duration: integer
+  - duration_in_minutes: integer
   - short_description: text
   - image: image
 
 MessageReservation
   - id: integer
-  - massage_id: foreign key - One massage has many hours
+  - massage_id: foreign key - One massage has many reservations
+  - masseur_id: foreign key - One masseur has many reservations
   - hour: time
   - day: date
   - created_at: datetime
