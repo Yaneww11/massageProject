@@ -1,0 +1,118 @@
+/* Blog Page Container */
+.blog-container {
+    max-width: 900px;
+    margin: 50px auto;
+    padding: 30px;
+    background: linear-gradient(135deg, #fff, #f9f9f9);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    font-family: 'Georgia', serif;
+    line-height: 1.8;
+    color: #333;
+}
+
+/* Blog Header */
+.blog-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.blog-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 15px;
+    object-fit: cover;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Blog Title */
+.blog-title {
+    font-size: 2.8rem;
+    color: #333;
+    margin: 20px 0;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+/* Short Description */
+.blog-short-description {
+    font-size: 1.2rem;
+    color: #666;
+    text-align: center;
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
+/* Description Section */
+.blog-description {
+    font-size: 1.1rem;
+    color: #444;
+    margin: 20px 0;
+    text-align: justify;
+    line-height: 1.8;
+    word-spacing: 0.05rem;
+}
+
+/* Details Section */
+.blog-details {
+    font-size: 1.2rem;
+    color: #333;
+    background-color: #f7f7f7;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.blog-details p {
+    margin: 5px 0;
+}
+
+.blog-details strong {
+    color: #333;
+}
+
+/* Button Style */
+.blog-btn {
+    display: inline-block;
+    padding: 12px 25px;
+    background-color: #f66b6b;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 30px;
+    text-align: center;
+    text-decoration: none;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.blog-btn:hover {
+    background-color: #e63946;
+    transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .blog-title {
+        font-size: 2.2rem;
+    }
+
+    .blog-short-description {
+        font-size: 1rem;
+    }
+
+    .blog-description {
+        font-size: 1rem;
+    }
+
+    .blog-details {
+        font-size: 1rem;
+    }
+
+    .blog-btn {
+        font-size: 1rem;
+        padding: 10px 20px;
+    }
+}

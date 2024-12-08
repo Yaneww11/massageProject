@@ -4,20 +4,20 @@
 {% block content %}
 <section class="about-me">
     <div class="description">
-        <h2>About Me and My Studio</h2>
+        <h2>За мен и моето студио</h2>
         <div class="about-content">
             <div class="photo-info-container">
                 <!-- Photo Section -->
                 <div class="photo-wrapper">
-                    <img src="{% static 'images/measure.jpg' %}" alt="Masseur's Photo">
+                    <img src="{{ masseur.image.url }}" alt="Masseur's Photo">
                 </div>
                 <!-- Info Section -->
                 <div class="info-section">
                     <p>
-                        Welcome to my massage studio! I am a professional masseur with over [X years] of experience. My passion lies in helping people relax, rejuvenate, and feel their best. Whether you're seeking stress relief, pain management, or simply a moment of calm, my studio is designed to be a sanctuary of wellness.
+                        {{ masseur.description }}
                     </p>
                     <p>
-                        My studio offers a serene and private environment equipped with state-of-the-art facilities to ensure your utmost comfort. Each massage session is customized to your individual needs, combining various techniques for a truly transformative experience.
+                        {{ studio.description }}
                     </p>
                 </div>
             </div>
@@ -46,7 +46,7 @@
 
 <section class="comments">
     <div class="description">
-        <h2>User Comments</h2>
+        <h2>Коментари</h2>
         <div class="comment-carousel">
             <div class="carousel-wrapper">
 {#                {% for comment in comments %}#}
@@ -74,7 +74,7 @@
         </div>
         <form class="comment-form" method="post">
             {% csrf_token %}
-            <h3>Leave a Comment</h3>
+            <h3>Остави коментар</h3>
             <div class="form-group">
                 <label for="name">Your Name</label>
                 <input type="text" id="name" name="name" required placeholder="Enter your name">

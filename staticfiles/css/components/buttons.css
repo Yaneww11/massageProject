@@ -18,3 +18,24 @@
 .btn-primary:hover {
     background-color: var(--button-hover-bg);
 }
+
+/* Button Style */
+.btn {
+    display: inline-block;
+    padding: 12px 25px;
+    background-color: #f66b6b;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 30px;
+    text-align: center;
+    text-decoration: none;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn:hover {
+    background-color: #e63946;
+    transform: scale(1.05);
+}

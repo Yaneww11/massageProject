@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="blog-container">
+    <div class="blog-header">
+        <img src="{{ massage.image.url }}" alt="{{ massage.name }}" class="blog-image">
+    </div>
+    <div class="blog-content">
+        <h1 class="blog-title">{{ massage.name }}</h1>
+        <p class="blog-short-description">{{ massage.short_description }}</p>
+        <div class="blog-description">
+            <p>{{ massage.description }}</p>
+        </div>
+        <div class="blog-details">
+            <p><strong>Price:</strong> ${{ massage.price }}</p>
+            <p><strong>Duration:</strong> {{ massage.duration_in_minutes }} minutes</p>
+        </div>
+        <a href="#" class="btn">Make a Reservation</a>
+    </div>
+</div>
+{% endblock %}

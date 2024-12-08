@@ -37,8 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'massageProject.accounts.apps.AccountsConfig',
-    'massageProject.main_app.apps.MainAppConfig'
+    'massageProject.main_app.apps.MainAppConfig',
 ]
 
 MIDDLEWARE = [
