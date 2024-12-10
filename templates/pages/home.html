@@ -10,6 +10,7 @@
     </section>
 
     <!-- Carousel Section -->
+    {% if images %}
     <section class="carousel-section">
         <div class="carousel">
             {% for image in images %}
@@ -21,6 +22,7 @@
             <button class="carousel-btn next" onclick="nextSlide()">&#10095;</button>
         </div>
     </section>
+    {% endif %}
 
     <!-- Offer Cards Section -->
     <section class="offers">
@@ -33,7 +35,8 @@
                         <p>
                             {{ m.short_description }}
                         </p>
-                        <a href="#" class="btn btn-primary">Научете повече</a>
+                        <a href="{% url 'reservation_page' pk=m.pk %}" class="btn">Направи резервация</a>
+                        <a href="{% url 'massage_detail' pk=m.pk %}" class="btn btn-primary">Научете повече</a>
                     </div>
                 {% endfor %}
             </div>

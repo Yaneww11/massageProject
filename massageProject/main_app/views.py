@@ -13,7 +13,8 @@ class Index(TemplateView):
         context = self.get_context_data(**kwargs)
         context['page'] = HomePage.objects.first()
         context['massages'] = Massage.objects.filter(home_page=True)[:3]
-        context['images'] = context['page'].gallery.images.all()
+        if context['page']:
+            context['images'] = context['page'].gallery.images.all()
         return self.render_to_response(context)
 
 class MassagesDashboard(ListView):
