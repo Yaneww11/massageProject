@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 
 class Massage(models.Model):
     name = models.CharField(max_length=80)
@@ -12,22 +14,8 @@ class Massage(models.Model):
     image = models.ImageField(upload_to='massages/')
     home_page = models.BooleanField(default=False)
 
-class MessageReservation(models.Model):
-    massage = models.ForeignKey(
-        Massage,
-        on_delete=models.CASCADE,
-        related_name='reservations'
-    )
-
-    masseur = models.ForeignKey(
-        'Masseur',
-        on_delete=models.CASCADE,
-        related_name='reservations'
-    )
-    hour = models.TimeField()
-    day = models.DateField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    def __str__(self):
+        return self.name
 
 class Masseur(models.Model):
     name = models.CharField(max_length=255)
@@ -42,6 +30,37 @@ class MessageStudio(models.Model):
     description = models.TextField()
     main_image = models.ImageField(upload_to='studios/')
     address = models.CharField(max_length=255)
+
+class MessageReservation(models.Model):
+    massage = models.ForeignKey(
+        Massage,
+        on_delete=models.CASCADE,
+        related_name='reservations'
+    )
+
+    masseur = models.ForeignKey(
+        'Masseur',
+        on_delete=models.CASCADE,
+        related_name='reservations',
+        blank=True,
+    )
+
+    # user = models.ForeignKey(
+    #     'accounts.CustomUser',
+    #     on_delete=models.CASCADE,
+    #     related_name='reservations',
+    #     blank=True,
+    # )
+
+    hour = models.TimeField()
+    day = models.DateField()
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+@receiver(pre_save, sender=MessageReservation)
+def set_masseur(sender, instance, **kwargs):
+    instance.masseur = Masseur.objects.first()
+    instance.save()
 
 class Gallery(models.Model):
     images = models.ManyToManyField('Image', related_name='galleries', through='GalleryImage')

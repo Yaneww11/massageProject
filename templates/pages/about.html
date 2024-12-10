@@ -31,19 +31,6 @@
     </div>
 </section>
 
-    
-{#<section class="working-hours">#}
-{#    <div class="description">#}
-{#        <h2>Working Hours</h2>#}
-{#        <p>Here are the hours I am available for appointments:</p>#}
-{#        <ul class="hours-list">#}
-{#            <li>Monday to Friday: 9:00 AM - 6:00 PM</li>#}
-{#            <li>Saturday: 10:00 AM - 4:00 PM</li>#}
-{#            <li>Sunday: Closed</li>#}
-{#        </ul>#}
-{#    </div>#}
-{#</section>#}
-
 <section class="comments">
     <div class="description">
         <h2>Коментари</h2>
@@ -75,6 +62,8 @@
         <form class="comment-form" method="post">
             {% csrf_token %}
             <h3>Остави коментар</h3>
+            {% if user.is_authenticated %}
+           
             <div class="form-group">
                 <label for="name">Your Name</label>
                 <input type="text" id="name" name="name" required placeholder="Enter your name">
@@ -84,6 +73,9 @@
                 <textarea id="comment" name="comment" required placeholder="Write your comment here"></textarea>
             </div>
             <button type="submit" class="btn-primary">Submit</button>
+             {% else %}
+                <p>Влезте в профила си, за да оставите коментар.<b><a href="#">Кликнете тук</a></b></p>
+            {% endif %}
         </form>
     </div>
 </section>

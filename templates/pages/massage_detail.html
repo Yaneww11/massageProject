@@ -7,15 +7,14 @@
     </div>
     <div class="blog-content">
         <h1 class="blog-title">{{ massage.name }}</h1>
-        <p class="blog-short-description">{{ massage.short_description }}</p>
         <div class="blog-description">
             <p>{{ massage.description }}</p>
         </div>
         <div class="blog-details">
-            <p><strong>Price:</strong> ${{ massage.price }}</p>
-            <p><strong>Duration:</strong> {{ massage.duration_in_minutes }} minutes</p>
+            <p><strong>Цена:</strong> {{ massage.price }}лв</p>
+            <p><strong>Продължителност:</strong> {{ massage.duration_in_minutes }} minutes</p>
         </div>
-        <a href="#" class="btn">Make a Reservation</a>
+        <a href="{% url 'reservation_page' pk=massage.pk %}" class="btn">Направи резервация</a>
     </div>
 </div>
 {% endblock %}
