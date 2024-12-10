@@ -31,3 +31,14 @@ MessageStudios
   - description: text
   - main_image: image
   - gallery: image
+
+User
+  - id: integer
+  - email: string
+  - password: string
+  - first_name: string
+  - last_name: string
+  - phone: string
+  - address: string
+  - created_at: datetime
+  - updated_at: datetime

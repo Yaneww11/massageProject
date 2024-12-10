@@ -73,32 +73,6 @@
     transform: scale(1.4);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
-
-
-
-/* Working Hours Section */
-.working-hours .description {
-    margin: 3rem auto;
-    text-align: center;
-}
-
-.working-hours h2 {
-    font-size: 2.5rem;
-    margin-bottom: 1.5rem;
-    font-family: 'Playfair Display', serif;
-    color: #5c3d2e;
-}
-
-.hours-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    font-size: 1.2rem;
-    color: #5c3d2e;
-    text-align: center;
-    line-height: 2;
-}
-
 /* Comments Section */
 .comments .description {
     margin: 3rem auto;
