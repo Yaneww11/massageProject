@@ -4,19 +4,40 @@ form {
     margin: 0 auto;
     padding: 2rem;
     background: var(--light-color);
+    border: 1px solid var(--primary-color);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
 }
 
-input, textarea {
-    width: 100%;
-    padding: 0.75rem;
-    margin-bottom: 1rem;
-    border: 1px solid var(--secondary-color);
-    border-radius: var(--border-radius);
+form div {
+    margin-bottom: 1.5rem;
+    text-align: left;
 }
 
-input:focus, textarea:focus {
-    border-color: var(--primary-color);
+label {
+    font-size: 1rem;
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
+    font-size: 1rem;
+    color: #333;
+    background-color: #f9f9f9;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: var(--secondary-color);
     outline: none;
+    background-color: #fff;
+}
+
+textarea {
+    height: 100px;
+    resize: vertical;
 }

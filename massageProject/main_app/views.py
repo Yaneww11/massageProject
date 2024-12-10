@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView, ListView
-from django.contrib import messages
+
 
 from massageProject.main_app.models import Massage, HomePage, Masseur, MessageStudio
 
@@ -24,6 +24,14 @@ class MassagesDashboard(ListView):
 
 class ReservationPage(TemplateView):
     template_name = 'pages/reservation.html'
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        if 'pk' in kwargs:
+            context['massage'] = Massage.objects.get(pk=kwargs['pk'])
+        else:
+            context['massage'] = None
+        return self.render_to_response(context)
 
 class AboutPage(TemplateView):
     template_name = 'pages/about.html'
