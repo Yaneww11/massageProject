@@ -8,11 +8,11 @@
         <p class="logo-text">Сияние</p>
     </a>
     <nav class="nav-links">
-        <a href="#">Запази час</a>
-        <a href="#">За студиото</a>
+        <a href="{% url 'reservation_page' %}">Запази час</a>
+        <a href="{% url 'about_page' %}">За студиото</a>
         <a href="{% url 'massages_dashboard' %}">Видове масажи</a>
         {% if True %}
-            <a href="#">Моите часове</a>
+            <a href="{% url 'profile_page' %}">Моите часове</a>
         {% else %}
             <a href="#">Вход</a>
         {% endif %}

@@ -13,6 +13,9 @@
 @import url('pages/home.css');
 @import url('pages/about.css');
 @import url('pages/services.css');
+@import url('pages/reservation.css');
+@import url('pages/detail_page.css');
+@import url('pages/my_profile.css');
 
 /* Components styles */
 @import url('components/buttons.css');

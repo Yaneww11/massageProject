@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="reservation-page">
+    <div class="description">
+        <h2>Your Reservations</h2>
+        <div class="reservation-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Service</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>2024-12-01</td>
+                        <td>10:00 AM</td>
+                        <td>Relaxation Massage</td>
+                        <td><span class="status upcoming">Upcoming</span></td>
+                        <td>
+                            <form method="post" action="#">
+                                <button type="submit" class="btn-cancel">Cancel</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>2024-11-25</td>
+                        <td>2:00 PM</td>
+                        <td>Therapeutic Massage</td>
+                        <td><span class="status completed">Completed</span></td>
+                        <td>
+                            <span class="inactive-action">N/A</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>2024-11-18</td>
+                        <td>4:30 PM</td>
+                        <td>Deep Tissue Massage</td>
+                        <td><span class="status cancelled">Cancelled</span></td>
+                        <td>
+                            <span class="inactive-action">N/A</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

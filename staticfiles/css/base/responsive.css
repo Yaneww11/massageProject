@@ -26,4 +26,7 @@
         justify-content: space-between;
         text-align: left;
     }
+    .photo-wrapper img {
+        max-width: 250px;
+    }
 }

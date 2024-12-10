@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<section class="about-me">
+    <div class="description">
+        <h2>За мен и моето студио</h2>
+        <div class="about-content">
+            <div class="photo-info-container">
+                <!-- Photo Section -->
+                <div class="photo-wrapper">
+                    <img src="{{ masseur.image.url }}" alt="Masseur's Photo">
+                </div>
+                <!-- Info Section -->
+                <div class="info-section">
+                    <p>
+                        {{ masseur.description }}
+                    </p>
+                    <p>
+                        {{ studio.description }}
+                    </p>
+                </div>
+            </div>
+{#            <!-- Certificate Section -->#}
+{#            <div class="certificate-section">#}
+{#                <div class="certificate">#}
+{#                    <img src="{% static 'images/certificate.png' %}" alt="Certificate">#}
+{#                </div>#}
+{#            </div>#}
+        </div>
+    </div>
+</section>
+
+    
+{#<section class="working-hours">#}
+{#    <div class="description">#}
+{#        <h2>Working Hours</h2>#}
+{#        <p>Here are the hours I am available for appointments:</p>#}
+{#        <ul class="hours-list">#}
+{#            <li>Monday to Friday: 9:00 AM - 6:00 PM</li>#}
+{#            <li>Saturday: 10:00 AM - 4:00 PM</li>#}
+{#            <li>Sunday: Closed</li>#}
+{#        </ul>#}
+{#    </div>#}
+{#</section>#}
+
+<section class="comments">
+    <div class="description">
+        <h2>Коментари</h2>
+        <div class="comment-carousel">
+            <div class="carousel-wrapper">
+{#                {% for comment in comments %}#}
+{#                <div class="carousel-item">#}
+{#                    <strong>{{ comment.name }}</strong>#}
+{#                    <p>{{ comment.text }}</p>#}
+{#                </div>#}
+{#                {% empty %}#}
+{#                <div class="carousel-item">#}
+{#                    <strong>No Comments</strong>#}
+{#                    <p>Be the first to leave one!</p>#}
+{#                </div>#}
+{#                {% endfor %}#}
+                <div class="carousel-item">
+                    <strong>Yane</strong>
+                    <p>Da</p>
+                </div>
+                <div class="carousel-item">
+                    <strong>Trifon</strong>
+                    <p>Yes</p>
+                </div>
+            </div>
+            <button class="carousel-btn prev-btn">&laquo;</button>
+            <button class="carousel-btn next-btn">&raquo;</button>
+        </div>
+        <form class="comment-form" method="post">
+            {% csrf_token %}
+            <h3>Остави коментар</h3>
+            <div class="form-group">
+                <label for="name">Your Name</label>
+                <input type="text" id="name" name="name" required placeholder="Enter your name">
+            </div>
+            <div class="form-group">
+                <label for="comment">Your Comment</label>
+                <textarea id="comment" name="comment" required placeholder="Write your comment here"></textarea>
+            </div>
+            <button type="submit" class="btn-primary">Submit</button>
+        </form>
+    </div>
+</section>
+
+<script src="{% static 'js/comments.js' %}"></script>
+{% endblock %}
