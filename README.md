@@ -17,7 +17,7 @@ This project is a web application for managing massage reservations. It allows u
 - JavaScript
 - HTML/CSS
 
-## Installation
+## Installation (Linux)
 
 1. Clone the repository:
     ```bash
