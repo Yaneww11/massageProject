@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView, ListView, FormView, CreateView
+from django.views.generic import TemplateView, ListView, CreateView
 
-from massageProject.main_app.forms import ReservationBaseForm, ReservationCreateForm, ReservationEditForm, \
+from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
     ReservationDeleteForm, CommentForm
 from massageProject.main_app.models import Massage, HomePage, Masseur, MessageStudio, MessageReservation, Comment
 

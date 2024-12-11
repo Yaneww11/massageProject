@@ -51,18 +51,22 @@
             <button class="carousel-btn prev-btn">&laquo;</button>
             <button class="carousel-btn next-btn">&raquo;</button>
         </div>
-        <form class="comment-form" method="post">
-            {% csrf_token %}
-            <h3>Остави коментар</h3>
-            {% if user.is_authenticated %}
-            <div class="form-group">
-                {{ form.content }}
-            </div>
-            <button type="submit" class="btn-primary">Submit</button>
-             {% else %}
-                <p>Влезте в профила си, за да оставите коментар.<b><a href="#">Кликнете тук</a></b></p>
-            {% endif %}
-        </form>
+        {% if perms.app_name.can_write_comment %}
+            <form class="comment-form" method="post">
+                {% csrf_token %}
+                <h3>Остави коментар</h3>
+                {% if user.is_authenticated %}
+                <div class="form-group">
+                    {{ form.content }}
+                </div>
+                <button type="submit" class="btn-primary">Submit</button>
+                 {% else %}
+                    <p>Влезте в профила си, за да оставите коментар.<b><a href="#">Кликнете тук</a></b></p>
+                {% endif %}
+            </form>
+        {% else %}
+            <p>Вие нямате разрешение да оставяте коментари.</p>
+        {% endif %}
     </div>
 </section>
 

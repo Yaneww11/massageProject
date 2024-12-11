@@ -98,4 +98,9 @@ class Comment(models.Model):
         auto_now_add=True,
     )
 
+    class Meta:
+        permissions = [
+            ("can_write_comment", "Can write a comment"),
+        ]
+
 
