@@ -36,25 +36,17 @@
         <h2>Коментари</h2>
         <div class="comment-carousel">
             <div class="carousel-wrapper">
-{#                {% for comment in comments %}#}
-{#                <div class="carousel-item">#}
-{#                    <strong>{{ comment.name }}</strong>#}
-{#                    <p>{{ comment.text }}</p>#}
-{#                </div>#}
-{#                {% empty %}#}
-{#                <div class="carousel-item">#}
-{#                    <strong>No Comments</strong>#}
-{#                    <p>Be the first to leave one!</p>#}
-{#                </div>#}
-{#                {% endfor %}#}
+                {% for comment in comments %}
                 <div class="carousel-item">
-                    <strong>Yane</strong>
-                    <p>Da</p>
+                    <strong>{{ comment.author }}</strong>
+                    <p>{{ comment.content }}</p>
                 </div>
+                {% empty %}
                 <div class="carousel-item">
-                    <strong>Trifon</strong>
-                    <p>Yes</p>
+                    <strong>Няма коментари</strong>
+                    <p>Бъди първенец и остави твоето мнение</p>
                 </div>
+                {% endfor %}
             </div>
             <button class="carousel-btn prev-btn">&laquo;</button>
             <button class="carousel-btn next-btn">&raquo;</button>
@@ -63,14 +55,8 @@
             {% csrf_token %}
             <h3>Остави коментар</h3>
             {% if user.is_authenticated %}
-           
             <div class="form-group">
-                <label for="name">Your Name</label>
-                <input type="text" id="name" name="name" required placeholder="Enter your name">
-            </div>
-            <div class="form-group">
-                <label for="comment">Your Comment</label>
-                <textarea id="comment" name="comment" required placeholder="Write your comment here"></textarea>
+                {{ form.content }}
             </div>
             <button type="submit" class="btn-primary">Submit</button>
              {% else %}

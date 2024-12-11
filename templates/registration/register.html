@@ -1,9 +1,52 @@
 {% extends 'base.html' %}
 
+
 {% block content %}
-    <form method="post">
-        {% csrf_token %}
-        {{ form }}
-        <button class="btn btn-primary ml-2">Register</button>
-    </form>
+    
+    {% if form.errors %}
+        <ul class="errorlist">
+          {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
+    {% endif %}
+  <form method="POST">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="id_first_name">Име</label>
+        {{ form.first_name }}
+    </div>
+
+    <div class="form-group">
+        <label for="id_last_name">Фамилия</label>
+        {{ form.last_name }}
+    </div>
+
+    <div class="form-group">
+        <label for="id_phone_number">Телефонен номер</label>
+        {{ form.phone_number }}
+    </div>
+
+    <div class="form-group">
+        <label for="id_email">Имейл адрес</label>
+        {{ form.email }}
+    </div>
+
+    <div class="form-group">
+        <label for="password1">Парола</label>
+        {{ form.password1 }}
+    </div>
+
+    <div class="form-group">
+        <label for="id_email">Повторете парола</label>
+        {{ form.password2 }}
+    </div>
+
+    <button type="submit">Register</button>
+    <p>Вече имате акаунт? <a href="{% url 'login' %}">Цъкнете тук</a></p>
+  </form>
+
+  
 {% endblock %}

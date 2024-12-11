@@ -15,7 +15,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         verbose_name='email address',
         max_length=255,
         unique=True,
-        help_text='Enter a valid email address'
+        help_text='Enter a valid email address',
+
     )
 
     phone_number = models.CharField(
@@ -27,7 +28,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
                 message='Please correct valid phone number'
             )
         ],
-        help_text='089999999 or +359899999999'
+        help_text='089999999',
     )
 
     is_staff = models.BooleanField(

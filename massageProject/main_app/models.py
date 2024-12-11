@@ -57,7 +57,6 @@ class MessageReservation(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     additional_text = models.TextField(default='', blank=True)
 
-
 @receiver(pre_save, sender=MessageReservation)
 def set_masseur(sender, instance, **kwargs):
     instance.masseur = Masseur.objects.first()
@@ -87,4 +86,16 @@ class HomePage(models.Model):
         on_delete=models.CASCADE,
         related_name='home_page'
     )
+
+class Comment(models.Model):
+    author = models.CharField(
+        max_length=30,
+    )
+
+    content = models.TextField()
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
 

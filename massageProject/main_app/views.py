@@ -3,8 +3,8 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView, ListView, FormView, CreateView
 
 from massageProject.main_app.forms import ReservationBaseForm, ReservationCreateForm, ReservationEditForm, \
-    ReservationDeleteForm
-from massageProject.main_app.models import Massage, HomePage, Masseur, MessageStudio, MessageReservation
+    ReservationDeleteForm, CommentForm
+from massageProject.main_app.models import Massage, HomePage, Masseur, MessageStudio, MessageReservation, Comment
 
 
 # Create your views here.
@@ -48,6 +48,25 @@ class AboutPage(TemplateView):
         context = self.get_context_data(**kwargs)
         context['masseur'] = Masseur.objects.first()
         context['studio'] = MessageStudio.objects.values('description', 'main_image').first()
+        context['comments'] = Comment.objects.all().order_by('-created_at')[:5]
+        context['form'] = CommentForm()
+        return self.render_to_response(context)
+
+
+    def post(self, request, *args, **kwargs):
+        form = CommentForm(request.POST)
+
+        if form.is_valid():
+            if form.cleaned_data:
+                comment = form.save(commit=False)
+                comment.author = self.request.user.get_full_name()
+                form.save()
+
+            return redirect('about_page')
+
+        context = self.get_context_data()
+        context['form'] = form
+
         return self.render_to_response(context)
 
 class ProfilePage(TemplateView):

@@ -1,7 +1,7 @@
 from django import forms
 
 from massageProject.main_app.mixins import DisableFieldMixin
-from massageProject.main_app.models import MessageReservation
+from massageProject.main_app.models import MessageReservation, Comment
 
 
 class ReservationBaseForm(forms.ModelForm):
@@ -29,3 +29,26 @@ class ReservationEditForm(ReservationBaseForm):
 
 class ReservationDeleteForm(ReservationBaseForm, DisableFieldMixin):
     disabled_fields = ['massage','date', 'time', 'additional_text']
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['content']
+
+        labels = {
+            'content': '',
+        }
+
+        error_messages = {
+            'content': {
+                'required': 'Въведете коментар',
+            }
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields['content'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Your comment',
+        })
