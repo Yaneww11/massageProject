@@ -74,7 +74,13 @@ class ProfilePage(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['reservations'] = MessageReservation.objects.filter(user=self.request.user).order_by('date', 'time')[:3]
+        user = self.request.user
+        if user.has_perm('main_app.view_all_reservations'):
+            context['reservations'] = MessageReservation.objects.all().order_by('date', 'time')[:10]
+            context['title'] = 'Най - нови резервации'
+        else:
+            context['reservations'] = MessageReservation.objects.filter(user=self.request.user).order_by('date', 'time')[:3]
+            context['title'] = f'{user.get_full_name()} - резервации'
         return context
 
 class MassageDetail(TemplateView):
