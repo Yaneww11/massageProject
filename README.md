@@ -21,8 +21,7 @@ This project is a web application for managing massage reservations. It allows u
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/Yaneww11/massage-reservation-system.git
-    cd massage-reservation-system
+    git clone https://github.com/Yaneww11/massageProject.git
     ```
 
 2. Create a virtual environment and activate it:
