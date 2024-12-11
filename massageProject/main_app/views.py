@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, ListView, FormView, CreateView
 
-from massageProject.main_app.forms import ReservationForm
+from massageProject.main_app.forms import ReservationBaseForm, ReservationCreateForm, ReservationEditForm, \
+    ReservationDeleteForm
 from massageProject.main_app.models import Massage, HomePage, Masseur, MessageStudio, MessageReservation
 
 
@@ -26,7 +27,7 @@ class MassagesDashboard(ListView):
 class ReservationPage(CreateView):
     model = MessageReservation
     template_name = 'pages/reservation.html'
-    form_class = ReservationForm
+    form_class = ReservationCreateForm
     success_url = reverse_lazy('profile_page')
 
     def form_valid(self, form):
@@ -57,8 +58,6 @@ class ProfilePage(TemplateView):
         context['reservations'] = MessageReservation.objects.filter(user=self.request.user).order_by('date', 'time')[:3]
         return context
 
-
-
 class MassageDetail(TemplateView):
     template_name = 'pages/massage_detail.html'
 
@@ -66,3 +65,37 @@ class MassageDetail(TemplateView):
         context = self.get_context_data(**kwargs)
         context['massage'] = Massage.objects.get(pk=kwargs['pk'])
         return self.render_to_response(context)
+
+def edit_reservation(request, pk: int):
+    reservation = MessageReservation.objects.get(pk=pk)
+
+    if request.method == 'POST':
+        form = ReservationEditForm(request.POST, instance=reservation)
+
+        if form.is_valid():
+            form.save()
+            return redirect('profile_page')
+    else:
+        form = ReservationEditForm(instance=reservation)
+
+    context = {
+        "form": form,
+        "reservation": reservation,
+    }
+
+    return render(request, 'reservation/edit-reservation.html', context)
+
+def delete_reservation(request, pk: int):
+    reservation = MessageReservation.objects.get(pk=pk)
+    form = ReservationDeleteForm(instance=reservation)
+
+    if request.method == 'POST':
+        reservation.delete()
+        return redirect('profile_page')
+
+    context = {
+        "reservation": reservation,
+        "form": form,
+    }
+
+    return render(request, 'reservation/delete-reservation.html', context)

@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 style="color: #5b3f32; text-align: center">Промени своята резервация</h1>
+    <form action="{% url 'edit_reservation' reservation.pk %}" method="post">
+        {{ form }}
+        {% csrf_token %}
+        <button class="btn-primary">Промени</button>
+    </form>
+
+{% endblock %}

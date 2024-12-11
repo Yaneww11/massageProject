@@ -4,20 +4,20 @@
 {% block content %}
 <section class="hero-section">
     <div class="hero-content">
-        <h1>Reserve Your Massage Appointment</h1>
-        <p>Experience relaxation and rejuvenation with our professional massage services.</p>
+        <h1>Резервирайте своя масаж</h1>
+        <p>Подарете си релаксация и възстановяване с нашите професионални масажни услуги.</p>
     </div>
 </section>
 
 {% if user.is_authenticated %}
-    <section class="reservation-form ">
+    <section class="reservation-form">
         <div class="description">
-            <h2>Book Your Appointment</h2>
-            <p>Fill out the form below to schedule your massage appointment. We look forward to serving you!</p>
+            <h2>Запазете час</h2>
+            <p>Попълнете формуляра по-долу, за да запазите час за масаж. Очакваме Ви с нетърпение!</p>
             <form class="form-container" method="post">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="massage">Type of massage</label>
+                    <label for="massage">Тип масаж</label>
                     <select id="massage" name="massage" required>
                         {% for massage in form.fields.massage.queryset %}
                             <option value="{{ massage.id }}" {% if form.massage.value == massage.id %}selected{% endif %}>
@@ -27,50 +27,50 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="date">Preferred Date</label>
+                    <label for="date">Предпочитана дата</label>
                     <input type="date" id="date" name="date"
                         value="{{ form.date.value|default:'' }}" required>
                 </div>
                 <div class="form-group">
-                    <label for="time">Preferred Time</label>
+                    <label for="time">Предпочитано време</label>
                     <select id="time" name="time" required>
                         <option value="" disabled {% if not form.time.value %}selected{% endif %}>
-                            Select a time
+                            Изберете време
                         </option>
                         <option value="09:00" {% if form.time.value == '09:00' %}selected{% endif %}>
-                            09:00 AM
+                            09:00 ч.
                         </option>
                         <option value="10:00" {% if form.time.value == '10:00' %}selected{% endif %}>
-                            10:00 AM
+                            10:00 ч.
                         </option>
                         <option value="11:00" {% if form.time.value == '11:00' %}selected{% endif %}>
-                            11:00 AM
+                            11:00 ч.
                         </option>
                         <option value="13:00" {% if form.time.value == '13:00' %}selected{% endif %}>
-                            01:00 PM
+                            13:00 ч.
                         </option>
                         <option value="15:00" {% if form.time.value == '15:00' %}selected{% endif %}>
-                            03:00 PM
+                            15:00 ч.
                         </option>
                         <option value="17:00" {% if form.time.value == '17:00' %}selected{% endif %}>
-                            05:00 PM
+                            17:00 ч.
                         </option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="additional_text">Additional Notes</label>
+                    <label for="additional_text">Допълнителни бележки</label>
                     <textarea id="additional_text" name="additional_text"
-                              placeholder="Any special requests or concerns">{{ form.additional_text.value|default:'' }}</textarea>
+                              placeholder="Специални изисквания или притеснения">{{ form.additional_text.value|default:'' }}</textarea>
                 </div>
-                <button type="submit" class="btn-primary">Reserve Now</button>
+                <button type="submit" class="btn-primary">Резервирайте сега</button>
             </form>
         </div>
     </section>
 {% else %}
-    <section class="unathenticted reservation-form ">
+    <section class="unathenticted reservation-form">
         <div class="description">
-            <h2>Book Your Appointment</h2>
-            <p>To make a reservation, please <a href="#">register</a> or <a href="#">log in</a>.</p>
+            <h2>Запазете час</h2>
+            <p>За да направите резервация, моля <a href="#">регистрирайте се</a> или <a href="#">влезте</a>.</p>
         </div>
     </section>
 {% endif %}

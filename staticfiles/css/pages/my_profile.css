@@ -1,3 +1,5 @@
+/* Refactored CSS */
+
 /* Reservation Page */
 .reservation-page {
     padding: 3rem 1.5rem;
@@ -34,11 +36,11 @@
 
 .reservation-table th,
 .reservation-table td {
-    padding: 1rem;
+    padding: 0.8rem; /* Reduced padding */
     border-bottom: 1px solid #ddd;
     position: relative;
     transition: all 0.3s ease;
-
+    vertical-align: middle; /* Align content in the middle */
 }
 
 .reservation-table th {
@@ -51,6 +53,17 @@
     z-index: 1;
 }
 
+.reservation-table td {
+    color: #5c3d2e;
+    font-family: 'Open Sans', sans-serif;
+    border-radius: 5px;
+    text-align: left;
+}
+
+.reservation-table td a {
+    display: inline-block; /* Prevent excessive spacing */
+}
+
 .reservation-table tr {
     background: #fff;
     transition: transform 0.3s ease, background 0.3s ease;
@@ -61,64 +74,33 @@
     transform: scale(1.01);
 }
 
-/* Working Hours Section */
-.working-hours .description {
-    margin: 3rem auto;
-    text-align: center;
-}
-
-.working-hours h2 {
-    font-size: 2.5rem;
-    margin-bottom: 1.5rem;
-    font-family: 'Playfair Display', serif;
-    color: #5c3d2e;
-}
-
-.hours-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    font-size: 1.2rem;
-    color: #5c3d2e;
-    text-align: center;
-    line-height: 2;
-}
-
-/* Cell Styling */
-.reservation-table td {
-    color: #5c3d2e;
-    font-family: 'Open Sans', sans-serif;
-    border-radius: 5px;
-    text-align: left;
-}
-
-.reservation-table td:first-child {
-    font-weight: bold;
-    color: var(--secondary-color);
-}
-
-/* Cancel Button */
-.btn-cancel {
-    background-color: #ff6b6b;
+/* Button-Like Links */
+.reservation-table td a {
+    text-decoration: none;
     color: #fff;
-    border: none;
     padding: 0.5rem 1rem;
     border-radius: 5px;
     font-size: 0.9rem;
-    cursor: pointer;
+    font-family: 'Open Sans', sans-serif;
     transition: all 0.3s ease;
 }
 
-.btn-cancel:hover {
-    background-color: #e63946;
-    box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);
+.btn-danger {
+    background-color: #885f4e;
+    border: none;
+}
+
+.btn-danger:hover,
+.btn-edit:hover
+{
+    background-color: #493228;
+    box-shadow: 0 4px 10px rgb(115, 98, 92);
     transform: scale(1.1);
 }
 
-/* Inactive Action */
-.inactive-action {
-    color: #aaa;
-    font-style: italic;
+.btn-edit {
+    background-color: #885f4e;
+    border: none;
 }
 
 /* Responsive Design */
@@ -129,14 +111,11 @@
 
     .reservation-table th,
     .reservation-table td {
-        padding: 0.7rem;
+        padding: 0.6rem;
     }
 
-    .btn-cancel {
+    .reservation-table td a {
         padding: 0.4rem 0.8rem;
         font-size: 0.8rem;
     }
 }
-
-
-

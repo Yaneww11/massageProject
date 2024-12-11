@@ -3,17 +3,18 @@
 {% block content %}
 <section class="reservation-page">
     <div class="description">
-        <h2>Your Reservations</h2>
+        <h2>Твоите резервации</h2>
         {% if reservations %}
             <div class="reservation-table">
                 <table>
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Service</th>
-                            <th>Action</th>
+                            <th>Дата</th>
+                            <th>Час</th>
+                            <th>Вид</th>
+                            <th>Съобщение</th>
+                            <th>Действия</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -23,9 +24,10 @@
                                 <td>{{ reservation.date }}</td>
                                 <td>{{ reservation.time }}</td>
                                 <td>{{ reservation.massage }}</td>
+                                <td>{{ reservation.additional_text }}</td>
                                 <td>
-{#                                    <a href="{% url 'cancel_reservation' reservation.id %}" class="btn btn-danger">Cancel</a>#}
-                                    <a href="#" class="btn btn-danger">Cancel</a>
+                                    <a href="{% url 'delete_reservation' reservation.id %}" class="btn-danger">Отмени</a>
+                                    <a href="{% url 'edit_reservation' reservation.id %}" class="btn-edit">Промени</a>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -33,10 +35,13 @@
                 </table>
             </div>
         {% else %}
-            <p>You have no reservations yet.</p>
+            <p>Вие нямате резервации</p>
         {% endif %}
     </div>
 </section>
+    
+{% if reservations %}
+    {% include 'partials/working_hours.html' %}
+{% endif %}
 
-{% include 'partials/working_hours.html' %}
 {% endblock %}
