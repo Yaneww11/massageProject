@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
-from django.views.generic import TemplateView, ListView
+from django.urls import reverse_lazy
+from django.views.generic import TemplateView, ListView, FormView, CreateView
 
-
-from massageProject.main_app.models import Massage, HomePage, Masseur, MessageStudio
+from massageProject.main_app.forms import ReservationForm
+from massageProject.main_app.models import Massage, HomePage, Masseur, MessageStudio, MessageReservation
 
 
 # Create your views here.
@@ -22,17 +23,22 @@ class MassagesDashboard(ListView):
     template_name = 'pages/massages_page.html'
     context_object_name = 'massages'
 
-
-class ReservationPage(TemplateView):
+class ReservationPage(CreateView):
+    model = MessageReservation
     template_name = 'pages/reservation.html'
+    form_class = ReservationForm
+    success_url = reverse_lazy('profile_page')
 
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-        if 'pk' in kwargs:
-            context['massage'] = Massage.objects.get(pk=kwargs['pk'])
-        else:
-            context['massage'] = None
-        return self.render_to_response(context)
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if 'pk' in self.kwargs:
+            massage_instance = Massage.objects.get(pk=self.kwargs['pk'])
+            context['form'] = self.form_class(initial={'massage': massage_instance})
+        return context
 
 class AboutPage(TemplateView):
     template_name = 'pages/about.html'
@@ -45,6 +51,13 @@ class AboutPage(TemplateView):
 
 class ProfilePage(TemplateView):
     template_name = 'pages/my_profile.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['reservations'] = MessageReservation.objects.filter(user=self.request.user).order_by('date', 'time')[:3]
+        return context
+
+
 
 class MassageDetail(TemplateView):
     template_name = 'pages/massage_detail.html'

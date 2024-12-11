@@ -45,22 +45,22 @@ class MessageReservation(models.Model):
         blank=True,
     )
 
-    # user = models.ForeignKey(
-    #     'accounts.CustomUser',
-    #     on_delete=models.CASCADE,
-    #     related_name='reservations',
-    #     blank=True,
-    # )
+    user = models.ForeignKey(
+        'accounts.CustomUser',
+        on_delete=models.CASCADE,
+        related_name='reservations',
+        blank=True,
+    )
 
-    hour = models.TimeField()
-    day = models.DateField()
+    time = models.TimeField()
+    date = models.DateField()
     updated_at = models.DateTimeField(auto_now=True)
+    additional_text = models.TextField(default='', blank=True)
 
 
 @receiver(pre_save, sender=MessageReservation)
 def set_masseur(sender, instance, **kwargs):
     instance.masseur = Masseur.objects.first()
-    instance.save()
 
 class Gallery(models.Model):
     images = models.ManyToManyField('Image', related_name='galleries', through='GalleryImage')
