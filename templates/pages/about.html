@@ -51,7 +51,7 @@
             <button class="carousel-btn prev-btn">&laquo;</button>
             <button class="carousel-btn next-btn">&raquo;</button>
         </div>
-        {% if perms.app_name.can_write_comment %}
+        {% if perms.app_name.add_comment %}
             <form class="comment-form" method="post">
                 {% csrf_token %}
                 <h3>Остави коментар</h3>
