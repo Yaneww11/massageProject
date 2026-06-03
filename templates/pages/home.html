@@ -32,11 +32,11 @@
                 {% for m in massages %}
                     <div class="card">
                         <h3>{{ m.name }}</h3>
-                        <p>
-                            {{ m.short_description }}
-                        </p>
-                        <a href="{% url 'reservation_page' pk=m.pk %}" class="btn">Направи резервация</a>
-                        <a href="{% url 'massage_detail' pk=m.pk %}" class="btn btn-primary">Научете повече</a>
+                        <p>{{ m.short_description }}</p>
+                        <div class="btn-group">
+                            <a href="{% url 'reservation_page' pk=m.pk %}" class="btn btn-accent">Запази час</a>
+                            <a href="{% url 'massage_detail' pk=m.pk %}" class="btn btn-outline">Научете повече</a>
+                        </div>
                     </div>
                 {% endfor %}
             </div>

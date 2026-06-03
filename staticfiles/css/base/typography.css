@@ -1,26 +1,39 @@
-h1, h2, h3, h4, h5, h6 {
-    font-family: var(--heading-font-family);
-    margin-bottom: 1rem;
-    color: var(--dark-color);
+body {
+    font-family: var(--font-main);
+    color: var(--text-main);
+    line-height: 1.6;
+    background-color: var(--bg-light);
 }
 
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    color: var(--primary-color);
+    margin-bottom: var(--space-md);
+    line-height: 1.2;
+}
+
+h1 { font-size: var(--fs-4xl); }
+h2 { font-size: var(--fs-3xl); }
+h3 { font-size: var(--fs-2xl); }
+
 p {
-    font-family: var(--font-family);
-    font-weight: 400;
-    font-style: normal;
-    color: var(--secondary-color);
+    font-family: var(--font-main);
+    margin-bottom: var(--space-md);
 }
 
 a {
     color: var(--primary-color);
     text-decoration: none;
+    transition: var(--transition);
 }
 
 a:hover {
-    text-decoration: underline;
+    color: var(--accent-color);
 }
 
 .logo-text {
-    font-family: var(--heading-font-family);
-    font-size: 2rem;
+    font-family: var(--font-heading);
+    font-size: var(--fs-2xl);
+    font-weight: 600;
+    letter-spacing: 1px;
 }

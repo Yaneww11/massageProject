@@ -1,52 +1,28 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
-    
-    {% if form.errors %}
-        <ul class="errorlist">
-          {% for field, errors in form.errors.items %}
-            {% for error in errors %}
-              <li>{{ error }}</li>
+<section class="reservation-section">
+    <div class="description">
+        <h2>Регистрация</h2>
+        <p>Създайте нов акаунт, за да започнете да планирате своите моменти на релакс.</p>
+
+        <form method="POST" class="form-container">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <div class="form-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
             {% endfor %}
-          {% endfor %}
-        </ul>
-    {% endif %}
-  <form method="POST">
-    {% csrf_token %}
-    <div class="form-group">
-        <label for="id_first_name">Име</label>
-        {{ form.first_name }}
+
+            <button type="submit" class="btn btn-primary btn-block">Регистрирай се</button>
+            <p style="margin-top: var(--space-md);">Вече имате акаунт? <a href="{% url 'login' %}">Влезте тук</a></p>
+        </form>
     </div>
-
-    <div class="form-group">
-        <label for="id_last_name">Фамилия</label>
-        {{ form.last_name }}
-    </div>
-
-    <div class="form-group">
-        <label for="id_phone_number">Телефонен номер</label>
-        {{ form.phone_number }}
-    </div>
-
-    <div class="form-group">
-        <label for="id_email">Имейл адрес</label>
-        {{ form.email }}
-    </div>
-
-    <div class="form-group">
-        <label for="password1">Парола</label>
-        {{ form.password1 }}
-    </div>
-
-    <div class="form-group">
-        <label for="id_email">Повторете парола</label>
-        {{ form.password2 }}
-    </div>
-
-    <button type="submit">Register</button>
-    <p>Вече имате акаунт? <a href="{% url 'login' %}">Цъкнете тук</a></p>
-  </form>
-
-  
+</section>
 {% endblock %}

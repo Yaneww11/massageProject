@@ -1,14 +1,38 @@
 /* Reservation Form Styling */
-.reservation-form {
-    padding: 3rem 1.5rem;
-    background: var(--background-color);
+.reservation-section {
+    padding: var(--space-xl) var(--space-lg);
+    background: var(--bg-light);
     text-align: center;
 }
 
-.unathenticted{
-    min-height: 450px;
+.reservation-section .description {
+    max-width: 800px;
+    margin: 0 auto;
+    background: transparent; /* Override default description bg */
+}
+
+.reservation-section h2 {
+    margin-bottom: var(--space-md);
+}
+
+.unauthenticated {
+    min-height: 400px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    font-size: 1.5rem;
+}
+
+.unauthenticated h2 {
+    color: var(--primary-color);
+}
+
+.unauthenticated p {
+    font-size: var(--fs-lg);
+    color: var(--text-muted);
+}
+
+.unauthenticated a {
+    color: var(--accent-color);
+    font-weight: 600;
 }

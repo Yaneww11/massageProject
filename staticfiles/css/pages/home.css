@@ -1,111 +1,96 @@
 .hero-section {
-    linear-gradient(to bottom, #f9f5f0, #e8ded3);
-    /*background-image: url('../../images/home_background.jpg'); !* Massage Background *!*/
+    background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('../../images/home_background.jpg');
     background-size: cover;
     background-position: center;
-    color: var(--primary-color);
+    color: var(--white);
     text-align: center;
-    padding: 5rem 2rem 2rem;
+    padding: var(--space-xl) var(--space-lg);
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-content {
+    max-width: 800px;
 }
 
 .hero-content h1 {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    color: var(--primary-color);
+    font-size: var(--fs-4xl);
+    margin-bottom: var(--space-md);
+    color: var(--white);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .hero-content p {
-    font-size: 1.2rem;
-    margin-bottom: 2rem;
-    color: var(--secondary-color);
+    font-size: var(--fs-xl);
+    margin-bottom: var(--space-lg);
+    color: var(--bg-light);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
-.btn-primary {
-    background-color: var(--button-bg);
-    color: var(--font-color);
-    padding: 0.8rem 1.5rem;
-    text-decoration: none;
-    border-radius: 5px;
-    font-size: 1rem;
-    border: 2px solid var(--secondary-color);
-    transition: all 0.3s ease;
-}
-
-.btn-primary:hover {
-    background-color: var(--button-hover-bg);
-    border-color: var(--font-color);
-}
-
-/* Description Section Styling */
+/* Description Section */
 .description {
-    padding: 0 1.5rem 3rem;
+    padding: var(--space-xl) var(--space-lg);
     text-align: center;
-    color: #5c3d2e; /* Warm brown */
-    font-family: 'Playfair Display', serif; /* Luxurious font */
+    background-color: var(--white);
 }
 
 .description h2 {
-    margin-bottom: 2rem;
+    margin-bottom: var(--space-lg);
 }
 
-/* Quote Blocks Row Layout */
 .description .quote-blocks {
     display: flex;
-    gap: 2rem;
+    gap: var(--space-lg);
     justify-content: center;
-    align-items: center;
-    flex-wrap: wrap; /* Ensures responsiveness */
+    flex-wrap: wrap;
+    margin-top: var(--space-lg);
 }
 
-/* Individual Quote Styling */
 .description .quote {
-    background: var(--background-color); /* Light creamy background */
-    border-left: 5px solid #7a5e4d; /* Vertical accent stripe */
-    padding: 1.5rem;
-    max-width: 300px;
-    flex: 1;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    background: var(--bg-light);
+    border-top: 4px solid var(--accent-color);
+    padding: var(--space-lg);
+    max-width: 350px;
+    flex: 1 1 300px;
+    box-shadow: var(--shadow-md);
+    border-radius: var(--radius-md);
     text-align: left;
-    border-radius: 8px; /* Rounded corners */
-    transition: transform 0.3s ease, background-color 0.3s ease;
+    transition: var(--transition);
 }
 
-/* Hover Effect for Quotes */
 .description .quote:hover {
-    transform: scale(1.05); /* Slight zoom on hover */
-    background: #f3ede6; /* Slightly darker cream */
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
 }
 
-/* Quote Text Styling */
 .description .quote h3 {
-    font-size: 1.4rem;
-    margin-bottom: 0.5rem;
-    color: #5c3d2e; /* Rich brown */
-    font-style: italic;
+    font-size: var(--fs-lg);
+    color: var(--primary-color);
+    margin-bottom: var(--space-sm);
 }
 
 .description .quote p {
-    font-size: 1rem;
-    color: #7a5e4d; /* Lighter brown */
-    font-family: 'Open Sans', sans-serif; /* Simple and clean */
+    font-size: var(--fs-base);
+    color: var(--text-muted);
     line-height: 1.6;
+    margin: 0;
 }
 
-
-
 /* Carousel Section */
+.carousel-section {
+    padding: var(--space-lg) 0;
+}
+
 .carousel {
     position: relative;
     overflow: hidden;
-    max-width: 100%;
-    height: 400px;
-    border-bottom: 6px solid var(--secondary-color);
-    border-top: 6px solid var(--secondary-color);
-}
-
-.carousel-slide {
-    display: none;
-    height: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 500px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
 }
 
 .carousel-slide img {
@@ -114,71 +99,93 @@
     object-fit: cover;
 }
 
-.carousel-slide.active {
-    display: block;
-}
-
 .carousel-btn {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
     background: var(--primary-color);
-    color: var(--font-color);
+    color: var(--white);
     border: none;
-    padding: 0.5rem 1rem;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    z-index: 10;
+    font-size: var(--fs-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.carousel-btn:hover {
+    background: var(--primary-light);
+    transform: translateY(-50%) scale(1.1);
 }
 
 .carousel-btn.prev {
-    left: 10px;
+    left: var(--space-md);
 }
 
 .carousel-btn.next {
-    right: 10px;
+    right: var(--space-md);
 }
 
 /* Offers Section */
 .offers {
-    padding: 3rem 1.5rem;
+    padding: var(--space-xl) var(--space-lg);
+    background-color: var(--bg-light);
 }
 
 .offers h2 {
     text-align: center;
-    font-size: 2.5rem;
-    color: var(--primary-color);
-    margin-bottom: 2rem;
+    margin-bottom: var(--space-xl);
 }
 
 .card-container {
-    display: flex;
-    justify-content: center;
-    gap: 1.5rem;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-lg);
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .card {
-    background-color: var(--background-color);
-    border: 1px solid var(--primary-color);
-    padding: 1.5rem;
-    border-radius: 8px;
-    width: 300px;
+    background-color: var(--bg-paper);
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
     text-align: center;
-    transition: transform 0.3s ease;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .card:hover {
     transform: translateY(-10px);
+    box-shadow: var(--shadow-lg);
 }
 
 .card h3 {
-    font-size: 1.5rem;
-    color: var(--primary-color);
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-md);
 }
 
 .card p {
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
-    color: var(--primary-color);
+    color: var(--text-muted);
+    margin-bottom: var(--space-lg);
+}
+
+.card .btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.hours-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 

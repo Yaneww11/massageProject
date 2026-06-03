@@ -1,14 +1,24 @@
-/* Footer styling */
+/* Footer Styles */
 footer {
     background-color: var(--primary-color);
-    color: var(--font-color);
-    padding: 1rem 0;
+    color: var(--white);
+    padding: var(--space-xl) var(--space-lg);
     text-align: center;
-    border-top: 4px solid var(--secondary-color);
+    margin-top: auto;
+}
+
+footer p {
+    color: var(--secondary-color);
+    font-size: var(--fs-sm);
+    margin-bottom: var(--space-md);
 }
 
 footer a {
-    color: var(--primary-color);
+    color: var(--white);
+    text-decoration: none;
+    font-size: var(--fs-sm);
+    margin: 0 var(--space-md);
+    transition: var(--transition);
 }
 
 footer a:hover {

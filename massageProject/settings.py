@@ -82,9 +82,9 @@ WSGI_APPLICATION = 'massageProject.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'massage_db2',
-        'USER': 'yane',
-        'PASSWORD': 'password',
+        'NAME': 'massage_db',
+        'USER': 'signal',
+        'PASSWORD': 'ialangis',
         'HOST': 'localhost',
         'PORT': '5432',
     }

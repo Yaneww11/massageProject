@@ -1,10 +1,27 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button class="btn btn-primary ml-2">Login</button>
-        <p>Don`t have a account <a href="{% url 'register' %}">Register</a></p>
-    </form>
+<section class="reservation-section">
+    <div class="description">
+        <h2>Вход в системата</h2>
+        <p>Моля, въведете своите данни, за да влезете в акаунта си.</p>
+        
+        <form method="post" class="form-container">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <div class="form-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary btn-block">Вход</button>
+            <p style="margin-top: var(--space-md);">Нямате акаунт? <a href="{% url 'register' %}">Регистрирайте се тук</a></p>
+        </form>
+    </div>
+</section>
 {% endblock %}

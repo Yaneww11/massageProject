@@ -10,7 +10,7 @@
 </section>
 
 {% if user.is_authenticated %}
-    <section class="reservation-form">
+    <section class="reservation-section">
         <div class="description">
             <h2>Запазете час</h2>
             <p>Попълнете формуляра по-долу, за да запазите час за масаж. Очакваме Ви с нетърпение!</p>
@@ -62,12 +62,12 @@
                     <textarea id="additional_text" name="additional_text"
                               placeholder="Специални изисквания или притеснения">{{ form.additional_text.value|default:'' }}</textarea>
                 </div>
-                <button type="submit" class="btn-primary">Резервирайте сега</button>
+                <button type="submit" class="btn btn-primary btn-block">Резервирайте сега</button>
             </form>
         </div>
     </section>
 {% else %}
-    <section class="unathenticted reservation-form">
+    <section class="unauthenticated reservation-section">
         <div class="description">
             <h2>Запазете час</h2>
             <p>За да направите резервация, моля <a href="{% url 'register' %}">регистрирайте се</a> или <a href="{% url 'login' %}">влезте</a>.</p>

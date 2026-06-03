@@ -21,6 +21,17 @@ class ReservationBaseForm(forms.ModelForm):
             }
         }
 
+    def clean(self):
+        cleaned_data = super().clean()
+        date = cleaned_data.get('date')
+        time = cleaned_data.get('time')
+
+        if date and time:
+            if MessageReservation.objects.filter(date=date, time=time).exclude(pk=self.instance.pk).exists():
+                raise forms.ValidationError('Този час вече е зает. Моля, изберете друг.')
+
+        return cleaned_data
+
 class ReservationCreateForm(ReservationBaseForm):
     pass
 
