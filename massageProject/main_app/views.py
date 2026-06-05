@@ -1,10 +1,91 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, ListView, CreateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.utils import timezone
+from datetime import datetime, timedelta, time
+from django.contrib import messages
+from django.http import JsonResponse
+import json
 
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
     ReservationDeleteForm, CommentForm
-from massageProject.main_app.models import Massage, HomePage, Masseur, MessageStudio, MessageReservation, Comment
+from massageProject.main_app.models import Massage, HomePage, Masseur, MessageStudio, MessageReservation, Comment, WorkingHours
+
+
+def check_availability(request):
+    masseur_id = request.GET.get('masseur_id')
+    date_str = request.GET.get('date')
+    massage_id = request.GET.get('massage_id')
+
+    if not all([masseur_id, date_str, massage_id]):
+        return JsonResponse({'error': 'Missing parameters'}, status=400)
+
+    try:
+        date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+        massage = Massage.objects.get(pk=massage_id)
+        masseur = Masseur.objects.get(pk=masseur_id)
+    except (ValueError, Massage.DoesNotExist, Masseur.DoesNotExist):
+        return JsonResponse({'error': 'Invalid parameters'}, status=400)
+
+    # 1. Get working hours for the day
+    day_of_week = date_obj.weekday()
+    working_hours = WorkingHours.objects.filter(masseur=masseur, day_of_week=day_of_week).first()
+
+    if not working_hours:
+        return JsonResponse({'slots': []})  # Not working
+
+    # 2. Generate 30-min slots
+    slots = []
+    current_dt = datetime.combine(date_obj, working_hours.start_time)
+    end_dt = datetime.combine(date_obj, working_hours.end_time)
+    
+    # Lead time check (2 hours)
+    min_time = timezone.localtime(timezone.now()) + timedelta(hours=2)
+
+    duration = timedelta(minutes=massage.duration_in_minutes)
+
+    # 3. Get existing reservations for overlap check
+    existing_reservations = MessageReservation.objects.filter(
+        masseur=masseur,
+        date=date_obj,
+        status=MessageReservation.STATUS_ACTIVE
+    )
+
+    while current_dt + duration <= end_dt:
+        slot_time = current_dt.time()
+        slot_end_dt = current_dt + duration
+        
+        is_available = True
+        reason = None
+
+        # Check lead time
+        if timezone.make_aware(current_dt) < min_time:
+            is_available = False
+            reason = 'past'
+        else:
+            # Check overlap
+            for res in existing_reservations:
+                res_start = datetime.combine(date_obj, res.time)
+                res_end = res_start + timedelta(minutes=res.massage.duration_in_minutes)
+                
+                # Overlap if: (StartA < EndB) and (EndA > StartB)
+                if current_dt < res_end and slot_end_dt > res_start:
+                    is_available = False
+                    reason = 'taken'
+                    break
+
+        slots.append({
+            'time': slot_time.strftime('%H:%M'),
+            'available': is_available,
+            'reason': reason
+        })
+        
+        current_dt += timedelta(minutes=30)
+
+    return JsonResponse({'slots': slots})
 
 
 # Create your views here.
@@ -19,12 +100,20 @@ class Index(TemplateView):
             context['images'] = context['page'].gallery.images.all()
         return self.render_to_response(context)
 
+class PrivacyPolicyView(TemplateView):
+    template_name = 'pages/privacy_policy.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page'] = HomePage.objects.first()
+        return context
+
 class MassagesDashboard(ListView):
     model = Massage
     template_name = 'pages/massages_page.html'
     context_object_name = 'massages'
 
-class ReservationPage(CreateView):
+class ReservationPage(LoginRequiredMixin, CreateView):
     model = MessageReservation
     template_name = 'pages/reservation.html'
     form_class = ReservationCreateForm
@@ -34,12 +123,11 @@ class ReservationPage(CreateView):
         form.instance.user = self.request.user
         return super().form_valid(form)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get_initial(self):
+        initial = super().get_initial()
         if 'pk' in self.kwargs:
-            massage_instance = Massage.objects.get(pk=self.kwargs['pk'])
-            context['form'] = self.form_class(initial={'massage': massage_instance})
-        return context
+            initial['massage'] = self.kwargs['pk']
+        return initial
 
 class AboutPage(TemplateView):
     template_name = 'pages/about.html'
@@ -69,17 +157,20 @@ class AboutPage(TemplateView):
 
         return self.render_to_response(context)
 
-class ProfilePage(TemplateView):
+class ProfilePage(LoginRequiredMixin, TemplateView):
     template_name = 'pages/my_profile.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         if user.has_perm('main_app.view_all_reservations'):
-            context['reservations'] = MessageReservation.objects.all().order_by('date', 'time')[:10]
-            context['title'] = 'Най - нови резервации'
+            context['active_reservations'] = MessageReservation.objects.active().order_by('date', 'time')[:15]
+            context['past_reservations'] = MessageReservation.objects.past().order_by('-date', '-time')[:15]
+            context['title'] = 'Управление на резервации'
         else:
-            context['reservations'] = MessageReservation.objects.filter(user=self.request.user).order_by('date', 'time')[:3]
+            user_reservations = MessageReservation.objects.filter(user=self.request.user)
+            context['active_reservations'] = user_reservations.active().order_by('date', 'time')
+            context['past_reservations'] = user_reservations.past().order_by('-date', '-time')[:5]
             context['title'] = f'{user.get_full_name()} - резервации'
         return context
 
@@ -91,8 +182,19 @@ class MassageDetail(TemplateView):
         context['massage'] = Massage.objects.get(pk=kwargs['pk'])
         return self.render_to_response(context)
 
+@login_required
 def edit_reservation(request, pk: int):
     reservation = MessageReservation.objects.get(pk=pk)
+
+    # Ownership check
+    if reservation.user != request.user:
+        raise PermissionDenied
+
+    # 24-hour rule
+    reservation_datetime = timezone.make_aware(datetime.combine(reservation.date, reservation.time))
+    if reservation_datetime < timezone.now() + timedelta(hours=24):
+        messages.error(request, "Не можете да променяте резервация по-малко от 24 часа преди часа.")
+        return redirect('profile_page')
 
     if request.method == 'POST':
         form = ReservationEditForm(request.POST, instance=reservation)
@@ -110,12 +212,25 @@ def edit_reservation(request, pk: int):
 
     return render(request, 'reservation/edit-reservation.html', context)
 
+@login_required
 def delete_reservation(request, pk: int):
     reservation = MessageReservation.objects.get(pk=pk)
+
+    # Ownership check
+    if reservation.user != request.user:
+        raise PermissionDenied
+
+    # 24-hour rule
+    reservation_datetime = timezone.make_aware(datetime.combine(reservation.date, reservation.time))
+    if reservation_datetime < timezone.now() + timedelta(hours=24):
+        messages.error(request, "Не можете да отменяте резервация по-малко от 24 часа преди часа.")
+        return redirect('profile_page')
+
     form = ReservationDeleteForm(instance=reservation)
 
     if request.method == 'POST':
-        reservation.delete()
+        reservation.change_status(MessageReservation.STATUS_DELETED, user=request.user)
+        messages.success(request, "Резервацията беше отменена успешно.")
         return redirect('profile_page')
 
     context = {

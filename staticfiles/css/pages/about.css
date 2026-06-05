@@ -142,7 +142,7 @@
 
 .carousel-btn:hover {
     background: #5c3d2e;
-    transform: scale(1.1);
+    transform: translateY(-50%);
 }
 
 .prev-btn {

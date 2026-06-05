@@ -1,11 +1,52 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1 style="color: #5b3f32; text-align: center">Промени своята резервация</h1>
-    <form action="{% url 'delete_reservation' reservation.pk %}" method="post">
-        {{ form }}
-        {% csrf_token %}
-        <button class="btn-primary">Изтрий</button>
-    </form>
+<section class="reservation-section">
+    <div class="description">
+        <h1>Отказване на резервация</h1>
+        <p style="margin-bottom: 2rem; color: var(--text-muted); font-size: var(--fs-lg);">
+            Сигурни ли сте, че искате да откажете тази резервация? Това действие е необратимо.
+        </p>
 
+        <form class="form-container" action="{% url 'delete_reservation' reservation.pk %}" method="post" style="border-top: 4px solid var(--error);">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="massage">Тип масаж</label>
+                <input type="text" id="massage" value="{{ reservation.massage.name }}" disabled>
+            </div>
+
+            <div class="form-group">
+                <label for="masseur">Масажист</label>
+                <input type="text" id="masseur" value="{{ reservation.masseur.name }}" disabled>
+            </div>
+
+            <div class="form-group">
+                <label for="date">Дата</label>
+                <input type="text" id="date" value="{{ reservation.date|date:'d.m.Y' }}" disabled>
+            </div>
+
+            <div class="form-group">
+                <label for="time">Време</label>
+                <input type="text" id="time" value="{{ reservation.time|time:'H:i' }} ч." disabled>
+            </div>
+
+            {% if reservation.additional_text %}
+            <div class="form-group">
+                <label for="additional_text">Допълнителни бележки</label>
+                <textarea id="additional_text" disabled>{{ reservation.additional_text }}</textarea>
+            </div>
+            {% endif %}
+
+            <div style="margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary btn-block" style="background-color: var(--error); border-color: var(--error); margin-bottom: 1rem;">
+                    Потвърди отказването
+                </button>
+                <a href="{% url 'profile_page' %}" class="btn btn-secondary btn-block">
+                    Връщане към профила
+                </a>
+            </div>
+        </form>
+    </div>
+</section>
 {% endblock %}

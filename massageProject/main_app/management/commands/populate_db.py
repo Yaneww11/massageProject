@@ -35,11 +35,6 @@ class Command(BaseCommand):
             user.save()
 
         # 2. Create Masseurs
-        working_hours_text = (
-            "Понеделник до Петък: 9:00 - 18:00\n"
-            "Събота: 10:00 - 16:00\n\n"
-            "Неделя: Почивен ден"
-        )
         masseurs_data = [
             ('Ivan Ivanov', 'ivan@example.com', '0891111111'),
             ('Maria Petrova', 'maria@example.com', '0892222222'),
@@ -54,12 +49,24 @@ class Command(BaseCommand):
                     'image': 'masseurs/measure.jpg',
                     'email': email,
                     'phone_number': phone,
-                    'working_hours': working_hours_text
                 }
             )
             masseurs.append(masseur)
             if created:
-                self.stdout.write(f"Created masseur: {name}")
+                # Add some working hours for each masseur (Mon-Fri 9-18, Sat 10-16)
+                from massageProject.main_app.models import WorkingHours
+                for day in range(5): # Mon-Fri
+                    WorkingHours.objects.get_or_create(
+                        masseur=masseur,
+                        day_of_week=day,
+                        defaults={'start_time': time(9, 0), 'end_time': time(18, 0)}
+                    )
+                WorkingHours.objects.get_or_create(
+                    masseur=masseur,
+                    day_of_week=5, # Sat
+                    defaults={'start_time': time(10, 0), 'end_time': time(16, 0)}
+                )
+                self.stdout.write(f"Created masseur and working hours for: {name}")
 
         # 3. Create Massages
         massages_data = [

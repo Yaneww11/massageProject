@@ -59,8 +59,34 @@
     margin-top: var(--space-xs);
 }
 
-.form-error {
+.form-error, .error-message {
     color: var(--error);
     font-size: var(--fs-sm);
     margin-top: var(--space-xs);
+}
+
+/* Alert Messages */
+.messages {
+    max-width: 600px;
+    margin: var(--space-md) auto;
+}
+
+.alert {
+    padding: var(--space-md);
+    margin-bottom: var(--space-md);
+    border-radius: var(--radius-md);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+}
+
+.alert-error, .alert-danger {
+    background-color: #FEE2E2;
+    color: var(--error);
+    border: 1px solid #FECACA;
+}
+
+.alert-success {
+    background-color: #ECFDF5;
+    color: var(--success);
+    border: 1px solid #D1FAE5;
 }

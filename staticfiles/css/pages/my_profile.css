@@ -103,19 +103,117 @@
     border: none;
 }
 
+/* Status Badges */
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-completed {
+    background-color: #ECFDF5;
+    color: #065F46;
+}
+
+.status-no_show {
+    background-color: #FFF7ED;
+    color: #9A3412;
+}
+
+.status-deleted {
+    background-color: #FEF2F2;
+    color: #991B1B;
+}
+
+.status-active {
+    background-color: #EFF6FF;
+    color: #1E40AF;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
+    .reservation-page {
+        padding: 2rem 1rem;
+    }
+
+    .reservation-page h2 {
+        font-size: 1.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .reservation-table {
+        padding: 0.5rem;
+        box-shadow: none;
+        background: transparent;
+    }
+
     .reservation-table table {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
     }
 
     .reservation-table th,
     .reservation-table td {
-        padding: 0.6rem;
+        padding: 0.5rem 0.3rem;
     }
 
     .reservation-table td a {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.8rem;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.75rem;
+        margin: 2px 0;
+        display: block;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .reservation-page h2 {
+        font-size: 1.5rem;
+    }
+
+    .reservation-table table thead {
+        display: none; /* Hide headers on very small screens */
+    }
+
+    .reservation-table table, 
+    .reservation-table table tbody, 
+    .reservation-table table tr, 
+    .reservation-table table td {
+        display: block;
+        width: 100%;
+    }
+
+    .reservation-table table tr {
+        margin-bottom: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 0.5rem;
+        box-shadow: var(--shadow-sm);
+        background: #fff;
+    }
+
+    .reservation-table table td {
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+        border-bottom: 1px solid #eee;
+    }
+
+    .reservation-table table td:last-child {
+        border-bottom: 0;
+    }
+
+    .reservation-table table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+        color: var(--primary-color);
     }
 }

@@ -16,56 +16,269 @@
             <p>Попълнете формуляра по-долу, за да запазите час за масаж. Очакваме Ви с нетърпение!</p>
             <form class="form-container" method="post">
                 {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
                 <div class="form-group">
                     <label for="massage">Тип масаж</label>
                     <select id="massage" name="massage" required>
                         {% for massage in form.fields.massage.queryset %}
-                            <option value="{{ massage.id }}" {% if form.massage.value == massage.id %}selected{% endif %}>
+                            <option value="{{ massage.id }}" {% if form.massage.value|add:"0" == massage.id %}selected{% endif %}>
                                 {{ massage.name }}
                             </option>
                         {% endfor %}
                     </select>
+                    {% if form.massage.errors %}
+                        <div class="error-message">{{ form.massage.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="masseur">Масажист</label>
+                    <select id="masseur" name="masseur" required>
+                        <option value="" disabled {% if not form.masseur.value %}selected{% endif %}>
+                            Изберете масажист
+                        </option>
+                        {% for masseur in form.fields.masseur.queryset %}
+                            <option value="{{ masseur.id }}" {% if form.masseur.value|add:"0" == masseur.id %}selected{% endif %}>
+                                {{ masseur.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if form.masseur.errors %}
+                        <div class="error-message">{{ form.masseur.errors }}</div>
+                    {% endif %}
                 </div>
                 <div class="form-group">
                     <label for="date">Предпочитана дата</label>
                     <input type="date" id="date" name="date"
-                        value="{{ form.date.value|default:'' }}" required>
+                        value="{{ form.date.value|date:'Y-m-d'|default:form.date.value|default:'' }}" required>
+                    {% if form.date.errors %}
+                        <div class="error-message">{{ form.date.errors }}</div>
+                    {% endif %}
                 </div>
                 <div class="form-group">
                     <label for="time">Предпочитано време</label>
-                    <select id="time" name="time" required>
-                        <option value="" disabled {% if not form.time.value %}selected{% endif %}>
-                            Изберете време
-                        </option>
-                        <option value="09:00" {% if form.time.value == '09:00' %}selected{% endif %}>
-                            09:00 ч.
-                        </option>
-                        <option value="10:00" {% if form.time.value == '10:00' %}selected{% endif %}>
-                            10:00 ч.
-                        </option>
-                        <option value="11:00" {% if form.time.value == '11:00' %}selected{% endif %}>
-                            11:00 ч.
-                        </option>
-                        <option value="13:00" {% if form.time.value == '13:00' %}selected{% endif %}>
-                            13:00 ч.
-                        </option>
-                        <option value="15:00" {% if form.time.value == '15:00' %}selected{% endif %}>
-                            15:00 ч.
-                        </option>
-                        <option value="17:00" {% if form.time.value == '17:00' %}selected{% endif %}>
-                            17:00 ч.
-                        </option>
-                    </select>
+                    <input type="hidden" id="time_value" name="time" value="{{ form.time.value|default:'' }}" required>
+                    <div id="time-slots" class="time-slots-container">
+                        <p class="placeholder-text">Моля, изберете първо масаж, масажист и дата.</p>
+                    </div>
+                    {% if form.time.errors %}
+                        <div class="error-message">{{ form.time.errors }}</div>
+                    {% endif %}
                 </div>
                 <div class="form-group">
                     <label for="additional_text">Допълнителни бележки</label>
                     <textarea id="additional_text" name="additional_text"
                               placeholder="Специални изисквания или притеснения">{{ form.additional_text.value|default:'' }}</textarea>
+                    {% if form.additional_text.errors %}
+                        <div class="error-message">{{ form.additional_text.errors }}</div>
+                    {% endif %}
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">Резервирайте сега</button>
             </form>
         </div>
     </section>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <style>
+        .time-slots-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: var(--space-sm);
+            margin-top: var(--space-sm);
+            padding: var(--space-md);
+            background: var(--bg-light);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--secondary-color);
+            min-height: 50px;
+        }
+
+        .time-slot {
+            padding: var(--space-sm);
+            border: 1px solid var(--primary-color);
+            background: var(--bg-paper);
+            color: var(--primary-color);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            text-align: center;
+            font-family: var(--font-main);
+        }
+
+        .time-slot:hover:not(.disabled) {
+            background: var(--primary-color);
+            color: var(--white);
+        }
+
+        .time-slot.selected {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            color: var(--white);
+        }
+
+        .time-slot.disabled {
+            background: #eee;
+            border-color: #ccc;
+            color: #999;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .placeholder-text {
+            grid-column: 1 / -1;
+            color: var(--text-muted);
+            font-style: italic;
+            margin: 0;
+            font-size: var(--fs-sm);
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .toast {
+            background: var(--primary-color);
+            color: var(--white);
+            padding: var(--space-md) var(--space-lg);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--space-sm);
+            box-shadow: var(--shadow-md);
+            font-size: var(--fs-sm);
+            font-family: var(--font-main);
+            animation: slideIn 0.3s ease-out;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const massageSelect = document.getElementById('massage');
+            const masseurSelect = document.getElementById('masseur');
+            const dateInput = document.getElementById('date');
+            const timeValueInput = document.getElementById('time_value');
+            const timeSlotsContainer = document.getElementById('time-slots');
+            const toastContainer = document.getElementById('toast-container');
+            const form = document.querySelector('.form-container');
+
+            // Set min date to today
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.setAttribute('min', today);
+
+            function showToast(message) {
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.textContent = message;
+                toastContainer.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(100%)';
+                    toast.style.transition = 'all 0.3s ease-in';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            let debounceTimer;
+            function debouncedFetch() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(fetchAvailability, 500);
+            }
+
+            async function fetchAvailability() {
+                const massageId = massageSelect.value;
+                const masseurId = masseurSelect.value;
+                const date = dateInput.value;
+
+                if (!massageId || !masseurId || !date) {
+                    timeSlotsContainer.innerHTML = '<p class="placeholder-text">Моля, изберете първо масаж, масажист и дата.</p>';
+                    return;
+                }
+
+                timeSlotsContainer.innerHTML = '<p class="placeholder-text">Зареждане на свободни часове...</p>';
+
+                try {
+                    const response = await fetch(`/check-availability/?massage_id=${massageId}&masseur_id=${masseurId}&date=${date}`);
+                    const data = await response.json();
+
+                    if (data.slots && data.slots.length > 0) {
+                        timeSlotsContainer.innerHTML = '';
+                        data.slots.forEach(slot => {
+                            const btn = document.createElement('div');
+                            btn.className = `time-slot ${slot.available ? '' : 'disabled'}`;
+                            btn.textContent = slot.available ? slot.time : `${slot.time} (Зает)`;
+                            
+                            if (slot.available) {
+                                btn.addEventListener('click', () => {
+                                    document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+                                    btn.classList.add('selected');
+                                    timeValueInput.value = slot.time;
+                                });
+                                
+                                // Re-select if previously selected
+                                if (timeValueInput.value === slot.time) {
+                                    btn.classList.add('selected');
+                                }
+                            }
+                            timeSlotsContainer.appendChild(btn);
+                        });
+                    } else {
+                        timeSlotsContainer.innerHTML = '<p class="placeholder-text">Няма свободни часове за избрания ден.</p>';
+                    }
+                } catch (error) {
+                    console.error('Error fetching availability:', error);
+                    timeSlotsContainer.innerHTML = '<p class="placeholder-text">Възникна грешка при зареждането.</p>';
+                }
+            }
+
+            // Click handling for help message
+            timeSlotsContainer.addEventListener('click', (e) => {
+                if (!massageSelect.value || !masseurSelect.value || !dateInput.value) {
+                    showToast('Моля, първо изберете тип масаж, масажист и дата.');
+                }
+            });
+
+            // Re-validation when massage changes
+            massageSelect.addEventListener('change', () => {
+                if (timeValueInput.value) {
+                    timeValueInput.value = '';
+                    showToast('Типът масаж беше променен. Моля, изберете нов час.');
+                }
+                debouncedFetch();
+            });
+
+            masseurSelect.addEventListener('change', debouncedFetch);
+            dateInput.addEventListener('change', debouncedFetch);
+
+            // Initial fetch if values are pre-filled (e.g., after validation error)
+            if (massageSelect.value && masseurSelect.value && dateInput.value) {
+                fetchAvailability();
+            }
+
+            // Final check before submit
+            form.addEventListener('submit', (e) => {
+                if (!timeValueInput.value) {
+                    e.preventDefault();
+                    showToast('Моля, изберете час за вашата резервация.');
+                }
+            });
+        });
+    </script>
 {% else %}
     <section class="unauthenticated reservation-section">
         <div class="description">

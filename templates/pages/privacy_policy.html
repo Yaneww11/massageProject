@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="privacy-policy-section" style="padding: 60px 20px; max-width: 800px; margin: 0 auto;">
+    <div class="container">
+        <h1>Политика за поверителност</h1>
+        <div class="privacy-content" style="margin-top: 30px; line-height: 1.6; color: #333;">
+            {% if page.privacy_policy_content %}
+                {{ page.privacy_policy_content|safe }}
+            {% else %}
+                <p>Съдържанието се подготвя...</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -7,10 +7,13 @@ from massageProject.main_app.models import MessageReservation, Comment
 class ReservationBaseForm(forms.ModelForm):
     class Meta:
         model = MessageReservation
-        fields = ['massage','date', 'time', 'additional_text']
+        fields = ['massage', 'masseur', 'date', 'time', 'additional_text']
 
         error_messages = {
             'massage': {
+                'required': 'Тове поле е задължително',
+            },
+            'masseur': {
                 'required': 'Тове поле е задължително',
             },
             'date': {
@@ -21,17 +24,6 @@ class ReservationBaseForm(forms.ModelForm):
             }
         }
 
-    def clean(self):
-        cleaned_data = super().clean()
-        date = cleaned_data.get('date')
-        time = cleaned_data.get('time')
-
-        if date and time:
-            if MessageReservation.objects.filter(date=date, time=time).exclude(pk=self.instance.pk).exists():
-                raise forms.ValidationError('Този час вече е зает. Моля, изберете друг.')
-
-        return cleaned_data
-
 class ReservationCreateForm(ReservationBaseForm):
     pass
 
@@ -39,7 +31,7 @@ class ReservationEditForm(ReservationBaseForm):
     pass
 
 class ReservationDeleteForm(ReservationBaseForm, DisableFieldMixin):
-    disabled_fields = ['massage','date', 'time', 'additional_text']
+    disabled_fields = ['massage', 'masseur', 'date', 'time', 'additional_text']
 
 class CommentForm(forms.ModelForm):
     class Meta:

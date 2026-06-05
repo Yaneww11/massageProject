@@ -11,6 +11,13 @@
     background: transparent; /* Override default description bg */
 }
 
+.reservation-section h1 {
+    font-family: var(--font-heading);
+    color: var(--primary-color);
+    margin-bottom: var(--space-lg);
+    font-size: var(--fs-3xl);
+}
+
 .reservation-section h2 {
     margin-bottom: var(--space-md);
 }

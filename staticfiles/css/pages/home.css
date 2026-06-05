@@ -91,6 +91,16 @@
     height: 500px;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
+    background-color: var(--bg-light);
+}
+
+.carousel-slide {
+    display: none;
+    height: 100%;
+}
+
+.carousel-slide.active {
+    display: block;
 }
 
 .carousel-slide img {
@@ -121,7 +131,7 @@
 
 .carousel-btn:hover {
     background: var(--primary-light);
-    transform: translateY(-50%) scale(1.1);
+    transform: translateY(-50%);
 }
 
 .carousel-btn.prev {
@@ -130,6 +140,48 @@
 
 .carousel-btn.next {
     right: var(--space-md);
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        min-height: 40vh;
+        padding: var(--space-xl) var(--space-md);
+    }
+    .hero-content h1 {
+        font-size: var(--fs-3xl);
+    }
+    .hero-content p {
+        font-size: var(--fs-lg);
+    }
+    .carousel {
+        height: 350px;
+    }
+    .carousel-btn {
+        width: 35px;
+        height: 35px;
+        font-size: var(--fs-base);
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-section {
+        min-height: 30vh;
+        padding: var(--space-xl) var(--space-sm);
+    }
+    .hero-content h1 {
+        font-size: var(--fs-2xl);
+    }
+    .carousel {
+        height: 200px;
+        border-radius: var(--radius-md);
+    }
+    .carousel-section {
+        padding: var(--space-md) var(--space-sm);
+    }
+    .carousel-btn {
+        width: 30px;
+        height: 30px;
+    }
 }
 
 /* Offers Section */
@@ -145,7 +197,7 @@
 
 .card-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: var(--space-lg);
     max-width: 1200px;
     margin: 0 auto;
