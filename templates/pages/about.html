@@ -48,14 +48,31 @@
                 </div>
                 {% endfor %}
             </div>
-            <button class="carousel-btn prev-btn">&laquo;</button>
-            <button class="carousel-btn next-btn">&raquo;</button>
+            <button class="carousel-btn prev-btn">&#10094;</button>
+            <button class="carousel-btn next-btn">&#10095;</button>
         </div>
-        {% if perms.app_name.add_comment %}
+        {% if perms.main_app.add_comment or user.is_authenticated %}
             <form class="comment-form" method="post">
                 {% csrf_token %}
                 <h3>Остави коментар</h3>
                 {% if user.is_authenticated %}
+                    {% if name_form %}
+                    <p style="margin-bottom: 1rem; color: #7a5e4d;">Моля, въведете своите имена, за да публикувате коментар:</p>
+                    <div class="name-form-fields" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div class="form-group" style="flex: 1;">
+                            {{ name_form.first_name.label_tag }}
+                            {{ name_form.first_name }}
+                            {{ name_form.first_name.errors }}
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            {{ name_form.last_name.label_tag }}
+                            {{ name_form.last_name }}
+                            {{ name_form.last_name.errors }}
+                        </div>
+                    </div>
+                    {% else %}
+                    <p style="margin-bottom: 1rem; color: #7a5e4d;">Публикуваш като: <strong>{{ user.get_full_name|default:user.phone_number }}</strong></p>
+                    {% endif %}
                 <div class="form-group">
                     {{ form.content }}
                 </div>

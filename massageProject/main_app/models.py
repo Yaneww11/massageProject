@@ -195,9 +195,47 @@ class HomePage(models.Model):
     )
     privacy_policy_content = models.TextField(null=True, blank=True)
 
+
+class StudioWorkingHours(models.Model):
+    home_page = models.ForeignKey(
+        HomePage,
+        on_delete=models.CASCADE,
+        related_name='studio_working_hours',
+    )
+    day_label = models.CharField(
+        max_length=100,
+        verbose_name='Ден / период',
+        help_text='напр. "Понеделник до Петък"',
+    )
+    hours = models.CharField(
+        max_length=50,
+        blank=True,
+        verbose_name='Часове',
+        help_text='напр. "9:00 - 18:00" — оставете празно за "Почивен ден"',
+    )
+    order = models.PositiveSmallIntegerField(default=0, verbose_name='Ред')
+
+    class Meta:
+        ordering = ['order']
+        verbose_name = 'Работно време на студиото'
+        verbose_name_plural = 'Работно време на студиото'
+
+    def __str__(self):
+        return f"{self.day_label}: {self.hours or 'Почивен ден'}"
+
+
 class Comment(models.Model):
+    user = models.ForeignKey(
+        'accounts.CustomUser',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+
     author = models.CharField(
-        max_length=30,
+        max_length=100,
+        null=True,
+        blank=True,
     )
 
     content = models.TextField()

@@ -91,38 +91,57 @@
 .comment-carousel {
     position: relative;
     width: 100%;
-    max-width: 600px;
+    max-width: 700px; /* Slightly wider */
     margin: 0 auto 2rem;
     overflow: hidden;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 15px; /* More rounded */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Softer, larger shadow */
+    background: #fff;
 }
 
 .carousel-wrapper {
     display: flex;
-    transition: transform 0.5s ease-in-out;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); /* Smoother transition */
 }
 
 .carousel-item {
     min-width: 100%;
-    background: #f9f5f0;
-    padding: 2rem;
+    background: #fff;
+    padding: 3rem 5rem; /* More horizontal padding to avoid buttons */
     text-align: center;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
 }
 
 .carousel-item strong {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     color: #7a5e4d;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     display: block;
+    font-family: 'Playfair Display', serif;
 }
 
 .carousel-item p {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: #5c3d2e;
     line-height: 1.6;
+    font-style: italic;
+    position: relative;
+    z-index: 2;
+}
+
+/* Watermark Quote marks */
+.carousel-item::before {
+    font-size: 8rem;
+    color: rgba(122, 94, 77, 0.05);
+    position: absolute;
+    top: -1rem;
+    left: 2rem;
+    font-family: 'Playfair Display', serif;
+    line-height: 1;
+    z-index: 1;
 }
 
 /* Carousel Buttons */
@@ -130,27 +149,51 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: #7a5e4d;
+    background: rgba(122, 94, 77, 0.8);
     color: #fff;
     border: none;
-    padding: 0.5rem 1rem;
-    font-size: 1.2rem;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     border-radius: 50%;
-    transition: background-color 0.3s ease, transform 0.3s ease;
+    transition: all 0.3s ease;
+    z-index: 10;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .carousel-btn:hover {
     background: #5c3d2e;
-    transform: translateY(-50%);
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.carousel-btn:active {
+    transform: translateY(-50%) scale(0.95);
 }
 
 .prev-btn {
-    left: 10px;
+    left: 20px;
 }
 
 .next-btn {
-    right: 10px;
+    right: 20px;
+}
+
+@media (max-width: 600px) {
+    .carousel-item {
+        padding: 2.5rem 3rem;
+    }
+    .carousel-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 1.2rem;
+    }
+    .prev-btn { left: 10px; }
+    .next-btn { right: 10px; }
 }
 
 /* Form */
@@ -168,6 +211,16 @@
     margin-bottom: 1rem;
     font-size: 1.5rem;
     color: #5c3d2e;
+}
+
+.name-form-fields .form-group label {
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+    color: #7a5e4d;
+}
+
+.name-form-fields .form-group input {
+    padding: 0.6rem;
 }
 
 .comment-form label {

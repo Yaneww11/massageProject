@@ -4,6 +4,10 @@
     box-sizing: border-box;
 }
 
+ul, ol {
+    list-style: none;
+}
+
 /* Ensure the page uses full height */
 html, body {
     margin: 0;

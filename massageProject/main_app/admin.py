@@ -5,8 +5,9 @@ from django.utils.html import format_html
 from django.utils import timezone
 from datetime import date
 from massageProject.main_app.models import (
-    Massage, Image, Gallery, HomePage, GalleryImage, 
-    MessageStudio, Masseur, WorkingHours, MessageReservation, Comment
+    Massage, Image, Gallery, HomePage, GalleryImage,
+    MessageStudio, Masseur, WorkingHours, MessageReservation, Comment,
+    StudioWorkingHours,
 )
 
 # --- Actions ---
@@ -104,7 +105,7 @@ class WorkingHoursAdmin(admin.ModelAdmin):
 
 @admin.register(MessageReservation)
 class MessageReservationAdmin(admin.ModelAdmin):
-    list_display = ('date', 'time', 'user', 'massage', 'masseur', 'status', 'status_updated_at')
+    list_display = ('date', 'time', 'get_client_name', 'massage', 'masseur', 'status', 'status_updated_at')
     list_filter = ('status', ReservationDateFilter, 'masseur', 'massage', 'date')
     search_fields = ('user__phone_number', 'user__first_name', 'user__last_name', 'massage__name')
     date_hierarchy = 'date'
@@ -117,6 +118,10 @@ class MessageReservationAdmin(admin.ModelAdmin):
         ('Additional Notes', {'fields': ('additional_text',)}),
         ('System Audit', {'fields': ('updated_at', 'status_updated_at', 'status_updated_by'), 'classes': ('collapse',)}),
     )
+
+    def get_client_name(self, obj):
+        return obj.user.get_full_name() or obj.user.phone_number
+    get_client_name.short_description = 'Клиент'
 
     def get_queryset(self, request):
         # Admins should see all reservations, including soft-deleted ones
@@ -159,9 +164,16 @@ class GalleryImageInline(admin.TabularInline):
 class GalleryAdmin(admin.ModelAdmin):
     inlines = [GalleryImageInline]
 
+class StudioWorkingHoursInline(admin.TabularInline):
+    model = StudioWorkingHours
+    extra = 1
+    fields = ('day_label', 'hours', 'order')
+
+
 @admin.register(HomePage)
 class HomePageAdmin(admin.ModelAdmin):
     list_display = ('title',)
+    inlines = [StudioWorkingHoursInline]
 
 @admin.register(MessageStudio)
 class MessageStudiosAdmin(admin.ModelAdmin):

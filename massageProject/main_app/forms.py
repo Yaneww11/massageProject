@@ -1,7 +1,38 @@
 from django import forms
+from django.core.validators import RegexValidator
 
 from massageProject.main_app.mixins import DisableFieldMixin
 from massageProject.main_app.models import MessageReservation, Comment
+
+_NAME_VALIDATOR = RegexValidator(
+    regex=r'^[A-Za-zА-Яа-яЁё\s\-]+$',
+    message='Моля, въведете само букви (кирилица или латиница), интервали и тирета.',
+)
+
+
+class UserNameForm(forms.Form):
+    first_name = forms.CharField(
+        max_length=50,
+        min_length=2,
+        label='Първо име',
+        validators=[_NAME_VALIDATOR],
+        error_messages={
+            'required': 'Полето е задължително.',
+            'min_length': 'Минималната дължина е %(limit_value)d символа.',
+            'max_length': 'Максималната дължина е %(limit_value)d символа.',
+        },
+    )
+    last_name = forms.CharField(
+        max_length=50,
+        min_length=2,
+        label='Фамилия',
+        validators=[_NAME_VALIDATOR],
+        error_messages={
+            'required': 'Полето е задължително.',
+            'min_length': 'Минималната дължина е %(limit_value)d символа.',
+            'max_length': 'Максималната дължина е %(limit_value)d символа.',
+        },
+    )
 
 
 class ReservationBaseForm(forms.ModelForm):

@@ -11,7 +11,7 @@ from django.http import JsonResponse
 import json
 
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
-    ReservationDeleteForm, CommentForm
+    ReservationDeleteForm, CommentForm, UserNameForm
 from massageProject.main_app.models import Massage, HomePage, Masseur, MessageStudio, MessageReservation, Comment, WorkingHours
 
 
@@ -119,6 +119,39 @@ class ReservationPage(LoginRequiredMixin, CreateView):
     form_class = ReservationCreateForm
     success_url = reverse_lazy('profile_page')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        if not (user.first_name and user.last_name) and 'name_form' not in context:
+            context['name_form'] = UserNameForm()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = None
+        user = request.user
+        name_form = None
+        name_valid = True
+
+        if not (user.first_name and user.last_name):
+            name_form = UserNameForm(request.POST)
+            if name_form.is_valid():
+                user.first_name = name_form.cleaned_data['first_name']
+                user.last_name = name_form.cleaned_data['last_name']
+                user.save(update_fields=['first_name', 'last_name'])
+                name_form = None
+            else:
+                name_valid = False
+
+        form = self.get_form()
+
+        if form.is_valid() and name_valid:
+            return self.form_valid(form)
+
+        extra = {'form': form}
+        if name_form is not None:
+            extra['name_form'] = name_form
+        return self.render_to_response(self.get_context_data(**extra))
+
     def form_valid(self, form):
         form.instance.user = self.request.user
         return super().form_valid(form)
@@ -132,30 +165,49 @@ class ReservationPage(LoginRequiredMixin, CreateView):
 class AboutPage(TemplateView):
     template_name = 'pages/about.html'
 
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         context['masseur'] = Masseur.objects.first()
         context['studio'] = MessageStudio.objects.values('description', 'main_image').first()
         context['comments'] = Comment.objects.all().order_by('-created_at')[:5]
-        context['form'] = CommentForm()
-        return self.render_to_response(context)
-
+        if 'form' not in context:
+            context['form'] = CommentForm()
+        
+        user = self.request.user
+        if user.is_authenticated and not (user.first_name and user.last_name) and 'name_form' not in context:
+            context['name_form'] = UserNameForm()
+        return context
 
     def post(self, request, *args, **kwargs):
+        user = request.user
+        name_form = None
+        name_valid = True
+
+        if user.is_authenticated and not (user.first_name and user.last_name):
+            name_form = UserNameForm(request.POST)
+            if name_form.is_valid():
+                user.first_name = name_form.cleaned_data['first_name']
+                user.last_name = name_form.cleaned_data['last_name']
+                user.save(update_fields=['first_name', 'last_name'])
+                name_form = None
+            else:
+                name_valid = False
+
         form = CommentForm(request.POST)
 
-        if form.is_valid():
-            if form.cleaned_data:
-                comment = form.save(commit=False)
-                comment.author = self.request.user.get_full_name()
-                form.save()
-
+        if form.is_valid() and name_valid:
+            comment = form.save(commit=False)
+            if user.is_authenticated:
+                comment.user = user
+                comment.author = user.get_full_name() or user.phone_number
+            comment.save()
             return redirect('about_page')
 
-        context = self.get_context_data()
-        context['form'] = form
+        extra = {'form': form}
+        if name_form:
+            extra['name_form'] = name_form
 
-        return self.render_to_response(context)
+        return self.render_to_response(self.get_context_data(**extra))
 
 class ProfilePage(LoginRequiredMixin, TemplateView):
     template_name = 'pages/my_profile.html'
