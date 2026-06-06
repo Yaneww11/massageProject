@@ -58,7 +58,7 @@
                     <select id="massage" name="massage" required>
                         {% for massage in form.fields.massage.queryset %}
                             <option value="{{ massage.id }}" {% if form.massage.value|add:"0" == massage.id %}selected{% endif %}>
-                                {{ massage.name }}
+                                {{ massage.name }} ({{ massage.duration_in_minutes }} мин)
                             </option>
                         {% endfor %}
                     </select>

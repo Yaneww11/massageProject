@@ -23,7 +23,7 @@
                         {% for reservation in active_reservations %}
                             <tr>
                                 <td data-label="Дата">{{ reservation.date|date:"d.m.Y" }}</td>
-                                <td data-label="Час">{{ reservation.time|time:"H:i" }} ч.</td>
+                                <td data-label="Час">{{ reservation.time|time:"H:i" }} - {{ reservation.end_time|time:"H:i" }}</td>
                                 <td data-label="Вид">{{ reservation.massage.name }}</td>
                                 <td data-label="Масажист">{{ reservation.masseur.name }}</td>
                                 <td data-label="Действия">
@@ -56,7 +56,7 @@
                         {% for reservation in past_reservations %}
                             <tr>
                                 <td data-label="Дата">{{ reservation.date|date:"d.m.Y" }}</td>
-                                <td data-label="Час">{{ reservation.time|time:"H:i" }} ч.</td>
+                                <td data-label="Час">{{ reservation.time|time:"H:i" }} - {{ reservation.end_time|time:"H:i" }}</td>
                                 <td data-label="Вид">{{ reservation.massage.name }}</td>
                                 <td data-label="Статус">
                                     <span class="status-badge status-{{ reservation.status }}">

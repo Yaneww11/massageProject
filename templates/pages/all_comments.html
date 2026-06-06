@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/pages/about.css' %}">
+<style>
+    .all-comments-section {
+        max-width: 800px;
+        margin: 3rem auto;
+        padding: 0 1.5rem;
+    }
+    .comment-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    .comment-card {
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        border-left: 5px solid #7a5e4d;
+        text-align: left;
+    }
+    .comment-card strong {
+        display: block;
+        font-family: 'Playfair Display', serif;
+        font-size: 1.2rem;
+        color: #7a5e4d;
+        margin-bottom: 0.5rem;
+    }
+    .comment-card .date {
+        font-size: 0.85rem;
+        color: #999;
+        margin-bottom: 0.5rem;
+    }
+    .comment-card p {
+        color: #5c3d2e;
+        line-height: 1.6;
+    }
+    .pagination {
+        margin-top: 3rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .pagination a, .pagination span {
+        padding: 0.5rem 1rem;
+        border: 1px solid #7a5e4d;
+        border-radius: 4px;
+        color: #7a5e4d;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    .pagination a:hover {
+        background: #f9f5f0;
+    }
+    .pagination .current {
+        background: #7a5e4d;
+        color: #fff;
+    }
+</style>
+
+<div class="all-comments-section">
+    <h2 style="text-align: center; color: #5c3d2e; margin-bottom: 2rem; font-family: 'Playfair Display', serif; font-size: 2.5rem;">Всички коментари</h2>
+    
+    <div class="comment-list">
+        {% for comment in comments %}
+            <div class="comment-card">
+                <strong>{{ comment.author }}</strong>
+                <div class="date">{{ comment.created_at|date:"d.m.Y H:i" }}</div>
+                <p>{{ comment.content }}</p>
+            </div>
+        {% empty %}
+            <p style="text-align: center;">Все още няма коментари.</p>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; Първа</a>
+            <a href="?page={{ page_obj.previous_page_number }}">Предишна</a>
+        {% endif %}
+
+        <span class="current">
+            Страница {{ page_obj.number }} от {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">Следваща</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">Последна &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div style="margin-top: 3rem; text-align: center;">
+        <a href="{% url 'about_page' %}" style="color: #7a5e4d; text-decoration: none; font-weight: bold;">&larr; Обратно към За нас</a>
+    </div>
+</div>
+{% endblock %}

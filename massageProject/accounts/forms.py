@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 class CustomUserForm(UserCreationForm):
     error_messages = {
         "password_mismatch": ("Паролите не съвпадат."),
+        "already_registered": ("Този телефонен номер вече е регистриран. Моля, влезте в профила си."),
     }
     class Meta:
         model = get_user_model()
@@ -22,21 +23,31 @@ class CustomUserForm(UserCreationForm):
                     'placeholder': '0899999999'
                 })
 
-    def clean_username(self):
-        """Reject usernames that differ only in case."""
-        username = self.cleaned_data.get("phone_number")
-        if (
-            username
-            and self._meta.model.objects.filter(phone_number__iexact=username).exists()
-        ):
-            self._update_errors(
-                ValidationError(
-                    {
-                        "phone_number": self.instance.unique_error_message(
-                            self._meta.model, ["phone_number"]
-                        )
-                    }
-                )
-            )
-        else:
-            return username
+    def clean_phone_number(self):
+        """
+        Check if a user with this phone number already exists.
+        If the user exists and has a password, reject with a custom message.
+        If the user exists but has NO password, attach that user instance to this form
+        so it can be "claimed" and updated.
+        """
+        phone_number = self.cleaned_data.get("phone_number")
+        if not phone_number:
+            return phone_number
+
+        User = get_user_model()
+        # Normalize phone number before checking
+        normalized_phone = User.objects.normalize_phone_number(phone_number)
+        
+        try:
+            existing_user = User.objects.get(phone_number__iexact=normalized_phone)
+            if existing_user.has_usable_password():
+                raise ValidationError(self.error_messages["already_registered"])
+            else:
+                # Set the existing user as the instance for this form.
+                # This allows ModelForm to update the existing record instead of creating a new one,
+                # and it bypasses the unique constraint validation for this specific record.
+                self.instance = existing_user
+        except User.DoesNotExist:
+            pass
+
+        return normalized_phone

@@ -116,6 +116,12 @@ class MessageReservation(models.Model):
     objects = ReservationManager()
     all_objects = models.Manager()
 
+    @property
+    def end_time(self):
+        start_dt = datetime.combine(self.date, self.time)
+        duration = timedelta(minutes=self.massage.duration_in_minutes)
+        return (start_dt + duration).time()
+
     def clean(self):
         # Use _id to avoid RelatedObjectDoesNotExist if the field is not set
         if not all([self.massage_id, self.masseur_id, self.date, self.time]):

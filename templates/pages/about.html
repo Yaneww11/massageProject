@@ -51,6 +51,13 @@
             <button class="carousel-btn prev-btn">&#10094;</button>
             <button class="carousel-btn next-btn">&#10095;</button>
         </div>
+        
+        {% if total_comments_count > 15 %}
+        <div style="margin-bottom: 2rem;">
+            <a href="{% url 'all_comments' %}" class="btn-secondary" style="color: #7a5e4d; text-decoration: underline; font-weight: bold;">Виж всички коментари ({{ total_comments_count }})</a>
+        </div>
+        {% endif %}
+
         {% if perms.main_app.add_comment or user.is_authenticated %}
             <form class="comment-form" method="post">
                 {% csrf_token %}

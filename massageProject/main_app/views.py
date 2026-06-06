@@ -169,7 +169,8 @@ class AboutPage(TemplateView):
         context = super().get_context_data(**kwargs)
         context['masseur'] = Masseur.objects.first()
         context['studio'] = MessageStudio.objects.values('description', 'main_image').first()
-        context['comments'] = Comment.objects.all().order_by('-created_at')[:5]
+        context['comments'] = Comment.objects.filter(is_reviewed=True).order_by('-created_at')[:15]
+        context['total_comments_count'] = Comment.objects.filter(is_reviewed=True).count()
         if 'form' not in context:
             context['form'] = CommentForm()
         
@@ -201,6 +202,7 @@ class AboutPage(TemplateView):
                 comment.user = user
                 comment.author = user.get_full_name() or user.phone_number
             comment.save()
+            messages.success(request, 'Вашият коментар е изпратен успешно и ще бъде публикуван след преглед.')
             return redirect('about_page')
 
         extra = {'form': form}
@@ -208,6 +210,15 @@ class AboutPage(TemplateView):
             extra['name_form'] = name_form
 
         return self.render_to_response(self.get_context_data(**extra))
+
+class AllCommentsView(ListView):
+    model = Comment
+    template_name = 'pages/all_comments.html'
+    context_object_name = 'comments'
+    paginate_by = 15
+
+    def get_queryset(self):
+        return Comment.objects.filter(is_reviewed=True).order_by('-created_at')
 
 class ProfilePage(LoginRequiredMixin, TemplateView):
     template_name = 'pages/my_profile.html'

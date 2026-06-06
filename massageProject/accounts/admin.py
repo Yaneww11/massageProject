@@ -32,6 +32,16 @@ class AppUserAdmin(UserAdmin):
         ("Statistics & Dates", {"fields": ("count_messages", "last_login", "date_joined")}),
     )
 
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("phone_number","first_name", "last_name", "usable_password", "password1", "password2"),
+            },
+        ),
+    )
+
     def full_name_display(self, obj):
         return f"{obj.first_name} {obj.last_name}"
     full_name_display.short_description = 'Full Name'

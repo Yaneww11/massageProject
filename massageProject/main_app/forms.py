@@ -55,6 +55,10 @@ class ReservationBaseForm(forms.ModelForm):
             }
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['massage'].label_from_instance = lambda obj: f"{obj.name} ({obj.duration_in_minutes} мин)"
+
 class ReservationCreateForm(ReservationBaseForm):
     pass
 
