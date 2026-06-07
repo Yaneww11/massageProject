@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block content %}
 <section class="reservation-section">
     <div class="description">
-        <h1>Промени своята резервация</h1>
+        <h1>{% trans "Промени своята резервация" %}</h1>
         <form class="form-container" action="{% url 'edit_reservation' reservation.pk %}" method="post">
             {% csrf_token %}
-            
+
             {% if form.non_field_errors %}
                 <div class="alert alert-danger">
                     {% for error in form.non_field_errors %}
@@ -16,11 +17,11 @@
             {% endif %}
 
             <div class="form-group">
-                <label for="massage">Тип масаж</label>
+                <label for="massage">{% trans "Тип масаж" %}</label>
                 <select id="massage" name="massage" required>
                     {% for massage in form.fields.massage.queryset %}
                         <option value="{{ massage.id }}" {% if form.massage.value|add:"0" == massage.id %}selected{% endif %}>
-                            {{ massage.name }} ({{ massage.duration_in_minutes }} мин)
+                            {{ massage.name }} ({{ massage.duration_in_minutes }} {% trans "мин" %})
                         </option>
                     {% endfor %}
                 </select>
@@ -30,7 +31,7 @@
             </div>
 
             <div class="form-group">
-                <label for="masseur">Масажист</label>
+                <label for="masseur">{% trans "Масажист" %}</label>
                 <select id="masseur" name="masseur" required>
                     {% for masseur in form.fields.masseur.queryset %}
                         <option value="{{ masseur.id }}" {% if form.masseur.value|add:"0" == masseur.id %}selected{% endif %}>
@@ -44,7 +45,7 @@
             </div>
 
             <div class="form-group">
-                <label for="date">Дата</label>
+                <label for="date">{% trans "Дата" %}</label>
                 <input type="date" id="date" name="date"
                     value="{{ form.date.value|date:'Y-m-d'|default:form.date.value|default:'' }}" required>
                 {% if form.date.errors %}
@@ -53,10 +54,11 @@
             </div>
 
             <div class="form-group">
-                <label for="time">Време</label>
+                <label for="time">{% trans "Време" %}</label>
                 <input type="hidden" id="time_value" name="time" value="{{ form.time.value|time:'H:i'|default:form.time.value|default:'' }}" required>
-                <div id="time-slots" class="time-slots-container">
-                    <p class="placeholder-text">Зареждане на свободни часове...</p>
+                <div id="time-slots" class="time-slots-container"
+                     data-availability-url="{% url 'check_availability' %}">
+                    <p class="placeholder-text">{% trans "Зареждане на свободни часове..." %}</p>
                 </div>
                 {% if form.time.errors %}
                     <div class="error-message">{{ form.time.errors }}</div>
@@ -64,16 +66,16 @@
             </div>
 
             <div class="form-group">
-                <label for="additional_text">Допълнителни бележки</label>
+                <label for="additional_text">{% trans "Допълнителни бележки" %}</label>
                 <textarea id="additional_text" name="additional_text"
-                          placeholder="Специални изисквания или притеснения">{{ form.additional_text.value|default:'' }}</textarea>
+                          placeholder="{% trans 'Специални изисквания или притеснения' %}">{{ form.additional_text.value|default:'' }}</textarea>
                 {% if form.additional_text.errors %}
                     <div class="error-message">{{ form.additional_text.errors }}</div>
                 {% endif %}
             </div>
 
-            <button type="submit" class="btn btn-primary btn-block">Запази промените</button>
-            <a href="{% url 'profile_page' %}" class="btn btn-secondary btn-block" style="margin-top: 10px;">Отказ</a>
+            <button type="submit" class="btn btn-primary btn-block">{% trans "Запази промените" %}</button>
+            <a href="{% url 'profile_page' %}" class="btn btn-secondary btn-block" style="margin-top: 10px;">{% trans "Отказ" %}</a>
         </form>
     </div>
 </section>
@@ -161,6 +163,14 @@
 </style>
 
 <script>
+    const MSG_SELECT_FIRST = "{% trans 'Моля, първо изберете тип масаж, масажист и дата.' %}";
+    const MSG_LOADING = "{% trans 'Зареждане на свободни часове...' %}";
+    const MSG_TAKEN = "{% trans 'Зает' %}";
+    const MSG_NO_SLOTS = "{% trans 'Няма свободни часове за избрания ден.' %}";
+    const MSG_ERROR = "{% trans 'Възникна грешка при зареждането.' %}";
+    const MSG_FILL_ALL = "{% trans 'Моля, попълнете всички полета.' %}";
+    const MSG_SELECT_TIME = "{% trans 'Моля, изберете час за вашата резервация.' %}";
+
     document.addEventListener('DOMContentLoaded', function() {
         const massageSelect = document.getElementById('massage');
         const masseurSelect = document.getElementById('masseur');
@@ -169,6 +179,7 @@
         const timeSlotsContainer = document.getElementById('time-slots');
         const toastContainer = document.getElementById('toast-container');
         const form = document.querySelector('.form-container');
+        const availabilityUrl = timeSlotsContainer.dataset.availabilityUrl;
 
         // Set min date to today
         const today = new Date().toISOString().split('T')[0];
@@ -199,14 +210,14 @@
             const date = dateInput.value;
 
             if (!massageId || !masseurId || !date) {
-                timeSlotsContainer.innerHTML = '<p class="placeholder-text">Моля, попълнете всички полета.</p>';
+                timeSlotsContainer.innerHTML = `<p class="placeholder-text">${MSG_FILL_ALL}</p>`;
                 return;
             }
 
-            timeSlotsContainer.innerHTML = '<p class="placeholder-text">Зареждане на свободни часове...</p>';
+            timeSlotsContainer.innerHTML = `<p class="placeholder-text">${MSG_LOADING}</p>`;
 
             try {
-                const response = await fetch(`/check-availability/?massage_id=${massageId}&masseur_id=${masseurId}&date=${date}`);
+                const response = await fetch(`${availabilityUrl}?massage_id=${massageId}&masseur_id=${masseurId}&date=${date}`);
                 const data = await response.json();
 
                 if (data.slots && data.slots.length > 0) {
@@ -214,47 +225,42 @@
                     data.slots.forEach(slot => {
                         const btn = document.createElement('div');
                         const isOriginalTime = timeValueInput.value.startsWith(slot.time);
-                        
+
                         btn.className = `time-slot ${slot.available || isOriginalTime ? '' : 'disabled'}`;
-                        btn.textContent = (slot.available || isOriginalTime) ? slot.time : `${slot.time} (Зает)`;
-                        
+                        btn.textContent = (slot.available || isOriginalTime) ? slot.time : `${slot.time} (${MSG_TAKEN})`;
+
                         if (slot.available || isOriginalTime) {
                             btn.addEventListener('click', () => {
                                 document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
                                 btn.classList.add('selected');
                                 timeValueInput.value = slot.time;
                             });
-                            
+
                             // Re-select if previously selected
                             if (isOriginalTime) {
                                 btn.classList.add('selected');
-                                timeValueInput.value = slot.time; // Ensure format is correct
+                                timeValueInput.value = slot.time;
                             }
                         }
                         timeSlotsContainer.appendChild(btn);
                     });
                 } else {
-                    timeSlotsContainer.innerHTML = '<p class="placeholder-text">Няма свободни часове за избрания ден.</p>';
+                    timeSlotsContainer.innerHTML = `<p class="placeholder-text">${MSG_NO_SLOTS}</p>`;
                 }
             } catch (error) {
                 console.error('Error fetching availability:', error);
-                timeSlotsContainer.innerHTML = '<p class="placeholder-text">Възникна грешка при зареждането.</p>';
+                timeSlotsContainer.innerHTML = `<p class="placeholder-text">${MSG_ERROR}</p>`;
             }
         }
 
         // Click handling for help message
         timeSlotsContainer.addEventListener('click', (e) => {
             if (!massageSelect.value || !masseurSelect.value || !dateInput.value) {
-                showToast('Моля, първо изберете тип масаж, масажист и дата.');
+                showToast(MSG_SELECT_FIRST);
             }
         });
 
-        massageSelect.addEventListener('change', () => {
-            // In edit mode, we don't necessarily want to clear the time immediately, 
-            // but we should re-check if it still fits.
-            debouncedFetch();
-        });
-
+        massageSelect.addEventListener('change', debouncedFetch);
         masseurSelect.addEventListener('change', debouncedFetch);
         dateInput.addEventListener('change', debouncedFetch);
 
@@ -264,8 +270,9 @@
         form.addEventListener('submit', (e) => {
             if (!timeValueInput.value) {
                 e.preventDefault();
-                showToast('Моля, изберете час за вашата резервация.');
+                showToast(MSG_SELECT_TIME);
             }
         });
-    </script>
+    });
+</script>
 {% endblock %}

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/pages/about.css' %}">
@@ -64,8 +64,8 @@
 </style>
 
 <div class="all-comments-section">
-    <h2 style="text-align: center; color: #5c3d2e; margin-bottom: 2rem; font-family: 'Playfair Display', serif; font-size: 2.5rem;">Всички коментари</h2>
-    
+    <h2 style="text-align: center; color: #5c3d2e; margin-bottom: 2rem; font-family: 'Playfair Display', serif; font-size: 2.5rem;">{% trans "Всички коментари" %}</h2>
+
     <div class="comment-list">
         {% for comment in comments %}
             <div class="comment-card">
@@ -74,30 +74,30 @@
                 <p>{{ comment.content }}</p>
             </div>
         {% empty %}
-            <p style="text-align: center;">Все още няма коментари.</p>
+            <p style="text-align: center;">{% trans "Все още няма коментари." %}</p>
         {% endfor %}
     </div>
 
     {% if is_paginated %}
     <div class="pagination">
         {% if page_obj.has_previous %}
-            <a href="?page=1">&laquo; Първа</a>
-            <a href="?page={{ page_obj.previous_page_number }}">Предишна</a>
+            <a href="?page=1">&laquo; {% trans "Първа" %}</a>
+            <a href="?page={{ page_obj.previous_page_number }}">{% trans "Предишна" %}</a>
         {% endif %}
 
         <span class="current">
-            Страница {{ page_obj.number }} от {{ page_obj.paginator.num_pages }}
+            {% blocktrans with num=page_obj.number total=page_obj.paginator.num_pages %}Страница {{ num }} от {{ total }}{% endblocktrans %}
         </span>
 
         {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}">Следваща</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}">Последна &raquo;</a>
+            <a href="?page={{ page_obj.next_page_number }}">{% trans "Следваща" %}</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">{% trans "Последна" %} &raquo;</a>
         {% endif %}
     </div>
     {% endif %}
 
     <div style="margin-top: 3rem; text-align: center;">
-        <a href="{% url 'about_page' %}" style="color: #7a5e4d; text-decoration: none; font-weight: bold;">&larr; Обратно към За нас</a>
+        <a href="{% url 'about_page' %}" style="color: #7a5e4d; text-decoration: none; font-weight: bold;">&larr; {% trans "Обратно към За нас" %}</a>
     </div>
 </div>
 {% endblock %}

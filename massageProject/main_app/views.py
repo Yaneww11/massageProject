@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from datetime import datetime, timedelta, time
 from django.contrib import messages
 from django.http import JsonResponse
@@ -202,7 +203,7 @@ class AboutPage(TemplateView):
                 comment.user = user
                 comment.author = user.get_full_name() or user.phone_number
             comment.save()
-            messages.success(request, 'Вашият коментар е изпратен успешно и ще бъде публикуван след преглед.')
+            messages.success(request, _('Вашият коментар е изпратен успешно и ще бъде публикуван след преглед.'))
             return redirect('about_page')
 
         extra = {'form': form}
@@ -229,12 +230,12 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
         if user.has_perm('main_app.view_all_reservations'):
             context['active_reservations'] = MessageReservation.objects.active().order_by('date', 'time')[:15]
             context['past_reservations'] = MessageReservation.objects.past().order_by('-date', '-time')[:15]
-            context['title'] = 'Управление на резервации'
+            context['title'] = _('Управление на резервации')
         else:
             user_reservations = MessageReservation.objects.filter(user=self.request.user)
             context['active_reservations'] = user_reservations.active().order_by('date', 'time')
             context['past_reservations'] = user_reservations.past().order_by('-date', '-time')[:5]
-            context['title'] = f'{user.get_full_name()} - резервации'
+            context['title'] = f'{user.get_full_name()} - {_("резервации")}'
         return context
 
 class MassageDetail(TemplateView):
@@ -256,7 +257,7 @@ def edit_reservation(request, pk: int):
     # 24-hour rule
     reservation_datetime = timezone.make_aware(datetime.combine(reservation.date, reservation.time))
     if reservation_datetime < timezone.now() + timedelta(hours=24):
-        messages.error(request, "Не можете да променяте резервация по-малко от 24 часа преди часа.")
+        messages.error(request, _("Не можете да променяте резервация по-малко от 24 часа преди часа."))
         return redirect('profile_page')
 
     if request.method == 'POST':
@@ -286,14 +287,14 @@ def delete_reservation(request, pk: int):
     # 24-hour rule
     reservation_datetime = timezone.make_aware(datetime.combine(reservation.date, reservation.time))
     if reservation_datetime < timezone.now() + timedelta(hours=24):
-        messages.error(request, "Не можете да отменяте резервация по-малко от 24 часа преди часа.")
+        messages.error(request, _("Не можете да отменяте резервация по-малко от 24 часа преди часа."))
         return redirect('profile_page')
 
     form = ReservationDeleteForm(instance=reservation)
 
     if request.method == 'POST':
         reservation.change_status(MessageReservation.STATUS_DELETED, user=request.user)
-        messages.success(request, "Резервацията беше отменена успешно.")
+        messages.success(request, _("Резервацията беше отменена успешно."))
         return redirect('profile_page')
 
     context = {

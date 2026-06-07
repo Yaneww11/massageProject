@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 {% block content %}
     <!-- Hero Section -->
     <section class="hero-section">
@@ -27,24 +27,23 @@
     <!-- Offer Cards Section -->
     <section class="offers">
         <div class="container">
-            <h2>Предпочитани масажи</h2>
+            <h2>{% trans "Предпочитани масажи" %}</h2>
             <div class="card-container">
                 {% for m in massages %}
                     <div class="card">
                         <h3>{{ m.name }}</h3>
                         <p>{{ m.short_description }}</p>
                         <div class="btn-group">
-                            <a href="{% url 'reservation_page' pk=m.pk %}" class="btn btn-accent">Запази час</a>
-                            <a href="{% url 'massage_detail' pk=m.pk %}" class="btn btn-outline">Научете повече</a>
+                            <a href="{% url 'reservation_page' pk=m.pk %}" class="btn btn-accent">{% trans "Запази час" %}</a>
+                            <a href="{% url 'massage_detail' pk=m.pk %}" class="btn btn-outline">{% trans "Научете повече" %}</a>
                         </div>
                     </div>
                 {% endfor %}
             </div>
         </div>
     </section>
-    
+
     {% include 'partials/working_hours.html' %}
     <script src="{% static 'js/carousel.js' %}"></script>
-    
-{% endblock %}
 
+{% endblock %}

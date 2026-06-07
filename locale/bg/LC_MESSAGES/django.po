@@ -1,0 +1,435 @@
+# Bulgarian translations for massageProject
+# This file is distributed under the same license as the massageProject package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: massageProject\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-06 22:00+0300\n"
+"PO-Revision-Date: 2026-06-06 22:00+0300\n"
+"Last-Translator: \n"
+"Language-Team: Bulgarian\n"
+"Language: bg\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# settings.py
+msgid "Bulgarian"
+msgstr "Български"
+
+msgid "English"
+msgstr "Английски"
+
+# models.py - StudioWorkingHours
+msgid "Ден / период"
+msgstr ""
+
+msgid "напр. \"Понеделник до Петък\""
+msgstr ""
+
+msgid "Часове"
+msgstr ""
+
+msgid "напр. \"9:00 - 18:00\" — оставете празно за \"Почивен ден\""
+msgstr ""
+
+msgid "Ред"
+msgstr ""
+
+msgid "Работно време на студиото"
+msgstr ""
+
+msgid "Почивен ден"
+msgstr ""
+
+# models.py - MessageReservation STATUS_CHOICES
+msgid "Предстояща"
+msgstr ""
+
+msgid "Завършена"
+msgstr ""
+
+msgid "Не се е явил"
+msgstr ""
+
+msgid "Отказана"
+msgstr ""
+
+# models.py - validation errors
+msgid "Резервация трябва да се направи поне 2 часа предварително."
+msgstr ""
+
+msgid "%(name)s не работи в този ден."
+msgstr ""
+
+msgid "Избраният час е извън работното време на %(name)s (%(start)s - %(end)s)."
+msgstr ""
+
+msgid "Часът се застъпва с друга резервация за %(name)s."
+msgstr ""
+
+# forms.py - validators & labels
+msgid "Моля, въведете само букви (кирилица или латиница), интервали и тирета."
+msgstr ""
+
+msgid "Първо име"
+msgstr ""
+
+msgid "Полето е задължително."
+msgstr ""
+
+msgid "Минималната дължина е %(limit_value)d символа."
+msgstr ""
+
+msgid "Максималната дължина е %(limit_value)d символа."
+msgstr ""
+
+msgid "Фамилия"
+msgstr ""
+
+msgid "Тове поле е задължително"
+msgstr ""
+
+msgid "мин"
+msgstr ""
+
+msgid "Въведете коментар"
+msgstr ""
+
+msgid "Твоя коментар"
+msgstr ""
+
+# accounts/forms.py
+msgid "Паролите не съвпадат."
+msgstr ""
+
+msgid "Този телефонен номер вече е регистриран. Моля, влезте в профила си."
+msgstr ""
+
+# views.py
+msgid "Вашият коментар е изпратен успешно и ще бъде публикуван след преглед."
+msgstr ""
+
+msgid "Управление на резервации"
+msgstr ""
+
+msgid "резервации"
+msgstr ""
+
+msgid "Не можете да променяте резервация по-малко от 24 часа преди часа."
+msgstr ""
+
+msgid "Не можете да отменяте резервация по-малко от 24 часа преди часа."
+msgstr ""
+
+msgid "Резервацията беше отменена успешно."
+msgstr ""
+
+# admin.py
+msgid "Маркирай като Завършена"
+msgstr ""
+
+msgid "Маркирай като Не се е явил"
+msgstr ""
+
+msgid "Клиент"
+msgstr ""
+
+# Templates - header
+msgid "Запази час"
+msgstr ""
+
+msgid "За студиото"
+msgstr ""
+
+msgid "Видове масажи"
+msgstr ""
+
+msgid "Моите часове"
+msgstr ""
+
+msgid "Изход"
+msgstr ""
+
+msgid "Вход"
+msgstr ""
+
+# Templates - footer
+msgid "Студио"
+msgstr ""
+
+msgid "За нас"
+msgstr ""
+
+msgid "Резервации"
+msgstr ""
+
+msgid "Политика за поверителност"
+msgstr ""
+
+# Templates - working_hours
+msgid "Работно време"
+msgstr ""
+
+# Templates - home
+msgid "Предпочитани масажи"
+msgstr ""
+
+msgid "Научете повече"
+msgstr ""
+
+# Templates - about
+msgid "За мен и моето студио"
+msgstr ""
+
+msgid "Коментари"
+msgstr ""
+
+msgid "Няма коментари"
+msgstr ""
+
+msgid "Бъди първенец и остави твоето мнение"
+msgstr ""
+
+msgid "Виж всички коментари (%(count)s)"
+msgstr ""
+
+msgid "Остави коментар"
+msgstr ""
+
+msgid "Моля, въведете своите имена, за да публикувате коментар:"
+msgstr ""
+
+msgid "Публикуваш като:"
+msgstr ""
+
+msgid "Качи коментара"
+msgstr ""
+
+msgid "Влезте в профила си, за да оставите коментар."
+msgstr ""
+
+msgid "Кликнете тук"
+msgstr ""
+
+msgid "Вие нямате разрешение да оставяте коментари."
+msgstr ""
+
+# Templates - reservation
+msgid "Резервирайте своя масаж"
+msgstr ""
+
+msgid "Подарете си релаксация и възстановяване с нашите професионални масажни услуги."
+msgstr ""
+
+msgid "Запазете час"
+msgstr ""
+
+msgid "Попълнете формуляра по-долу, за да запазите час за масаж. Очакваме Ви с нетърпение!"
+msgstr ""
+
+msgid "Само букви (кирилица или латиница), интервали и тирета"
+msgstr ""
+
+msgid "Моля, въведете Вашите имена. Те ще бъдат запазени и използвани автоматично при бъдещи резервации. След запазване имената ви не могат да бъдат променени."
+msgstr ""
+
+msgid "Тип масаж"
+msgstr ""
+
+msgid "Масажист"
+msgstr ""
+
+msgid "Изберете масажист"
+msgstr ""
+
+msgid "Предпочитана дата"
+msgstr ""
+
+msgid "Предпочитано време"
+msgstr ""
+
+msgid "Моля, изберете първо масаж, масажист и дата."
+msgstr ""
+
+msgid "Допълнителни бележки"
+msgstr ""
+
+msgid "Специални изисквания или притеснения"
+msgstr ""
+
+msgid "Резервирайте сега"
+msgstr ""
+
+msgid "Зареждане на свободни часове..."
+msgstr ""
+
+msgid "Зает"
+msgstr ""
+
+msgid "Няма свободни часове за избрания ден."
+msgstr ""
+
+msgid "Възникна грешка при зареждането."
+msgstr ""
+
+msgid "Типът масаж беше променен. Моля, изберете нов час."
+msgstr ""
+
+msgid "Моля, изберете час за вашата резервация."
+msgstr ""
+
+msgid "За да направите резервация, моля"
+msgstr ""
+
+msgid "регистрирайте се"
+msgstr ""
+
+msgid "или"
+msgstr ""
+
+msgid "влезте"
+msgstr ""
+
+# Templates - my_profile
+msgid "Предстоящи резервации"
+msgstr ""
+
+msgid "Дата"
+msgstr ""
+
+msgid "Час"
+msgstr ""
+
+msgid "Вид"
+msgstr ""
+
+msgid "Действия"
+msgstr ""
+
+msgid "Промени"
+msgstr ""
+
+msgid "Отмени"
+msgstr ""
+
+msgid "Нямате предстоящи резервации"
+msgstr ""
+
+msgid "История на резервациите"
+msgstr ""
+
+msgid "Статус"
+msgstr ""
+
+msgid "Нямате предишни резервации"
+msgstr ""
+
+# Templates - massages_page
+msgid "Предлагани масажи"
+msgstr ""
+
+# Templates - massage_detail
+msgid "Цена:"
+msgstr ""
+
+msgid "Продължителност:"
+msgstr ""
+
+msgid "Направи резервация"
+msgstr ""
+
+# Templates - all_comments
+msgid "Всички коментари"
+msgstr ""
+
+msgid "Все още няма коментари."
+msgstr ""
+
+msgid "Първа"
+msgstr ""
+
+msgid "Предишна"
+msgstr ""
+
+msgid "Страница %(num)s от %(total)s"
+msgstr ""
+
+msgid "Следваща"
+msgstr ""
+
+msgid "Последна"
+msgstr ""
+
+msgid "Обратно към За нас"
+msgstr ""
+
+# Templates - privacy_policy
+msgid "Съдържанието се подготвя..."
+msgstr ""
+
+# Templates - login
+msgid "Вход в системата"
+msgstr ""
+
+msgid "Моля, въведете своите данни, за да влезете в акаунта си."
+msgstr ""
+
+msgid "Нямате акаунт?"
+msgstr ""
+
+msgid "Регистрирайте се тук"
+msgstr ""
+
+# Templates - register
+msgid "Регистрация"
+msgstr ""
+
+msgid "Създайте нов акаунт, за да започнете да планирате своите моменти на релакс."
+msgstr ""
+
+msgid "Регистрирай се"
+msgstr ""
+
+msgid "Вече имате акаунт?"
+msgstr ""
+
+msgid "Влезте тук"
+msgstr ""
+
+# Templates - delete-reservation
+msgid "Отказване на резервация"
+msgstr ""
+
+msgid "Сигурни ли сте, че искате да откажете тази резервация? Това действие е необратимо."
+msgstr ""
+
+msgid "Дата"
+msgstr ""
+
+msgid "Време"
+msgstr ""
+
+msgid "Потвърди отказването"
+msgstr ""
+
+msgid "Връщане към профила"
+msgstr ""
+
+# Templates - edit-reservation
+msgid "Промени своята резервация"
+msgstr ""
+
+msgid "Моля, първо изберете тип масаж, масажист и дата."
+msgstr ""
+
+msgid "Моля, попълнете всички полета."
+msgstr ""
+
+msgid "Запази промените"
+msgstr ""
+
+msgid "Отказ"
+msgstr ""

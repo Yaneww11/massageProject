@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
 {% block content %}
 <section class="about-me">
     <div class="description">
-        <h2>За мен и моето студио</h2>
+        <h2>{% trans "За мен и моето студио" %}</h2>
         <div class="about-content">
             <div class="photo-info-container">
                 <!-- Photo Section -->
@@ -21,19 +21,13 @@
                     </p>
                 </div>
             </div>
-{#            <!-- Certificate Section -->#}
-{#            <div class="certificate-section">#}
-{#                <div class="certificate">#}
-{#                    <img src="{% static 'images/certificate.png' %}" alt="Certificate">#}
-{#                </div>#}
-{#            </div>#}
         </div>
     </div>
 </section>
 
 <section class="comments">
     <div class="description">
-        <h2>Коментари</h2>
+        <h2>{% trans "Коментари" %}</h2>
         <div class="comment-carousel">
             <div class="carousel-wrapper">
                 {% for comment in comments %}
@@ -43,28 +37,30 @@
                 </div>
                 {% empty %}
                 <div class="carousel-item">
-                    <strong>Няма коментари</strong>
-                    <p>Бъди първенец и остави твоето мнение</p>
+                    <strong>{% trans "Няма коментари" %}</strong>
+                    <p>{% trans "Бъди първенец и остави твоето мнение" %}</p>
                 </div>
                 {% endfor %}
             </div>
             <button class="carousel-btn prev-btn">&#10094;</button>
             <button class="carousel-btn next-btn">&#10095;</button>
         </div>
-        
+
         {% if total_comments_count > 15 %}
         <div style="margin-bottom: 2rem;">
-            <a href="{% url 'all_comments' %}" class="btn-secondary" style="color: #7a5e4d; text-decoration: underline; font-weight: bold;">Виж всички коментари ({{ total_comments_count }})</a>
+            <a href="{% url 'all_comments' %}" class="btn-secondary" style="color: #7a5e4d; text-decoration: underline; font-weight: bold;">
+                {% blocktrans with count=total_comments_count %}Виж всички коментари ({{ count }}){% endblocktrans %}
+            </a>
         </div>
         {% endif %}
 
         {% if perms.main_app.add_comment or user.is_authenticated %}
             <form class="comment-form" method="post">
                 {% csrf_token %}
-                <h3>Остави коментар</h3>
+                <h3>{% trans "Остави коментар" %}</h3>
                 {% if user.is_authenticated %}
                     {% if name_form %}
-                    <p style="margin-bottom: 1rem; color: #7a5e4d;">Моля, въведете своите имена, за да публикувате коментар:</p>
+                    <p style="margin-bottom: 1rem; color: #7a5e4d;">{% trans "Моля, въведете своите имена, за да публикувате коментар:" %}</p>
                     <div class="name-form-fields" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
                         <div class="form-group" style="flex: 1;">
                             {{ name_form.first_name.label_tag }}
@@ -78,18 +74,18 @@
                         </div>
                     </div>
                     {% else %}
-                    <p style="margin-bottom: 1rem; color: #7a5e4d;">Публикуваш като: <strong>{{ user.get_full_name|default:user.phone_number }}</strong></p>
+                    <p style="margin-bottom: 1rem; color: #7a5e4d;">{% trans "Публикуваш като:" %} <strong>{{ user.get_full_name|default:user.phone_number }}</strong></p>
                     {% endif %}
                 <div class="form-group">
                     {{ form.content }}
                 </div>
-                <button type="submit" class="btn-primary">Качи коментара</button>
+                <button type="submit" class="btn-primary">{% trans "Качи коментара" %}</button>
                  {% else %}
-                    <p>Влезте в профила си, за да оставите коментар.<b><a href="#">Кликнете тук</a></b></p>
+                    <p>{% trans "Влезте в профила си, за да оставите коментар." %}<b><a href="{% url 'login' %}">{% trans "Кликнете тук" %}</a></b></p>
                 {% endif %}
             </form>
         {% else %}
-            <p>Вие нямате разрешение да оставяте коментари.</p>
+            <p>{% trans "Вие нямате разрешение да оставяте коментари." %}</p>
         {% endif %}
     </div>
 </section>

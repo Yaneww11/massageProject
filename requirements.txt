@@ -4,3 +4,5 @@ pillow==11.0.0
 psycopg2==2.9.10
 psycopg2-binary==2.9.10
 sqlparse==0.5.2
+django-modeltranslation==0.20.3
+django-rosetta==0.10.3

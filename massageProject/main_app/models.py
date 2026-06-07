@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from datetime import datetime, timedelta
 
 class Massage(models.Model):
@@ -54,10 +55,10 @@ class MessageReservation(models.Model):
     STATUS_DELETED = 'deleted'
 
     STATUS_CHOICES = [
-        (STATUS_ACTIVE, 'Предстояща'),
-        (STATUS_COMPLETED, 'Завършена'),
-        (STATUS_NOSHOW, 'Не се е явил'),
-        (STATUS_DELETED, 'Отказана'),
+        (STATUS_ACTIVE, _('Предстояща')),
+        (STATUS_COMPLETED, _('Завършена')),
+        (STATUS_NOSHOW, _('Не се е явил')),
+        (STATUS_DELETED, _('Отказана')),
     ]
 
     massage = models.ForeignKey(
@@ -134,19 +135,25 @@ class MessageReservation(models.Model):
         # 1. Lead time check (2 hours)
         reservation_datetime = timezone.make_aware(datetime.combine(self.date, self.time))
         if reservation_datetime < timezone.now() + timedelta(hours=2):
-            raise ValidationError("Резервация трябва да се направи поне 2 часа предварително.")
+            raise ValidationError(_("Резервация трябва да се направи поне 2 часа предварително."))
 
         # 2. Working hours check
         day = self.date.weekday()
         hours = self.masseur.working_hours.filter(day_of_week=day).first()
         if not hours:
-            raise ValidationError(f"{self.masseur.name} не работи в този ден.")
-        
+            raise ValidationError(_("%(name)s не работи в този ден.") % {'name': self.masseur.name})
+
         duration = timedelta(minutes=self.massage.duration_in_minutes)
         end_time = (datetime.combine(self.date, self.time) + duration).time()
 
         if self.time < hours.start_time or end_time > hours.end_time:
-            raise ValidationError(f"Избраният час е извън работното време на {self.masseur.name} ({hours.start_time} - {hours.end_time}).")
+            raise ValidationError(
+                _("Избраният час е извън работното време на %(name)s (%(start)s - %(end)s).") % {
+                    'name': self.masseur.name,
+                    'start': hours.start_time,
+                    'end': hours.end_time,
+                }
+            )
 
         # 3. Overlap check
         existing_reservations = MessageReservation.objects.filter(
@@ -158,10 +165,12 @@ class MessageReservation(models.Model):
         for res in existing_reservations:
             res_duration = timedelta(minutes=res.massage.duration_in_minutes)
             res_end = (datetime.combine(res.date, res.time) + res_duration).time()
-            
+
             # (StartA < EndB) and (EndA > StartB)
             if self.time < res_end and end_time > res.time:
-                raise ValidationError(f"Часът се застъпва с друга резервация за {self.masseur.name}.")
+                raise ValidationError(
+                    _("Часът се застъпва с друга резервация за %(name)s.") % {'name': self.masseur.name}
+                )
 
     def change_status(self, new_status, user=None):
         self.status = new_status
@@ -210,24 +219,24 @@ class StudioWorkingHours(models.Model):
     )
     day_label = models.CharField(
         max_length=100,
-        verbose_name='Ден / период',
-        help_text='напр. "Понеделник до Петък"',
+        verbose_name=_('Ден / период'),
+        help_text=_('напр. "Понеделник до Петък"'),
     )
     hours = models.CharField(
         max_length=50,
         blank=True,
-        verbose_name='Часове',
-        help_text='напр. "9:00 - 18:00" — оставете празно за "Почивен ден"',
+        verbose_name=_('Часове'),
+        help_text=_('напр. "9:00 - 18:00" — оставете празно за "Почивен ден"'),
     )
-    order = models.PositiveSmallIntegerField(default=0, verbose_name='Ред')
+    order = models.PositiveSmallIntegerField(default=0, verbose_name=_('Ред'))
 
     class Meta:
         ordering = ['order']
-        verbose_name = 'Работно време на студиото'
-        verbose_name_plural = 'Работно време на студиото'
+        verbose_name = _('Работно време на студиото')
+        verbose_name_plural = _('Работно време на студиото')
 
     def __str__(self):
-        return f"{self.day_label}: {self.hours or 'Почивен ден'}"
+        return f"{self.day_label}: {self.hours or _('Почивен ден')}"
 
 
 class Comment(models.Model):

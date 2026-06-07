@@ -1,11 +1,12 @@
+{% load i18n %}
 <!-- Footer Section -->
 <footer>
     <div class="footer-content">
-        <p>&copy; 2026 Студио "Сияние"</p>
+        <p>&copy; 2026 {% trans "Студио" %} &ldquo;Сияние&rdquo;</p>
         <div class="footer-links">
-            <a href="{% url 'about_page' %}">За нас</a>
-            <a href="{% url 'reservation_page' %}">Резервации</a>
-            <a href="{% url 'privacy_policy' %}">Политика за поверителност</a>
+            <a href="{% url 'about_page' %}">{% trans "За нас" %}</a>
+            <a href="{% url 'reservation_page' %}">{% trans "Резервации" %}</a>
+            <a href="{% url 'privacy_policy' %}">{% trans "Политика за поверителност" %}</a>
         </div>
     </div>
 </footer>

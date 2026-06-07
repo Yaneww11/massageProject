@@ -99,6 +99,38 @@
 .hamburger-icon::before { top: -8px; }
 .hamburger-icon::after { top: 8px; }
 
+/* Language Switcher */
+.lang-switcher {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+}
+
+.lang-btn {
+    background: none;
+    border: 1px solid var(--secondary-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-main);
+    font-size: var(--fs-sm);
+    font-family: var(--font-main);
+    font-weight: 600;
+    padding: 2px 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    line-height: 1.4;
+}
+
+.lang-btn:hover,
+.lang-btn.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--white);
+}
+
 /* Mobile View */
 @media (max-width: 830px) {
     .nav-links {

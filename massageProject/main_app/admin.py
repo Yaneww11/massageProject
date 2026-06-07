@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.http import HttpResponse
 from django.utils.html import format_html
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from datetime import date
 from massageProject.main_app.models import (
     Massage, Image, Gallery, HomePage, GalleryImage,
@@ -29,12 +30,12 @@ def export_reservations_csv(modeladmin, request, queryset):
 def mark_as_reviewed(modeladmin, request, queryset):
     queryset.update(is_reviewed=True)
 
-@admin.action(description='Маркирай като Завършена')
+@admin.action(description=_('Маркирай като Завършена'))
 def mark_as_completed(modeladmin, request, queryset):
     for obj in queryset:
         obj.change_status(MessageReservation.STATUS_COMPLETED, user=request.user)
 
-@admin.action(description='Маркирай като Не се е явил')
+@admin.action(description=_('Маркирай като Не се е явил'))
 def mark_as_noshow(modeladmin, request, queryset):
     for obj in queryset:
         obj.change_status(MessageReservation.STATUS_NOSHOW, user=request.user)
@@ -121,7 +122,7 @@ class MessageReservationAdmin(admin.ModelAdmin):
 
     def get_client_name(self, obj):
         return obj.user.get_full_name() or obj.user.phone_number
-    get_client_name.short_description = 'Клиент'
+    get_client_name.short_description = _('Клиент')
 
     def get_queryset(self, request):
         # Admins should see all reservations, including soft-deleted ones

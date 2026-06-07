@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 {% block content %}
     <div class="container">
-        <h1>Предлагани масажи</h1>
+        <h1>{% trans "Предлагани масажи" %}</h1>
         <div class="cards">
             {% for m in massages %}
                 <div class="card">
-                    <img src="{{ m.image.url }}" alt="Swedish Massage">
+                    <img src="{{ m.image.url }}" alt="{{ m.name }}">
                     <div class="card-content">
                         <h2 class="card-title">{{ m.name }}</h2>
                         <p class="card-description">{{ m.short_description }}</p>
-                        <a href="{% url 'massage_detail' pk=m.pk %}" class="btn">Научете повече</a>
+                        <a href="{% url 'massage_detail' pk=m.pk %}" class="btn">{% trans "Научете повече" %}</a>
                     </div>
                 </div>
             {% endfor %}

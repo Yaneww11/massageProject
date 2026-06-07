@@ -18,6 +18,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from django.conf.urls.i18n import i18n_patterns
+import django.conf.urls.i18n as i18n_urls
 
 # Admin Customization
 admin.site.site_header = "Massage Studio Administration"
@@ -26,9 +28,15 @@ admin.site.index_title = "Welcome to the Studio Management Dashboard"
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('massageProject.main_app.urls')),
-    path('accounts/', include('massageProject.accounts.urls'))
+    path('i18n/', include(i18n_urls)),
+    path('rosetta/', include('rosetta.urls')),
 ]
+
+urlpatterns += i18n_patterns(
+    path('', include('massageProject.main_app.urls')),
+    path('accounts/', include('massageProject.accounts.urls')),
+    prefix_default_language=True,
+)
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

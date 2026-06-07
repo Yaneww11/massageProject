@@ -1,4 +1,4 @@
-{% load static %}
+{% load static i18n %}{% get_current_language as CURRENT_LANG %}
 
 <!-- Header Section -->
 <header class="navbar">
@@ -8,17 +8,25 @@
         <p class="logo-text">Сияние</p>
     </a>
     <nav class="nav-links">
-        <a href="{% url 'reservation_page' %}">Запази час</a>
-        <a href="{% url 'about_page' %}">За студиото</a>
-        <a href="{% url 'massages_dashboard' %}">Видове масажи</a>
+        <a href="{% url 'reservation_page' %}">{% trans "Запази час" %}</a>
+        <a href="{% url 'about_page' %}">{% trans "За студиото" %}</a>
+        <a href="{% url 'massages_dashboard' %}">{% trans "Видове масажи" %}</a>
         {% if user.is_authenticated %}
-            <a href="{% url 'profile_page' %}">Моите часове</a>
+            <a href="{% url 'profile_page' %}">{% trans "Моите часове" %}</a>
             <a href="{% url 'logout' %}" onclick="event.preventDefault(); document.getElementById('logout-form').submit()">
-                Изход
+                {% trans "Изход" %}
             </a>
         {% else %}
-            <a href="{% url 'login' %}">Вход</a>
+            <a href="{% url 'login' %}">{% trans "Вход" %}</a>
         {% endif %}
+
+        <!-- Language Switcher -->
+        <form action="{% url 'set_language' %}" method="post" class="lang-switcher">
+            {% csrf_token %}
+            <input name="next" type="hidden" value="{{ request.path }}">
+            <button type="submit" name="language" value="bg" class="lang-btn {% if CURRENT_LANG == 'bg' %}active{% endif %}">BG</button>
+            <button type="submit" name="language" value="en" class="lang-btn {% if CURRENT_LANG == 'en' %}active{% endif %}">EN</button>
+        </form>
     </nav>
     <button class="mobile-menu-toggle" aria-label="Open menu">
         <span class="hamburger-icon"></span>

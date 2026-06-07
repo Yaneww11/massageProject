@@ -1,12 +1,13 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 
 class CustomUserForm(UserCreationForm):
     error_messages = {
-        "password_mismatch": ("Паролите не съвпадат."),
-        "already_registered": ("Този телефонен номер вече е регистриран. Моля, влезте в профила си."),
+        "password_mismatch": _("Паролите не съвпадат."),
+        "already_registered": _("Този телефонен номер вече е регистриран. Моля, влезте в профила си."),
     }
     class Meta:
         model = get_user_model()

@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block content %}
 <section class="reservation-section">
     <div class="description">
-        <h2>Регистрация</h2>
-        <p>Създайте нов акаунт, за да започнете да планирате своите моменти на релакс.</p>
+        <h2>{% trans "Регистрация" %}</h2>
+        <p>{% trans "Създайте нов акаунт, за да започнете да планирате своите моменти на релакс." %}</p>
 
         <form method="POST" class="form-container">
             {% csrf_token %}
@@ -20,8 +21,8 @@
                 </div>
             {% endfor %}
 
-            <button type="submit" class="btn btn-primary btn-block">Регистрирай се</button>
-            <p style="margin-top: var(--space-md);">Вече имате акаунт? <a href="{% url 'login' %}">Влезте тук</a></p>
+            <button type="submit" class="btn btn-primary btn-block">{% trans "Регистрирай се" %}</button>
+            <p style="margin-top: var(--space-md);">{% trans "Вече имате акаунт?" %} <a href="{% url 'login' %}">{% trans "Влезте тук" %}</a></p>
         </form>
     </div>
 </section>
