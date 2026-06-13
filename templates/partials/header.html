@@ -3,31 +3,58 @@
 <!-- Header Section -->
 <header class="navbar">
     <a href="{% url 'index' %}" class="logo-container">
-        <!-- Logo SVG/Image -->
-        <img src="{% static 'images/logo.svg' %}" alt="Logo" class="logo-svg">
-        <p class="logo-text">Сияние</p>
+        <img src="{% static 'images/logo.svg' %}" alt="{{ brand_name }}" class="logo-svg">
+        <p class="logo-text">{{ brand_name }}</p>
     </a>
-    <nav class="nav-links">
-        <a href="{% url 'reservation_page' %}">{% trans "Запази час" %}</a>
-        <a href="{% url 'about_page' %}">{% trans "За студиото" %}</a>
-        <a href="{% url 'massages_dashboard' %}">{% trans "Видове масажи" %}</a>
-        {% if user.is_authenticated %}
-            <a href="{% url 'profile_page' %}">{% trans "Моите часове" %}</a>
-            <a href="{% url 'logout' %}" onclick="event.preventDefault(); document.getElementById('logout-form').submit()">
-                {% trans "Изход" %}
-            </a>
-        {% else %}
-            <a href="{% url 'login' %}">{% trans "Вход" %}</a>
-        {% endif %}
 
-        <!-- Language Switcher -->
+    <nav class="nav-links" id="nav-links">
+        <a href="{% url 'index' %}">{% trans "Начало" %}</a>
+        <a href="{% url 'massages_dashboard' %}">{% trans "Услуги" %}</a>
+        <a href="{% url 'index' %}#gallery">{% trans "Галерия" %}</a>
+        <a href="{% url 'about_page' %}">{% trans "Мнения" %}</a>
+        <a href="{% url 'index' %}#contacts">{% trans "Контакти" %}</a>
+
+        <!-- Mobile-only auth links -->
+        <div class="nav-auth-mobile">
+            {% if user.is_authenticated %}
+                <a href="{% url 'profile_page' %}">{% trans "Моите часове" %}</a>
+                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit()">{% trans "Изход" %}</a>
+            {% else %}
+                <a href="{% url 'login' %}">{% trans "Вход" %}</a>
+                <a href="{% url 'register' %}">{% trans "Регистрация" %}</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="navbar-actions">
         <form action="{% url 'set_language' %}" method="post" class="lang-switcher">
             {% csrf_token %}
             <input name="next" type="hidden" value="{{ request.path }}">
             <button type="submit" name="language" value="bg" class="lang-btn {% if CURRENT_LANG == 'bg' %}active{% endif %}">BG</button>
             <button type="submit" name="language" value="en" class="lang-btn {% if CURRENT_LANG == 'en' %}active{% endif %}">EN</button>
         </form>
-    </nav>
+
+        <a href="{% url 'reservation_page' %}" class="btn btn-primary navbar-cta">{% trans "Запазете час" %}</a>
+
+        <div class="user-menu" id="user-menu">
+            <button class="user-menu-toggle" id="user-menu-toggle" aria-label="{% trans 'Профил' %}" aria-expanded="false">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+            </button>
+            <div class="user-menu-dropdown" id="user-menu-dropdown" role="menu">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'profile_page' %}" role="menuitem">{% trans "Моите часове" %}</a>
+                    <a href="#" role="menuitem" onclick="event.preventDefault(); document.getElementById('logout-form').submit()">{% trans "Изход" %}</a>
+                {% else %}
+                    <a href="{% url 'login' %}" role="menuitem">{% trans "Вход" %}</a>
+                    <a href="{% url 'register' %}" role="menuitem">{% trans "Регистрация" %}</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
     <button class="mobile-menu-toggle" aria-label="Open menu">
         <span class="hamburger-icon"></span>
     </button>
@@ -36,3 +63,22 @@
 <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
     {% csrf_token %}
 </form>
+
+<script>
+(function () {
+    var toggle = document.getElementById('user-menu-toggle');
+    var menu = document.getElementById('user-menu');
+    if (!toggle) return;
+    toggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var open = menu.classList.toggle('user-menu--open');
+        toggle.setAttribute('aria-expanded', open);
+    });
+    document.addEventListener('click', function (e) {
+        if (!menu.contains(e.target)) {
+            menu.classList.remove('user-menu--open');
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+    });
+})();
+</script>

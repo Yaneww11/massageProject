@@ -1,12 +1,43 @@
-{% load i18n %}
+{% load static i18n %}
 <!-- Footer Section -->
-<footer>
-    <div class="footer-content">
-        <p>&copy; 2026 {% trans "Студио" %} &ldquo;Сияние&rdquo;</p>
-        <div class="footer-links">
-            <a href="{% url 'about_page' %}">{% trans "За нас" %}</a>
-            <a href="{% url 'reservation_page' %}">{% trans "Резервации" %}</a>
-            <a href="{% url 'privacy_policy' %}">{% trans "Политика за поверителност" %}</a>
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <a href="{% url 'index' %}" class="logo-container logo-container--light">
+                {% if brand_logo %}
+                    <img src="{{ brand_logo }}" alt="{{ brand_name }}" class="logo-svg logo-svg--light">
+                {% else %}
+                    <img src="{% static 'images/logo.svg' %}" alt="{{ brand_name }}" class="logo-svg logo-svg--light">
+                {% endif %}
+                <p class="logo-text logo-text--light">{{ brand_name }}</p>
+            </a>
+            {% if footer_tagline %}
+                <p class="footer-tagline">{{ footer_tagline }}</p>
+            {% endif %}
         </div>
+
+        <div class="footer-nav">
+            <span class="footer-col-label">{% trans "Навигация" %}</span>
+            <ul>
+                <li><a href="{% url 'index' %}">{% trans "Начало" %}</a></li>
+                <li><a href="{% url 'massages_dashboard' %}">{% trans "Услуги" %}</a></li>
+                <li><a href="{% url 'index' %}#gallery">{% trans "Галерия" %}</a></li>
+                <li><a href="{% url 'about_page' %}">{% trans "Мнения" %}</a></li>
+                <li><a href="{% url 'index' %}#contacts">{% trans "Контакти" %}</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-contacts">
+            <span class="footer-col-label">{% trans "Контакти" %}</span>
+            {% if studio %}
+                {% if studio.address %}<p>{{ studio.address }}</p>{% endif %}
+                {% if studio.phone %}<p>{{ studio.phone }}</p>{% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>&copy; 2026 {{ brand_name }}</p>
+        <a href="{% url 'privacy_policy' %}">{% trans "Политика за поверителност" %}</a>
     </div>
 </footer>

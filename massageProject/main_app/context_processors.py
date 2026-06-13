@@ -1,24 +1,27 @@
-from massageProject.main_app.models import HomePage
+from massageProject.main_app.models import HomePage, MessageStudio
 
 def admin_branding(request):
-    """
-    Returns the brand name and logo from the HomePage singleton.
-    Also attaches them to the request object for use in settings callables if needed,
-    and returns them for use in templates.
-    """
     try:
         homepage = HomePage.get_solo()
         brand_name = homepage.brand_name
         brand_logo = homepage.logo.url if homepage.logo else None
+        footer_tagline = homepage.footer_tagline
     except Exception:
         brand_name = 'Relax & Health'
         brand_logo = None
-    
-    # Attach to request for potential use in settings (though we'll prefer template)
+        footer_tagline = ''
+
     request.brand_name = brand_name
     request.brand_logo = brand_logo
-    
+
+    try:
+        studio = MessageStudio.objects.first()
+    except Exception:
+        studio = None
+
     return {
         'brand_name': brand_name,
         'brand_logo': brand_logo,
+        'footer_tagline': footer_tagline,
+        'studio': studio,
     }

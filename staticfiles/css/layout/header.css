@@ -24,7 +24,11 @@
 .logo-svg {
     width: 2.5rem;
     height: 2.5rem;
-    filter: brightness(0) saturate(100%) invert(20%) sepia(20%) saturate(1000%) hue-rotate(345deg) brightness(95%) contrast(90%); /* Primary color for SVG */
+    filter: brightness(0) saturate(100%) invert(20%) sepia(20%) saturate(1000%) hue-rotate(345deg) brightness(95%) contrast(90%);
+}
+
+.logo-svg--light {
+    filter: brightness(0) invert(1);
 }
 
 .logo-text {
@@ -32,10 +36,15 @@
     margin: 0;
 }
 
+.logo-text--light {
+    color: var(--white);
+}
+
 /* Navigation Links */
 .nav-links {
     display: flex;
     gap: var(--space-lg);
+    align-items: center;
 }
 
 .nav-links a {
@@ -65,6 +74,115 @@
 
 .nav-links a:hover::after {
     width: 100%;
+}
+
+/* Mobile-only auth block — hidden on desktop */
+.nav-auth-mobile {
+    display: none;
+}
+
+/* Navbar right-side actions */
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+/* CTA Button */
+.navbar-cta {
+    font-size: var(--fs-sm);
+    padding: 0.5rem 1.25rem;
+    white-space: nowrap;
+}
+
+/* Language Switcher */
+.lang-switcher {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+}
+
+.lang-btn {
+    background: none;
+    border: 1px solid var(--secondary-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-main);
+    font-size: var(--fs-sm);
+    font-family: var(--font-main);
+    font-weight: 600;
+    padding: 2px 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    line-height: 1.4;
+}
+
+.lang-btn:hover,
+.lang-btn.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--white);
+}
+
+/* User Menu Dropdown */
+.user-menu {
+    position: relative;
+}
+
+.user-menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 1px solid var(--secondary-color);
+    border-radius: 50%;
+    width: 2.25rem;
+    height: 2.25rem;
+    cursor: pointer;
+    color: var(--primary-color);
+    transition: var(--transition);
+    padding: 0;
+}
+
+.user-menu-toggle:hover {
+    background-color: var(--bg-light);
+    border-color: var(--primary-color);
+}
+
+.user-menu-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    background: var(--bg-paper);
+    border: 1px solid var(--border-color, #e8e0d8);
+    border-radius: var(--radius-md, 8px);
+    box-shadow: var(--shadow-md);
+    min-width: 160px;
+    z-index: 1100;
+    overflow: hidden;
+}
+
+.user-menu--open .user-menu-dropdown {
+    display: block;
+}
+
+.user-menu-dropdown a {
+    display: block;
+    padding: 0.65rem 1rem;
+    font-family: var(--font-main);
+    font-size: var(--fs-sm);
+    color: var(--text-main);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.user-menu-dropdown a:hover {
+    background-color: var(--bg-light);
+    color: var(--accent-color);
 }
 
 /* Mobile Menu Toggle Button */
@@ -99,38 +217,6 @@
 .hamburger-icon::before { top: -8px; }
 .hamburger-icon::after { top: 8px; }
 
-/* Language Switcher */
-.lang-switcher {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    border: none;
-    background: none;
-    padding: 0;
-    margin: 0;
-}
-
-.lang-btn {
-    background: none;
-    border: 1px solid var(--secondary-color);
-    border-radius: var(--radius-sm);
-    color: var(--text-main);
-    font-size: var(--fs-sm);
-    font-family: var(--font-main);
-    font-weight: 600;
-    padding: 2px 8px;
-    cursor: pointer;
-    transition: var(--transition);
-    line-height: 1.4;
-}
-
-.lang-btn:hover,
-.lang-btn.active {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    color: var(--white);
-}
-
 /* Mobile View */
 @media (max-width: 830px) {
     .nav-links {
@@ -152,8 +238,36 @@
         right: 0;
     }
 
+    .nav-auth-mobile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-md);
+        margin-top: var(--space-md);
+        padding-top: var(--space-md);
+        border-top: 1px solid var(--secondary-color);
+        width: 100%;
+    }
+
+    .nav-auth-mobile a {
+        font-family: var(--font-main);
+        color: var(--text-main);
+        text-decoration: none;
+        font-size: var(--fs-base);
+        font-weight: 500;
+    }
+
     .navbar {
         padding: var(--space-md);
+    }
+
+    /* Hide user-menu dropdown on mobile — auth links are in the slide-in nav */
+    .user-menu {
+        display: none;
+    }
+
+    .navbar-cta {
+        display: none;
     }
 
     .mobile-menu-toggle {
