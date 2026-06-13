@@ -236,51 +236,88 @@
 .hp-gallery-cell:hover img { transform: scale(1.04); }
 
 /* ================================================================
-   REVIEWS — rotating quote
+   REVIEWS — two-card carousel
    ================================================================ */
 .hp-reviews {
     background: var(--bg-paper);
     padding: 6rem 2rem;
-    text-align: center;
+}
+
+.hp-reviews-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.hp-leave-review-btn { white-space: nowrap; flex-shrink: 0; }
+
+.hp-reviews-outer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.hp-reviews-wrap {
+    flex: 1;
+    overflow: hidden;
+}
+
+.hp-reviews-track {
+    display: flex;
+    gap: 1.5rem;
+    transition: transform 0.45s cubic-bezier(.25, .8, .25, 1);
+}
+
+.hp-review-card {
+    flex: 0 0 calc(50% - 0.75rem);
+    background: #fff;
+    border: 1px solid var(--hp-border);
+    border-radius: 12px;
+    padding: 2.5rem;
+    box-sizing: border-box;
 }
 
 .hp-stars {
     color: var(--accent-color);
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     letter-spacing: 2px;
-    margin-bottom: 2rem;
+    margin-bottom: 1.25rem;
 }
 
-.hp-review-slide { display: none; }
-.hp-review-slide.active { display: block; }
-
 .hp-review-quote {
-    font-family: var(--font-heading);
-    font-size: clamp(1.3rem, 2.4vw, 2.1rem);
-    line-height: 1.4;
+    font-size: 1.0625rem;
+    line-height: 1.65;
     color: var(--primary-color);
-    margin: 0 0 2rem;
+    margin: 0 0 1.5rem;
     font-weight: 400;
+}
+
+.hp-review-divider {
+    border: none;
+    border-top: 1px solid var(--hp-border);
+    margin: 0 0 1.5rem;
 }
 
 .hp-reviewer {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
+    gap: 0.875rem;
 }
 
 .hp-avatar {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: var(--accent-color);
-    color: #fff;
+    background: var(--hp-sunken);
+    border: 1.5px solid var(--hp-border);
+    color: var(--accent-color);
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: var(--font-heading);
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 600;
     flex-shrink: 0;
 }
@@ -288,15 +325,32 @@
 .hp-reviewer-name {
     font-weight: 600;
     color: var(--primary-color);
-    text-align: left;
+    font-size: 0.9375rem;
 }
 
-.hp-reviewer-role {
-    font-size: 0.875rem;
-    color: var(--text-muted);
-    text-align: left;
+/* Arrow buttons */
+.hp-carousel-arrow {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid var(--hp-border);
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    transition: background 0.2s, border-color 0.2s;
+    line-height: 1;
+    padding: 0;
 }
 
+.hp-carousel-arrow:hover:not(:disabled) { background: var(--hp-sunken); }
+.hp-carousel-arrow:disabled { opacity: 0.3; cursor: default; }
+
+/* Dots */
 .hp-review-dots {
     display: flex;
     gap: 0.5rem;
@@ -305,65 +359,231 @@
 }
 
 .hp-dot {
-    width: 9px;
-    height: 9px;
+    width: 8px;
+    height: 8px;
     padding: 0;
-    border-radius: 50%;
+    border-radius: 4px;
     border: none;
     cursor: pointer;
     background: var(--hp-border);
-    transition: background 0.2s ease;
+    transition: background 0.25s, width 0.25s;
 }
 
-.hp-dot.active { background: var(--accent-color); }
+.hp-dot.active {
+    background: var(--accent-color);
+    width: 24px;
+}
 
 /* ================================================================
-   WORKING HOURS — centered list
+   REVIEW MODAL
+   ================================================================ */
+.hp-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    padding: 1rem;
+}
+
+.hp-modal-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.hp-modal {
+    background: #fff;
+    border-radius: 16px;
+    padding: 2.5rem;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(74, 55, 40, 0.15);
+}
+
+.hp-modal-title {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin: 0 0 1.75rem;
+}
+
+.hp-modal-field { margin-bottom: 1.25rem; }
+
+.hp-modal-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.hp-modal-input,
+.hp-modal-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid var(--hp-border);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: var(--font-main);
+    color: var(--text-main);
+    background: #fff;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+    outline: none;
+}
+
+.hp-modal-input:focus,
+.hp-modal-textarea:focus { border-color: var(--accent-color); }
+
+.hp-modal-textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+.hp-star-selector {
+    display: flex;
+    gap: 0.125rem;
+}
+
+.hp-star-pick {
+    font-size: 1.875rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--hp-border);
+    padding: 0;
+    line-height: 1;
+    transition: color 0.15s;
+}
+
+.hp-star-pick.active { color: var(--accent-color); }
+
+.hp-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.75rem;
+}
+
+.hp-modal-cancel {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-muted);
+    padding: 0.5rem;
+    transition: color 0.2s;
+}
+
+.hp-modal-cancel:hover { color: var(--primary-color); }
+
+.hp-modal-success {
+    display: none;
+    text-align: center;
+    padding: 1.5rem 0 0.5rem;
+    color: var(--primary-color);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+}
+
+/* ================================================================
+   WORKING HOURS — two-column with contact card
    ================================================================ */
 .hp-hours {
-    background: var(--bg-light);
+    background: var(--bg-paper);
     padding: 6rem 2rem;
-    text-align: center;
+}
+
+.hp-hours-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 4rem;
+    align-items: start;
+}
+
+.hp-hours-left .hp-section-title {
+    margin-top: 0.75rem;
 }
 
 .hp-hours-list {
     list-style: none;
     padding: 0;
-    margin: 4rem 0 0;
+    margin: 2.5rem 0 0;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
 }
 
 .hp-hours-row {
     display: flex;
-    justify-content: center;
-    gap: 1rem;
     align-items: center;
-    font-size: 1.125rem;
+    gap: 1.5rem;
+    font-size: 1.0625rem;
+    padding: 0.875rem 0;
+    border-bottom: 1px solid var(--hp-border);
+}
+
+.hp-hours-row:last-child {
+    border-bottom: none;
 }
 
 .hp-hours-day {
     color: var(--text-muted);
-    min-width: 200px;
-    text-align: right;
+    flex: 1;
 }
 
 .hp-hours-sep {
-    width: 1px;
-    align-self: stretch;
-    background: var(--hp-border);
-    flex-shrink: 0;
+    display: none;
 }
 
 .hp-hours-time {
     color: var(--primary-color);
-    min-width: 140px;
-    text-align: left;
     font-weight: 600;
 }
 
-.hp-hours-cta { margin-top: 4rem; }
+/* Contact card */
+.hp-contact-card {
+    background: var(--bg-light);
+    border-radius: 1rem;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+.hp-contact-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.hp-contact-label {
+    font-family: var(--font-main);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.hp-contact-value {
+    font-size: 1.125rem;
+    color: var(--text-main);
+}
+
+.btn-block {
+    display: block;
+    width: 100%;
+    text-align: center;
+}
 
 /* ================================================================
    RESPONSIVE
@@ -388,8 +608,12 @@
 
     .hp-svc-row { gap: 1rem; padding: 1.5rem 0.5rem; }
 
-    .hp-hours-day { min-width: 140px; }
-    .hp-hours-time { min-width: 110px; }
+    .hp-hours-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+
+    .hp-reviews-header { align-items: flex-start; flex-direction: column; }
 }
 
 @media (max-width: 600px) {
@@ -404,6 +628,10 @@
     .hp-svc-row { grid-template-columns: auto 1fr; }
     .hp-svc-meta { display: none; }
 
+    .hp-review-card { flex: 0 0 100%; }
+    .hp-reviews-outer { gap: 0.5rem; }
+    .hp-carousel-arrow { width: 36px; height: 36px; font-size: 1.25rem; }
+
     .hp-gallery-grid {
         grid-template-columns: 1fr;
         grid-template-rows: auto;
@@ -415,10 +643,7 @@
         min-height: 200px;
     }
 
-    .hp-hours-row { flex-direction: column; gap: 0.25rem; }
-    .hp-hours-day,
-    .hp-hours-time { min-width: unset; text-align: center; }
-    .hp-hours-sep { display: none; }
+    .hp-contact-card { padding: 1.75rem; }
 }
 
 /* ================================================================

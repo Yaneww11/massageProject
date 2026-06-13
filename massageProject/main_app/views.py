@@ -99,7 +99,7 @@ class Index(TemplateView):
         context['massages'] = Massage.objects.filter(home_page=True)[:3]
         if context['page']:
             context['images'] = context['page'].gallery.images.all()
-        context['comments'] = Comment.objects.filter(is_reviewed=True).order_by('-created_at')[:3]
+        context['comments'] = Comment.objects.filter(is_reviewed=True).order_by('-created_at')[:10]
         return self.render_to_response(context)
 
 class PrivacyPolicyView(TemplateView):
@@ -212,6 +212,32 @@ class AboutPage(TemplateView):
             extra['name_form'] = name_form
 
         return self.render_to_response(self.get_context_data(**extra))
+
+from django.views.decorators.http import require_POST
+
+@require_POST
+def submit_comment(request):
+    content = request.POST.get('content', '').strip()
+    author_name = request.POST.get('author', '').strip()
+    try:
+        rating = max(1, min(5, int(request.POST.get('rating', 5))))
+    except (ValueError, TypeError):
+        rating = 5
+
+    if not content:
+        return JsonResponse({'success': False, 'error': _('Въведете мнение')}, status=400)
+
+    comment = Comment(content=content, rating=rating, is_reviewed=False)
+    user = request.user
+    if user.is_authenticated:
+        comment.user = user
+        comment.author = user.get_full_name() or str(user.phone_number)
+    elif author_name:
+        comment.author = author_name
+
+    comment.save()
+    return JsonResponse({'success': True})
+
 
 class AllCommentsView(ListView):
     model = Comment

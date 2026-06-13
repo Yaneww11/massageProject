@@ -65,7 +65,7 @@
 
 <!-- ========== GALLERY — Mosaic grid ========== -->
 {% if images %}
-<section class="hp-gallery">
+<section class="hp-gallery" id="gallery">
     <div class="hp-container">
         <div class="hp-reveal">
             <span class="hp-eyebrow">{% trans "Атмосфера" %}</span>
@@ -82,57 +82,128 @@
 </section>
 {% endif %}
 
-<!-- ========== REVIEWS — Rotating single quote ========== -->
-{% if comments %}
+<!-- ========== REVIEWS — Two-card carousel ========== -->
 <section class="hp-reviews">
-    <div class="hp-container-prose">
-        <div class="hp-reveal">
-            <span class="hp-eyebrow hp-centered-text">{% trans "Мнения" %}</span>
-            <div id="hp-reviews-carousel">
-                {% for comment in comments %}
-                <div class="hp-review-slide{% if forloop.first %} active{% endif %}">
-                    <div class="hp-stars">★★★★★</div>
-                    <p class="hp-review-quote">&ldquo;{{ comment.content }}&rdquo;</p>
-                    <div class="hp-reviewer">
-                        <div class="hp-avatar">{{ comment.author|default:comment.user.get_full_name|default:comment.user.phone_number|default:"К"|first|upper }}</div>
-                        <div>
-                            <div class="hp-reviewer-name">{{ comment.author|default:comment.user.get_full_name|default:comment.user.phone_number|default:"Клиент" }}</div>
-                            <div class="hp-reviewer-role">{% trans "Клиент" %}</div>
+    <div class="hp-container">
+        <div class="hp-reviews-header hp-reveal">
+            <div>
+                <span class="hp-eyebrow">{% trans "Мнения" %}</span>
+                <h2 class="hp-section-title">{% trans "Какво казват клиентите" %}</h2>
+            </div>
+            <button class="btn btn-outline hp-leave-review-btn" id="hp-open-modal">{% trans "Оставете мнение" %}</button>
+        </div>
+
+        {% if comments %}
+        <div class="hp-reviews-outer hp-reveal">
+            {% if comments|length > 2 %}
+            <button class="hp-carousel-arrow hp-carousel-prev" id="hp-rev-prev" aria-label="{% trans "Предишен" %}">&#8249;</button>
+            {% endif %}
+            <div class="hp-reviews-wrap" id="hp-reviews-wrap">
+                <div class="hp-reviews-track" id="hp-reviews-track">
+                    {% for comment in comments %}
+                    <div class="hp-review-card">
+                        <div class="hp-stars">
+                            {% with r=comment.rating|default:5 %}
+                            {% if r >= 1 %}★{% else %}☆{% endif %}{% if r >= 2 %}★{% else %}☆{% endif %}{% if r >= 3 %}★{% else %}☆{% endif %}{% if r >= 4 %}★{% else %}☆{% endif %}{% if r >= 5 %}★{% else %}☆{% endif %}
+                            {% endwith %}
+                        </div>
+                        <p class="hp-review-quote">&ldquo;{{ comment.content }}&rdquo;</p>
+                        <hr class="hp-review-divider">
+                        <div class="hp-reviewer">
+                            <div class="hp-avatar">{{ comment.display_name|first|upper }}</div>
+                            <div class="hp-reviewer-name">{{ comment.display_name }}</div>
                         </div>
                     </div>
-                </div>
-                {% endfor %}
-                {% if comments|length > 1 %}
-                <div class="hp-review-dots">
-                    {% for comment in comments %}
-                    <button class="hp-dot{% if forloop.first %} active{% endif %}" data-index="{{ forloop.counter0 }}" aria-label="{% trans "Отзив" %} {{ forloop.counter }}"></button>
                     {% endfor %}
                 </div>
-                {% endif %}
             </div>
+            {% if comments|length > 2 %}
+            <button class="hp-carousel-arrow hp-carousel-next" id="hp-rev-next" aria-label="{% trans "Следващ" %}">&#8250;</button>
+            {% endif %}
         </div>
+
+        {% if comments|length > 2 %}
+        <div class="hp-review-dots" id="hp-review-dots">
+            {% for comment in comments %}
+            <button class="hp-dot{% if forloop.first %} active{% endif %}" data-index="{{ forloop.counter0 }}" aria-label="{% trans "Отзив" %} {{ forloop.counter }}"></button>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endif %}
     </div>
 </section>
-{% endif %}
 
-<!-- ========== WORKING HOURS — Centered list ========== -->
+<!-- ========== REVIEW MODAL ========== -->
+<div class="hp-modal-overlay" id="hp-review-modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="hp-modal">
+        <h2 class="hp-modal-title">{% trans "Оставете мнение" %}</h2>
+        {% csrf_token %}
+        <div id="hp-modal-body">
+            <div class="hp-modal-field">
+                <label class="hp-modal-label">{% trans "Оценка" %}</label>
+                <div class="hp-star-selector" id="hp-star-selector">
+                    <button type="button" class="hp-star-pick active" data-val="1">★</button>
+                    <button type="button" class="hp-star-pick active" data-val="2">★</button>
+                    <button type="button" class="hp-star-pick active" data-val="3">★</button>
+                    <button type="button" class="hp-star-pick active" data-val="4">★</button>
+                    <button type="button" class="hp-star-pick active" data-val="5">★</button>
+                </div>
+            </div>
+            {% if not request.user.is_authenticated %}
+            <div class="hp-modal-field">
+                <label class="hp-modal-label" for="hp-modal-name">{% trans "Вашето Име" %}</label>
+                <input type="text" id="hp-modal-name" class="hp-modal-input" placeholder="{% trans "Име" %}">
+            </div>
+            {% endif %}
+            <div class="hp-modal-field">
+                <label class="hp-modal-label" for="hp-modal-content">{% trans "Вашето Мнение" %}</label>
+                <textarea id="hp-modal-content" class="hp-modal-textarea" placeholder="{% trans "Споделете Вашето преживяване..." %}"></textarea>
+            </div>
+            <div class="hp-modal-actions">
+                <button type="button" class="hp-modal-cancel" id="hp-close-modal">{% trans "Отказ" %}</button>
+                <button type="button" class="btn btn-primary" id="hp-submit-review">{% trans "Публикувай" %}</button>
+            </div>
+        </div>
+        <div class="hp-modal-success" id="hp-modal-success">
+            {% trans "Благодарим! Вашето мнение ще бъде публикувано след преглед." %}
+        </div>
+    </div>
+</div>
+
+<!-- ========== WORKING HOURS — Two-column with contact card ========== -->
 {% if page.studio_working_hours.all %}
-<section class="hp-hours">
-    <div class="hp-container-prose">
-        <div class="hp-reveal">
-            <span class="hp-eyebrow hp-centered-text">{% trans "Заповядайте" %}</span>
-            <h2 class="hp-section-title hp-centered">{% trans "Работно време" %}</h2>
-            <ul class="hp-hours-list">
-                {% for entry in page.studio_working_hours.all %}
-                <li class="hp-hours-row">
-                    <span class="hp-hours-day">{{ entry.day_label }}</span>
-                    <span class="hp-hours-sep"></span>
-                    <strong class="hp-hours-time">{% if entry.hours %}{{ entry.hours }}{% else %}{% trans "Почивен ден" %}{% endif %}</strong>
-                </li>
-                {% endfor %}
-            </ul>
-            <div class="hp-hours-cta">
-                <a href="{% url 'reservation_page' %}" class="btn btn-primary btn-lg">{% trans "Запазете час" %}</a>
+<section class="hp-hours" id="contacts">
+    <div class="hp-container">
+        <div class="hp-hours-grid">
+            <div class="hp-hours-left hp-reveal">
+                <span class="hp-eyebrow">{% trans "Заповядайте" %}</span>
+                <h2 class="hp-section-title">{% trans "Работно време" %}</h2>
+                <ul class="hp-hours-list">
+                    {% for entry in page.studio_working_hours.all %}
+                    <li class="hp-hours-row">
+                        <span class="hp-hours-day">{{ entry.day_label }}</span>
+                        <span class="hp-hours-sep"></span>
+                        <strong class="hp-hours-time">{% if entry.hours %}{{ entry.hours }}{% else %}{% trans "Почивен ден" %}{% endif %}</strong>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="hp-contact-card hp-reveal">
+                {% if studio %}
+                {% if studio.address %}
+                <div class="hp-contact-field">
+                    <span class="hp-contact-label">{% trans "Адрес" %}</span>
+                    <span class="hp-contact-value">{{ studio.address }}</span>
+                </div>
+                {% endif %}
+                {% if studio.phone %}
+                <div class="hp-contact-field">
+                    <span class="hp-contact-label">{% trans "Телефон" %}</span>
+                    <span class="hp-contact-value">{{ studio.phone }}</span>
+                </div>
+                {% endif %}
+                {% endif %}
+                <a href="{% url 'reservation_page' %}" class="btn btn-primary btn-block">{% trans "Запазете час" %}</a>
             </div>
         </div>
     </div>
@@ -158,30 +229,153 @@
         });
     }
 
-    // Reviews carousel
-    var carousel = document.getElementById('hp-reviews-carousel');
-    if (carousel) {
-        var slides = carousel.querySelectorAll('.hp-review-slide');
-        var dots = carousel.querySelectorAll('.hp-dot');
+    // Reviews two-card carousel
+    (function () {
+        var track = document.getElementById('hp-reviews-track');
+        var wrap = document.getElementById('hp-reviews-wrap');
+        if (!track || !wrap) return;
+
+        var cards = track.querySelectorAll('.hp-review-card');
+        var n = cards.length;
+        if (n <= 2) return;
+
+        var prevBtn = document.getElementById('hp-rev-prev');
+        var nextBtn = document.getElementById('hp-rev-next');
+        var dots = document.querySelectorAll('#hp-review-dots .hp-dot');
         var current = 0;
-        if (slides.length > 1) {
-            function showSlide(i) {
-                slides[current].classList.remove('active');
-                if (dots[current]) dots[current].classList.remove('active');
-                current = (i + slides.length) % slides.length;
-                slides[current].classList.add('active');
-                if (dots[current]) dots[current].classList.add('active');
-            }
-            dots.forEach(function (dot) {
-                dot.addEventListener('click', function () { showSlide(parseInt(dot.dataset.index)); });
-            });
-            var timer = setInterval(function () { showSlide(current + 1); }, 5000);
-            carousel.addEventListener('mouseenter', function () { clearInterval(timer); });
-            carousel.addEventListener('mouseleave', function () {
-                timer = setInterval(function () { showSlide(current + 1); }, 5000);
+        var GAP = 24;
+
+        function getVisible() { return window.innerWidth < 600 ? 1 : 2; }
+
+        function slide(i) {
+            var vis = getVisible();
+            var max = n - vis;
+            current = Math.max(0, Math.min(i, max));
+            var cardW = cards[0].offsetWidth;
+            track.style.transform = 'translateX(-' + (current * (cardW + GAP)) + 'px)';
+            if (prevBtn) prevBtn.disabled = current === 0;
+            if (nextBtn) nextBtn.disabled = current >= max;
+            dots.forEach(function (d, idx) { d.classList.toggle('active', idx === current); });
+        }
+
+        if (prevBtn) prevBtn.addEventListener('click', function () { slide(current - 1); });
+        if (nextBtn) nextBtn.addEventListener('click', function () { slide(current + 1); });
+        dots.forEach(function (d) {
+            d.addEventListener('click', function () { slide(parseInt(d.dataset.index)); });
+        });
+
+        var autoTimer = setInterval(function () {
+            var max = n - getVisible();
+            slide(current < max ? current + 1 : 0);
+        }, 5000);
+        wrap.addEventListener('mouseenter', function () { clearInterval(autoTimer); });
+        wrap.addEventListener('mouseleave', function () {
+            autoTimer = setInterval(function () {
+                var max = n - getVisible();
+                slide(current < max ? current + 1 : 0);
+            }, 5000);
+        });
+
+        var resizeTimer;
+        window.addEventListener('resize', function () {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function () { slide(current); }, 100);
+        });
+
+        slide(0);
+    }());
+
+    // Review modal
+    (function () {
+        var overlay = document.getElementById('hp-review-modal');
+        if (!overlay) return;
+
+        var openBtn = document.getElementById('hp-open-modal');
+        var closeBtn = document.getElementById('hp-close-modal');
+        var modalBody = document.getElementById('hp-modal-body');
+        var successDiv = document.getElementById('hp-modal-success');
+        var submitBtn = document.getElementById('hp-submit-review');
+        var nameInput = document.getElementById('hp-modal-name');
+        var contentInput = document.getElementById('hp-modal-content');
+        var starSelector = document.getElementById('hp-star-selector');
+        var starBtns = starSelector ? starSelector.querySelectorAll('.hp-star-pick') : [];
+        var selectedRating = 5;
+
+        function openModal() {
+            overlay.classList.add('open');
+            overlay.setAttribute('aria-hidden', 'false');
+            if (nameInput) nameInput.focus();
+        }
+
+        function closeModal() {
+            overlay.classList.remove('open');
+            overlay.setAttribute('aria-hidden', 'true');
+            setTimeout(function () {
+                if (modalBody) modalBody.style.display = '';
+                if (successDiv) successDiv.style.display = 'none';
+                if (contentInput) contentInput.value = '';
+                selectedRating = 5;
+                updateStars(5);
+            }, 260);
+        }
+
+        function updateStars(val) {
+            selectedRating = val;
+            starBtns.forEach(function (btn, i) {
+                btn.classList.toggle('active', i < val);
             });
         }
-    }
+
+        updateStars(5);
+
+        starBtns.forEach(function (btn, i) {
+            btn.addEventListener('click', function () { updateStars(i + 1); });
+            btn.addEventListener('mouseenter', function () {
+                starBtns.forEach(function (b, j) { b.classList.toggle('active', j <= i); });
+            });
+        });
+        if (starSelector) {
+            starSelector.addEventListener('mouseleave', function () { updateStars(selectedRating); });
+        }
+
+        if (openBtn) openBtn.addEventListener('click', openModal);
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+
+        function getCsrf() {
+            var el = overlay.querySelector('[name=csrfmiddlewaretoken]');
+            return el ? el.value : '';
+        }
+
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function () {
+                var content = contentInput ? contentInput.value.trim() : '';
+                if (!content) { if (contentInput) contentInput.focus(); return; }
+
+                var fd = new FormData();
+                fd.append('csrfmiddlewaretoken', getCsrf());
+                fd.append('author', nameInput ? nameInput.value.trim() : '');
+                fd.append('content', content);
+                fd.append('rating', selectedRating);
+
+                submitBtn.disabled = true;
+
+                fetch('{% url "submit_comment" %}', { method: 'POST', body: fd })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (data.success) {
+                            if (modalBody) modalBody.style.display = 'none';
+                            if (successDiv) successDiv.style.display = 'block';
+                            setTimeout(closeModal, 3000);
+                        } else {
+                            submitBtn.disabled = false;
+                        }
+                    })
+                    .catch(function () { submitBtn.disabled = false; });
+            });
+        }
+    }());
 })();
 </script>
 

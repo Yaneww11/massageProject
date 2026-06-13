@@ -476,3 +476,66 @@ msgstr "Welcome"
 
 msgid "Масажно студио"
 msgstr "Massage studio"
+
+msgid "Начало"
+msgstr "Home"
+
+msgid "Услуги"
+msgstr "Services"
+
+msgid "Галерия"
+msgstr "Gallery"
+
+msgid "Контакти"
+msgstr "Contacts"
+
+msgid "Навигация"
+msgstr "Navigation"
+
+msgid "Адрес"
+msgstr "Address"
+
+msgid "Телефон"
+msgstr "Phone"
+
+msgid "Профил"
+msgstr "Profile"
+
+msgid "Какво казват клиентите"
+msgstr "What our clients say"
+
+msgid "Оставете мнение"
+msgstr "Leave a review"
+
+msgid "Предишен"
+msgstr "Previous"
+
+msgid "Следващ"
+msgstr "Next"
+
+msgid "Оценка"
+msgstr "Rating"
+
+msgid "Вашето Име"
+msgstr "Your Name"
+
+msgid "Име"
+msgstr "Name"
+
+msgid "Вашето Мнение"
+msgstr "Your Review"
+
+msgid "Споделете Вашето преживяване..."
+msgstr "Share your experience..."
+
+msgid "Отказ"
+msgstr "Cancel"
+
+msgid "Публикувай"
+msgstr "Submit"
+
+msgid "Благодарим! Вашето мнение ще бъде публикувано след преглед."
+msgstr "Thank you! Your review will be published after moderation."
+
+msgid "Въведете мнение"
+msgstr "Please enter a review"

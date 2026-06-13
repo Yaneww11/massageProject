@@ -16,6 +16,10 @@ class Massage(models.Model):
     image = models.ImageField(upload_to='massages/')
     home_page = models.BooleanField(default=False)
 
+    class Meta:
+        verbose_name = _('Масаж')
+        verbose_name_plural = _('Масажи')
+
     def __str__(self):
         return self.name
 
@@ -25,6 +29,10 @@ class Masseur(models.Model):
     image = models.ImageField(upload_to='masseurs/')
     phone_number = models.CharField(max_length=20)
     email = models.EmailField()
+
+    class Meta:
+        verbose_name = _('Терапевт')
+        verbose_name_plural = _('Терапевти')
 
     def __str__(self):
         return self.name
@@ -41,12 +49,25 @@ class WorkingHours(models.Model):
 
     class Meta:
         unique_together = ('masseur', 'day_of_week')
+        verbose_name = _('Работно време')
+        verbose_name_plural = _('Работно време')
+
+    def __str__(self):
+        return f"{self.masseur.name} - {self.get_day_of_week_display()}"
 
 class MessageStudio(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
     main_image = models.ImageField(upload_to='studios/')
     address = models.CharField(max_length=255)
+    phone = models.CharField(max_length=50, blank=True)
+
+    class Meta:
+        verbose_name = _('Студио')
+        verbose_name_plural = _('Студиа')
+
+    def __str__(self):
+        return self.name
 
 class MessageReservation(models.Model):
     STATUS_ACTIVE = 'active'
@@ -210,6 +231,7 @@ class HomePage(models.Model):
         related_name='home_page'
     )
     privacy_policy_content = models.TextField(null=True, blank=True)
+    footer_tagline = models.TextField(blank=True)
 
     def save(self, *args, **kwargs):
         if not self.pk and HomePage.objects.exists():
@@ -275,6 +297,8 @@ class Comment(models.Model):
 
     content = models.TextField()
 
+    rating = models.IntegerField(default=5)
+
     created_at = models.DateTimeField(
         auto_now_add=True,
     )
@@ -282,6 +306,14 @@ class Comment(models.Model):
     is_reviewed = models.BooleanField(
         default=False,
     )
+
+    @property
+    def display_name(self):
+        if self.author:
+            return self.author
+        if self.user_id:
+            return self.user.get_full_name() or str(self.user.phone_number)
+        return 'Клиент'
 
 
 
