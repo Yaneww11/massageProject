@@ -3,8 +3,8 @@
 <!-- Header Section -->
 <header class="navbar">
     <a href="{% url 'index' %}" class="logo-container">
-        <img src="{% static 'images/logo.svg' %}" alt="{{ brand_name }}" class="logo-svg">
-        <p class="logo-text">{{ brand_name }}</p>
+        <img src="{{ brand_logo }}" alt="{{ brand_name }}" class="logo-svg logo-svg--black">
+{#        <p class="logo-text">{{ brand_name }}</p>#}
     </a>
 
     <nav class="nav-links" id="nav-links">

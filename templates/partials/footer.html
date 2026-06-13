@@ -6,8 +6,6 @@
             <a href="{% url 'index' %}" class="logo-container logo-container--light">
                 {% if brand_logo %}
                     <img src="{{ brand_logo }}" alt="{{ brand_name }}" class="logo-svg logo-svg--light">
-                {% else %}
-                    <img src="{% static 'images/logo.svg' %}" alt="{{ brand_name }}" class="logo-svg logo-svg--light">
                 {% endif %}
                 <p class="logo-text logo-text--light">{{ brand_name }}</p>
             </a>
