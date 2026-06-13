@@ -99,6 +99,7 @@ class Index(TemplateView):
         context['massages'] = Massage.objects.filter(home_page=True)[:3]
         if context['page']:
             context['images'] = context['page'].gallery.images.all()
+        context['comments'] = Comment.objects.filter(is_reviewed=True).order_by('-created_at')[:3]
         return self.render_to_response(context)
 
 class PrivacyPolicyView(TemplateView):

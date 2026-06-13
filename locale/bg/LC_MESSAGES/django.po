@@ -433,3 +433,46 @@ msgstr ""
 
 msgid "Отказ"
 msgstr ""
+
+# Templates - home (Quiet design)
+msgid "Масажно студио · от 2014"
+msgstr ""
+
+msgid "Вижте услугите"
+msgstr ""
+
+msgid "10+ години"
+msgstr ""
+
+msgid "опит"
+msgstr ""
+
+msgid "клиенти"
+msgstr ""
+
+msgid "оценка"
+msgstr ""
+
+msgid "Нашите услуги"
+msgstr ""
+
+msgid "лв."
+msgstr ""
+
+msgid "Атмосфера"
+msgstr ""
+
+msgid "Място, създадено за покой"
+msgstr ""
+
+msgid "Мнения"
+msgstr ""
+
+msgid "Отзив"
+msgstr ""
+
+msgid "Заповядайте"
+msgstr ""
+
+msgid "Масажно студио"
+msgstr ""

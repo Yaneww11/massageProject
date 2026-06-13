@@ -1,49 +1,188 @@
 {% extends 'base.html' %}
 {% load static i18n %}
 {% block content %}
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="hero-content">
-            <h1>{{ page.title }}</h1>
-            <p>{{ page.description }}</p>
-        </div>
-    </section>
 
-    <!-- Carousel Section -->
-    {% if images %}
-    <section class="carousel-section">
-        <div class="carousel">
-            {% for image in images %}
-                <div class="carousel-slide active">
-                    <img src="{{ image.image.url }}" alt="{{ image.alt_text }}">
+<!-- ========== HERO — Split layout ========== -->
+<section class="hp-hero">
+    <div class="hp-container hp-hero-inner">
+        <div class="hp-hero-text">
+            <span class="hp-eyebrow">{% trans "Масажно студио · от 2014" %}</span>
+            {% if page %}
+                <h1 class="hp-hero-title">{{ page.brand_name }}</h1>
+                <p class="hp-hero-sub">{{ page.description }}</p>
+            {% endif %}
+            <div class="hp-hero-btns">
+                <a href="{% url 'reservation_page' %}" class="btn btn-primary btn-lg">{% trans "Запазете час" %}</a>
+                <a href="{% url 'massages_dashboard' %}" class="btn btn-outline btn-lg">{% trans "Вижте услугите" %}</a>
+            </div>
+            <div class="hp-stats">
+                <div class="hp-stat">
+                    <span class="hp-stat-val">{% trans "10+ години" %}</span>
+                    <span class="hp-stat-lbl">{% trans "опит" %}</span>
                 </div>
-            {% endfor %}
-            <button class="carousel-btn prev" onclick="prevSlide()">&#10094;</button>
-            <button class="carousel-btn next" onclick="nextSlide()">&#10095;</button>
-        </div>
-    </section>
-    {% endif %}
-
-    <!-- Offer Cards Section -->
-    <section class="offers">
-        <div class="container">
-            <h2>{% trans "Предпочитани масажи" %}</h2>
-            <div class="card-container">
-                {% for m in massages %}
-                    <div class="card">
-                        <h3>{{ m.name }}</h3>
-                        <p>{{ m.short_description }}</p>
-                        <div class="btn-group">
-                            <a href="{% url 'reservation_page' pk=m.pk %}" class="btn btn-accent">{% trans "Запази час" %}</a>
-                            <a href="{% url 'massage_detail' pk=m.pk %}" class="btn btn-outline">{% trans "Научете повече" %}</a>
-                        </div>
-                    </div>
-                {% endfor %}
+                <div class="hp-stat">
+                    <span class="hp-stat-val">4000+</span>
+                    <span class="hp-stat-lbl">{% trans "клиенти" %}</span>
+                </div>
+                <div class="hp-stat">
+                    <span class="hp-stat-val">4.9★</span>
+                    <span class="hp-stat-lbl">{% trans "оценка" %}</span>
+                </div>
             </div>
         </div>
-    </section>
+        <div class="hp-hero-media">
+            <img src="{% static 'images/home_background.jpg' %}" alt="{% if page %}{{ page.brand_name }}{% else %}{% trans "Масажно студио" %}{% endif %}">
+        </div>
+    </div>
+</section>
 
-    {% include 'partials/working_hours.html' %}
-    <script src="{% static 'js/carousel.js' %}"></script>
+<!-- ========== SERVICES — Numbered rows ========== -->
+{% if massages %}
+<section class="hp-services">
+    <div class="hp-container-narrow">
+        <div class="hp-reveal">
+            <span class="hp-eyebrow">{% trans "Нашите услуги" %}</span>
+            <h2 class="hp-section-title">{% trans "Предпочитани масажи" %}</h2>
+        </div>
+        <div class="hp-svc-list">
+            {% for m in massages %}
+            <a href="{% url 'massage_detail' pk=m.pk %}" class="hp-svc-row hp-reveal">
+                <span class="hp-svc-num">0{{ forloop.counter }}</span>
+                <div class="hp-svc-info">
+                    <h3 class="hp-svc-name">{{ m.name }}</h3>
+                    <p class="hp-svc-desc">{{ m.short_description }}</p>
+                </div>
+                <div class="hp-svc-meta">
+                    <span class="hp-svc-price">{{ m.price }} {% trans "лв." %}</span>
+                    <span class="hp-svc-dur">{{ m.duration_in_minutes }} {% trans "мин" %}</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ========== GALLERY — Mosaic grid ========== -->
+{% if images %}
+<section class="hp-gallery">
+    <div class="hp-container">
+        <div class="hp-reveal">
+            <span class="hp-eyebrow">{% trans "Атмосфера" %}</span>
+            <h2 class="hp-section-title hp-centered">{% trans "Място, създадено за покой" %}</h2>
+        </div>
+        <div class="hp-gallery-grid hp-reveal">
+            {% for image in images|slice:":3" %}
+            <div class="hp-gallery-cell {% if forloop.first %}hp-gallery-cell--big{% endif %}">
+                <img src="{{ image.image.url }}" alt="{{ image.alt_text }}">
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ========== REVIEWS — Rotating single quote ========== -->
+{% if comments %}
+<section class="hp-reviews">
+    <div class="hp-container-prose">
+        <div class="hp-reveal">
+            <span class="hp-eyebrow hp-centered-text">{% trans "Мнения" %}</span>
+            <div id="hp-reviews-carousel">
+                {% for comment in comments %}
+                <div class="hp-review-slide{% if forloop.first %} active{% endif %}">
+                    <div class="hp-stars">★★★★★</div>
+                    <p class="hp-review-quote">&ldquo;{{ comment.content }}&rdquo;</p>
+                    <div class="hp-reviewer">
+                        <div class="hp-avatar">{{ comment.author|default:comment.user.get_full_name|default:comment.user.phone_number|default:"К"|first|upper }}</div>
+                        <div>
+                            <div class="hp-reviewer-name">{{ comment.author|default:comment.user.get_full_name|default:comment.user.phone_number|default:"Клиент" }}</div>
+                            <div class="hp-reviewer-role">{% trans "Клиент" %}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% if comments|length > 1 %}
+                <div class="hp-review-dots">
+                    {% for comment in comments %}
+                    <button class="hp-dot{% if forloop.first %} active{% endif %}" data-index="{{ forloop.counter0 }}" aria-label="{% trans "Отзив" %} {{ forloop.counter }}"></button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- ========== WORKING HOURS — Centered list ========== -->
+{% if page.studio_working_hours.all %}
+<section class="hp-hours">
+    <div class="hp-container-prose">
+        <div class="hp-reveal">
+            <span class="hp-eyebrow hp-centered-text">{% trans "Заповядайте" %}</span>
+            <h2 class="hp-section-title hp-centered">{% trans "Работно време" %}</h2>
+            <ul class="hp-hours-list">
+                {% for entry in page.studio_working_hours.all %}
+                <li class="hp-hours-row">
+                    <span class="hp-hours-day">{{ entry.day_label }}</span>
+                    <span class="hp-hours-sep"></span>
+                    <strong class="hp-hours-time">{% if entry.hours %}{{ entry.hours }}{% else %}{% trans "Почивен ден" %}{% endif %}</strong>
+                </li>
+                {% endfor %}
+            </ul>
+            <div class="hp-hours-cta">
+                <a href="{% url 'reservation_page' %}" class="btn btn-primary btn-lg">{% trans "Запазете час" %}</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<script>
+(function () {
+    // Scroll reveal
+    var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var reveals = document.querySelectorAll('.hp-reveal');
+    if (prefersReduced) {
+        reveals.forEach(function (el) { el.classList.add('hp-revealed'); });
+    } else {
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (e.isIntersecting) { e.target.classList.add('hp-revealed'); io.unobserve(e.target); }
+            });
+        }, { threshold: 0.1 });
+        reveals.forEach(function (el) {
+            setTimeout(function () { el.classList.add('hp-revealed'); }, 1200);
+            io.observe(el);
+        });
+    }
+
+    // Reviews carousel
+    var carousel = document.getElementById('hp-reviews-carousel');
+    if (carousel) {
+        var slides = carousel.querySelectorAll('.hp-review-slide');
+        var dots = carousel.querySelectorAll('.hp-dot');
+        var current = 0;
+        if (slides.length > 1) {
+            function showSlide(i) {
+                slides[current].classList.remove('active');
+                if (dots[current]) dots[current].classList.remove('active');
+                current = (i + slides.length) % slides.length;
+                slides[current].classList.add('active');
+                if (dots[current]) dots[current].classList.add('active');
+            }
+            dots.forEach(function (dot) {
+                dot.addEventListener('click', function () { showSlide(parseInt(dot.dataset.index)); });
+            });
+            var timer = setInterval(function () { showSlide(current + 1); }, 5000);
+            carousel.addEventListener('mouseenter', function () { clearInterval(timer); });
+            carousel.addEventListener('mouseleave', function () {
+                timer = setInterval(function () { showSlide(current + 1); }, 5000);
+            });
+        }
+    }
+})();
+</script>
 
 {% endblock %}

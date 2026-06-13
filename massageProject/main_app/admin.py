@@ -5,6 +5,10 @@ from django.utils.html import format_html
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from datetime import date
+
+from unfold.admin import ModelAdmin, TabularInline
+from modeltranslation.admin import TranslationAdmin
+
 from massageProject.main_app.models import (
     Massage, Image, Gallery, HomePage, GalleryImage,
     MessageStudio, Masseur, WorkingHours, MessageReservation, Comment,
@@ -13,7 +17,7 @@ from massageProject.main_app.models import (
 
 # --- Actions ---
 
-@admin.action(description='Export selected reservations to CSV')
+@admin.action(description=_('Export selected reservations to CSV'))
 def export_reservations_csv(modeladmin, request, queryset):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="reservations_{timezone.now().date()}.csv"'
@@ -26,7 +30,7 @@ def export_reservations_csv(modeladmin, request, queryset):
     
     return response
 
-@admin.action(description='Mark selected comments as reviewed')
+@admin.action(description=_('Mark selected comments as reviewed'))
 def mark_as_reviewed(modeladmin, request, queryset):
     queryset.update(is_reviewed=True)
 
@@ -43,14 +47,14 @@ def mark_as_noshow(modeladmin, request, queryset):
 # --- Filters ---
 
 class ReservationDateFilter(admin.SimpleListFilter):
-    title = 'Timeframe'
+    title = _('Времеви период')
     parameter_name = 'timeframe'
 
     def lookups(self, request, modeladmin):
         return (
-            ('today', 'Today'),
-            ('upcoming', 'Upcoming'),
-            ('past', 'Past'),
+            ('today', _('Днес')),
+            ('upcoming', _('Предстоящи')),
+            ('past', _('Минали')),
         )
 
     def queryset(self, request, queryset):
@@ -65,59 +69,63 @@ class ReservationDateFilter(admin.SimpleListFilter):
 # --- Admin Classes ---
 
 @admin.register(Massage)
-class MassageAdmin(admin.ModelAdmin):
+class MassageAdmin(ModelAdmin, TranslationAdmin):
     list_display = ('display_image', 'name', 'price', 'duration_in_minutes', 'home_page')
     search_fields = ('name', 'short_description')
     list_filter = ('home_page', 'price', 'duration_in_minutes')
     list_editable = ('price', 'duration_in_minutes', 'home_page')
+    list_filter_sheet = True
+    
     fieldsets = (
-        ('Basic Information', {'fields': ('name', 'short_description', 'description')}),
-        ('Pricing & Duration', {'fields': ('price', 'duration_in_minutes')}),
-        ('Media & Visibility', {'fields': ('image', 'home_page')}),
+        (_('Основна информация'), {'fields': ('name', 'short_description', 'description')}),
+        (_('Цена и Продължителност'), {'fields': ('price', 'duration_in_minutes')}),
+        (_('Медия и Видимост'), {'fields': ('image', 'home_page')}),
     )
 
     def display_image(self, obj):
         if obj.image:
             return format_html('<img src="{}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" />', obj.image.url)
-        return "No Image"
-    display_image.short_description = 'Preview'
+        return _("Няма снимка")
+    display_image.short_description = _('Преглед')
 
 @admin.register(Masseur)
-class MasseurAdmin(admin.ModelAdmin):
+class MasseurAdmin(ModelAdmin, TranslationAdmin):
     list_display = ('display_image', 'name', 'phone_number', 'email')
     search_fields = ('name', 'email', 'phone_number')
     
     def display_image(self, obj):
         if obj.image:
             return format_html('<img src="{}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;" />', obj.image.url)
-        return "No Photo"
-    display_image.short_description = 'Photo'
+        return _("Няма снимка")
+    display_image.short_description = _('Снимка')
 
 @admin.register(WorkingHours)
-class WorkingHoursAdmin(admin.ModelAdmin):
+class WorkingHoursAdmin(ModelAdmin):
     list_display = ('masseur', 'get_day_display', 'start_time', 'end_time')
     list_filter = ('day_of_week', 'masseur')
     list_editable = ('start_time', 'end_time')
     ordering = ('masseur', 'day_of_week')
+    list_filter_sheet = True
 
     def get_day_display(self, obj):
         return dict(WorkingHours.DAYS_OF_WEEK).get(obj.day_of_week)
-    get_day_display.short_description = 'Day'
+    get_day_display.short_description = _('Ден')
 
 @admin.register(MessageReservation)
-class MessageReservationAdmin(admin.ModelAdmin):
+class MessageReservationAdmin(ModelAdmin):
     list_display = ('date', 'time', 'get_client_name', 'massage', 'masseur', 'status', 'status_updated_at')
     list_filter = ('status', ReservationDateFilter, 'masseur', 'massage', 'date')
     search_fields = ('user__phone_number', 'user__first_name', 'user__last_name', 'massage__name')
     date_hierarchy = 'date'
     actions = [export_reservations_csv, mark_as_completed, mark_as_noshow]
     readonly_fields = ('updated_at', 'status_updated_at', 'status_updated_by')
+    list_filter_sheet = True
     
     fieldsets = (
-        ('Reservation Details', {'fields': ('date', 'time', 'user', 'status')}),
-        ('Service Info', {'fields': ('massage', 'masseur')}),
-        ('Additional Notes', {'fields': ('additional_text',)}),
-        ('System Audit', {'fields': ('updated_at', 'status_updated_at', 'status_updated_by'), 'classes': ('collapse',)}),
+        (_('Детайли за резервацията'), {'fields': ('date', 'time', 'user', 'status')}),
+        (_('Информация за услугата'), {'fields': ('massage', 'masseur')}),
+        (_('Допълнителни бележки'), {'fields': ('additional_text',)}),
+        (_('Системен одит'), {'fields': ('updated_at', 'status_updated_at', 'status_updated_by'), 'classes': ('collapse',)}),
     )
 
     def get_client_name(self, obj):
@@ -125,7 +133,6 @@ class MessageReservationAdmin(admin.ModelAdmin):
     get_client_name.short_description = _('Клиент')
 
     def get_queryset(self, request):
-        # Admins should see all reservations, including soft-deleted ones
         return MessageReservation.all_objects.all()
 
     def save_model(self, request, obj, form, change):
@@ -135,53 +142,54 @@ class MessageReservationAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
 @admin.register(Comment)
-class CommentAdmin(admin.ModelAdmin):
+class CommentAdmin(ModelAdmin):
     list_display = ('author', 'content_truncated', 'created_at', 'is_reviewed')
     list_filter = ('is_reviewed', 'created_at')
     search_fields = ('author', 'content')
     actions = [mark_as_reviewed]
     list_editable = ('is_reviewed',)
+    list_filter_sheet = True
 
     def content_truncated(self, obj):
         return obj.content[:50] + '...' if len(obj.content) > 50 else obj.content
-    content_truncated.short_description = 'Content'
+    content_truncated.short_description = _('Съдържание')
 
 @admin.register(Image)
-class ImageAdmin(admin.ModelAdmin):
+class ImageAdmin(ModelAdmin, TranslationAdmin):
     list_display = ('display_image', 'alt_text')
     search_fields = ('alt_text',)
 
     def display_image(self, obj):
         if obj.image:
             return format_html('<img src="{}" style="width: 80px; height: 50px; object-fit: cover;" />', obj.image.url)
-        return "No Image"
-    display_image.short_description = 'Preview'
+        return _("Няма изображение")
+    display_image.short_description = _('Преглед')
 
-class GalleryImageInline(admin.TabularInline):
+class GalleryImageInline(TabularInline):
     model = GalleryImage
     extra = 1
 
 @admin.register(Gallery)
-class GalleryAdmin(admin.ModelAdmin):
+class GalleryAdmin(ModelAdmin):
     inlines = [GalleryImageInline]
 
-class StudioWorkingHoursInline(admin.TabularInline):
+class StudioWorkingHoursInline(TabularInline):
     model = StudioWorkingHours
     extra = 1
     fields = ('day_label', 'hours', 'order')
 
-
 @admin.register(HomePage)
-class HomePageAdmin(admin.ModelAdmin):
-    list_display = ('title',)
+class HomePageAdmin(ModelAdmin, TranslationAdmin):
+    list_display = ('brand_name',)
     inlines = [StudioWorkingHoursInline]
 
 @admin.register(MessageStudio)
-class MessageStudiosAdmin(admin.ModelAdmin):
+class MessageStudiosAdmin(ModelAdmin, TranslationAdmin):
     list_display = ('display_image', 'name', 'address')
+    list_filter_sheet = True
     
     def display_image(self, obj):
         if obj.main_image:
             return format_html('<img src="{}" style="width: 80px; height: 50px; object-fit: cover;" />', obj.main_image.url)
-        return "No Image"
-    display_image.short_description = 'Main Image'
+        return _("Няма изображение")
+    display_image.short_description = _('Основна снимка')

@@ -201,14 +201,34 @@ class GalleryImage(models.Model):
         unique_together = ('gallery', 'image')
 
 class HomePage(models.Model):
-    title = models.CharField(max_length=255)
+    brand_name = models.CharField(max_length=255)
     description = models.TextField()
+    logo = models.ImageField(upload_to='branding/', null=True, blank=True)
     gallery = models.OneToOneField(
         Gallery,
         on_delete=models.CASCADE,
         related_name='home_page'
     )
     privacy_policy_content = models.TextField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.pk and HomePage.objects.exists():
+            return
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_solo(cls):
+        obj, created = cls.objects.get_or_create(
+            pk=1,
+            defaults={
+                'brand_name': 'Relax & Health',
+                'description': 'Welcome to our studio.',
+            }
+        )
+        return obj
+
+    def __str__(self):
+        return self.brand_name
 
 
 class StudioWorkingHours(models.Model):

@@ -43,6 +43,7 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 # Application definition
 
 INSTALLED_APPS = [
+    'unfold',
     'modeltranslation',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -81,6 +82,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'massageProject.main_app.context_processors.admin_branding',
             ],
         },
     },
@@ -163,3 +165,75 @@ EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='webmaster@localhost')
+# Unfold Configuration
+UNFOLD = {
+    "SITE_TITLE": "Relax & Health Admin",
+    "SITE_HEADER": "Relax & Health",
+    "SITE_SYMBOL": "spa",
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": True,
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": True,
+        "navigation": [
+            {
+                "title": _("Студио"),
+                "separator": True,
+                "items": [
+                    {
+                        "title": _("Начална страница"),
+                        "icon": "home",
+                        "link": reverse_lazy("admin:main_app_homepage_changelist"),
+                    },
+                    {
+                        "title": _("Услуги"),
+                        "icon": "spa",
+                        "link": reverse_lazy("admin:main_app_massage_changelist"),
+                    },
+                    {
+                        "title": _("Терапевти"),
+                        "icon": "person",
+                        "link": reverse_lazy("admin:main_app_masseur_changelist"),
+                    },
+                    {
+                        "title": _("Работно време"),
+                        "icon": "schedule",
+                        "link": reverse_lazy("admin:main_app_workinghours_changelist"),
+                    },
+                    {
+                        "title": _("Обекти"),
+                        "icon": "location_on",
+                        "link": reverse_lazy("admin:main_app_messagestudio_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Резервации"),
+                "separator": True,
+                "items": [
+                    {
+                        "title": _("Всички резервации"),
+                        "icon": "event",
+                        "link": reverse_lazy("admin:main_app_messagereservation_changelist"),
+                    },
+                ],
+            },
+            {
+                "title": _("Потребители и Отзиви"),
+                "separator": True,
+                "items": [
+                    {
+                        "title": _("Потребители"),
+                        "icon": "group",
+                        "link": reverse_lazy("admin:accounts_customuser_changelist"),
+                    },
+                    {
+                        "title": _("Коментари"),
+                        "icon": "chat",
+                        "link": reverse_lazy("admin:main_app_comment_changelist"),
+                    },
+                ],
+            },
+        ],
+    },
+    }
