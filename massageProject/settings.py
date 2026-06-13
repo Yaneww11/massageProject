@@ -172,10 +172,12 @@ UNFOLD = {
     "SITE_SYMBOL": "spa",
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": True,
+    "SHOW_LANGUAGES": True,
     "SIDEBAR": {
         "show_search": True,
         "show_all_applications": True,
         "navigation": [
+            # Studio administration pages.
             {
                 "title": _("Студио"),
                 "separator": True,
@@ -207,6 +209,7 @@ UNFOLD = {
                     },
                 ],
             },
+            # Reservation management pages.
             {
                 "title": _("Резервации"),
                 "separator": True,
@@ -218,6 +221,7 @@ UNFOLD = {
                     },
                 ],
             },
+            # User and feedback administration pages.
             {
                 "title": _("Потребители и Отзиви"),
                 "separator": True,

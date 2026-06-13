@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from datetime import date
 
 from unfold.admin import ModelAdmin, TabularInline
-from modeltranslation.admin import TranslationAdmin
+from modeltranslation.admin import TabbedTranslationAdmin
 
 from massageProject.main_app.models import (
     Massage, Image, Gallery, HomePage, GalleryImage,
@@ -69,7 +69,7 @@ class ReservationDateFilter(admin.SimpleListFilter):
 # --- Admin Classes ---
 
 @admin.register(Massage)
-class MassageAdmin(ModelAdmin, TranslationAdmin):
+class MassageAdmin(ModelAdmin, TabbedTranslationAdmin):
     list_display = ('display_image', 'name', 'price', 'duration_in_minutes', 'home_page')
     search_fields = ('name', 'short_description')
     list_filter = ('home_page', 'price', 'duration_in_minutes')
@@ -89,7 +89,7 @@ class MassageAdmin(ModelAdmin, TranslationAdmin):
     display_image.short_description = _('Преглед')
 
 @admin.register(Masseur)
-class MasseurAdmin(ModelAdmin, TranslationAdmin):
+class MasseurAdmin(ModelAdmin, TabbedTranslationAdmin):
     list_display = ('display_image', 'name', 'phone_number', 'email')
     search_fields = ('name', 'email', 'phone_number')
     
@@ -146,6 +146,7 @@ class CommentAdmin(ModelAdmin):
     list_display = ('author', 'content_truncated', 'created_at', 'is_reviewed')
     list_filter = ('is_reviewed', 'created_at')
     search_fields = ('author', 'content')
+    ordering = ('is_reviewed', '-created_at')
     actions = [mark_as_reviewed]
     list_editable = ('is_reviewed',)
     list_filter_sheet = True
@@ -155,7 +156,7 @@ class CommentAdmin(ModelAdmin):
     content_truncated.short_description = _('Съдържание')
 
 @admin.register(Image)
-class ImageAdmin(ModelAdmin, TranslationAdmin):
+class ImageAdmin(ModelAdmin, TabbedTranslationAdmin):
     list_display = ('display_image', 'alt_text')
     search_fields = ('alt_text',)
 
@@ -179,13 +180,17 @@ class StudioWorkingHoursInline(TabularInline):
     fields = ('day_label', 'hours', 'order')
 
 @admin.register(HomePage)
-class HomePageAdmin(ModelAdmin, TranslationAdmin):
+class HomePageAdmin(ModelAdmin, TabbedTranslationAdmin):
     list_display = ('brand_name',)
     inlines = [StudioWorkingHoursInline]
+    fieldsets = (
+        (None, {'fields': ('brand_name', 'logo', 'description', 'footer_tagline', 'gallery')}),
+        (_('Политика за поверителност'), {'fields': ('privacy_policy_content',), 'classes': ('collapse',)}),
+    )
 
 @admin.register(MessageStudio)
-class MessageStudiosAdmin(ModelAdmin, TranslationAdmin):
-    list_display = ('display_image', 'name', 'address')
+class MessageStudiosAdmin(ModelAdmin, TabbedTranslationAdmin):
+    list_display = ('display_image', 'name', 'address', 'phone')
     list_filter_sheet = True
     
     def display_image(self, obj):
