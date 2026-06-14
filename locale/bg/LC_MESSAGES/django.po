@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-14 14:37+0000\n"
+"POT-Creation-Date: 2026-06-14 14:46+0000\n"
 "PO-Revision-Date: 2026-06-06 22:00+0300\n"
 "Last-Translator: \n"
 "Language-Team: Bulgarian\n"
@@ -238,7 +238,7 @@ msgstr ""
 
 # Templates - working_hours
 #: massageProject/main_app/models.py:52 massageProject/main_app/models.py:53
-#: massageProject/settings.py:201 templates/pages/home.html:180
+#: massageProject/settings.py:201 templates/pages/home.html:183
 #: templates/partials/working_hours.html:4
 msgid "Работно време"
 msgstr ""
@@ -509,7 +509,7 @@ msgstr ""
 msgid "Масажно студио · от 2014"
 msgstr ""
 
-#: templates/pages/home.html:15 templates/pages/home.html:206
+#: templates/pages/home.html:15 templates/pages/home.html:209
 #: templates/pages/reservation.html:15 templates/pages/reservation.html:331
 #: templates/partials/header.html:45 templates/partials/header.html:47
 msgid "Запазете час"
@@ -561,84 +561,88 @@ msgstr "мин"
 
 #: templates/pages/home.html:71
 msgid "Атмосфера"
-msgstr ""
+msgstr "Атмосфера"
 
 #: templates/pages/home.html:72
 msgid "Място, създадено за покой"
-msgstr ""
+msgstr "Място, създадено за покой"
 
-#: templates/pages/home.html:90 templates/partials/footer.html:23
+#: templates/pages/home.html:82
+msgid "Виж пълната галерия"
+msgstr "Виж пълната галерия"
+
+#: templates/pages/home.html:93 templates/partials/footer.html:23
 #: templates/partials/header.html:14
 msgid "Мнения"
 msgstr ""
 
-#: templates/pages/home.html:91
+#: templates/pages/home.html:94
 msgid "Какво казват клиентите"
 msgstr ""
 
-#: templates/pages/home.html:93 templates/pages/home.html:139
+#: templates/pages/home.html:96 templates/pages/home.html:142
 #: templates/pages/my_profile.html:184 templates/pages/my_profile.html:239
 msgid "Оставете мнение"
 msgstr "Оставете мнение"
 
-#: templates/pages/home.html:99
+#: templates/pages/home.html:102
 msgid "Предишен"
 msgstr ""
 
-#: templates/pages/home.html:121
+#: templates/pages/home.html:124
 msgid "Следващ"
 msgstr ""
 
-#: templates/pages/home.html:128
+#: templates/pages/home.html:131
 msgid "Отзив"
 msgstr ""
 
-#: templates/pages/home.html:143 templates/pages/my_profile.html:245
+#: templates/pages/home.html:146 templates/pages/my_profile.html:245
 msgid "Оценка"
 msgstr ""
 
-#: templates/pages/home.html:154
+#: templates/pages/home.html:157
 msgid "Вашето Име"
 msgstr ""
 
-#: templates/pages/home.html:155
+#: templates/pages/home.html:158
 msgid "Име"
 msgstr ""
 
-#: templates/pages/home.html:159
+#: templates/pages/home.html:162
 msgid "Вашето Мнение"
 msgstr ""
 
-#: templates/pages/home.html:160
+#: templates/pages/home.html:163
 msgid "Споделете Вашето преживяване..."
 msgstr ""
 
-#: templates/pages/home.html:163 templates/reservation/edit-reservation.html:78
+#: templates/pages/home.html:166 templates/reservation/edit-reservation.html:78
 msgid "Отказ"
 msgstr ""
 
-#: templates/pages/home.html:164
+#: templates/pages/home.html:167
 msgid "Публикувай"
 msgstr ""
 
-#: templates/pages/home.html:168
+#: templates/pages/home.html:171
 msgid "Благодарим! Вашето мнение ще бъде публикувано след преглед."
 msgstr ""
 
-#: templates/pages/home.html:179
+#: templates/pages/home.html:182
 msgid "Заповядайте"
 msgstr ""
 
-#: templates/pages/home.html:186 templates/pages/my_profile.html:209
+#: templates/pages/home.html:189 templates/pages/my_profile.html:209
 #: templates/partials/working_hours.html:8
 msgid "Почивен ден"
 msgstr "Почивен ден"
 
-#: templates/pages/home.html:195
+#: templates/pages/home.html:198
 msgid "Адрес"
 msgstr ""
 
-#: templates/pages/home.html:201
+#: templates/pages/home.html:204
 msgid "Телефон"
 msgstr ""
 

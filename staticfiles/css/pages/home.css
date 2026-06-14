@@ -235,6 +235,29 @@
 
 .hp-gallery-cell:hover img { transform: scale(1.04); }
 
+.hp-gallery-footer {
+    margin-top: 3.5rem;
+}
+
+.btn-gallery {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.6rem 2.5rem;
+    border: 1px solid var(--primary-color);
+    border-radius: 4px;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+    transition: var(--transition);
+    background: transparent;
+}
+
+.btn-gallery:hover {
+    background: var(--primary-color);
+    color: var(--white);
+}
+
 /* ================================================================
    REVIEWS — two-card carousel
    ================================================================ */
