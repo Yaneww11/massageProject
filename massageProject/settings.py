@@ -169,7 +169,7 @@ DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='webmaster@localhost')
 UNFOLD = {
     "SITE_TITLE": "Relax & Health Admin",
     "SITE_HEADER": "Relax & Health",
-    "SITE_SYMBOL": "spa",
+    "SITE_SYMBOL": "admin_meds",
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": True,
     "SHOW_LANGUAGES": True,

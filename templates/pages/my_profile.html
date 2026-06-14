@@ -1,82 +1,325 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load profile_extras %}
 
 {% block content %}
-<section class="reservation-page">
-    <div class="description">
-        <h2>{{ title }}</h2>
+<section class="profile-page">
+  <div class="profile-container">
 
-        <!-- Active Reservations -->
-        <h3 style="margin-top: 2rem; color: var(--primary-color); text-align: left; margin-bottom: 1rem;">{% trans "Предстоящи резервации" %}</h3>
-        {% if active_reservations %}
-            <div class="reservation-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>{% trans "Дата" %}</th>
-                            <th>{% trans "Час" %}</th>
-                            <th>{% trans "Вид" %}</th>
-                            <th>{% trans "Масажист" %}</th>
-                            <th>{% trans "Действия" %}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for reservation in active_reservations %}
-                            <tr>
-                                <td data-label="{% trans 'Дата' %}">{{ reservation.date|date:"d.m.Y" }}</td>
-                                <td data-label="{% trans 'Час' %}">{{ reservation.time|time:"H:i" }} - {{ reservation.end_time|time:"H:i" }}</td>
-                                <td data-label="{% trans 'Вид' %}">{{ reservation.massage.name }}</td>
-                                <td data-label="{% trans 'Масажист' %}">{{ reservation.masseur.name }}</td>
-                                <td data-label="{% trans 'Действия' %}">
-                                    <a href="{% url 'edit_reservation' reservation.id %}" class="btn-edit">{% trans "Промени" %}</a>
-                                    <a href="{% url 'delete_reservation' reservation.id %}" class="btn-danger">{% trans "Отмени" %}</a>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <p style="text-align: left; color: var(--text-muted);">{% trans "Нямате предстоящи резервации" %}</p>
+    <!-- Hero -->
+    <div class="profile-hero">
+      <div class="profile-avatar">
+        {% if user.first_name and user.last_name %}
+          {{ user.first_name.0|upper }}{{ user.last_name.0|upper }}
         {% endif %}
-
-        <!-- Past Reservations History -->
-        <h3 style="margin-top: 4rem; color: var(--text-muted); text-align: left; margin-bottom: 1rem;">{% trans "История на резервациите" %}</h3>
-        {% if past_reservations %}
-            <div class="reservation-table" style="opacity: 0.9;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>{% trans "Дата" %}</th>
-                            <th>{% trans "Час" %}</th>
-                            <th>{% trans "Вид" %}</th>
-                            <th>{% trans "Статус" %}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for reservation in past_reservations %}
-                            <tr>
-                                <td data-label="{% trans 'Дата' %}">{{ reservation.date|date:"d.m.Y" }}</td>
-                                <td data-label="{% trans 'Час' %}">{{ reservation.time|time:"H:i" }} - {{ reservation.end_time|time:"H:i" }}</td>
-                                <td data-label="{% trans 'Вид' %}">{{ reservation.massage.name }}</td>
-                                <td data-label="{% trans 'Статус' %}">
-                                    <span class="status-badge status-{{ reservation.status }}">
-                                        {{ reservation.get_status_display }}
-                                    </span>
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <p style="text-align: left; color: var(--text-muted);">{% trans "Нямате предишни резервации" %}</p>
-        {% endif %}
+      </div>
+      <div class="profile-hero-text">
+        <span class="profile-eyebrow">{% trans "МОИТЕ ЧАСОВЕ" %}</span>
+        <h1 class="profile-greeting">{% trans "Здравейте," %} {{ user.first_name }}</h1>
+        <p class="profile-subtitle">{% trans "Преглеждайте, променяйте или отменяйте своите часове на едно място." %}</p>
+      </div>
     </div>
+
+    <!-- Stats bar -->
+    <div class="profile-stats">
+      <div class="stat-card">
+        <span class="stat-value">{{ favorite_service|default:"—" }}</span>
+        <span class="stat-label">{% trans "ЛЮБИМА УСЛУГА" %}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">{{ total_visits }}</span>
+        <span class="stat-label">{% trans "ПОСЕЩЕНИЯ" %}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">{{ upcoming_count }}</span>
+        <span class="stat-label">{% trans "ПРЕДСТОЯЩИ" %}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">{{ client_since }}</span>
+        <span class="stat-label">{% trans "КЛИЕНТ ОТ" %}</span>
+      </div>
+    </div>
+
+    <!-- Next booking highlight card -->
+    {% if next_reservation %}
+    <div class="next-booking-card">
+      <div class="next-booking-date-block">
+        <span class="nbd-month">{{ next_reservation.date|date:"E"|upper }}</span>
+        <span class="nbd-day">{{ next_reservation.date.day }}</span>
+        <span class="nbd-weekday">{{ next_reservation.date|date:"l" }}</span>
+      </div>
+      <div class="next-booking-body">
+        <div class="next-booking-top">
+          <span class="profile-eyebrow">{% trans "СЛЕДВАЩА РЕЗЕРВАЦИЯ" %}</span>
+          {% if next_reservation.date == today %}
+          <span class="badge-today">&#9711; {% trans "Днес" %}</span>
+          {% endif %}
+        </div>
+        <h2 class="next-booking-title">{{ next_reservation.massage.name }}</h2>
+        <div class="next-booking-meta">
+          <span class="nbd-time">{{ next_reservation.time|time:"H:i" }} &#8211; {{ next_reservation.end_time|time:"H:i" }}</span>
+          <span class="nbd-sep">&middot;</span>
+          <span>{{ next_reservation.massage.duration_in_minutes }} {% trans "мин" %}</span>
+          <span class="nbd-sep">&middot;</span>
+          <span>{{ next_reservation.massage.price }} {% trans "лв" %}</span>
+        </div>
+        <div class="next-booking-masseur">
+          <div class="masseur-avatar-sm">{{ next_reservation.masseur.name|initials }}</div>
+          <div class="masseur-info">
+            <span class="masseur-name">{{ next_reservation.masseur.name }}</span>
+            <span class="masseur-role">{% trans "Масажист" %}</span>
+          </div>
+        </div>
+        {% if studio %}
+        <div class="next-booking-location">
+          <i class="fas fa-map-marker-alt"></i> {{ studio.address }}
+        </div>
+        {% endif %}
+        <div class="next-booking-actions">
+          <button class="btn-calendar" disabled>
+            <i class="fas fa-calendar-plus"></i> {% trans "Добави в календар" %}
+          </button>
+          {% if studio %}
+          <a href="https://www.google.com/maps/search/?api=1&query={{ studio.address|urlencode }}"
+             target="_blank" rel="noopener noreferrer" class="btn-outline-profile">
+            <i class="fas fa-directions"></i> {% trans "Упътвания" %}
+          </a>
+          {% endif %}
+          <a href="{% url 'edit_reservation' next_reservation.id %}" class="btn-outline-profile">
+            <i class="fas fa-pencil-alt"></i> {% trans "Промени" %}
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Upcoming reservations -->
+    <div class="upcoming-section">
+      <div class="section-header-row">
+        <div>
+          <span class="profile-eyebrow">{% trans "ПРЕДСТОЯЩИ РЕЗЕРВАЦИИ" %}</span>
+          <h2 class="section-title">{% trans "Предстоящи резервации" %}</h2>
+          <p class="section-subtitle">{% trans "Очакваме Ви с нетърпение." %}</p>
+        </div>
+        <a href="{% url 'reservation_page' %}" class="btn-primary-profile">+ {% trans "Запазете нов час" %}</a>
+      </div>
+
+      {% if active_reservations %}
+      <div class="bookings-table-wrap">
+        <table class="bookings-table">
+          <thead>
+            <tr>
+              <th>{% trans "ДАТА" %}</th>
+              <th>{% trans "ЧАС" %}</th>
+              <th>{% trans "УСЛУГА" %}</th>
+              <th>{% trans "СПЕЦИАЛИСТ" %}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in active_reservations %}
+            <tr>
+              <td data-label="{% trans 'ДАТА' %}">
+                <span class="date-main">{{ r.date|date:"d.m.Y" }}</span>
+                <span class="date-sub">{{ r.date|date:"l" }}</span>
+              </td>
+              <td data-label="{% trans 'ЧАС' %}">{{ r.time|time:"H:i" }} &#8211; {{ r.end_time|time:"H:i" }}</td>
+              <td data-label="{% trans 'УСЛУГА' %}">
+                <span class="service-name">{{ r.massage.name }}</span>
+                <span class="service-meta">{{ r.massage.duration_in_minutes }} {% trans "мин" %} &middot; {{ r.massage.price }} {% trans "лв" %}</span>
+              </td>
+              <td data-label="{% trans 'СПЕЦИАЛИСТ' %}">
+                <div class="masseur-cell">
+                  <div class="masseur-avatar-xs">{{ r.masseur.name|initials }}</div>
+                  <span>{{ r.masseur.name }}</span>
+                </div>
+              </td>
+              <td class="action-cell" data-label="">
+                <button class="btn-icon-cal" disabled title="{% trans 'Добави в календар' %}">
+                  <i class="far fa-calendar"></i>
+                </button>
+                <a href="{% url 'edit_reservation' r.id %}" class="btn-action-edit">{% trans "Промени" %}</a>
+                <a href="{% url 'delete_reservation' r.id %}" class="btn-action-cancel">&times; {% trans "Отмени" %}</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="empty-state-msg">{% trans "Нямате предстоящи резервации." %}</p>
+      {% endif %}
+    </div>
+
+    <!-- Visit history -->
+    <div class="history-section">
+      <span class="profile-eyebrow">{% trans "ИСТОРИЯ НА ПОСЕЩЕНИЯТА" %}</span>
+      <h2 class="section-title">{% trans "История на посещенията" %}</h2>
+      <p class="section-subtitle">{% trans "Вашите минали сеанси." %}</p>
+
+      {% if past_reservations %}
+      <div class="history-list">
+        {% for r in past_reservations %}
+        {% with review=reviewed_map|get_item:r.pk %}
+        <div class="history-row">
+          <div class="history-date">
+            <span class="date-main">{{ r.date|date:"d.m.Y" }}</span>
+            <span class="date-sub">{{ r.time|time:"H:i" }} &#8211; {{ r.end_time|time:"H:i" }}</span>
+          </div>
+          <div class="history-service">
+            <span class="service-name">{{ r.massage.name }}</span>
+            {% if review %}
+            <div class="star-rating">
+              {% for i in "12345" %}{% if forloop.counter <= review.rating %}<span class="star filled">&#9733;</span>{% else %}<span class="star">&#9734;</span>{% endif %}{% endfor %}
+            </div>
+            {% endif %}
+          </div>
+          <div class="history-actions">
+            {% if review %}
+            <span class="badge-rated">{% trans "ОЦЕНЕНО" %}</span>
+            {% else %}
+            <button class="btn-outline-sm btn-review"
+                    data-reservation-id="{{ r.pk }}"
+                    data-massage="{{ r.massage.name }}">
+              &#9734; {% trans "Оставете мнение" %}
+            </button>
+            {% endif %}
+            <a href="{% url 'reservation_page' %}?massage={{ r.massage.pk }}" class="btn-outline-sm">
+              &rarr; {% trans "Запазете отново" %}
+            </a>
+          </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="empty-state-msg">{% trans "Нямате предишни резервации." %}</p>
+      {% endif %}
+    </div>
+
+    <!-- Working hours + Contacts -->
+    {% if working_hours or studio %}
+    <div class="info-grid">
+      {% if working_hours %}
+      <div class="info-card">
+        <span class="profile-eyebrow">{% trans "РАБОТНО ВРЕМЕ" %}</span>
+        {% for wh in working_hours %}
+        <div class="hours-row">
+          <span class="hours-day">{{ wh.day_label }}</span>
+          <span class="hours-time">{% if wh.hours %}{{ wh.hours }}{% else %}{% trans "Почивен ден" %}{% endif %}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% if studio %}
+      <div class="info-card">
+        <span class="profile-eyebrow">{% trans "КОНТАКТИ" %}</span>
+        <div class="contact-row">
+          <i class="fas fa-map-marker-alt contact-icon"></i>
+          <span>{{ studio.address }}</span>
+        </div>
+        {% if studio.phone %}
+        <div class="contact-row">
+          <i class="fas fa-phone contact-icon"></i>
+          <span>{{ studio.phone }}</span>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+  </div>
 </section>
 
-{% if active_reservations %}
-    {% include 'partials/working_hours.html' %}
-{% endif %}
+<!-- Review modal -->
+<div id="profile-review-modal" class="review-modal-overlay" style="display:none;" aria-modal="true" role="dialog">
+  <div class="review-modal-content">
+    <button class="modal-close" id="profile-review-close" aria-label="{% trans 'Затвори' %}">&times;</button>
+    <h3 class="modal-title">{% trans "Оставете мнение" %}</h3>
+    <p class="modal-service-name" id="profile-review-service"></p>
+    <form id="profile-review-form">
+      {% csrf_token %}
+      <input type="hidden" name="reservation_id" id="profile-review-reservation-id">
+      <div class="form-group">
+        <label class="form-label">{% trans "Оценка" %}</label>
+        <div class="star-input" id="profile-star-input">
+          <span class="star-btn" data-value="1">&#9733;</span>
+          <span class="star-btn" data-value="2">&#9733;</span>
+          <span class="star-btn" data-value="3">&#9733;</span>
+          <span class="star-btn" data-value="4">&#9733;</span>
+          <span class="star-btn" data-value="5">&#9733;</span>
+        </div>
+        <input type="hidden" name="rating" id="profile-review-rating" value="5">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="profile-review-content">{% trans "Вашето мнение" %}</label>
+        <textarea name="content" id="profile-review-content" rows="4"
+                  class="form-textarea" placeholder="{% trans 'Споделете своите впечатления...' %}"></textarea>
+      </div>
+      <button type="submit" class="btn-primary-profile btn-full">{% trans "Изпратете" %}</button>
+    </form>
+  </div>
+</div>
+
+<script>
+(function () {
+  var modal = document.getElementById('profile-review-modal');
+  var closeBtn = document.getElementById('profile-review-close');
+  var form = document.getElementById('profile-review-form');
+  var ratingInput = document.getElementById('profile-review-rating');
+  var stars = document.querySelectorAll('#profile-star-input .star-btn');
+
+  function setStars(val) {
+    ratingInput.value = val;
+    stars.forEach(function (s) {
+      s.classList.toggle('active', parseInt(s.dataset.value) <= val);
+    });
+  }
+  setStars(5);
+
+  document.querySelectorAll('.btn-review').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.getElementById('profile-review-reservation-id').value = btn.dataset.reservationId || '';
+      document.getElementById('profile-review-service').textContent = btn.dataset.massage || '';
+      document.getElementById('profile-review-content').value = '';
+      setStars(5);
+      modal.style.display = 'flex';
+    });
+  });
+
+  closeBtn.addEventListener('click', function () { modal.style.display = 'none'; });
+  modal.addEventListener('click', function (e) { if (e.target === modal) modal.style.display = 'none'; });
+
+  stars.forEach(function (star) {
+    star.addEventListener('click', function () { setStars(parseInt(star.dataset.value)); });
+    star.addEventListener('mouseenter', function () {
+      stars.forEach(function (s) {
+        s.classList.toggle('hover', parseInt(s.dataset.value) <= parseInt(star.dataset.value));
+      });
+    });
+  });
+  document.getElementById('profile-star-input').addEventListener('mouseleave', function () {
+    stars.forEach(function (s) { s.classList.remove('hover'); });
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var data = new FormData(form);
+    fetch('{% url "submit_comment" %}', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': data.get('csrfmiddlewaretoken') },
+      body: data
+    }).then(function (r) { return r.json(); }).then(function (res) {
+      if (res.success) {
+        modal.style.display = 'none';
+        location.reload();
+      } else {
+        alert(res.error || '{% trans "Грешка при изпращане." %}');
+      }
+    });
+  });
+})();
+</script>
 
 {% endblock %}

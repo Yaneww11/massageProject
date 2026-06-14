@@ -6,7 +6,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta, time, date
+from django.db.models import Count
 from django.contrib import messages
 from django.http import JsonResponse
 import json
@@ -162,6 +163,8 @@ class ReservationPage(LoginRequiredMixin, CreateView):
         initial = super().get_initial()
         if 'pk' in self.kwargs:
             initial['massage'] = self.kwargs['pk']
+        elif self.request.GET.get('massage'):
+            initial['massage'] = self.request.GET.get('massage')
         return initial
 
 class AboutPage(TemplateView):
@@ -232,6 +235,12 @@ def submit_comment(request):
     if user.is_authenticated:
         comment.user = user
         comment.author = user.get_full_name() or str(user.phone_number)
+        reservation_id = request.POST.get('reservation_id')
+        if reservation_id:
+            try:
+                comment.reservation = MessageReservation.all_objects.get(pk=reservation_id, user=user)
+            except (MessageReservation.DoesNotExist, ValueError):
+                pass
     elif author_name:
         comment.author = author_name
 
@@ -254,15 +263,39 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
+
         if user.has_perm('main_app.view_all_reservations'):
-            context['active_reservations'] = MessageReservation.objects.active().order_by('date', 'time')[:15]
-            context['past_reservations'] = MessageReservation.objects.past().order_by('-date', '-time')[:15]
+            active_reservations = list(MessageReservation.objects.active().order_by('date', 'time')[:15])
+            past_reservations = list(MessageReservation.objects.past().order_by('-date', '-time')[:15])
             context['title'] = _('Управление на резервации')
         else:
-            user_reservations = MessageReservation.objects.filter(user=self.request.user)
-            context['active_reservations'] = user_reservations.active().order_by('date', 'time')
-            context['past_reservations'] = user_reservations.past().order_by('-date', '-time')[:5]
+            user_qs = MessageReservation.objects.filter(user=user)
+            active_reservations = list(user_qs.active().order_by('date', 'time'))
+            past_reservations = list(user_qs.past().order_by('-date', '-time')[:5])
             context['title'] = f'{user.get_full_name()} - {_("резервации")}'
+
+        context['active_reservations'] = active_reservations
+        context['past_reservations'] = past_reservations
+        context['next_reservation'] = active_reservations[0] if active_reservations else None
+        context['today'] = date.today()
+
+        # Metrics
+        context['total_visits'] = MessageReservation.all_objects.filter(user=user, status='completed').count()
+        context['upcoming_count'] = len(active_reservations)
+        fav = (MessageReservation.objects.filter(user=user)
+               .values('massage__name').annotate(c=Count('id')).order_by('-c').first())
+        context['favorite_service'] = fav['massage__name'] if fav else None
+        context['client_since'] = user.date_joined.year
+
+        # Studio info and working hours
+        context['studio'] = MessageStudio.objects.first()
+        homepage = HomePage.objects.first()
+        context['working_hours'] = list(homepage.studio_working_hours.order_by('order')) if homepage else []
+
+        # Map of reviewed past reservations {reservation_id: comment}
+        reviewed = Comment.objects.filter(reservation__in=past_reservations).select_related('reservation')
+        context['reviewed_map'] = {c.reservation_id: c for c in reviewed}
+
         return context
 
 class MassageDetail(TemplateView):

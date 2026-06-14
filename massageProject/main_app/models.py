@@ -204,12 +204,32 @@ class MessageReservation(models.Model):
         self.full_clean()
         super().save(*args, **kwargs)
 
+    class Meta:
+        verbose_name = _('Резервация')
+        verbose_name_plural = _('Резервации')
+
+    def __str__(self):
+        return f"{self.massage.name} - {self.date} {self.time.strftime('%H:%M')}"
+
 class Gallery(models.Model):
     images = models.ManyToManyField('Image', related_name='galleries', through='GalleryImage')
+
+    class Meta:
+        verbose_name = _('Галерия')
+        verbose_name_plural = _('Галерии')
+
+    def __str__(self):
+        if hasattr(self, 'home_page'):
+            return f"{_('Галерия')} - {self.home_page.brand_name}"
+        return f"{_('Галерия')} {self.id}"
 
 class Image(models.Model):
     image = models.ImageField(upload_to='studios/gallery/')
     alt_text = models.CharField(max_length=255)
+
+    class Meta:
+        verbose_name = _('Изображение')
+        verbose_name_plural = _('Изображения')
 
     def __str__(self):
         return self.alt_text
@@ -220,6 +240,11 @@ class GalleryImage(models.Model):
 
     class Meta:
         unique_together = ('gallery', 'image')
+        verbose_name = _('Изображение в галерия')
+        verbose_name_plural = _('Изображения в галерия')
+
+    def __str__(self):
+        return f"{self.gallery} - {self.image.alt_text}"
 
 class HomePage(models.Model):
     brand_name = models.CharField(max_length=255)
@@ -232,6 +257,10 @@ class HomePage(models.Model):
     )
     privacy_policy_content = models.TextField(null=True, blank=True)
     footer_tagline = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = _('Начална страница')
+        verbose_name_plural = _('Начални страници')
 
     def save(self, *args, **kwargs):
         if not self.pk and HomePage.objects.exists():
@@ -289,6 +318,15 @@ class Comment(models.Model):
         blank=True,
     )
 
+    reservation = models.ForeignKey(
+        'MessageReservation',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='comments',
+        verbose_name=_('резервация'),
+    )
+
     author = models.CharField(
         max_length=100,
         null=True,
@@ -306,6 +344,13 @@ class Comment(models.Model):
     is_reviewed = models.BooleanField(
         default=False,
     )
+
+    class Meta:
+        verbose_name = _('Коментар')
+        verbose_name_plural = _('Коментари')
+
+    def __str__(self):
+        return f"{self.display_name} - {self.created_at.strftime('%d.%m.%Y')}"
 
     @property
     def display_name(self):

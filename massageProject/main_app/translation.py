@@ -16,7 +16,7 @@ class MasseurTranslationOptions(TranslationOptions):
 
 @register(HomePage)
 class HomePageTranslationOptions(TranslationOptions):
-    fields = ('brand_name', 'description', 'privacy_policy_content')
+    fields = ('brand_name', 'description', 'privacy_policy_content', 'footer_tagline')
 
 
 @register(MessageStudio)

@@ -70,7 +70,7 @@ class ReservationDateFilter(admin.SimpleListFilter):
 
 @admin.register(Massage)
 class MassageAdmin(ModelAdmin, TabbedTranslationAdmin):
-    list_display = ('display_image', 'name', 'price', 'duration_in_minutes', 'home_page')
+    list_display = ('name', 'price', 'duration_in_minutes', 'home_page')
     search_fields = ('name', 'short_description')
     list_filter = ('home_page', 'price', 'duration_in_minutes')
     list_editable = ('price', 'duration_in_minutes', 'home_page')

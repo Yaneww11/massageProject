@@ -3,6 +3,7 @@ from django.contrib.auth.models import PermissionsMixin, AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from django.core.mail import send_mail
 
 from massageProject.accounts.managers import AppUserManager
@@ -12,10 +13,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=50, blank=True)
     last_name = models.CharField(max_length=50, blank=True)
     email = models.EmailField(
-        verbose_name='email address',
+        verbose_name=_('email address'),
         max_length=255,
         unique=True,
-        help_text='Enter a valid email address',
+        help_text=_('Enter a valid email address'),
 
     )
 
@@ -25,21 +26,20 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         validators=[
             RegexValidator(
                 regex=r'^(\+359|0)?8[789]\d{7}$',
-                message='Please correct valid phone number'
+                message=_('Please correct valid phone number')
             )
         ],
-        help_text='089999999',
     )
 
     is_staff = models.BooleanField(
-        ("staff status"),
+        _("staff status"),
         default=False,
-        help_text=("Designates whether the user can log into this admin site."),
+        help_text=_("Designates whether the user can log into this admin site."),
     )
     is_active = models.BooleanField(
-        ("active"),
+        _("active"),
         default=True,
-        help_text=(
+        help_text=_(
             "Designates whether this user should be treated as active. "
             "Unselect this instead of deleting accounts."
         ),
@@ -54,8 +54,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = "phone_number"
     REQUIRED_FIELDS = ["email"]
 
+    class Meta:
+        verbose_name = _('Потребител')
+        verbose_name_plural = _('Потребители')
+
     def __str__(self):
-        return self.get_full_name()
+        full_name = self.get_full_name()
+        return full_name if full_name else self.phone_number
 
     def clean(self):
         super().clean()
