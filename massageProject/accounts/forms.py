@@ -1,7 +1,26 @@
-from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+
+
+class CustomAuthenticationForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].widget.attrs.update({
+            'placeholder': '0899999999',
+            'title': _('Телефонният номер трябва да започва с 0')
+        })
+        self.fields['username'].help_text = _('Телефонният номер трябва да започва с 0 (напр. 08XXXXXXXX)')
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if username and not username.startswith('0'):
+            raise ValidationError(
+                _("Телефонният номер трябва да започва с 0."),
+                code='invalid_phone_start',
+            )
+        return username
 
 
 class CustomUserForm(UserCreationForm):
@@ -15,6 +34,9 @@ class CustomUserForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['first_name'].required = True
+        self.fields['last_name'].required = True
+        
         # Iterate over all fields and remove the help_text
         for field_name, field in self.fields.items():
             field.help_text = None

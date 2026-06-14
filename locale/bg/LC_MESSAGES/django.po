@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-14 14:46+0000\n"
+"POT-Creation-Date: 2026-06-14 17:26+0000\n"
 "PO-Revision-Date: 2026-06-06 22:00+0300\n"
 "Last-Translator: \n"
 "Language-Team: Bulgarian\n"
@@ -19,12 +19,24 @@ msgstr ""
 msgid "Потребители и достъп"
 msgstr ""
 
+#: massageProject/accounts/forms.py:12
+msgid "Телефонният номер трябва да започва с 0"
+msgstr ""
+
+#: massageProject/accounts/forms.py:14
+msgid "Телефонният номер трябва да започва с 0 (напр. 08XXXXXXXX)"
+msgstr ""
+
+#: massageProject/accounts/forms.py:20
+msgid "Телефонният номер трябва да започва с 0."
+msgstr ""
+
 # accounts/forms.py
-#: massageProject/accounts/forms.py:9
+#: massageProject/accounts/forms.py:28
 msgid "Паролите не съвпадат."
 msgstr ""
 
-#: massageProject/accounts/forms.py:10
+#: massageProject/accounts/forms.py:29
 msgid "Този телефонен номер вече е регистриран. Моля, влезте в профила си."
 msgstr ""
 
@@ -946,7 +958,7 @@ msgid "Изход"
 msgstr ""
 
 #: templates/partials/header.html:31 templates/partials/header.html:62
-#: templates/registration/login.html:23
+#: templates/registration/login.html:26
 msgid "Вход"
 msgstr ""
 
@@ -969,11 +981,11 @@ msgstr ""
 msgid "Моля, въведете своите данни, за да влезете в акаунта си."
 msgstr ""
 
-#: templates/registration/login.html:24
+#: templates/registration/login.html:27
 msgid "Нямате акаунт?"
 msgstr ""
 
-#: templates/registration/login.html:24
+#: templates/registration/login.html:27
 msgid "Регистрирайте се тук"
 msgstr ""
 
