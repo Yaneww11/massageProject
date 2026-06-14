@@ -27,7 +27,6 @@ footer {
     background: #5c3d2e; /* Example footer background color */
     color: white;
     text-align: center;
-    padding: 1rem 0;
     position: relative; /* Ensure it stays relative to its container */
 }
 

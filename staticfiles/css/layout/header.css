@@ -241,7 +241,7 @@
 .hamburger-icon::after { top: 8px; }
 
 /* Mobile View */
-@media (max-width: 830px) {
+@media (max-width: 940px) {
     .navbar {
         padding: var(--space-sm) var(--space-md);
     }

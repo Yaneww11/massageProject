@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.db.models import JSONField
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from datetime import datetime, timedelta
@@ -61,6 +62,10 @@ class MessageStudio(models.Model):
     main_image = models.ImageField(upload_to='studios/')
     address = models.CharField(max_length=255)
     phone = models.CharField(max_length=50, blank=True)
+    email_address = models.EmailField()
+    facebook_link = models.URLField(null=True, blank=True)
+    instagram_link = models.URLField(null=True, blank=True)
+    tik_tok_link = models.URLField(null=True, blank=True)
 
     class Meta:
         verbose_name = _('Студио')

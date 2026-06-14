@@ -38,7 +38,7 @@
 
 <!-- ========== SERVICES — Numbered rows ========== -->
 {% if massages %}
-<section class="hp-services">
+<section class="hp-services" id="services">
     <div class="hp-container-narrow">
         <div class="hp-reveal">
             <span class="hp-eyebrow">{% trans "Нашите услуги" %}</span>
@@ -58,6 +58,9 @@
                 </div>
             </a>
             {% endfor %}
+        </div>
+        <div class="hp-gallery-footer hp-reveal hp-centered-text">
+            <a href="{% url 'massages_dashboard' %}" class="btn-gallery">{% trans "Виж всички услуги" %} &rarr;</a>
         </div>
     </div>
 </section>

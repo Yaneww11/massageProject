@@ -2,40 +2,56 @@
 <!-- Footer Section -->
 <footer class="site-footer">
     <div class="footer-inner">
-        <div class="footer-brand">
-            <a href="{% url 'index' %}" class="logo-container logo-container--light">
-                {% if brand_logo %}
-                    <img src="{{ brand_logo }}" alt="{{ brand_name }}" class="logo-svg logo-svg--light">
-                {% endif %}
-                <p class="logo-text logo-text--light">{{ brand_name }}</p>
-            </a>
+        <!-- Column 1: Social & Tagline -->
+        <div class="footer-col footer-col--social">
             {% if footer_tagline %}
                 <p class="footer-tagline">{{ footer_tagline }}</p>
             {% endif %}
+            <div class="footer-social-links">
+                {% if studio.facebook_link %}
+                    <a href="{{ studio.facebook_link }}" target="_blank">Facebook</a>
+                {% endif %}
+                {% if studio.instagram_link %}
+                    <a href="{{ studio.instagram_link }}" target="_blank">Instagram</a>
+                {% endif %}
+                {% if studio.tik_tok_link %}
+                    <a href="{{ studio.tik_tok_link }}" target="_blank">TikTok</a>
+                {% endif %}
+            </div>
         </div>
 
-        <div class="footer-nav">
-            <span class="footer-col-label">{% trans "Навигация" %}</span>
-            <ul>
-                <li><a href="{% url 'index' %}">{% trans "Начало" %}</a></li>
-                <li><a href="{% url 'massages_dashboard' %}">{% trans "Услуги" %}</a></li>
-                <li><a href="{% url 'index' %}#gallery">{% trans "Галерия" %}</a></li>
-                <li><a href="{% url 'about_page' %}">{% trans "Мнения" %}</a></li>
-                <li><a href="{% url 'index' %}#contacts">{% trans "Контакти" %}</a></li>
-            </ul>
-        </div>
-
-        <div class="footer-contacts">
-            <span class="footer-col-label">{% trans "Контакти" %}</span>
-            {% if studio %}
-                {% if studio.address %}<p>{{ studio.address }}</p>{% endif %}
-                {% if studio.phone %}<p>{{ studio.phone }}</p>{% endif %}
+        <!-- Column 2: Address -->
+        <div class="footer-col footer-col--address">
+            <h3 class="footer-col-title">{% trans "Адрес" %}</h3>
+            {% if studio.address %}
+                <p class="footer-address">{{ studio.address }}</p>
             {% endif %}
+        </div>
+
+        <!-- Column 3: Contact -->
+        <div class="footer-col footer-col--contact">
+            <h3 class="footer-col-title">{% trans "Контакти" %}</h3>
+            <div class="footer-contact-items">
+                {% if studio.phone %}
+                    <div class="footer-contact-item">
+                        <i class="fas fa-phone-alt"></i>
+                        <a href="tel:{{ studio.phone }}" class="footer-contact-link">{{ studio.phone }}</a>
+                    </div>
+                {% endif %}
+                {% if studio.email_address %}
+                    <div class="footer-contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <a href="mailto:{{ studio.email_address }}" class="footer-contact-link">{{ studio.email_address }}</a>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 
     <div class="footer-bottom">
-        <p>&copy; 2026 {{ brand_name }}</p>
-        <a href="{% url 'privacy_policy' %}">{% trans "Политика за поверителност" %}</a>
+        <div class="footer-bottom-inner">
+            <p>&copy; 2026 {% trans "Масажно студио Сияние" %}</p>
+            <a href="{% url 'privacy_policy' %}">{% trans "Политика за поверителност" %}</a>
+        </div>
     </div>
 </footer>
