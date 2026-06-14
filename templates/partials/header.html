@@ -14,6 +14,14 @@
         <a href="{% url 'about_page' %}">{% trans "Мнения" %}</a>
         <a href="{% url 'index' %}#contacts">{% trans "Контакти" %}</a>
 
+        <!-- Mobile Language Switcher -->
+        <form action="{% url 'set_language' %}" method="post" class="lang-switcher lang-switcher--mobile">
+            {% csrf_token %}
+            <input name="next" type="hidden" value="{{ request.path }}">
+            <button type="submit" name="language" value="bg" class="lang-btn {% if CURRENT_LANG == 'bg' %}active{% endif %}">BG</button>
+            <button type="submit" name="language" value="en" class="lang-btn {% if CURRENT_LANG == 'en' %}active{% endif %}">EN</button>
+        </form>
+
         <!-- Mobile-only auth links -->
         <div class="nav-auth-mobile">
             {% if user.is_authenticated %}
@@ -27,14 +35,17 @@
     </nav>
 
     <div class="navbar-actions">
-        <form action="{% url 'set_language' %}" method="post" class="lang-switcher">
+        <form action="{% url 'set_language' %}" method="post" class="lang-switcher lang-switcher--desktop">
             {% csrf_token %}
             <input name="next" type="hidden" value="{{ request.path }}">
             <button type="submit" name="language" value="bg" class="lang-btn {% if CURRENT_LANG == 'bg' %}active{% endif %}">BG</button>
             <button type="submit" name="language" value="en" class="lang-btn {% if CURRENT_LANG == 'en' %}active{% endif %}">EN</button>
         </form>
 
-        <a href="{% url 'reservation_page' %}" class="btn btn-primary navbar-cta">{% trans "Запазете час" %}</a>
+        <a href="{% url 'reservation_page' %}" class="btn btn-primary navbar-cta" title="{% trans 'Запазете час' %}">
+            <i class="fas fa-calendar-alt"></i>
+            <span>{% trans "Запазете час" %}</span>
+        </a>
 
         <div class="user-menu" id="user-menu">
             <button class="user-menu-toggle" id="user-menu-toggle" aria-label="{% trans 'Профил' %}" aria-expanded="false">

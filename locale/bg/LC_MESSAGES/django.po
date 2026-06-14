@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-14 13:50+0000\n"
+"POT-Creation-Date: 2026-06-14 14:37+0000\n"
 "PO-Revision-Date: 2026-06-06 22:00+0300\n"
 "Last-Translator: \n"
 "Language-Team: Bulgarian\n"
@@ -244,129 +244,129 @@ msgid "Работно време"
 msgstr ""
 
 # Templates - footer
-#: massageProject/main_app/models.py:65 massageProject/settings.py:182
+#: massageProject/main_app/models.py:66 massageProject/settings.py:182
 msgid "Студио"
 msgstr ""
 
-#: massageProject/main_app/models.py:66
+#: massageProject/main_app/models.py:67
 msgid "Студиа"
 msgstr ""
 
 # models.py - MessageReservation STATUS_CHOICES
-#: massageProject/main_app/models.py:78
+#: massageProject/main_app/models.py:79
 msgid "Предстояща"
 msgstr ""
 
-#: massageProject/main_app/models.py:79
+#: massageProject/main_app/models.py:80
 msgid "Завършена"
 msgstr ""
 
-#: massageProject/main_app/models.py:80
+#: massageProject/main_app/models.py:81
 msgid "Не се е явил"
 msgstr ""
 
-#: massageProject/main_app/models.py:81
+#: massageProject/main_app/models.py:82
 msgid "Отказана"
 msgstr ""
 
 # models.py - validation errors
-#: massageProject/main_app/models.py:158
+#: massageProject/main_app/models.py:159
 msgid "Резервация трябва да се направи поне 2 часа предварително."
 msgstr ""
 
-#: massageProject/main_app/models.py:164
+#: massageProject/main_app/models.py:165
 #, python-format
 msgid "%(name)s не работи в този ден."
 msgstr ""
 
-#: massageProject/main_app/models.py:171
+#: massageProject/main_app/models.py:172
 #, python-format
 msgid ""
 "Избраният час е извън работното време на %(name)s (%(start)s - %(end)s)."
 msgstr ""
 
-#: massageProject/main_app/models.py:192
+#: massageProject/main_app/models.py:193
 #, python-format
 msgid "Часът се застъпва с друга резервация за %(name)s."
 msgstr ""
 
-#: massageProject/main_app/models.py:207
+#: massageProject/main_app/models.py:208
 msgid "Резервация"
 msgstr ""
 
-#: massageProject/main_app/models.py:208 massageProject/settings.py:214
+#: massageProject/main_app/models.py:209 massageProject/settings.py:214
 msgid "Резервации"
 msgstr ""
 
-#: massageProject/main_app/models.py:217 templates/partials/footer.html:22
+#: massageProject/main_app/models.py:218 templates/partials/footer.html:22
 #: templates/partials/header.html:13
 msgid "Галерия"
 msgstr ""
 
-#: massageProject/main_app/models.py:218
+#: massageProject/main_app/models.py:219
 msgid "Галерии"
 msgstr ""
 
-#: massageProject/main_app/models.py:230
+#: massageProject/main_app/models.py:231
 msgid "Изображение"
 msgstr ""
 
-#: massageProject/main_app/models.py:231
+#: massageProject/main_app/models.py:232
 msgid "Изображения"
 msgstr ""
 
-#: massageProject/main_app/models.py:242
+#: massageProject/main_app/models.py:243
 msgid "Изображение в галерия"
 msgstr ""
 
-#: massageProject/main_app/models.py:243
+#: massageProject/main_app/models.py:244
 msgid "Изображения в галерия"
 msgstr ""
 
-#: massageProject/main_app/models.py:261 massageProject/settings.py:186
+#: massageProject/main_app/models.py:262 massageProject/settings.py:186
 msgid "Начална страница"
 msgstr ""
 
-#: massageProject/main_app/models.py:262
+#: massageProject/main_app/models.py:263
 msgid "Начални страници"
 msgstr ""
 
 # models.py - StudioWorkingHours
-#: massageProject/main_app/models.py:292
+#: massageProject/main_app/models.py:293
 msgid "Ден / период"
 msgstr ""
 
-#: massageProject/main_app/models.py:293
+#: massageProject/main_app/models.py:294
 msgid "напр. \"Понеделник до Петък\""
 msgstr ""
 
-#: massageProject/main_app/models.py:298
+#: massageProject/main_app/models.py:299
 msgid "Часове"
 msgstr ""
 
-#: massageProject/main_app/models.py:299
+#: massageProject/main_app/models.py:300
 msgid "напр. \"9:00 - 18:00\" — оставете празно за \"Почивен ден\""
 msgstr ""
 
-#: massageProject/main_app/models.py:301
+#: massageProject/main_app/models.py:302
 msgid "Ред"
 msgstr ""
 
-#: massageProject/main_app/models.py:305 massageProject/main_app/models.py:306
+#: massageProject/main_app/models.py:306 massageProject/main_app/models.py:307
 msgid "Работно време на студиото"
 msgstr ""
 
-#: massageProject/main_app/models.py:326
+#: massageProject/main_app/models.py:327
 msgid "резервация"
 msgstr ""
 
-#: massageProject/main_app/models.py:348
+#: massageProject/main_app/models.py:349
 #, fuzzy
 #| msgid "Промени"
 msgid "Коментар"
 msgstr "Промени"
 
-#: massageProject/main_app/models.py:349 massageProject/settings.py:235
+#: massageProject/main_app/models.py:350 massageProject/settings.py:235
 #: templates/pages/about.html:30
 msgid "Коментари"
 msgstr ""
@@ -511,7 +511,7 @@ msgstr ""
 
 #: templates/pages/home.html:15 templates/pages/home.html:206
 #: templates/pages/reservation.html:15 templates/pages/reservation.html:331
-#: templates/partials/header.html:37
+#: templates/partials/header.html:45 templates/partials/header.html:47
 msgid "Запазете час"
 msgstr ""
 
@@ -933,26 +933,26 @@ msgstr ""
 msgid "Контакти"
 msgstr ""
 
-#: templates/partials/header.html:20 templates/partials/header.html:48
+#: templates/partials/header.html:28 templates/partials/header.html:59
 msgid "Моите часове"
 msgstr ""
 
-#: templates/partials/header.html:21 templates/partials/header.html:49
+#: templates/partials/header.html:29 templates/partials/header.html:60
 msgid "Изход"
 msgstr ""
 
-#: templates/partials/header.html:23 templates/partials/header.html:51
+#: templates/partials/header.html:31 templates/partials/header.html:62
 #: templates/registration/login.html:23
 msgid "Вход"
 msgstr ""
 
 # Templates - register
-#: templates/partials/header.html:24 templates/partials/header.html:52
+#: templates/partials/header.html:32 templates/partials/header.html:63
 #: templates/registration/register.html:7
 msgid "Регистрация"
 msgstr ""
 
-#: templates/partials/header.html:40
+#: templates/partials/header.html:51
 msgid "Профил"
 msgstr ""
 

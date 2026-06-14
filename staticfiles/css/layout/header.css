@@ -60,6 +60,7 @@
     font-weight: 500;
     position: relative;
     padding: var(--space-xs) 0;
+    transition: var(--transition);
 }
 
 .nav-links a::after {
@@ -95,9 +96,18 @@
 
 /* CTA Button */
 .navbar-cta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
     font-size: var(--fs-sm);
-    padding: 0.5rem 1.25rem;
+    padding: 0.6rem 1.5rem;
     white-space: nowrap;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.navbar-cta i {
+    font-size: 0.9rem;
 }
 
 /* Language Switcher */
@@ -111,12 +121,16 @@
     margin: 0;
 }
 
+.lang-switcher--mobile {
+    display: none;
+}
+
 .lang-btn {
     background: none;
     border: 1px solid var(--secondary-color);
     border-radius: var(--radius-sm);
     color: var(--text-main);
-    font-size: var(--fs-sm);
+    font-size: var(--fs-xs);
     font-family: var(--font-main);
     font-weight: 600;
     padding: 2px 8px;
@@ -166,7 +180,7 @@
     border: 1px solid var(--border-color, #e8e0d8);
     border-radius: var(--radius-md, 8px);
     box-shadow: var(--shadow-md);
-    min-width: 160px;
+    min-width: 180px;
     z-index: 1100;
     overflow: hidden;
 }
@@ -177,7 +191,7 @@
 
 .user-menu-dropdown a {
     display: block;
-    padding: 0.65rem 1rem;
+    padding: 0.75rem 1.25rem;
     font-family: var(--font-main);
     font-size: var(--fs-sm);
     color: var(--text-main);
@@ -198,6 +212,10 @@
     cursor: pointer;
     padding: var(--space-xs);
     z-index: 1100;
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
 }
 
 .hamburger-icon {
@@ -224,59 +242,88 @@
 
 /* Mobile View */
 @media (max-width: 830px) {
+    .navbar {
+        padding: var(--space-sm) var(--space-md);
+    }
+
     .nav-links {
         position: fixed;
         top: 0;
         right: -100%;
-        width: 70%;
+        width: 280px;
         height: 100vh;
         background-color: var(--bg-paper);
         flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: var(--space-xl);
+        justify-content: flex-start;
+        align-items: flex-start;
+        padding: 5rem 2rem 2rem;
+        gap: var(--space-lg);
         box-shadow: var(--shadow-lg);
-        transition: 0.4s ease-in-out;
+        transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1050;
     }
 
     .nav-links.active {
         right: 0;
     }
 
-    .nav-auth-mobile {
+    .nav-links a {
+        font-size: var(--fs-lg);
+        width: 100%;
+        border-bottom: 1px solid var(--bg-light);
+        padding-bottom: var(--space-sm);
+    }
+
+    .lang-switcher--desktop {
+        display: none;
+    }
+
+    .lang-switcher--mobile {
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: var(--space-md);
-        margin-top: var(--space-md);
-        padding-top: var(--space-md);
+        margin-top: auto;
+        padding-top: var(--space-lg);
         border-top: 1px solid var(--secondary-color);
         width: 100%;
     }
 
+    .nav-auth-mobile {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-md);
+        width: 100%;
+        margin-top: var(--space-md);
+    }
+
     .nav-auth-mobile a {
-        font-family: var(--font-main);
-        color: var(--text-main);
-        text-decoration: none;
         font-size: var(--fs-base);
-        font-weight: 500;
     }
 
-    .navbar {
-        padding: var(--space-md);
-    }
-
-    /* Hide user-menu dropdown on mobile — auth links are in the slide-in nav */
+    /* User menu links in slide-in nav */
     .user-menu {
         display: none;
     }
 
     .navbar-cta {
+        width: 2.5rem;
+        height: 2.5rem;
+        padding: 0;
+        border-radius: 50%;
+        justify-content: center;
+        margin-left: auto;
+    }
+
+    .navbar-cta span {
         display: none;
     }
 
+    .navbar-cta i {
+        margin: 0;
+        font-size: 1.1rem;
+    }
+
     .mobile-menu-toggle {
-        display: block;
+        display: flex;
     }
 
     .mobile-menu-toggle.active .hamburger-icon {
@@ -291,3 +338,4 @@
         transform: translateY(-8px) rotate(-45deg);
     }
 }
+
