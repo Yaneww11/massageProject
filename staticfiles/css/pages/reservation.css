@@ -1,45 +1,670 @@
-/* Reservation Form Styling */
-.reservation-section {
+/* ============================================================
+   Book Now — Editorial layout (A)
+   Two-column: white form card + sticky summary sidebar.
+   ============================================================ */
+
+/* ── Page shell ──────────────────────────────────────────── */
+.book-page {
+    max-width: 1200px;
+    margin: 0 auto;
     padding: var(--space-xl) var(--space-lg);
-    background: var(--bg-light);
+    box-sizing: border-box;
+}
+
+.book-page__head {
+    margin-bottom: var(--space-lg);
+}
+
+.book-eyebrow {
+    display: block;
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    color: var(--accent-color);
+    margin-bottom: var(--space-xs);
+}
+
+.book-title {
+    margin: 0 0 var(--space-xs);
+    font-family: var(--font-heading);
+    font-size: var(--fs-4xl);
+    color: var(--primary-color);
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+}
+
+.book-subtitle {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: var(--fs-lg);
+}
+
+/* ── Two-column grid ─────────────────────────────────────── */
+.bn-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 348px;
+    gap: var(--space-lg);
+    align-items: start;
+}
+
+/* ── Form card ───────────────────────────────────────────── */
+.bn-card {
+    background: var(--bg-paper);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid #E7DDD1;
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+/* ── Blocks inside the card ──────────────────────────────── */
+.bn-block {
+    padding-top: var(--space-lg);
+    border-top: 1px solid #E7DDD1;
+}
+
+.bn-block--first {
+    padding-top: 0;
+    border-top: none;
+}
+
+/* ── Step label ──────────────────────────────────────────── */
+.bn-step-label {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-main);
+}
+
+.bn-hint {
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    font-style: italic;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    margin-left: auto;
+}
+
+/* ── Service description line ────────────────────────────── */
+.bn-svc-desc {
+    margin-top: var(--space-sm);
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+    line-height: 1.5;
+    min-height: 1.4em;
+}
+
+/* ── Therapist tiles ─────────────────────────────────────── */
+.bn-therapist-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-sm);
+}
+
+.bn-therapist-tile {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    text-align: left;
+    transition: var(--transition);
+    background: var(--bg-paper);
+    border: 1.5px solid #DCC9B8;
+    width: 100%;
+    font-family: var(--font-main);
+}
+
+.bn-therapist-tile:hover {
+    border-color: var(--accent-color);
+    background: #FAF7F2;
+}
+
+.bn-therapist-tile.selected {
+    background: #FAF7F2;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(142, 115, 91, 0.2);
+}
+
+/* ── Avatar (initials circle) ────────────────────────────── */
+.bn-avatar {
+    width: 38px;
+    height: 38px;
+    flex: none;
+    border-radius: 50%;
+    background: #ECE0D4;
+    color: var(--accent-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: var(--fs-sm);
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+    user-select: none;
+}
+
+.bn-avatar--lg {
+    width: 48px;
+    height: 48px;
+    font-size: var(--fs-base);
+    flex: none;
+}
+
+.bn-tile-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.bn-tile-name {
+    display: block;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bn-tile-role {
+    display: block;
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+}
+
+/* ── Date + time composite ───────────────────────────────── */
+.bn-datetime {
+    display: grid;
+    grid-template-columns: minmax(0, 300px) 1fr;
+    gap: var(--space-lg);
+    align-items: start;
+}
+
+.bn-slots-panel {
+    border-left: 1px solid #E7DDD1;
+    padding-left: var(--space-lg);
+}
+
+/* ── Inline calendar ─────────────────────────────────────── */
+.bn-cal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-sm);
+}
+
+.bn-cal-month-label {
+    font-family: var(--font-heading);
+    font-size: var(--fs-lg);
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.bn-cal-nav {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    border: 1px solid #DCC9B8;
+    background: var(--bg-paper);
+    color: var(--primary-color);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    padding: 0;
+}
+
+.bn-cal-nav:hover:not(:disabled) {
+    background: #FAF7F2;
+    border-color: var(--accent-color);
+}
+
+.bn-cal-nav:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.bn-cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.bn-cal-wd {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}
+
+.bn-cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.bn-cal-day {
+    aspect-ratio: 1 / 1;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-main);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-main);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 0;
+    line-height: 1;
+}
+
+.bn-cal-day:hover:not(:disabled):not(.bn-cal-day--selected) {
+    background: #F2EBE2;
+}
+
+.bn-cal-day--selected {
+    background: var(--accent-color) !important;
+    color: var(--white) !important;
+    border-color: var(--accent-color);
+    font-weight: 700;
+}
+
+.bn-cal-day:disabled {
+    opacity: 0.38;
+    cursor: default;
+    color: #B0A090;
+}
+
+.bn-cal-day--today::after {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent-color);
+}
+
+.bn-cal-day--today.bn-cal-day--selected::after {
+    background: var(--white);
+}
+
+/* ── Time slots ──────────────────────────────────────────── */
+.bn-slots {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.bn-slots-group-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    margin-top: 4px;
+}
+
+.bn-slots-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    gap: var(--space-xs);
+}
+
+.time-slot {
+    padding: 8px 0;
+    border: 1px solid var(--primary-color);
+    background: var(--bg-paper);
+    color: var(--primary-color);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 600;
+    text-align: center;
+    font-family: var(--font-main);
+    font-size: var(--fs-sm);
+}
+
+.time-slot:hover:not(.disabled) {
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+.time-slot.selected {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--white);
+}
+
+.time-slot.disabled {
+    background: #eee;
+    border-color: #ccc;
+    color: #999;
+    cursor: not-allowed;
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+.bn-placeholder {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: var(--fs-sm);
+    margin: var(--space-sm) 0;
+}
+
+/* ── Logged-in user card ─────────────────────────────────── */
+.bn-user-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    border: 1px solid #E7DDD1;
+    background: var(--bg-paper);
+    flex-wrap: wrap;
+}
+
+.bn-user-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.bn-user-name {
+    display: block;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.bn-user-sub {
+    display: block;
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.bn-confirm-badge {
+    font-size: var(--fs-xs);
+    color: var(--accent-color);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────── */
+.bn-aside {
+    position: sticky;
+    top: 96px;
+    background: var(--bg-paper);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid #E7DDD1;
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.bn-eyebrow {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+.bn-summary {
+    display: flex;
+    flex-direction: column;
+}
+
+.bn-summary-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding: 11px 0;
+    border-top: 1px solid #E7DDD1;
+}
+
+.bn-summary-row:first-child {
+    border-top: none;
+    padding-top: 0;
+}
+
+.bn-summary-row span:first-child {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex: none;
+}
+
+.bn-summary-row span:last-child {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--text-main);
+    text-align: right;
+}
+
+.bn-divider {
+    border: none;
+    border-top: 1px solid #E7DDD1;
+    margin: 0;
+}
+
+.bn-reassure {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.bn-reassure svg {
+    flex: none;
+    margin-top: 1px;
+    color: var(--accent-color);
+}
+
+/* Confirm button disabled state */
+#confirm-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* ── Inline confirmation panel ───────────────────────────── */
+.bn-confirm {
+    text-align: center;
+    padding: var(--space-xl) var(--space-lg);
+    max-width: 560px;
+    margin: 0 auto;
+}
+
+.bn-confirm-icon {
+    width: 66px;
+    height: 66px;
+    border-radius: 50%;
+    background: #ECF1E7;
+    color: var(--success);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-lg);
+}
+
+.bn-confirm-heading {
+    margin: 0 0 var(--space-xs);
+    font-family: var(--font-heading);
+    font-size: var(--fs-3xl);
+    color: var(--primary-color);
+}
+
+.bn-confirm-sub {
+    margin: 0 0 var(--space-lg);
+    color: var(--text-muted);
+    font-size: var(--fs-lg);
+}
+
+.bn-confirm-summary {
+    text-align: left;
+    background: var(--bg-paper);
+    border: 1px solid #E7DDD1;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+}
+
+.bn-confirm-actions {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* ── Unauthenticated prompt ──────────────────────────────── */
+.bn-unauth {
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-xl) var(--space-lg);
     text-align: center;
 }
 
-.reservation-section .description {
-    max-width: 800px;
-    margin: 0 auto;
-    background: transparent; /* Override default description bg */
-}
-
-.reservation-section h1 {
+.bn-unauth h2 {
     font-family: var(--font-heading);
     color: var(--primary-color);
-    margin-bottom: var(--space-lg);
     font-size: var(--fs-3xl);
-}
-
-.reservation-section h2 {
     margin-bottom: var(--space-md);
 }
 
-.unauthenticated {
-    min-height: 400px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.unauthenticated h2 {
-    color: var(--primary-color);
-}
-
-.unauthenticated p {
+.bn-unauth p {
     font-size: var(--fs-lg);
     color: var(--text-muted);
 }
 
-.unauthenticated a {
+.bn-unauth a {
     color: var(--accent-color);
     font-weight: 600;
+}
+
+/* ── Toast ───────────────────────────────────────────────── */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.toast {
+    background: var(--primary-color);
+    color: var(--white);
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-sm);
+    box-shadow: var(--shadow-md);
+    font-size: var(--fs-sm);
+    font-family: var(--font-main);
+    animation: bn-slideIn 0.3s ease-out;
+    border-left: 4px solid var(--accent-color);
+    max-width: 320px;
+}
+
+@keyframes bn-slideIn {
+    from { transform: translateX(110%); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+}
+
+/* ── Name help text ──────────────────────────────────────── */
+.name-help-text {
+    display: block;
+    margin-top: var(--space-xs);
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* ── Mobile ──────────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .bn-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .bn-aside {
+        position: static;
+    }
+
+    .book-title {
+        font-size: var(--fs-3xl);
+    }
+}
+
+@media (max-width: 620px) {
+    .book-page {
+        padding: var(--space-lg) var(--space-md);
+    }
+
+    .bn-card {
+        padding: var(--space-md);
+        gap: var(--space-md);
+    }
+
+    .bn-block {
+        padding-top: var(--space-md);
+    }
+
+    .bn-datetime {
+        grid-template-columns: 1fr;
+    }
+
+    .bn-slots-panel {
+        border-left: none;
+        padding-left: 0;
+        border-top: 1px solid #E7DDD1;
+        padding-top: var(--space-md);
+    }
+
+    .bn-therapist-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .bn-confirm-actions {
+        flex-direction: column;
+    }
+
+    .bn-confirm-actions .btn {
+        width: 100%;
+    }
 }

@@ -43,22 +43,13 @@
         <div class="hp-reveal">
             <span class="hp-eyebrow">{% trans "Нашите услуги" %}</span>
             <h2 class="hp-section-title">{% trans "Предпочитани масажи" %}</h2>
+            <p class="hp-section-sub">{% trans "Всяка сесия е съобразена с вашето тяло и нужди." %}</p>
         </div>
-        <div class="hp-svc-list">
-            {% for m in massages %}
-            <a href="{% url 'massage_detail' pk=m.pk %}" class="hp-svc-row hp-reveal">
-                <span class="hp-svc-num">0{{ forloop.counter }}</span>
-                <div class="hp-svc-info">
-                    <h3 class="hp-svc-name">{{ m.name }}</h3>
-                    <p class="hp-svc-desc">{{ m.short_description }}</p>
-                </div>
-                <div class="hp-svc-meta">
-                    <span class="hp-svc-price">{{ m.price }} {% trans "лв." %}</span>
-                    <span class="hp-svc-dur">{{ m.duration_in_minutes }} {% trans "мин" %}</span>
-                </div>
-            </a>
-            {% endfor %}
-        </div>
+        {% if featured_has_images %}
+            {% include 'partials/featured_with_image.html' %}
+        {% else %}
+            {% include 'partials/featured_without_image.html' %}
+        {% endif %}
         <div class="hp-gallery-footer hp-reveal hp-centered-text">
             <a href="{% url 'massages_dashboard' %}" class="btn-gallery">{% trans "Виж всички услуги" %} &rarr;</a>
         </div>
@@ -82,7 +73,7 @@
             {% endfor %}
         </div>
         <div class="hp-gallery-footer hp-reveal hp-centered-text">
-            <a href="#" class="btn-gallery">{% trans "Виж пълната галерия" %} &rarr;</a>
+            <a href="{% url 'gallery' %}" class="btn-gallery">{% trans "Виж пълната галерия" %} &rarr;</a>
         </div>
     </div>
 </section>
@@ -131,7 +122,7 @@
         {% if comments|length > 2 %}
         <div class="hp-review-dots" id="hp-review-dots">
             {% for comment in comments %}
-            <button class="hp-dot{% if forloop.first %} active{% endif %}" data-index="{{ forloop.counter0 }}" aria-label="{% trans "Отзив" %} {{ forloop.counter }}"></button>
+                <button class="hp-dot{% if forloop.first %} active{% endif %}" data-index="{{ forloop.counter0 }}" aria-label="{% trans "Отзив" %} {{ forloop.counter }}"></button>
             {% endfor %}
         </div>
         {% endif %}
@@ -256,29 +247,36 @@
         function slide(i) {
             var vis = getVisible();
             var max = n - vis;
+            var numPages = Math.ceil(n / vis);
             current = Math.max(0, Math.min(i, max));
             var cardW = cards[0].offsetWidth;
             track.style.transform = 'translateX(-' + (current * (cardW + GAP)) + 'px)';
             if (prevBtn) prevBtn.disabled = current === 0;
             if (nextBtn) nextBtn.disabled = current >= max;
-            dots.forEach(function (d, idx) { d.classList.toggle('active', idx === current); });
+            var activePage = Math.min(Math.round(current / vis), numPages - 1);
+            dots.forEach(function (d, idx) {
+                d.style.display = idx < numPages ? '' : 'none';
+                d.classList.toggle('active', idx === activePage);
+            });
         }
 
-        if (prevBtn) prevBtn.addEventListener('click', function () { slide(current - 1); });
-        if (nextBtn) nextBtn.addEventListener('click', function () { slide(current + 1); });
+        if (prevBtn) prevBtn.addEventListener('click', function () { slide(current - getVisible()); });
+        if (nextBtn) nextBtn.addEventListener('click', function () { slide(current + getVisible()); });
         dots.forEach(function (d) {
-            d.addEventListener('click', function () { slide(parseInt(d.dataset.index)); });
+            d.addEventListener('click', function () { slide(parseInt(d.dataset.index) * getVisible()); });
         });
 
         var autoTimer = setInterval(function () {
-            var max = n - getVisible();
-            slide(current < max ? current + 1 : 0);
+            var vis = getVisible();
+            var max = n - vis;
+            slide(current + vis <= max ? current + vis : 0);
         }, 5000);
         wrap.addEventListener('mouseenter', function () { clearInterval(autoTimer); });
         wrap.addEventListener('mouseleave', function () {
             autoTimer = setInterval(function () {
-                var max = n - getVisible();
-                slide(current < max ? current + 1 : 0);
+                var vis = getVisible();
+                var max = n - vis;
+                slide(current + vis <= max ? current + vis : 0);
             }, 5000);
         });
 

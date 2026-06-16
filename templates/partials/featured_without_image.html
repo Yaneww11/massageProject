@@ -1,0 +1,16 @@
+{% load i18n %}
+<div class="hp-svc-list">
+    {% for m in massages %}
+    <a href="{% url 'massage_detail' pk=m.pk %}" class="hp-svc-row hp-reveal">
+        <span class="hp-svc-num">0{{ forloop.counter }}</span>
+        <div class="hp-svc-info">
+            <h3 class="hp-svc-name">{{ m.name }}</h3>
+            <p class="hp-svc-desc">{{ m.short_description }}</p>
+        </div>
+        <div class="hp-svc-meta">
+            <span class="hp-svc-price">{{ m.price }} {% trans "лв." %}</span>
+            <span class="hp-svc-dur">{{ m.duration_in_minutes }} {% trans "мин" %}</span>
+        </div>
+    </a>
+    {% endfor %}
+</div>

@@ -1,0 +1,20 @@
+{% load i18n %}
+<div class="hp-feat-list">
+    {% for m in massages %}
+    <article class="hp-feat-row hp-reveal">
+        <a href="{% url 'massage_detail' pk=m.pk %}" class="hp-feat-img">
+            <img src="{{ m.image.url }}" alt="{{ m.name }}">
+        </a>
+        <div class="hp-feat-body">
+            <span class="hp-feat-num">0{{ forloop.counter }}</span>
+            <h3 class="hp-feat-name">{{ m.name }}</h3>
+            <p class="hp-feat-desc">{{ m.short_description }}</p>
+            <div class="hp-feat-meta">
+                <span class="hp-feat-badge">{{ m.duration_in_minutes }} {% trans "мин" %}</span>
+                <span class="hp-feat-price">{{ m.price }} {% trans "лв." %}</span>
+            </div>
+            <a href="{% url 'reservation_page' %}?massage={{ m.pk }}" class="btn btn-primary hp-feat-book">{% trans "Запазете час" %}</a>
+        </div>
+    </article>
+    {% endfor %}
+</div>

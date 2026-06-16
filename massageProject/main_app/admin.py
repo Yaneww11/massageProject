@@ -12,7 +12,7 @@ from modeltranslation.admin import TabbedTranslationAdmin
 from massageProject.main_app.models import (
     Massage, Image, Gallery, HomePage, GalleryImage,
     MessageStudio, Masseur, WorkingHours, MessageReservation, Comment,
-    StudioWorkingHours,
+    StudioWorkingHours, ServiceGroup, GalleryAlbum, AlbumPhoto,
 )
 
 # --- Actions ---
@@ -68,18 +68,24 @@ class ReservationDateFilter(admin.SimpleListFilter):
 
 # --- Admin Classes ---
 
+@admin.register(ServiceGroup)
+class ServiceGroupAdmin(ModelAdmin, TabbedTranslationAdmin):
+    list_display = ('name', 'order')
+    list_editable = ('order',)
+
+
 @admin.register(Massage)
 class MassageAdmin(ModelAdmin, TabbedTranslationAdmin):
-    list_display = ('name', 'price', 'duration_in_minutes', 'home_page')
+    list_display = ('name', 'price', 'duration_in_minutes', 'home_page', 'group')
     search_fields = ('name', 'short_description')
-    list_filter = ('home_page', 'price', 'duration_in_minutes')
+    list_filter = ('home_page', 'group', 'price', 'duration_in_minutes')
     list_editable = ('price', 'duration_in_minutes', 'home_page')
     list_filter_sheet = True
-    
+
     fieldsets = (
         (_('Основна информация'), {'fields': ('name', 'short_description', 'description')}),
         (_('Цена и Продължителност'), {'fields': ('price', 'duration_in_minutes')}),
-        (_('Медия и Видимост'), {'fields': ('image', 'home_page')}),
+        (_('Медия и Видимост'), {'fields': ('image', 'home_page', 'group')}),
     )
 
     def display_image(self, obj):
@@ -171,8 +177,48 @@ class GalleryImageInline(TabularInline):
     extra = 1
 
 @admin.register(Gallery)
-class GalleryAdmin(ModelAdmin):
+class GalleryAdmin(ModelAdmin, TabbedTranslationAdmin):
     inlines = [GalleryImageInline]
+    fields = ('title', 'short_description')
+
+
+class AlbumPhotoInline(TabularInline):
+    model = AlbumPhoto
+    extra = 1
+    fields = ('display_image', 'image', 'alt_text', 'order')
+    readonly_fields = ('display_image',)
+
+    def display_image(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" style="width:80px;height:50px;object-fit:cover;" />', obj.image.url)
+        return _('Няма изображение')
+    display_image.short_description = _('Преглед')
+
+
+@admin.register(GalleryAlbum)
+class GalleryAlbumAdmin(ModelAdmin, TabbedTranslationAdmin):
+    list_display = ('title', 'gallery', 'order', 'photo_count')
+    list_editable = ('order',)
+    prepopulated_fields = {'slug': ('title_bg',)}
+    inlines = [AlbumPhotoInline]
+
+    def photo_count(self, obj):
+        return obj.photos.count()
+    photo_count.short_description = _('Брой снимки')
+
+
+@admin.register(AlbumPhoto)
+class AlbumPhotoAdmin(ModelAdmin, TabbedTranslationAdmin):
+    list_display = ('display_image', 'album', 'alt_text', 'order')
+    list_editable = ('order',)
+    list_filter = ('album',)
+    search_fields = ('alt_text',)
+
+    def display_image(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" style="width: 80px; height: 50px; object-fit: cover;" />', obj.image.url)
+        return _("Няма изображение")
+    display_image.short_description = _('Преглед')
 
 class StudioWorkingHoursInline(TabularInline):
     model = StudioWorkingHours

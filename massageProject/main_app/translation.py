@@ -1,6 +1,7 @@
 from modeltranslation.translator import register, TranslationOptions
 from massageProject.main_app.models import (
-    Massage, Masseur, HomePage, MessageStudio, StudioWorkingHours, Image
+    Massage, Masseur, HomePage, MessageStudio, StudioWorkingHours, Image, ServiceGroup,
+    Gallery, GalleryAlbum, AlbumPhoto,
 )
 
 
@@ -31,4 +32,24 @@ class StudioWorkingHoursTranslationOptions(TranslationOptions):
 
 @register(Image)
 class ImageTranslationOptions(TranslationOptions):
+    fields = ('alt_text',)
+
+
+@register(ServiceGroup)
+class ServiceGroupTranslationOptions(TranslationOptions):
+    fields = ('name',)
+
+
+@register(Gallery)
+class GalleryTranslationOptions(TranslationOptions):
+    fields = ('title', 'short_description')
+
+
+@register(GalleryAlbum)
+class GalleryAlbumTranslationOptions(TranslationOptions):
+    fields = ('title', 'description')
+
+
+@register(AlbumPhoto)
+class AlbumPhotoTranslationOptions(TranslationOptions):
     fields = ('alt_text',)

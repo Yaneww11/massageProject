@@ -221,6 +221,23 @@ UNFOLD = {
                     },
                 ],
             },
+            # Gallery administration pages.
+            {
+                "title": _("Галерия"),
+                "separator": True,
+                "items": [
+                    {
+                        "title": _("Албуми"),
+                        "icon": "photo_library",
+                        "link": reverse_lazy("admin:main_app_galleryalbum_changelist"),
+                    },
+                    {
+                        "title": _("Снимки в албум"),
+                        "icon": "image",
+                        "link": reverse_lazy("admin:main_app_albumphoto_changelist"),
+                    },
+                ],
+            },
             # User and feedback administration pages.
             {
                 "title": _("Потребители и Отзиви"),

@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+
+{% block content %}
+<div class="gal-page">
+
+  <!-- Album header -->
+  <div class="gal-album-header">
+    <div class="gal-album-header__inner">
+      <a href="{% url 'gallery' %}" class="gal-back">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+        {% trans "Към галерията" %}
+      </a>
+      <h1>{{ album.title }}</h1>
+      {% if album.description %}
+        <p>{{ album.description }}</p>
+      {% endif %}
+      <span class="gal-album-count">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>
+        </svg>
+        {{ album.photo_count }} {% trans "снимки" %}
+      </span>
+    </div>
+  </div>
+
+  <!-- Photos masonry -->
+  <section class="gal-section">
+    <div class="gal-container">
+      {% if photos %}
+        <div class="gal-masonry">
+          {% for photo in photos %}
+            <div class="gal-photo" data-src="{{ photo.image.url }}" data-alt="{{ photo.alt_text }}">
+              <img src="{{ photo.image.url }}" alt="{{ photo.alt_text }}" loading="lazy">
+              <span class="gal-photo__magnify">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M11 8v6M8 11h6"/>
+                </svg>
+              </span>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p style="text-align:center; color: var(--text-muted); padding: var(--space-xl) 0;">
+          {% trans "Албумът все още няма добавени снимки." %}
+        </p>
+      {% endif %}
+    </div>
+  </section>
+
+  <!-- CTA band -->
+  <div class="gal-cta">
+    <h2>{% trans "Готови за вашия момент на грижа?" %}</h2>
+    <p>{% trans "Запазете час и усетете атмосферата на живо." %}</p>
+    <a href="{% url 'reservation_page' %}" class="btn-primary">{% trans "Запазете час" %}</a>
+  </div>
+
+</div>
+
+<!-- Lightbox -->
+<div class="gal-lightbox" id="galLightbox" style="display:none;" role="dialog" aria-modal="true" aria-label="{% trans 'Увеличена снимка' %}">
+  <button class="gal-lightbox__close" id="galLightboxClose" aria-label="{% trans 'Затвори' %}">&#x2715;</button>
+  <img class="gal-lightbox__img" id="galLightboxImg" src="" alt="">
+</div>
+
+<script>
+(function () {
+  const lb = document.getElementById('galLightbox');
+  const lbImg = document.getElementById('galLightboxImg');
+  const lbClose = document.getElementById('galLightboxClose');
+
+  document.querySelectorAll('.gal-photo').forEach(function (el) {
+    el.addEventListener('click', function () {
+      lbImg.src = el.dataset.src;
+      lbImg.alt = el.dataset.alt || '';
+      lb.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  function closeLightbox() {
+    lb.style.display = 'none';
+    lbImg.src = '';
+    document.body.style.overflow = '';
+  }
+
+  lbClose.addEventListener('click', closeLightbox);
+
+  lb.addEventListener('click', function (e) {
+    if (e.target === lb) closeLightbox();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeLightbox();
+  });
+})();
+</script>
+{% endblock %}

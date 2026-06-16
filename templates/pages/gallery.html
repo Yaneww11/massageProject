@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+
+{% block content %}
+<div class="gal-page">
+
+  <!-- Page header -->
+  <div class="gal-header">
+    <span class="gal-eyebrow">{% trans "Галерия" %}</span>
+    {% if gallery %}
+      <h1>{{ gallery.title }}</h1>
+      {% if gallery.short_description %}
+        <p>{{ gallery.short_description }}</p>
+      {% endif %}
+    {% else %}
+      <h1>{% trans "Нашата галерия" %}</h1>
+    {% endif %}
+  </div>
+
+  <!-- Mosaic + overflow grid -->
+  <section class="gal-section">
+    <div class="gal-container">
+
+      {% if albums %}
+        {% with mosaic_albums=albums|slice:":4" overflow_albums=albums|slice:"4:" %}
+
+        <!-- First 4 albums: mosaic grid -->
+        <div class="gal-mosaic">
+          {% for album in mosaic_albums %}
+            {% with cover=album.photos.all.0 %}
+            <a href="{% url 'gallery_album' album.slug %}" class="gal-tile">
+              <div class="gal-tile__bg"
+                   {% if cover %}style="background-image: url('{{ cover.image.url }}')"{% endif %}>
+              </div>
+              <div class="gal-tile__overlay"></div>
+              <div class="gal-tile__body">
+                <span class="gal-tile__count">{{ album.photo_count }} {% trans "снимки" %}</span>
+                <h3 class="gal-tile__title">{{ album.title }}</h3>
+                {% if forloop.first and album.description %}
+                  <p class="gal-tile__desc">{{ album.description }}</p>
+                {% endif %}
+                <span class="gal-tile__hint">
+                  {% trans "Виж албума" %}
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14M13 6l6 6-6 6"/>
+                  </svg>
+                </span>
+              </div>
+            </a>
+            {% endwith %}
+          {% endfor %}
+        </div>
+
+        <!-- Albums 5+: regular responsive grid -->
+        {% if overflow_albums %}
+          <div class="gal-overflow-grid">
+            {% for album in overflow_albums %}
+              {% with cover=album.photos.all.0 %}
+              <a href="{% url 'gallery_album' album.slug %}" class="gal-tile">
+                <div class="gal-tile__bg"
+                     {% if cover %}style="background-image: url('{{ cover.image.url }}')"{% endif %}>
+                </div>
+                <div class="gal-tile__overlay"></div>
+                <div class="gal-tile__body">
+                  <span class="gal-tile__count">{{ album.photo_count }} {% trans "снимки" %}</span>
+                  <h3 class="gal-tile__title">{{ album.title }}</h3>
+                  <span class="gal-tile__hint">
+                    {% trans "Виж албума" %}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M5 12h14M13 6l6 6-6 6"/>
+                    </svg>
+                  </span>
+                </div>
+              </a>
+              {% endwith %}
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {% endwith %}
+      {% else %}
+        <p style="text-align:center; color: var(--text-muted); padding: var(--space-xl) 0;">
+          {% trans "Галерията все още няма добавени албуми." %}
+        </p>
+      {% endif %}
+
+    </div>
+  </section>
+
+  <!-- CTA band -->
+  <div class="gal-cta">
+    <h2>{% trans "Готови за вашия момент на грижа?" %}</h2>
+    <p>{% trans "Запазете час и усетете атмосферата на живо." %}</p>
+    <a href="{% url 'reservation_page' %}" class="btn-primary">{% trans "Запазете час" %}</a>
+  </div>
+
+</div>
+{% endblock %}

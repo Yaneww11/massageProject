@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, ListView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -14,7 +14,7 @@ import json
 
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
     ReservationDeleteForm, CommentForm, UserNameForm
-from massageProject.main_app.models import Massage, HomePage, Masseur, MessageStudio, MessageReservation, Comment, WorkingHours
+from massageProject.main_app.models import Massage, HomePage, Masseur, MessageStudio, MessageReservation, Comment, WorkingHours, ServiceGroup, Gallery, GalleryAlbum
 
 
 def check_availability(request):
@@ -97,7 +97,9 @@ class Index(TemplateView):
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         context['page'] = HomePage.objects.first()
-        context['massages'] = Massage.objects.filter(home_page=True)[:3]
+        massages = list(Massage.objects.filter(home_page=True)[:3])
+        context['massages'] = massages
+        context['featured_has_images'] = bool(massages) and all(m.image for m in massages)
         if context['page']:
             context['images'] = context['page'].gallery.images.all()
         context['comments'] = Comment.objects.filter(is_reviewed=True).order_by('-created_at')[:10]
@@ -116,6 +118,11 @@ class MassagesDashboard(ListView):
     template_name = 'pages/massages_page.html'
     context_object_name = 'massages'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['groups'] = ServiceGroup.objects.filter(massages__isnull=False).distinct()
+        return context
+
 class ReservationPage(LoginRequiredMixin, CreateView):
     model = MessageReservation
     template_name = 'pages/reservation.html'
@@ -127,6 +134,17 @@ class ReservationPage(LoginRequiredMixin, CreateView):
         user = self.request.user
         if not (user.first_name and user.last_name) and 'name_form' not in context:
             context['name_form'] = UserNameForm()
+        context['masseurs'] = Masseur.objects.all()
+        context['massages_json'] = json.dumps([
+            {
+                'id': m.pk,
+                'name': m.name,
+                'duration': m.duration_in_minutes,
+                'price': str(m.price).rstrip('0').rstrip('.') if m.price else '',
+                'desc': m.short_description or (m.description[:100] if m.description else ''),
+            }
+            for m in Massage.objects.all()
+        ])
         return context
 
     def post(self, request, *args, **kwargs):
@@ -150,6 +168,15 @@ class ReservationPage(LoginRequiredMixin, CreateView):
         if form.is_valid() and name_valid:
             return self.form_valid(form)
 
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            all_errors = {}
+            for f, e in form.errors.items():
+                all_errors[f] = list(e)
+            if name_form is not None:
+                for f, e in name_form.errors.items():
+                    all_errors[f] = list(e)
+            return JsonResponse({'success': False, 'errors': all_errors}, status=400)
+
         extra = {'form': form}
         if name_form is not None:
             extra['name_form'] = name_form
@@ -157,7 +184,24 @@ class ReservationPage(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.user = self.request.user
-        return super().form_valid(form)
+        self.object = form.save()
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            r = self.object
+            price = r.massage.price
+            price_str = str(price).rstrip('0').rstrip('.') if price else ''
+            return JsonResponse({
+                'success': True,
+                'booking': {
+                    'service': r.massage.name,
+                    'duration': f"{r.massage.duration_in_minutes} мин",
+                    'price': f"{price_str} лв" if price_str else '',
+                    'masseur': r.masseur.name,
+                    'date': r.date.strftime('%d.%m.%Y'),
+                    'time': r.time.strftime('%H:%M'),
+                },
+                'contact': str(self.request.user.email or self.request.user.phone_number),
+            })
+        return redirect(self.get_success_url())
 
     def get_initial(self):
         initial = super().get_initial()
@@ -363,3 +407,24 @@ def delete_reservation(request, pk: int):
     }
 
     return render(request, 'reservation/delete-reservation.html', context)
+
+
+class GalleryView(TemplateView):
+    template_name = 'pages/gallery.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['albums'] = list(GalleryAlbum.objects.order_by('order').prefetch_related('photos'))
+        return ctx
+
+
+class GalleryAlbumView(TemplateView):
+    template_name = 'pages/gallery_album.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        album = get_object_or_404(GalleryAlbum, slug=kwargs['slug'])
+        ctx['album'] = album
+        ctx['photos'] = album.photos.order_by('order')
+        return ctx
+

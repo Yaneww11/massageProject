@@ -5,6 +5,19 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from datetime import datetime, timedelta
 
+class ServiceGroup(models.Model):
+    name = models.CharField(max_length=100, verbose_name=_('Наименование'))
+    order = models.PositiveSmallIntegerField(default=0, verbose_name=_('Ред'))
+
+    class Meta:
+        ordering = ['order']
+        verbose_name = _('Група услуги')
+        verbose_name_plural = _('Групи услуги')
+
+    def __str__(self):
+        return self.name
+
+
 class Massage(models.Model):
     name = models.CharField(max_length=80)
     description = models.TextField()
@@ -16,10 +29,28 @@ class Massage(models.Model):
     short_description = models.CharField(max_length=255)
     image = models.ImageField(upload_to='massages/')
     home_page = models.BooleanField(default=False)
+    group = models.ForeignKey(
+        'ServiceGroup',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='massages',
+        verbose_name=_('Група'),
+    )
 
     class Meta:
         verbose_name = _('Масаж')
         verbose_name_plural = _('Масажи')
+
+    def clean(self):
+        if self.home_page:
+            qs = Massage.objects.filter(home_page=True)
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+            if qs.count() >= 3:
+                raise ValidationError({
+                    'home_page': _('Можете да изберете най-много 3 предпочитани масажа.')
+                })
 
     def __str__(self):
         return self.name
@@ -218,6 +249,8 @@ class MessageReservation(models.Model):
 
 class Gallery(models.Model):
     images = models.ManyToManyField('Image', related_name='galleries', through='GalleryImage')
+    title = models.CharField(max_length=255, blank=True, verbose_name=_('Заглавие'))
+    short_description = models.TextField(blank=True, verbose_name=_('Кратко описание'))
 
     class Meta:
         verbose_name = _('Галерия')
@@ -226,7 +259,7 @@ class Gallery(models.Model):
     def __str__(self):
         if hasattr(self, 'home_page'):
             return f"{_('Галерия')} - {self.home_page.brand_name}"
-        return f"{_('Галерия')} {self.id}"
+        return self.title or f"{_('Галерия')} {self.id}"
 
 class Image(models.Model):
     image = models.ImageField(upload_to='studios/gallery/')
@@ -250,6 +283,45 @@ class GalleryImage(models.Model):
 
     def __str__(self):
         return f"{self.gallery} - {self.image.alt_text}"
+
+
+class GalleryAlbum(models.Model):
+    title = models.CharField(max_length=255, verbose_name=_('Заглавие'))
+    description = models.TextField(blank=True, verbose_name=_('Описание'))
+    slug = models.SlugField(unique=True, verbose_name=_('Slug'))
+    order = models.PositiveIntegerField(default=0, verbose_name=_('Ред'))
+
+    class Meta:
+        ordering = ['order']
+        verbose_name = _('Албум')
+        verbose_name_plural = _('Албуми')
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def cover(self):
+        return self.photos.order_by('order').first()
+
+    @property
+    def photo_count(self):
+        return self.photos.count()
+
+
+class AlbumPhoto(models.Model):
+    album = models.ForeignKey(GalleryAlbum, on_delete=models.CASCADE, related_name='photos', verbose_name=_('Албум'))
+    image = models.ImageField(upload_to='gallery/albums/', verbose_name=_('Изображение'))
+    alt_text = models.CharField(max_length=255, blank=True, verbose_name=_('Алт текст'))
+    order = models.PositiveIntegerField(default=0, verbose_name=_('Ред'))
+
+    class Meta:
+        ordering = ['order']
+        verbose_name = _('Снимка в албум')
+        verbose_name_plural = _('Снимки в албум')
+
+    def __str__(self):
+        return self.alt_text or f"Снимка {self.order}"
+
 
 class HomePage(models.Model):
     brand_name = models.CharField(max_length=255)

@@ -2,336 +2,634 @@
 {% load static i18n %}
 
 {% block content %}
-<section class="hero-section">
-    <div class="hero-content">
-        <h1>{% trans "Резервирайте своя масаж" %}</h1>
-        <p>{% trans "Подарете си релаксация и възстановяване с нашите професионални масажни услуги." %}</p>
-    </div>
+
+{% if not user.is_authenticated %}
+
+<section class="bn-unauth">
+  <h2>{% trans "Запазете час" %}</h2>
+  <p>{% trans "За да направите резервация, моля" %} <a href="{% url 'register' %}">{% trans "регистрирайте се" %}</a> {% trans "или" %} <a href="{% url 'login' %}">{% trans "влезте" %}</a>.</p>
 </section>
 
-{% if user.is_authenticated %}
-    <section class="reservation-section">
-        <div class="description">
-            <h2>{% trans "Запазете час" %}</h2>
-            <p>{% trans "Попълнете формуляра по-долу, за да запазите час за масаж. Очакваме Ви с нетърпение!" %}</p>
-            <form class="form-container" method="post">
-                {% csrf_token %}
-
-                {% if form.non_field_errors %}
-                    <div class="alert alert-danger">
-                        {% for error in form.non_field_errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
-                {% if not user.first_name or not user.last_name %}
-                    <div class="form-group">
-                        <label for="first_name">{% trans "Първо име" %}</label>
-                        <input type="text" id="first_name" name="first_name"
-                               value="{{ name_form.first_name.value|default:'' }}"
-                               minlength="2" maxlength="50"
-                               pattern="[A-Za-zА-Яа-яЁё\- ]+"
-                               title="{% trans 'Само букви (кирилица или латиница), интервали и тирета' %}"
-                               required>
-                        {% if name_form.first_name.errors %}
-                            <div class="error-message">{{ name_form.first_name.errors }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="form-group">
-                        <label for="last_name">{% trans "Фамилия" %}</label>
-                        <input type="text" id="last_name" name="last_name"
-                               value="{{ name_form.last_name.value|default:'' }}"
-                               minlength="2" maxlength="50"
-                               pattern="[A-Za-zА-Яа-яЁё\- ]+"
-                               title="{% trans 'Само букви (кирилица или латиница), интервали и тирета' %}"
-                               required>
-                        {% if name_form.last_name.errors %}
-                            <div class="error-message">{{ name_form.last_name.errors }}</div>
-                        {% endif %}
-                        <small class="name-help-text">{% trans "Моля, въведете Вашите имена. Те ще бъдат запазени и използвани автоматично при бъдещи резервации. След запазване имената ви не могат да бъдат променени." %}</small>
-                    </div>
-                {% endif %}
-
-                <div class="form-group">
-                    <label for="massage">{% trans "Тип масаж" %}</label>
-                    <select id="massage" name="massage" required>
-                        {% for massage in form.fields.massage.queryset %}
-                            <option value="{{ massage.id }}" {% if form.massage.value|add:"0" == massage.id %}selected{% endif %}>
-                                {{ massage.name }} ({{ massage.duration_in_minutes }} {% trans "мин" %})
-                            </option>
-                        {% endfor %}
-                    </select>
-                    {% if form.massage.errors %}
-                        <div class="error-message">{{ form.massage.errors }}</div>
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    <label for="masseur">{% trans "Масажист" %}</label>
-                    <select id="masseur" name="masseur" required>
-                        <option value="" disabled {% if not form.masseur.value %}selected{% endif %}>
-                            {% trans "Изберете масажист" %}
-                        </option>
-                        {% for masseur in form.fields.masseur.queryset %}
-                            <option value="{{ masseur.id }}" {% if form.masseur.value|add:"0" == masseur.id %}selected{% endif %}>
-                                {{ masseur.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                    {% if form.masseur.errors %}
-                        <div class="error-message">{{ form.masseur.errors }}</div>
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    <label for="date">{% trans "Предпочитана дата" %}</label>
-                    <input type="date" id="date" name="date"
-                        value="{{ form.date.value|date:'Y-m-d'|default:form.date.value|default:'' }}" required>
-                    {% if form.date.errors %}
-                        <div class="error-message">{{ form.date.errors }}</div>
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    <label for="time">{% trans "Предпочитано време" %}</label>
-                    <input type="hidden" id="time_value" name="time" value="{{ form.time.value|default:'' }}" required>
-                    <div id="time-slots" class="time-slots-container"
-                         data-availability-url="{% url 'check_availability' %}">
-                        <p class="placeholder-text">{% trans "Моля, изберете първо масаж, масажист и дата." %}</p>
-                    </div>
-                    {% if form.time.errors %}
-                        <div class="error-message">{{ form.time.errors }}</div>
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    <label for="additional_text">{% trans "Допълнителни бележки" %}</label>
-                    <textarea id="additional_text" name="additional_text"
-                              placeholder="{% trans 'Специални изисквания или притеснения' %}">{{ form.additional_text.value|default:'' }}</textarea>
-                    {% if form.additional_text.errors %}
-                        <div class="error-message">{{ form.additional_text.errors }}</div>
-                    {% endif %}
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">{% trans "Резервирайте сега" %}</button>
-            </form>
-        </div>
-    </section>
-
-    <!-- Toast Container -->
-    <div id="toast-container" class="toast-container"></div>
-
-    <style>
-        .name-help-text {
-            display: block;
-            margin-top: var(--space-xs, 4px);
-            font-size: var(--fs-sm);
-            color: var(--text-muted);
-            font-style: italic;
-        }
-
-        .time-slots-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: var(--space-sm);
-            margin-top: var(--space-sm);
-            padding: var(--space-md);
-            background: var(--bg-light);
-            border-radius: var(--radius-md);
-            border: 1px solid var(--secondary-color);
-            min-height: 50px;
-        }
-
-        .time-slot {
-            padding: var(--space-sm);
-            border: 1px solid var(--primary-color);
-            background: var(--bg-paper);
-            color: var(--primary-color);
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: var(--transition);
-            font-weight: 600;
-            text-align: center;
-            font-family: var(--font-main);
-        }
-
-        .time-slot:hover:not(.disabled) {
-            background: var(--primary-color);
-            color: var(--white);
-        }
-
-        .time-slot.selected {
-            background: var(--accent-color);
-            border-color: var(--accent-color);
-            color: var(--white);
-        }
-
-        .time-slot.disabled {
-            background: #eee;
-            border-color: #ccc;
-            color: #999;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-
-        .placeholder-text {
-            grid-column: 1 / -1;
-            color: var(--text-muted);
-            font-style: italic;
-            margin: 0;
-            font-size: var(--fs-sm);
-        }
-
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-
-        .toast {
-            background: var(--primary-color);
-            color: var(--white);
-            padding: var(--space-md) var(--space-lg);
-            border-radius: var(--radius-sm);
-            margin-bottom: var(--space-sm);
-            box-shadow: var(--shadow-md);
-            font-size: var(--fs-sm);
-            font-family: var(--font-main);
-            animation: slideIn 0.3s ease-out;
-            border-left: 4px solid var(--accent-color);
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-    </style>
-
-    <script>
-        const MSG_SELECT_FIRST = "{% trans 'Моля, изберете първо масаж, масажист и дата.' %}";
-        const MSG_LOADING = "{% trans 'Зареждане на свободни часове...' %}";
-        const MSG_TAKEN = "{% trans 'Зает' %}";
-        const MSG_NO_SLOTS = "{% trans 'Няма свободни часове за избрания ден.' %}";
-        const MSG_ERROR = "{% trans 'Възникна грешка при зареждането.' %}";
-        const MSG_MASSAGE_CHANGED = "{% trans 'Типът масаж беше променен. Моля, изберете нов час.' %}";
-        const MSG_SELECT_TIME = "{% trans 'Моля, изберете час за вашата резервация.' %}";
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const massageSelect = document.getElementById('massage');
-            const masseurSelect = document.getElementById('masseur');
-            const dateInput = document.getElementById('date');
-            const timeValueInput = document.getElementById('time_value');
-            const timeSlotsContainer = document.getElementById('time-slots');
-            const toastContainer = document.getElementById('toast-container');
-            const form = document.querySelector('.form-container');
-            const availabilityUrl = timeSlotsContainer.dataset.availabilityUrl;
-
-            // Set min date to today
-            const today = new Date().toISOString().split('T')[0];
-            dateInput.setAttribute('min', today);
-
-            function showToast(message) {
-                const toast = document.createElement('div');
-                toast.className = 'toast';
-                toast.textContent = message;
-                toastContainer.appendChild(toast);
-                setTimeout(() => {
-                    toast.style.opacity = '0';
-                    toast.style.transform = 'translateX(100%)';
-                    toast.style.transition = 'all 0.3s ease-in';
-                    setTimeout(() => toast.remove(), 300);
-                }, 3000);
-            }
-
-            let debounceTimer;
-            function debouncedFetch() {
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(fetchAvailability, 500);
-            }
-
-            async function fetchAvailability() {
-                const massageId = massageSelect.value;
-                const masseurId = masseurSelect.value;
-                const date = dateInput.value;
-
-                if (!massageId || !masseurId || !date) {
-                    timeSlotsContainer.innerHTML = `<p class="placeholder-text">${MSG_SELECT_FIRST}</p>`;
-                    return;
-                }
-
-                timeSlotsContainer.innerHTML = `<p class="placeholder-text">${MSG_LOADING}</p>`;
-
-                try {
-                    const response = await fetch(`${availabilityUrl}?massage_id=${massageId}&masseur_id=${masseurId}&date=${date}`);
-                    const data = await response.json();
-
-                    if (data.slots && data.slots.length > 0) {
-                        timeSlotsContainer.innerHTML = '';
-                        data.slots.forEach(slot => {
-                            const btn = document.createElement('div');
-                            btn.className = `time-slot ${slot.available ? '' : 'disabled'}`;
-                            btn.textContent = slot.available ? slot.time : `${slot.time} (${MSG_TAKEN})`;
-
-                            if (slot.available) {
-                                btn.addEventListener('click', () => {
-                                    document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
-                                    btn.classList.add('selected');
-                                    timeValueInput.value = slot.time;
-                                });
-
-                                // Re-select if previously selected
-                                if (timeValueInput.value === slot.time) {
-                                    btn.classList.add('selected');
-                                }
-                            }
-                            timeSlotsContainer.appendChild(btn);
-                        });
-                    } else {
-                        timeSlotsContainer.innerHTML = `<p class="placeholder-text">${MSG_NO_SLOTS}</p>`;
-                    }
-                } catch (error) {
-                    console.error('Error fetching availability:', error);
-                    timeSlotsContainer.innerHTML = `<p class="placeholder-text">${MSG_ERROR}</p>`;
-                }
-            }
-
-            // Click handling for help message
-            timeSlotsContainer.addEventListener('click', (e) => {
-                if (!massageSelect.value || !masseurSelect.value || !dateInput.value) {
-                    showToast(MSG_SELECT_FIRST);
-                }
-            });
-
-            // Re-validation when massage changes
-            massageSelect.addEventListener('change', () => {
-                if (timeValueInput.value) {
-                    timeValueInput.value = '';
-                    showToast(MSG_MASSAGE_CHANGED);
-                }
-                debouncedFetch();
-            });
-
-            masseurSelect.addEventListener('change', debouncedFetch);
-            dateInput.addEventListener('change', debouncedFetch);
-
-            // Initial fetch if values are pre-filled (e.g., after validation error)
-            if (massageSelect.value && masseurSelect.value && dateInput.value) {
-                fetchAvailability();
-            }
-
-            // Final check before submit
-            form.addEventListener('submit', (e) => {
-                if (!timeValueInput.value) {
-                    e.preventDefault();
-                    showToast(MSG_SELECT_TIME);
-                }
-            });
-        });
-    </script>
 {% else %}
-    <section class="unauthenticated reservation-section">
-        <div class="description">
-            <h2>{% trans "Запазете час" %}</h2>
-            <p>{% trans "За да направите резервация, моля" %} <a href="{% url 'register' %}">{% trans "регистрирайте се" %}</a> {% trans "или" %} <a href="{% url 'login' %}">{% trans "влезте" %}</a>.</p>
-        </div>
-    </section>
-{% endif %}
 
+<div class="book-page">
+
+  <div class="book-page__head" id="book-head">
+    <span class="book-eyebrow">{% trans "Резервация" %}</span>
+    <h1 class="book-title">{% trans "Запазете час" %}</h1>
+    <p class="book-subtitle">{% trans "Изберете процедура и удобно за Вас време — ние ще се погрижим за останалото." %}</p>
+  </div>
+
+  <form method="post" id="book-form">
+    {% csrf_token %}
+
+    <div class="bn-grid">
+
+      <!-- ── Left: form card ────────────────────────────── -->
+      <div class="bn-card">
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+          {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Block 1: Treatment -->
+        <div class="bn-block bn-block--first">
+          <div class="bn-step-label">{% trans "Масаж" %}</div>
+          <div class="form-group" style="margin-bottom:0">
+            <select id="massage" name="massage" required>
+              {% for m in form.fields.massage.queryset %}
+                <option value="{{ m.id }}"
+                  {% if form.massage.value|add:"0" == m.id %}selected{% endif %}>
+                  {{ m.name }} — {{ m.duration_in_minutes }} {% trans "мин" %}{% if m.price %} · {{ m.price }} {% trans "лв" %}{% endif %}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="bn-svc-desc" id="svc-desc"></div>
+          {% if form.massage.errors %}
+            <div class="error-message">{{ form.massage.errors }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Block 2: Therapist -->
+        <div class="bn-block">
+          <div class="bn-step-label">{% trans "Масажист" %}</div>
+          <div class="bn-therapist-grid">
+            {% for m in masseurs %}
+            <button type="button" class="bn-therapist-tile"
+                    data-id="{{ m.id }}" data-name="{{ m.name }}">
+              <span class="bn-avatar">{{ m.name|slice:":1"|upper }}</span>
+              <span class="bn-tile-info">
+                <span class="bn-tile-name">{{ m.name }}</span>
+                {% if m.description %}
+                <span class="bn-tile-role">{{ m.description|truncatechars:45 }}</span>
+                {% endif %}
+              </span>
+            </button>
+            {% endfor %}
+          </div>
+          <input type="hidden" name="masseur" id="masseur-value">
+          {% if form.masseur.errors %}
+            <div class="error-message" style="margin-top:var(--space-sm)">{{ form.masseur.errors }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Block 3: Date & time -->
+        <div class="bn-block">
+          <div class="bn-step-label">
+            {% trans "Дата и час" %}
+            <span class="bn-hint">{% trans "Затворено в неделя" %}</span>
+          </div>
+          <div class="bn-datetime">
+            <div id="bn-calendar"></div>
+            <div class="bn-slots-panel">
+              <div id="time-slots" class="bn-slots"
+                   data-availability-url="{% url 'check_availability' %}">
+                <p class="bn-placeholder">{% trans "Изберете дата." %}</p>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" name="date" id="date-value"
+                 value="{{ form.date.value|date:'Y-m-d'|default:'' }}">
+          <input type="hidden" name="time" id="time-value"
+                 value="{{ form.time.value|default:'' }}">
+          {% if form.date.errors %}
+            <div class="error-message">{{ form.date.errors }}</div>
+          {% endif %}
+          {% if form.time.errors %}
+            <div class="error-message">{{ form.time.errors }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Block 4: Your details -->
+        <div class="bn-block">
+          <div class="bn-step-label">{% trans "Вашите данни" %}</div>
+
+          {% if not user.first_name or not user.last_name %}
+            <div class="form-group">
+              <label for="first_name">{% trans "Първо име" %}</label>
+              <input type="text" id="first_name" name="first_name"
+                     value="{{ name_form.first_name.value|default:'' }}"
+                     minlength="2" maxlength="50"
+                     pattern="[A-Za-zА-Яа-яЁё\- ]+"
+                     title="{% trans 'Само букви (кирилица или латиница), интервали и тирета' %}"
+                     required>
+              {% if name_form.first_name.errors %}
+                <div class="error-message">{{ name_form.first_name.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label for="last_name">{% trans "Фамилия" %}</label>
+              <input type="text" id="last_name" name="last_name"
+                     value="{{ name_form.last_name.value|default:'' }}"
+                     minlength="2" maxlength="50"
+                     pattern="[A-Za-zА-Яа-яЁё\- ]+"
+                     title="{% trans 'Само букви (кирилица или латиница), интервали и тирета' %}"
+                     required>
+              {% if name_form.last_name.errors %}
+                <div class="error-message">{{ name_form.last_name.errors }}</div>
+              {% endif %}
+              <small class="name-help-text">{% trans "Моля, въведете Вашите имена. Те ще бъдат запазени и използвани автоматично при бъдещи резервации. След запазване имената ви не могат да бъдат променени." %}</small>
+            </div>
+
+          {% else %}
+            <div class="bn-user-card">
+              <span class="bn-avatar bn-avatar--lg">{{ user.first_name|slice:":1"|upper }}{{ user.last_name|slice:":1"|upper }}</span>
+              <div class="bn-user-info">
+                <span class="bn-user-name">{{ user.first_name }} {{ user.last_name }}</span>
+                <span class="bn-user-sub">{{ user.phone_number }}</span>
+              </div>
+              <span class="bn-confirm-badge">{% trans "Ще получите потвърждение" %}</span>
+            </div>
+          {% endif %}
+
+        </div>
+
+        <!-- Block 5: Notes -->
+        <div class="bn-block">
+          <div class="bn-step-label">
+            {% trans "Допълнителни бележки" %}
+            <span class="bn-hint">{% trans "По избор" %}</span>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <textarea id="additional_text" name="additional_text" rows="3"
+                      placeholder="{% trans 'Специални изисквания или притеснения...' %}">{{ form.additional_text.value|default:'' }}</textarea>
+            {% if form.additional_text.errors %}
+              <div class="error-message">{{ form.additional_text.errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+      </div><!-- /bn-card -->
+
+      <!-- ── Right: sticky summary sidebar ─────────────── -->
+      <aside class="bn-aside">
+        <span class="bn-eyebrow">{% trans "Вашата резервация" %}</span>
+        <div class="bn-summary">
+          <div class="bn-summary-row">
+            <span>{% trans "Масаж" %}</span><span id="s-svc">—</span>
+          </div>
+          <div class="bn-summary-row">
+            <span>{% trans "Масажист" %}</span><span id="s-thp">—</span>
+          </div>
+          <div class="bn-summary-row">
+            <span>{% trans "Дата" %}</span><span id="s-date">—</span>
+          </div>
+          <div class="bn-summary-row">
+            <span>{% trans "Час" %}</span><span id="s-time">—</span>
+          </div>
+          <div class="bn-summary-row">
+            <span>{% trans "Продължителност" %}</span><span id="s-dur">—</span>
+          </div>
+        </div>
+        <hr class="bn-divider">
+        <button type="submit" class="btn btn-primary btn-block" id="confirm-btn" disabled>
+          {% trans "Потвърдете резервацията" %}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               aria-hidden="true" style="margin-left:auto;flex:none">
+            <path d="M5 12h14M13 6l6 6-6 6"/>
+          </svg>
+        </button>
+        <p class="bn-reassure">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/>
+          </svg>
+          {% trans "Безплатно анулиране до 24 часа преди процедурата." %}
+        </p>
+      </aside>
+
+    </div><!-- /bn-grid -->
+  </form>
+
+  <!-- ── Confirmation panel (shown after successful submit) ── -->
+  <div class="bn-confirm" id="bn-confirm" hidden>
+    <div class="bn-confirm-icon">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20 6L9 17l-5-5"/>
+      </svg>
+    </div>
+    <h2 class="bn-confirm-heading">{% trans "Записани сте!" %}</h2>
+    <p class="bn-confirm-sub">
+      {% trans "Потвърждение ще получите на" %} <strong id="conf-contact"></strong>
+    </p>
+    <div class="bn-confirm-summary">
+      <div class="bn-summary-row"><span>{% trans "Масаж" %}</span><span id="conf-svc"></span></div>
+      <div class="bn-summary-row"><span>{% trans "Масажист" %}</span><span id="conf-thp"></span></div>
+      <div class="bn-summary-row"><span>{% trans "Дата" %}</span><span id="conf-date"></span></div>
+      <div class="bn-summary-row"><span>{% trans "Час" %}</span><span id="conf-time"></span></div>
+      <div class="bn-summary-row"><span>{% trans "Продължителност" %}</span><span id="conf-dur"></span></div>
+      <div class="bn-summary-row"><span>{% trans "Цена" %}</span><span id="conf-price"></span></div>
+    </div>
+    <div class="bn-confirm-actions">
+      <a href="{% url 'profile_page' %}" class="btn btn-primary">{% trans "Вижте моите резервации" %}</a>
+      <button type="button" class="btn btn-outline" onclick="location.reload()">{% trans "Запазете нов час" %}</button>
+    </div>
+  </div>
+
+</div><!-- /book-page -->
+
+<div id="toast-container" class="toast-container"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+  /* ── Data & elements ─────────────────────────────────── */
+  const MASSAGES     = {{ massages_json|safe }};
+  const INITIAL_MASSEUR = '{{ form.masseur.value|default:"" }}';
+  const INITIAL_DATE    = '{{ form.date.value|date:"Y-m-d"|default:"" }}';
+  const INITIAL_TIME    = '{{ form.time.value|default:"" }}';
+  const LANG = document.documentElement.lang || 'bg';
+
+  const massageSelect = document.getElementById('massage');
+  const masseurValue  = document.getElementById('masseur-value');
+  const dateValue     = document.getElementById('date-value');
+  const timeValue     = document.getElementById('time-value');
+  const confirmBtn    = document.getElementById('confirm-btn');
+  const svcDesc       = document.getElementById('svc-desc');
+  const sSvc          = document.getElementById('s-svc');
+  const sThp          = document.getElementById('s-thp');
+  const sDate         = document.getElementById('s-date');
+  const sTime         = document.getElementById('s-time');
+  const sDur          = document.getElementById('s-dur');
+  const slotsEl       = document.getElementById('time-slots');
+  const form          = document.getElementById('book-form');
+  const calEl         = document.getElementById('bn-calendar');
+  const toastCont     = document.getElementById('toast-container');
+  const AVAIL_URL     = slotsEl.dataset.availabilityUrl;
+
+  /* ── i18n strings ─────────────────────────────────────── */
+  const MSG_SELECT_FIRST   = "{% trans 'Моля, изберете масаж, масажист и дата.' %}";
+  const MSG_SELECT_TIME    = "{% trans 'Моля, изберете час за Вашата резервация.' %}";
+  const MSG_LOADING        = "{% trans 'Зареждане...' %}";
+  const MSG_NO_SLOTS       = "{% trans 'Няма свободни часове за избрания ден.' %}";
+  const MSG_ERROR          = "{% trans 'Възникна грешка. Моля, опитайте отново.' %}";
+  const MSG_MASSAGE_CHANGED= "{% trans 'Типът масаж беше променен. Моля, изберете нов час.' %}";
+  const MSG_MORNING        = "{% trans 'Сутрин' %}";
+  const MSG_AFTERNOON      = "{% trans 'Следобед' %}";
+  const MSG_EVENING        = "{% trans 'Вечер' %}";
+  const MSG_SENDING        = "{% trans 'Изпращане...' %}";
+  const CONFIRM_INNER      = confirmBtn.innerHTML;
+
+  /* ── Toast ────────────────────────────────────────────── */
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    toastCont.appendChild(t);
+    setTimeout(() => {
+      t.style.opacity = '0';
+      t.style.transform = 'translateX(110%)';
+      t.style.transition = 'all 0.3s ease-in';
+      setTimeout(() => t.remove(), 300);
+    }, 3000);
+  }
+
+  /* ── Confirm button state ─────────────────────────────── */
+  function updateConfirmBtn() {
+    let ok = massageSelect.value && masseurValue.value && dateValue.value && timeValue.value;
+    const fn = document.getElementById('first_name');
+    const ln = document.getElementById('last_name');
+    if (fn && ln) ok = ok && fn.value.trim() && ln.value.trim();
+    confirmBtn.disabled = !ok;
+  }
+
+  /* ── A: Massage select ────────────────────────────────── */
+  function applyMassage() {
+    const m = MASSAGES.find(x => x.id == massageSelect.value);
+    if (!m) return;
+    svcDesc.textContent = m.desc;
+    sSvc.textContent    = m.name;
+    sDur.textContent    = m.duration + ' мин';
+  }
+
+  massageSelect.addEventListener('change', () => {
+    if (timeValue.value) {
+      timeValue.value = '';
+      sTime.textContent = '—';
+      showToast(MSG_MASSAGE_CHANGED);
+    }
+    applyMassage();
+    debouncedFetch();
+    updateConfirmBtn();
+  });
+
+  applyMassage(); // initialize from server-rendered select
+
+  /* ── B: Therapist tiles ───────────────────────────────── */
+  document.querySelectorAll('.bn-therapist-tile').forEach(tile => {
+    tile.addEventListener('click', () => {
+      document.querySelectorAll('.bn-therapist-tile').forEach(t => t.classList.remove('selected'));
+      tile.classList.add('selected');
+      masseurValue.value = tile.dataset.id;
+      sThp.textContent   = tile.dataset.name;
+      debouncedFetch();
+      updateConfirmBtn();
+    });
+  });
+
+  if (INITIAL_MASSEUR) {
+    const tile = document.querySelector(`.bn-therapist-tile[data-id="${INITIAL_MASSEUR}"]`);
+    if (tile) {
+      tile.classList.add('selected');
+      masseurValue.value = INITIAL_MASSEUR;
+      sThp.textContent   = tile.dataset.name;
+    }
+  }
+
+  /* ── C: Calendar ──────────────────────────────────────── */
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Build month/weekday arrays via Intl so they localise automatically
+  const monthFmt = new Intl.DateTimeFormat(LANG, { month: 'long' });
+  const MONTHS = Array.from({ length: 12 }, (_, i) => {
+    const s = monthFmt.format(new Date(2000, i, 1));
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  });
+  // Monday-first short weekday headers (Jan 3 2000 = Monday)
+  const wdFmt = new Intl.DateTimeFormat(LANG, { weekday: 'short' });
+  const WD_SHORT = Array.from({ length: 7 }, (_, i) => {
+    const s = wdFmt.format(new Date(2000, 0, 3 + i));
+    return s.charAt(0).toUpperCase() + s.slice(1, 3);
+  });
+
+  let calView = { year: today.getFullYear(), month: today.getMonth() };
+
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function toISO(y, m, d) { return `${y}-${pad2(m + 1)}-${pad2(d)}`; }
+
+  function renderCalendar() {
+    const { year, month } = calView;
+    calEl.innerHTML = '';
+
+    // Head
+    const head = document.createElement('div');
+    head.className = 'bn-cal-head';
+
+    const prev = document.createElement('button');
+    prev.type = 'button';
+    prev.className = 'bn-cal-nav';
+    prev.setAttribute('aria-label', 'Previous month');
+    prev.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>';
+    prev.disabled = (year === today.getFullYear() && month === today.getMonth());
+    prev.addEventListener('click', () => stepMonth(-1));
+
+    const next = document.createElement('button');
+    next.type = 'button';
+    next.className = 'bn-cal-nav';
+    next.setAttribute('aria-label', 'Next month');
+    next.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="transform:scaleX(-1)"><path d="M15 18l-6-6 6-6"/></svg>';
+    next.addEventListener('click', () => stepMonth(1));
+
+    const lbl = document.createElement('span');
+    lbl.className = 'bn-cal-month-label';
+    lbl.textContent = MONTHS[month] + ' ' + year;
+
+    head.appendChild(prev);
+    head.appendChild(lbl);
+    head.appendChild(next);
+    calEl.appendChild(head);
+
+    // Weekday row
+    const wdRow = document.createElement('div');
+    wdRow.className = 'bn-cal-weekdays';
+    WD_SHORT.forEach(w => {
+      const cell = document.createElement('div');
+      cell.className = 'bn-cal-wd';
+      cell.textContent = w;
+      wdRow.appendChild(cell);
+    });
+    calEl.appendChild(wdRow);
+
+    // Day grid
+    const grid = document.createElement('div');
+    grid.className = 'bn-cal-grid';
+    calEl.appendChild(grid);
+
+    const firstDow = (new Date(year, month, 1).getDay() + 6) % 7; // Mon=0
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let i = 0; i < firstDow; i++) grid.appendChild(document.createElement('div'));
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dt  = new Date(year, month, d);
+      const iso = toISO(year, month, d);
+      const isPast    = dt < today;
+      const isSunday  = dt.getDay() === 0;
+      const isToday   = dt.getTime() === today.getTime();
+      const isSelected= dateValue.value === iso;
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'bn-cal-day';
+      btn.textContent = d;
+      if (isToday)    btn.classList.add('bn-cal-day--today');
+      if (isSelected) btn.classList.add('bn-cal-day--selected');
+
+      if (isPast || isSunday) {
+        btn.disabled = true;
+      } else {
+        btn.addEventListener('click', () => selectDate(iso, btn));
+      }
+      grid.appendChild(btn);
+    }
+  }
+
+  function stepMonth(dir) {
+    let { year, month } = calView;
+    month += dir;
+    if (month > 11) { year++;  month = 0; }
+    if (month < 0)  { year--;  month = 11; }
+    calView = { year, month };
+    renderCalendar();
+  }
+
+  function selectDate(iso, btn) {
+    document.querySelectorAll('.bn-cal-day--selected')
+            .forEach(b => b.classList.remove('bn-cal-day--selected'));
+    btn.classList.add('bn-cal-day--selected');
+    dateValue.value = iso;
+    updateSidebarDate(iso);
+
+    if (timeValue.value) {
+      timeValue.value = '';
+      sTime.textContent = '—';
+    }
+    fetchAvailability();
+    updateConfirmBtn();
+  }
+
+  function updateSidebarDate(iso) {
+    const dt      = new Date(iso + 'T00:00:00');
+    const dayFmt  = new Intl.DateTimeFormat(LANG, { weekday: 'long' });
+    const dayName = dayFmt.format(dt);
+    const cap     = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+    sDate.textContent = `${cap}, ${dt.getDate()} ${MONTHS[dt.getMonth()].toLowerCase()}`;
+  }
+
+  renderCalendar();
+
+  if (INITIAL_DATE) {
+    const parts = INITIAL_DATE.split('-').map(Number);
+    if (parts.length === 3) {
+      calView = { year: parts[0], month: parts[1] - 1 };
+      renderCalendar();
+      updateSidebarDate(INITIAL_DATE);
+    }
+  }
+
+  /* ── D: Time slots ────────────────────────────────────── */
+  function partOfDay(t) {
+    return t < '12:00' ? 'morning' : t < '17:00' ? 'afternoon' : 'evening';
+  }
+  const GROUP_LABELS = { morning: MSG_MORNING, afternoon: MSG_AFTERNOON, evening: MSG_EVENING };
+
+  let debounceTimer;
+  function debouncedFetch() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(fetchAvailability, 400);
+  }
+
+  async function fetchAvailability() {
+    const massageId = massageSelect.value;
+    const masseurId = masseurValue.value;
+    const date      = dateValue.value;
+
+    if (!massageId || !masseurId || !date) {
+      slotsEl.innerHTML = `<p class="bn-placeholder">${MSG_SELECT_FIRST}</p>`;
+      return;
+    }
+
+    slotsEl.innerHTML = `<p class="bn-placeholder">${MSG_LOADING}</p>`;
+
+    try {
+      const res  = await fetch(`${AVAIL_URL}?massage_id=${massageId}&masseur_id=${masseurId}&date=${date}`);
+      const data = await res.json();
+
+      if (!data.slots || data.slots.length === 0) {
+        slotsEl.innerHTML = `<p class="bn-placeholder">${MSG_NO_SLOTS}</p>`;
+        return;
+      }
+
+      slotsEl.innerHTML = '';
+      const groups = { morning: [], afternoon: [], evening: [] };
+      data.slots.forEach(s => groups[partOfDay(s.time)].push(s));
+
+      ['morning', 'afternoon', 'evening'].forEach(key => {
+        if (groups[key].length === 0) return;
+
+        const lbl = document.createElement('div');
+        lbl.className = 'bn-slots-group-label';
+        lbl.textContent = GROUP_LABELS[key];
+        slotsEl.appendChild(lbl);
+
+        const row = document.createElement('div');
+        row.className = 'bn-slots-row';
+
+        groups[key].forEach(slot => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'time-slot' + (slot.available ? '' : ' disabled');
+          btn.textContent = slot.time;
+
+          if (!slot.available) {
+            btn.disabled = true;
+          } else {
+            btn.addEventListener('click', () => {
+              document.querySelectorAll('.time-slot.selected')
+                      .forEach(b => b.classList.remove('selected'));
+              btn.classList.add('selected');
+              timeValue.value = slot.time;
+              sTime.textContent = slot.time;
+              updateConfirmBtn();
+            });
+            if (INITIAL_TIME && timeValue.value === slot.time) {
+              btn.classList.add('selected');
+            }
+          }
+          row.appendChild(btn);
+        });
+
+        slotsEl.appendChild(row);
+      });
+
+    } catch (err) {
+      console.error('Availability fetch error:', err);
+      slotsEl.innerHTML = `<p class="bn-placeholder">${MSG_ERROR}</p>`;
+    }
+  }
+
+  /* ── E: Name field listeners ──────────────────────────── */
+  const fnInput = document.getElementById('first_name');
+  const lnInput = document.getElementById('last_name');
+  if (fnInput) fnInput.addEventListener('input', updateConfirmBtn);
+  if (lnInput) lnInput.addEventListener('input', updateConfirmBtn);
+
+  /* ── F: AJAX form submit ──────────────────────────────── */
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    if (!massageSelect.value || !masseurValue.value || !dateValue.value) {
+      showToast(MSG_SELECT_FIRST);
+      return;
+    }
+    if (!timeValue.value) {
+      showToast(MSG_SELECT_TIME);
+      return;
+    }
+
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = MSG_SENDING;
+
+    try {
+      const res  = await fetch(form.action || window.location.href, {
+        method: 'POST',
+        body:   new FormData(form),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        const b = data.booking;
+        document.getElementById('conf-svc').textContent   = b.service;
+        document.getElementById('conf-thp').textContent   = b.masseur;
+        document.getElementById('conf-date').textContent  = b.date;
+        document.getElementById('conf-time').textContent  = b.time;
+        document.getElementById('conf-dur').textContent   = b.duration;
+        document.getElementById('conf-price').textContent = b.price;
+        document.getElementById('conf-contact').textContent = data.contact;
+
+        form.hidden = true;
+        document.getElementById('book-head').hidden = true;
+        document.getElementById('bn-confirm').hidden = false;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        const allErrors = data.errors || {};
+        const firstMsg  = Object.values(allErrors).flat()[0];
+        if (firstMsg) showToast(firstMsg);
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = CONFIRM_INNER;
+      }
+    } catch (err) {
+      console.error('Form submit error:', err);
+      showToast(MSG_ERROR);
+      confirmBtn.disabled = false;
+      confirmBtn.innerHTML = CONFIRM_INNER;
+    }
+  });
+
+  /* ── Initial state ────────────────────────────────────── */
+  if (massageSelect.value && masseurValue.value && INITIAL_DATE) {
+    fetchAvailability();
+  }
+  updateConfirmBtn();
+});
+</script>
+
+{% endif %}
 {% endblock %}
