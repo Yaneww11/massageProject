@@ -5,22 +5,21 @@ from django.utils.translation import gettext_lazy as _
 
 
 class CustomAuthenticationForm(AuthenticationForm):
+    error_messages = {
+        **AuthenticationForm.error_messages,
+        'inactive': _(
+            "Моля, потвърдете имейла си, преди да влезете. Проверете пощата си "
+            "за линк за потвърждение, или поискайте нов по-долу."
+        ),
+    }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['username'].label = _('Имейл')
         self.fields['username'].widget.attrs.update({
-            'placeholder': '0899999999',
-            'title': _('Телефонният номер трябва да започва с 0')
+            'placeholder': 'example@email.com',
+            'autocomplete': 'email',
         })
-        self.fields['username'].help_text = _('Телефонният номер трябва да започва с 0 (напр. 08XXXXXXXX)')
-
-    def clean_username(self):
-        username = self.cleaned_data.get('username')
-        if username and not username.startswith('0'):
-            raise ValidationError(
-                _("Телефонният номер трябва да започва с 0."),
-                code='invalid_phone_start',
-            )
-        return username
 
 
 class CustomUserForm(UserCreationForm):
