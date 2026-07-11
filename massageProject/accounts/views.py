@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
+from django.contrib.auth.views import PasswordResetView
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.utils.encoding import force_str
@@ -60,3 +61,27 @@ class ResendVerificationView(FormView):
         except User.DoesNotExist:
             pass
         return super().form_valid(form)
+
+
+class BrandedPasswordResetView(PasswordResetView):
+    template_name = 'registration/password_reset_form.html'
+    email_template_name = 'emails/password_reset_email.txt'
+    html_email_template_name = 'emails/password_reset_email.html'
+    subject_template_name = 'emails/password_reset_subject.txt'
+    success_url = reverse_lazy('password_reset_done')
+
+    @property
+    def extra_email_context(self):
+        from massageProject.main_app.models import HomePage, MessageStudio
+
+        homepage = HomePage.get_solo()
+        studio = MessageStudio.objects.first()
+        logo_url = None
+        if homepage and homepage.logo:
+            logo_url = self.request.build_absolute_uri(homepage.logo.url)
+
+        return {
+            'brand_name': homepage.brand_name if homepage else _('Relax & Health'),
+            'studio': studio,
+            'logo_url': logo_url,
+        }
