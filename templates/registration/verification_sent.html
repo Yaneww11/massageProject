@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<section class="reservation-section">
+    <div class="description">
+        <h2>{% trans "Проверете пощата си" %}</h2>
+        <p>{% trans "Изпратихме линк за потвърждение на посочения от Вас имейл адрес. Моля, отворете го, за да активирате акаунта си." %}</p>
+        <p><a href="{% url 'login' %}">{% trans "Обратно към вход" %}</a></p>
+    </div>
+</section>
+{% endblock %}
