@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-from massageProject.main_app.models import Massage, Masseur, MessageReservation, WorkingHours
+from massageProject.main_app.models import Massage, Masseur, MessageReservation, WorkingHours, HomePage
 from massageProject.accounts.models import CustomUser
 from datetime import datetime, time, date, timedelta
 
@@ -192,3 +192,13 @@ class SecurityAndBusinessRulesTest(TestCase):
         response = self.client.get('/reserve/')
         self.assertEqual(response.status_code, 302)
         self.assertIn('/login/', response.url)
+
+class HomePageGetSoloTest(TestCase):
+    def test_get_solo_creates_singleton_on_fresh_db(self):
+        obj = HomePage.get_solo()
+        self.assertIsInstance(obj, HomePage)
+
+    def test_get_solo_returns_same_instance_on_second_call(self):
+        first = HomePage.get_solo()
+        second = HomePage.get_solo()
+        self.assertEqual(first.pk, second.pk)
