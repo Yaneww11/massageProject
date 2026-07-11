@@ -158,13 +158,18 @@ LOGIN_REDIRECT_URL = reverse_lazy('reservation_page')
 LOGOUT_REDIRECT_URL = reverse_lazy('index')
 
 # Email Configuration
-EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+EMAIL_BACKEND = env('EMAIL_BACKEND', default='massageProject.accounts.email_backend.GmailBackend')
 EMAIL_HOST = env('EMAIL_HOST', default='')
 EMAIL_PORT = env.int('EMAIL_PORT', default=587)
 EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='webmaster@localhost')
+
+GMAIL_API_CLIENT_ID = env('GMAIL_API_CLIENT_ID', default='')
+GMAIL_API_CLIENT_SECRET = env('GMAIL_API_CLIENT_SECRET', default='')
+GMAIL_API_REFRESH_TOKEN = env('GMAIL_API_REFRESH_TOKEN', default='')
+GMAIL_API_USER_ID = env('GMAIL_API_USER_ID', default='me')
 # Unfold Configuration
 UNFOLD = {
     "SITE_TITLE": "Relax & Health Admin",
