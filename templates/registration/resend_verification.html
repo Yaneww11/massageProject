@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block content %}
+<section class="reservation-section">
+    <div class="description">
+        <h2>{% trans "Изпращане на нов линк за потвърждение" %}</h2>
+        <p>{% trans "Въведете имейла, с който сте се регистрирали, и ще Ви изпратим нов линк за потвърждение." %}</p>
+
+        <form method="post" class="form-container">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <div class="form-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary btn-block">{% trans "Изпрати" %}</button>
+            <p style="margin-top: var(--space-md);"><a href="{% url 'login' %}">{% trans "Обратно към вход" %}</a></p>
+        </form>
+    </div>
+</section>
+{% endblock %}

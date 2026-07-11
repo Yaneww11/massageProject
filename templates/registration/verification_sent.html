@@ -6,6 +6,9 @@
     <div class="description">
         <h2>{% trans "Проверете пощата си" %}</h2>
         <p>{% trans "Изпратихме линк за потвърждение на посочения от Вас имейл адрес. Моля, отворете го, за да активирате акаунта си." %}</p>
+        <p style="margin-top: var(--space-md);">
+            {% trans "Не получихте имейл?" %} <a href="{% url 'resend_verification' %}">{% trans "Изпратете отново" %}</a>
+        </p>
         <p><a href="{% url 'login' %}">{% trans "Обратно към вход" %}</a></p>
     </div>
 </section>

@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.core.exceptions import ValidationError
@@ -73,3 +74,7 @@ class CustomUserForm(UserCreationForm):
             pass
 
         return normalized_phone
+
+
+class ResendVerificationForm(forms.Form):
+    email = forms.EmailField(label=_('Имейл'))

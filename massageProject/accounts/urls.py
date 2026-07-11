@@ -2,7 +2,7 @@ from django.urls import path
 from django.contrib.auth.views import LoginView, LogoutView
 from django.views.generic import TemplateView
 
-from massageProject.accounts.views import UserRegisterView, VerifyEmailView
+from massageProject.accounts.views import UserRegisterView, VerifyEmailView, ResendVerificationView
 from massageProject.accounts.forms import CustomAuthenticationForm
 
 urlpatterns = [
@@ -12,4 +12,5 @@ urlpatterns = [
 
     path('verification-sent/', TemplateView.as_view(template_name='registration/verification_sent.html'), name='verification_sent'),
     path('verify/<uidb64>/<token>/', VerifyEmailView.as_view(), name='verify_email'),
+    path('resend-verification/', ResendVerificationView.as_view(), name='resend_verification'),
 ]

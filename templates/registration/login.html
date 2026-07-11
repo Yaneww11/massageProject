@@ -25,6 +25,8 @@
             {% endfor %}
             <button type="submit" class="btn btn-primary btn-block">{% trans "Вход" %}</button>
             <p style="margin-top: var(--space-md);">{% trans "Нямате акаунт?" %} <a href="{% url 'register' %}">{% trans "Регистрирайте се тук" %}</a></p>
+            <p><a href="{% url 'resend_verification' %}">{% trans "Изпратете отново линк за потвърждение" %}</a></p>
+            <p><a href="{% url 'password_reset' %}">{% trans "Забравена парола?" %}</a></p>
         </form>
     </div>
 </section>

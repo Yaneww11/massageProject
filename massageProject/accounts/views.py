@@ -6,10 +6,10 @@ from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.utils.translation import gettext_lazy as _
 from django.views import View
-from django.views.generic import CreateView
+from django.views.generic import CreateView, FormView
 
 from massageProject.accounts.emails import send_verification_email
-from massageProject.accounts.forms import CustomUserForm
+from massageProject.accounts.forms import CustomUserForm, ResendVerificationForm
 from massageProject.accounts.tokens import email_verification_token_generator
 
 User = get_user_model()
@@ -44,4 +44,19 @@ class VerifyEmailView(View):
             return redirect('reservation_page')
 
         messages.error(request, _("Този линк за потвърждение е невалиден или е изтекъл."))
-        return redirect('login')
+        return redirect('resend_verification')
+
+
+class ResendVerificationView(FormView):
+    template_name = 'registration/resend_verification.html'
+    form_class = ResendVerificationForm
+    success_url = reverse_lazy('verification_sent')
+
+    def form_valid(self, form):
+        email = form.cleaned_data['email']
+        try:
+            user = User.objects.get(email__iexact=email, is_active=False)
+            send_verification_email(self.request, user)
+        except User.DoesNotExist:
+            pass
+        return super().form_valid(form)
