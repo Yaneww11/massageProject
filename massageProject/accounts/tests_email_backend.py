@@ -64,3 +64,22 @@ class GmailBackendTest(TestCase):
             result = backend.send_messages([message])
 
         self.assertEqual(result, 0)
+
+    def test_send_messages_fails_silently_when_open_raises(self):
+        backend = GmailBackend(fail_silently=True)
+        message = EmailMultiAlternatives('Subject', 'Body', 'from@example.com', ['to@example.com'])
+
+        with patch('massageProject.accounts.email_backend.googleapiclient.discovery.build',
+                    side_effect=Exception('boom')):
+            result = backend.send_messages([message])
+
+        self.assertEqual(result, 0)
+
+    def test_send_messages_raises_by_default_when_open_raises(self):
+        backend = GmailBackend()
+        message = EmailMultiAlternatives('Subject', 'Body', 'from@example.com', ['to@example.com'])
+
+        with patch('massageProject.accounts.email_backend.googleapiclient.discovery.build',
+                    side_effect=Exception('boom')):
+            with self.assertRaises(Exception):
+                backend.send_messages([message])

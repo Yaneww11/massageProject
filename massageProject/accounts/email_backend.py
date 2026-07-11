@@ -21,16 +21,22 @@ class GmailBackend(BaseEmailBackend):
         if self.service is not None:
             return False
 
-        credentials = google.oauth2.credentials.Credentials(
-            'token',
-            refresh_token=self.refresh_token,
-            token_uri='https://accounts.google.com/o/oauth2/token',
-            client_id=self.client_id,
-            client_secret=self.client_secret,
-        )
-        self.service = googleapiclient.discovery.build(
-            'gmail', 'v1', credentials=credentials, cache_discovery=False
-        )
+        try:
+            credentials = google.oauth2.credentials.Credentials(
+                'token',
+                refresh_token=self.refresh_token,
+                token_uri='https://accounts.google.com/o/oauth2/token',
+                client_id=self.client_id,
+                client_secret=self.client_secret,
+            )
+            self.service = googleapiclient.discovery.build(
+                'gmail', 'v1', credentials=credentials, cache_discovery=False
+            )
+        except Exception:
+            if not self.fail_silently:
+                raise
+            return None
+
         return True
 
     def close(self):
@@ -41,6 +47,11 @@ class GmailBackend(BaseEmailBackend):
             return 0
 
         opened_here = self.open()
+        if not self.service or opened_here is None:
+            # We failed silently on open().
+            # Trying to send would be pointless.
+            return 0
+
         sent_count = 0
         try:
             for message in email_messages:
