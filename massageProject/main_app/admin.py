@@ -197,7 +197,7 @@ class AlbumPhotoInline(TabularInline):
 
 @admin.register(GalleryAlbum)
 class GalleryAlbumAdmin(ModelAdmin, TabbedTranslationAdmin):
-    list_display = ('title', 'gallery', 'order', 'photo_count')
+    list_display = ('title', 'order', 'photo_count')
     list_editable = ('order',)
     prepopulated_fields = {'slug': ('title_bg',)}
     inlines = [AlbumPhotoInline]

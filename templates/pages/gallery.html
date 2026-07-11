@@ -7,14 +7,7 @@
   <!-- Page header -->
   <div class="gal-header">
     <span class="gal-eyebrow">{% trans "Галерия" %}</span>
-    {% if gallery %}
-      <h1>{{ gallery.title }}</h1>
-      {% if gallery.short_description %}
-        <p>{{ gallery.short_description }}</p>
-      {% endif %}
-    {% else %}
-      <h1>{% trans "Нашата галерия" %}</h1>
-    {% endif %}
+    <h1>{% trans "Нашата галерия" %}</h1>
   </div>
 
   <!-- Mosaic + overflow grid -->
@@ -86,13 +79,5 @@
 
     </div>
   </section>
-
-  <!-- CTA band -->
-  <div class="gal-cta">
-    <h2>{% trans "Готови за вашия момент на грижа?" %}</h2>
-    <p>{% trans "Запазете час и усетете атмосферата на живо." %}</p>
-    <a href="{% url 'reservation_page' %}" class="btn-primary">{% trans "Запазете час" %}</a>
-  </div>
-
 </div>
 {% endblock %}

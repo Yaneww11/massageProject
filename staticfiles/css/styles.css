@@ -17,6 +17,7 @@
 @import url('pages/detail_page.css');
 @import url('pages/my_profile.css');
 @import url('pages/gallery.css');
+@import url('pages/auth.css');
 
 /* Components styles */
 @import url('components/buttons.css');

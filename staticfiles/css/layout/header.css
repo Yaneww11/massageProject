@@ -33,7 +33,7 @@
 
 /* Black variant for PNG logos: force non-transparent pixels to black */
 .logo-svg--black {
-    filter: brightness(0) saturate(100%);
+    color: var(--primary-color);
 }
 
 .logo-text {

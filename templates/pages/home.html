@@ -58,15 +58,15 @@
 {% endif %}
 
 <!-- ========== GALLERY — Mosaic grid ========== -->
-{% if images %}
+{% if gallery_images %}
 <section class="hp-gallery" id="gallery">
     <div class="hp-container">
         <div class="hp-reveal hp-centered-text">
-            <span class="hp-eyebrow">{% trans "Атмосфера" %}</span>
-            <h2 class="hp-section-title">{% trans "Място, създадено за покой" %}</h2>
+            <span class="hp-eyebrow">{{ gallery.title }}</span>
+            <h2 class="hp-section-title">{{ gallery.short_description }}</h2>
         </div>
         <div class="hp-gallery-grid hp-reveal">
-            {% for image in images|slice:":3" %}
+            {% for image in gallery_images %}
             <div class="hp-gallery-cell {% if forloop.first %}hp-gallery-cell--big{% endif %}">
                 <img src="{{ image.image.url }}" alt="{{ image.alt_text }}">
             </div>

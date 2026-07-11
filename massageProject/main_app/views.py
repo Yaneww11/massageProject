@@ -14,7 +14,7 @@ import json
 
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
     ReservationDeleteForm, CommentForm, UserNameForm
-from massageProject.main_app.models import Massage, HomePage, Masseur, MessageStudio, MessageReservation, Comment, WorkingHours, ServiceGroup, Gallery, GalleryAlbum
+from massageProject.main_app.models import Massage, HomePage, Masseur, MessageStudio, MessageReservation, Comment, WorkingHours, ServiceGroup, GalleryAlbum
 
 
 def check_availability(request):
@@ -101,7 +101,9 @@ class Index(TemplateView):
         context['massages'] = massages
         context['featured_has_images'] = bool(massages) and all(m.image for m in massages)
         if context['page']:
-            context['images'] = context['page'].gallery.images.all()
+            gallery = context['page'].gallery
+            context['gallery'] = gallery
+            context['gallery_images'] = gallery.images.all()[:3]
         context['comments'] = Comment.objects.filter(is_reviewed=True).order_by('-created_at')[:10]
         return self.render_to_response(context)
 
