@@ -5,10 +5,12 @@ from django.contrib.auth.hashers import make_password
 
 
 class AppUserManager(BaseUserManager):
-    def _create_user(self, phone_number:str ,email, password: str, **extra_fields):
+    def _create_user(self, email, phone_number: str, password: str, **extra_fields):
         """
         Create and save a user with the given email, phone, and password.
         """
+        if not email:
+            raise ValueError("The given email must be set")
         if not phone_number:
             raise ValueError("The given phone number must be set")
         email = self.normalize_email(email)
@@ -24,12 +26,12 @@ class AppUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_user(self, phone_number, email=None, password=None, **extra_fields):
+    def create_user(self, email, phone_number=None, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", False)
         extra_fields.setdefault("is_superuser", False)
-        return self._create_user(phone_number,email, password, **extra_fields)
+        return self._create_user(email, phone_number, password, **extra_fields)
 
-    def create_superuser(self, phone_number, email=None, password=None, **extra_fields):
+    def create_superuser(self, email, phone_number=None, password=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
 
@@ -38,7 +40,7 @@ class AppUserManager(BaseUserManager):
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
 
-        return self._create_user(phone_number,email, password, **extra_fields)
+        return self._create_user(email, phone_number, password, **extra_fields)
 
     def with_perm(
         self, perm, is_active=True, include_superusers=True, backend=None, obj=None

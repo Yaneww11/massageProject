@@ -41,7 +41,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         default=True,
         help_text=_(
             "Designates whether this user should be treated as active. "
-            "Unselect this instead of deleting accounts."
+            "Unselect this to disable an account, or to require the user to verify "
+            "their email again."
         ),
     )
 
@@ -51,8 +52,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     objects = AppUserManager()
 
     EMAIL_FIELD = "email"
-    USERNAME_FIELD = "phone_number"
-    REQUIRED_FIELDS = ["email"]
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["phone_number"]
 
     class Meta:
         verbose_name = _('Потребител')
@@ -60,7 +61,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         full_name = self.get_full_name()
-        return full_name if full_name else self.phone_number
+        return full_name if full_name else self.email
 
     def clean(self):
         super().clean()

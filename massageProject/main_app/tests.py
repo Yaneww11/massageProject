@@ -157,7 +157,7 @@ class SecurityAndBusinessRulesTest(TestCase):
             user=self.user1, massage=self.massage, masseur=self.masseur,
             date=date(2026, 6, 15), time=time(10, 0)
         )
-        self.client.login(phone_number='0888888882', password='p2')
+        self.client.login(email='u2@e.com', password='p2')
         response = self.client.get(f'/{res.pk}/edit_reserve/')
         self.assertEqual(response.status_code, 403) # PermissionDenied
 
@@ -169,7 +169,7 @@ class SecurityAndBusinessRulesTest(TestCase):
             user=self.user1, massage=self.massage, masseur=self.masseur,
             date=res_datetime.date(), time=res_datetime.time()
         )
-        self.client.login(phone_number='0888888881', password='p1')
+        self.client.login(email='u1@e.com', password='p1')
         response = self.client.get(f'/{res.pk}/edit_reserve/')
         self.assertEqual(response.status_code, 302) # Redirect with error
         self.assertRedirects(response, '/profile/')
@@ -184,7 +184,7 @@ class SecurityAndBusinessRulesTest(TestCase):
             user=self.user1, massage=self.massage, masseur=self.masseur,
             date=res_datetime.date(), time=res_datetime.time()
         )
-        self.client.login(phone_number='0888888881', password='p1')
+        self.client.login(email='u1@e.com', password='p1')
         response = self.client.get(f'/{res.pk}/delete_reserve/')
         self.assertRedirects(response, '/profile/')
 

@@ -7,15 +7,15 @@ UserModel = get_user_model()
 
 @admin.register(UserModel)
 class AppUserAdmin(UserAdmin):
-    list_display = ('phone_number', 'full_name_display', 'email', 'reservations_count', 'is_staff', 'is_active')
+    list_display = ('email', 'full_name_display', 'phone_number', 'reservations_count', 'is_staff', 'is_active')
     list_filter = ("is_staff", "is_superuser", "is_active", "groups")
     search_fields = ("phone_number", "first_name", "last_name", "email")
     ordering = ("-date_joined",)
     list_editable = ('is_active',)
 
     fieldsets = (
-        ("Credentials", {"fields": ("phone_number", "password")}),
-        ("Personal Information", {"fields": ("first_name", "last_name", "email")}),
+        ("Credentials", {"fields": ("email", "password")}),
+        ("Personal Information", {"fields": ("first_name", "last_name", "phone_number")}),
         (
             "Access Control",
             {
@@ -37,7 +37,7 @@ class AppUserAdmin(UserAdmin):
             None,
             {
                 "classes": ("wide",),
-                "fields": ("phone_number","first_name", "last_name", "usable_password", "password1", "password2"),
+                "fields": ("email", "first_name", "last_name", "phone_number", "usable_password", "password1", "password2"),
             },
         ),
     )

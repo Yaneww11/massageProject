@@ -72,7 +72,7 @@ class CommentLogicTest(TestCase):
         self.assertEqual(response.context['paginator'].num_pages, 3) # 15 + 15 + 10 = 40
 
     def test_comment_submission_is_not_immediately_visible(self):
-        self.client.login(phone_number='0888888888', password='password123')
+        self.client.login(email='test@example.com', password='password123')
         response = self.client.post(reverse('about_page'), {'content': 'New pending comment'})
         self.assertEqual(response.status_code, 302) # Redirects
         
