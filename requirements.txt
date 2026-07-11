@@ -23,10 +23,10 @@ proto-plus==1.28.1
 protobuf==7.35.1
 psycopg2==2.9.10
 psycopg2-binary==2.9.10
-pycparser==3.0
-pyparsing==3.3.2
 pyasn1==0.6.4
 pyasn1-modules==0.4.2
+pycparser==3.0
+pyparsing==3.3.2
 requests==2.34.2
 requests-oauthlib==2.0.0
 sqlparse==0.5.2
