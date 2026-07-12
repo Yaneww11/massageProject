@@ -2,6 +2,7 @@ from unittest.mock import MagicMock, patch
 
 from django.core.mail import EmailMultiAlternatives
 from django.test import TestCase, override_settings
+from google.auth.exceptions import RefreshError
 from googleapiclient.errors import HttpError
 
 from massageProject.accounts.email_backend import GmailBackend
@@ -82,4 +83,36 @@ class GmailBackendTest(TestCase):
         with patch('massageProject.accounts.email_backend.googleapiclient.discovery.build',
                     side_effect=Exception('boom')):
             with self.assertRaises(Exception):
+                backend.send_messages([message])
+
+    def test_send_messages_fails_silently_on_google_auth_error_during_execute(self):
+        # Regression guard: the Gmail API's OAuth token refresh happens lazily
+        # inside execute(), so a failed refresh (e.g. an expired/revoked
+        # refresh token) can raise google.auth.exceptions.RefreshError (or any
+        # other non-HttpError exception), not HttpError. _send must catch
+        # this broadly, matching open()'s existing `except Exception` style.
+        backend = GmailBackend(fail_silently=True)
+        message = EmailMultiAlternatives('Subject', 'Body', 'from@example.com', ['to@example.com'])
+
+        mock_service = MagicMock()
+        mock_service.users.return_value.messages.return_value.send.return_value.execute.side_effect = (
+            RefreshError('refresh failed')
+        )
+
+        with patch('massageProject.accounts.email_backend.googleapiclient.discovery.build', return_value=mock_service):
+            result = backend.send_messages([message])
+
+        self.assertEqual(result, 0)
+
+    def test_send_messages_raises_by_default_on_google_auth_error_during_execute(self):
+        backend = GmailBackend()
+        message = EmailMultiAlternatives('Subject', 'Body', 'from@example.com', ['to@example.com'])
+
+        mock_service = MagicMock()
+        mock_service.users.return_value.messages.return_value.send.return_value.execute.side_effect = (
+            RefreshError('refresh failed')
+        )
+
+        with patch('massageProject.accounts.email_backend.googleapiclient.discovery.build', return_value=mock_service):
+            with self.assertRaises(RefreshError):
                 backend.send_messages([message])

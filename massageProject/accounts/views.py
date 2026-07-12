@@ -40,7 +40,7 @@ class VerifyEmailView(View):
         if user is not None and email_verification_token_generator.check_token(user, token):
             user.is_active = True
             user.save(update_fields=['is_active'])
-            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            login(request, user, backend='massageProject.accounts.backends.VerificationAwareBackend')
             messages.success(request, _("Имейлът Ви е потвърден успешно. Добре дошли!"))
             return redirect('reservation_page')
 

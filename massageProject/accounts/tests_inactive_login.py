@@ -106,3 +106,30 @@ class InactiveUserLoginTest(TestCase):
         form = response.context['form']
         errors = [str(e) for e in form.non_field_errors()]
         self.assertNotIn(str(CustomAuthenticationForm.error_messages['inactive']), errors)
+
+    def test_deactivating_a_logged_in_user_invalidates_their_session(self):
+        # Regression guard: AllowAllUsersModelBackend.get_user() always
+        # returns True from user_can_authenticate(), so it kept resolving
+        # request.user for is_active=False users on every subsequent
+        # request -- meaning deactivating an account no longer killed the
+        # user's existing session. The replacement backend must leave
+        # get_user()/user_can_authenticate() untouched so deactivation still
+        # invalidates the session on the very next request.
+        user = self._create_user('deactivateme@example.com', '0888666666', is_active=True)
+
+        logged_in = self.client.login(
+            username='deactivateme@example.com', password=self.PASSWORD,
+        )
+        self.assertTrue(logged_in)
+
+        response = self.client.get(reverse('profile_page'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.wsgi_request.user.is_authenticated)
+
+        user.is_active = False
+        user.save(update_fields=['is_active'])
+
+        response = self.client.get(reverse('profile_page'))
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/accounts/login/', response.url)

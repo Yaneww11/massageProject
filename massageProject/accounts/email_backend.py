@@ -4,7 +4,6 @@ import google.oauth2.credentials
 import googleapiclient.discovery
 from django.conf import settings
 from django.core.mail.backends.base import BaseEmailBackend
-from googleapiclient.errors import HttpError
 
 
 class GmailBackend(BaseEmailBackend):
@@ -71,7 +70,7 @@ class GmailBackend(BaseEmailBackend):
             self.service.users().messages().send(
                 userId=self.user_id, body={'raw': raw_message}
             ).execute()
-        except HttpError:
+        except Exception:
             if not self.fail_silently:
                 raise
             return False
