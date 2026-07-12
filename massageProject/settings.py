@@ -153,6 +153,8 @@ MEDIA_ROOT = BASE_DIR / 'media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.CustomUser'
+# AllowAllUsersModelBackend (not ModelBackend) so authenticate() succeeds for is_active=False users, letting AuthenticationForm.confirm_login_allowed() surface our custom inactive-user message instead of a generic invalid-login error.
+AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.AllowAllUsersModelBackend']
 
 LOGIN_REDIRECT_URL = reverse_lazy('reservation_page')
 LOGOUT_REDIRECT_URL = reverse_lazy('index')
