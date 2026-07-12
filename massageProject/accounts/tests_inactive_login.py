@@ -29,14 +29,14 @@ class InactiveUserLoginTest(TestCase):
         return user
 
     def test_inactive_user_correct_password_sees_custom_inactive_message(self):
-        # NOTE: asserted via response.context['form'], not response.content/assertContains.
-        # templates/registration/login.html only loops over per-field form.errors and never
-        # renders form.non_field_errors, so a non-field ValidationError (which is what
-        # confirm_login_allowed() raises) never reaches the rendered HTML regardless of this
-        # fix. That template gap is a separate, pre-existing bug outside this task's scope
-        # (settings.py + this test file only) -- see report for details. Testing against the
-        # bound form is the template-independent way to verify the *right* validation error
-        # fired.
+        # NOTE: asserted via response.context['form'] rather than response.content.
+        # This checks that the *right* validation error fired on the form,
+        # independent of template rendering. See
+        # test_inactive_user_correct_password_sees_message_in_rendered_html
+        # below for the template-rendering regression guard (the template
+        # previously never rendered form.non_field_errors, so this message
+        # was computed correctly but invisible to users -- now fixed in
+        # templates/registration/login.html).
         self._create_user('inactive@example.com', '0888111111', is_active=False)
 
         response = self.client.post(reverse('login'), {
@@ -49,6 +49,26 @@ class InactiveUserLoginTest(TestCase):
         self.assertIn(
             str(CustomAuthenticationForm.error_messages['inactive']),
             [str(e) for e in form.non_field_errors()],
+        )
+
+    def test_inactive_user_correct_password_sees_message_in_rendered_html(self):
+        # Regression guard for the template gap noted above: the message must
+        # actually be present in response.content, not just attached to the
+        # form object. templates/registration/login.html previously only
+        # rendered per-field form.errors and never form.non_field_errors, so
+        # this custom inactive-login message (a non-field error) was computed
+        # correctly but never reached the rendered HTML.
+        self._create_user('inactive3@example.com', '0888555555', is_active=False)
+
+        response = self.client.post(reverse('login'), {
+            'username': 'inactive3@example.com',
+            'password': self.PASSWORD,
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            str(CustomAuthenticationForm.error_messages['inactive']),
         )
 
     def test_active_user_correct_password_logs_in(self):
