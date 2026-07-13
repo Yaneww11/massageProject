@@ -6,6 +6,7 @@ cryptography==49.0.0
 Django==6.0.6
 django-environ==0.13.0
 django-modeltranslation==0.20.3
+django-ratelimit==4.1.0
 django-rosetta==0.10.3
 django-unfold==0.97.0
 google-api-core==2.31.0

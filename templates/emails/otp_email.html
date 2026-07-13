@@ -1,0 +1,12 @@
+{% extends "emails/base_email.html" %}
+{% load i18n %}
+{% block subject %}{% trans "Ваш код за потвърждение" %}{% endblock %}
+{% block content %}
+<h1 style="font-family:'Playfair Display', Georgia, serif; font-size:22px; color:#4A3728; margin:0 0 16px;">{% trans "Здравейте," %}</h1>
+<p style="font-size:15px; line-height:1.6; margin:0 0 24px;">{% trans "Използвайте следния код, за да потвърдите своя имейл адрес:" %}</p>
+<p style="text-align:center; margin:0 0 24px;">
+  <span style="display:inline-block; background-color:#F2EBE2; color:#4A3728; letter-spacing:0.3em; font-size:28px; font-weight:700; padding:14px 24px; border-radius:8px;">{{ code }}</span>
+</p>
+<p style="font-size:13px; color:#6B5E55; margin:0 0 4px;">{% trans "Кодът е валиден 10 минути." %}</p>
+<p style="font-size:13px; color:#6B5E55; margin:0;">{% trans "Ако не сте поискали този код, можете да игнорирате този имейл." %}</p>
+{% endblock %}
