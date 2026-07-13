@@ -15,7 +15,7 @@ class AppUserAdmin(UserAdmin):
 
     fieldsets = (
         ("Credentials", {"fields": ("email", "password")}),
-        ("Personal Information", {"fields": ("first_name", "last_name", "phone_number")}),
+        ("Personal Information", {"fields": ("first_name", "last_name", "phone_number", "date_of_birth")}),
         (
             "Access Control",
             {

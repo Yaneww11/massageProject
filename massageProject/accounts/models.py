@@ -31,6 +31,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ],
     )
 
+    date_of_birth = models.DateField(
+        _("date of birth"),
+        null=True,
+        blank=True,
+    )
+
     is_staff = models.BooleanField(
         _("staff status"),
         default=False,
