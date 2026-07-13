@@ -7,8 +7,10 @@
     <title>Massage Center</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
+    <script>window.IS_AUTHENTICATED = {{ user.is_authenticated|yesno:"true,false" }};</script>
     {% include 'partials/header.html' %}
     <main>
         {% if messages %}
@@ -24,6 +26,7 @@
         {% endblock %}
      </main>
     {% include 'partials/footer.html' %}
+    {% include 'partials/auth_modal.html' %}
 
     <script src="{% static 'js/resposive_menu_button.js' %}"></script>
 </body>

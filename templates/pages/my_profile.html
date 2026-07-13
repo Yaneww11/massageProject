@@ -101,7 +101,7 @@
           <h2 class="section-title">{% trans "Предстоящи резервации" %}</h2>
           <p class="section-subtitle">{% trans "Очакваме Ви с нетърпение." %}</p>
         </div>
-        <a href="{% url 'reservation_page' %}" class="btn-primary-profile">+ {% trans "Запазете нов час" %}</a>
+        <a href="{% url 'reservation_page' %}" class="btn-primary-profile" data-auth-modal-link>+ {% trans "Запазете нов час" %}</a>
       </div>
 
       {% if active_reservations %}
@@ -184,7 +184,7 @@
               &#9734; {% trans "Оставете мнение" %}
             </button>
             {% endif %}
-            <a href="{% url 'reservation_page' %}?massage={{ r.massage.pk }}" class="btn-outline-sm">
+            <a href="{% url 'reservation_page' %}?massage={{ r.massage.pk }}" class="btn-outline-sm" data-auth-modal-link>
               &rarr; {% trans "Запазете отново" %}
             </a>
           </div>

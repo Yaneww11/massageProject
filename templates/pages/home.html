@@ -12,7 +12,7 @@
                 <p class="hp-hero-sub">{{ page.description }}</p>
             {% endif %}
             <div class="hp-hero-btns">
-                <a href="{% url 'reservation_page' %}" class="btn btn-primary btn-lg">{% trans "Запазете час" %}</a>
+                <a href="{% url 'reservation_page' %}" class="btn btn-primary btn-lg" data-auth-modal-link>{% trans "Запазете час" %}</a>
                 <a href="{% url 'massages_dashboard' %}" class="btn btn-outline btn-lg">{% trans "Вижте услугите" %}</a>
             </div>
             <div class="hp-stats">
@@ -200,7 +200,7 @@
                 </div>
                 {% endif %}
                 {% endif %}
-                <a href="{% url 'reservation_page' %}" class="btn btn-primary btn-block">{% trans "Запазете час" %}</a>
+                <a href="{% url 'reservation_page' %}" class="btn btn-primary btn-block" data-auth-modal-link>{% trans "Запазете час" %}</a>
             </div>
         </div>
     </div>

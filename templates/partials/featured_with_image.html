@@ -13,7 +13,7 @@
                 <span class="hp-feat-badge">{{ m.duration_in_minutes }} {% trans "мин" %}</span>
                 <span class="hp-feat-price">{{ m.price }} {% trans "лв." %}</span>
             </div>
-            <a href="{% url 'reservation_page' %}?massage={{ m.pk }}" class="btn btn-primary hp-feat-book">{% trans "Запазете час" %}</a>
+            <a href="{% url 'reservation_page' %}?massage={{ m.pk }}" class="btn btn-primary hp-feat-book" data-auth-modal-link>{% trans "Запазете час" %}</a>
         </div>
     </article>
     {% endfor %}

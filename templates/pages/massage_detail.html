@@ -15,7 +15,7 @@
             <p><strong>{% trans "Цена:" %}</strong> {{ massage.price }}лв</p>
             <p><strong>{% trans "Продължителност:" %}</strong> {{ massage.duration_in_minutes }} {% trans "мин" %}</p>
         </div>
-        <a href="{% url 'reservation_page' pk=massage.pk %}" class="btn">{% trans "Направи резервация" %}</a>
+        <a href="{% url 'reservation_page' pk=massage.pk %}" class="btn" data-auth-modal-link>{% trans "Направи резервация" %}</a>
     </div>
 </div>
 {% endblock %}
