@@ -78,10 +78,8 @@ msgid "Парола"
 msgstr "Парола"
 
 #: massageProject/accounts/forms.py:87
-#, fuzzy
-#| msgid "Научете повече"
 msgid "Имейлът не е потвърден."
-msgstr "Научете повече"
+msgstr "Имейлът не е потвърден."
 
 #: massageProject/accounts/models.py:19
 msgid "email address"
@@ -542,10 +540,8 @@ msgid "Потребители и Отзиви"
 msgstr ""
 
 #: templates/emails/otp_email.html:3 templates/emails/otp_email_subject.txt:1
-#, fuzzy
-#| msgid "Научете повече"
 msgid "Ваш код за потвърждение"
-msgstr "Научете повече"
+msgstr "Ваш код за потвърждение"
 
 #: templates/emails/otp_email.html:5 templates/emails/otp_email.txt:1
 #: templates/pages/my_profile.html:18
@@ -1245,10 +1241,8 @@ msgid "Въведете всичките 6 цифри."
 msgstr "Въведете всичките 6 цифри."
 
 #: templates/partials/auth_modal.html:12
-#, fuzzy
-#| msgid "Всички резервации"
 msgid "Влезте или се регистрирайте"
-msgstr "Всички резервации"
+msgstr "Влезте или се регистрирайте"
 
 #: templates/partials/auth_modal.html:13
 msgid "За да завършите резервацията, трябва да потвърдим Вашия имейл."
@@ -1285,22 +1279,16 @@ msgid "Забравена парола?"
 msgstr ""
 
 #: templates/partials/auth_modal.html:42
-#, fuzzy
-#| msgid "Детайли за резервацията"
 msgid "Потвърдете своя имейл"
-msgstr "Детайли за резервацията"
+msgstr "Потвърдете своя имейл"
 
 #: templates/partials/auth_modal.html:54
-#, fuzzy
-#| msgid "Научете повече"
 msgid "Не получихте код?"
-msgstr "Научете повече"
+msgstr "Не получихте код?"
 
 #: templates/partials/auth_modal.html:54
-#, fuzzy
-#| msgid "Запазете отново"
 msgid "Изпрати отново"
-msgstr "Запазете отново"
+msgstr "Изпрати отново"
 
 #: templates/partials/auth_modal.html:58
 msgid "Създайте профил"

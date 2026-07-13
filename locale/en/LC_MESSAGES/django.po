@@ -23,8 +23,6 @@ msgstr "Duration:"
 #: massageProject/accounts/booking_auth_views.py:26
 #: massageProject/accounts/booking_auth_views.py:67
 #: templates/partials/auth_modal.html:2
-#, fuzzy
-#| msgid "Потвърдете своя имейл адрес"
 msgid "Въведете имейл адрес."
 msgstr "Enter an email address."
 
@@ -32,21 +30,15 @@ msgstr "Enter an email address."
 #: massageProject/accounts/booking_auth_views.py:61
 #: massageProject/accounts/booking_auth_views.py:84
 #: massageProject/accounts/booking_auth_views.py:124
-#, fuzzy
-#| msgid "Възникна грешка при зареждането."
 msgid "Твърде много опити. Опитайте отново по-късно."
 msgstr "Too many attempts. Please try again later."
 
 #: massageProject/accounts/booking_auth_views.py:70
 #: massageProject/accounts/booking_auth_views.py:138
-#, fuzzy
-#| msgid "Възникна грешка при зареждането."
 msgid "Проверката за робот не е успешна. Опитайте отново."
 msgstr "The bot check failed. Please try again."
 
 #: massageProject/accounts/booking_auth_views.py:91
-#, fuzzy
-#| msgid "Въведете мнение"
 msgid "Въведете имейл и код."
 msgstr "Enter an email and code."
 
@@ -59,8 +51,6 @@ msgid "Няма активен код за този имейл. Изпратет
 msgstr "There is no active code for this email. Send a new one."
 
 #: massageProject/accounts/booking_auth_views.py:131
-#, fuzzy
-#| msgid "Този линк за потвърждение е невалиден или е изтекъл."
 msgid "Имейлът не е потвърден или потвърждението е изтекло."
 msgstr "The email hasn't been verified, or verification has expired."
 
@@ -87,14 +77,10 @@ msgstr ""
 
 #: massageProject/accounts/forms.py:58 templates/partials/auth_modal.html:33
 #: templates/partials/auth_modal.html:72
-#, fuzzy
-#| msgid "Нова парола"
 msgid "Парола"
 msgstr "Password"
 
 #: massageProject/accounts/forms.py:87
-#, fuzzy
-#| msgid "Ще получите потвърждение"
 msgid "Имейлът не е потвърден."
 msgstr "The email hasn't been verified."
 
@@ -566,8 +552,6 @@ msgid "Потребители и Отзиви"
 msgstr "Additional Notes"
 
 #: templates/emails/otp_email.html:3 templates/emails/otp_email_subject.txt:1
-#, fuzzy
-#| msgid "Ще получите потвърждение"
 msgid "Ваш код за потвърждение"
 msgstr "Your verification code"
 
@@ -577,21 +561,14 @@ msgid "Здравейте,"
 msgstr "Hello,"
 
 #: templates/emails/otp_email.html:6 templates/emails/otp_email.txt:3
-#, fuzzy
-#| msgid "Потвърдете своя имейл адрес"
 msgid "Използвайте следния код, за да потвърдите своя имейл адрес:"
 msgstr "Use the following code to verify your email address:"
 
 #: templates/emails/otp_email.html:10 templates/emails/otp_email.txt:6
-#, fuzzy
-#| msgid "Този линк е валиден 3 дни."
 msgid "Кодът е валиден 10 минути."
 msgstr "The code is valid for 10 minutes."
 
 #: templates/emails/otp_email.html:11 templates/emails/otp_email.txt:7
-#, fuzzy
-#| msgid ""
-#| "Ако не сте поискали смяна на паролата, можете да игнорирате този имейл."
 msgid "Ако не сте поискали този код, можете да игнорирате този имейл."
 msgstr "If you didn't request this code, you can ignore this email."
 
@@ -1270,20 +1247,14 @@ msgid "Изпращане..."
 msgstr "Sending..."
 
 #: templates/partials/auth_modal.html:3
-#, fuzzy
-#| msgid "Възникна грешка при зареждането."
 msgid "Възникна грешка. Опитайте отново."
 msgstr "Something went wrong. Please try again."
 
 #: templates/partials/auth_modal.html:4
-#, fuzzy
-#| msgid "Въведете коментар"
 msgid "Въведете всичките 6 цифри."
 msgstr "Enter all 6 digits."
 
 #: templates/partials/auth_modal.html:12
-#, fuzzy
-#| msgid "Вижте моите резервации"
 msgid "Влезте или се регистрирайте"
 msgstr "Log in or sign up"
 
@@ -1292,32 +1263,22 @@ msgid "За да завършите резервацията, трябва да 
 msgstr "To complete your booking, we need to verify your email."
 
 #: templates/partials/auth_modal.html:19 templates/partials/auth_modal.html:53
-#, fuzzy
-#| msgid "Продължителност"
 msgid "Продължи"
 msgstr "Continue"
 
 #: templates/partials/auth_modal.html:23
-#, fuzzy
-#| msgid "Вече имате акаунт?"
 msgid "Как искате да влезете?"
 msgstr "How would you like to log in?"
 
 #: templates/partials/auth_modal.html:25
-#, fuzzy
-#| msgid "Нова парола"
 msgid "С парола"
 msgstr "With a password"
 
 #: templates/partials/auth_modal.html:26
-#, fuzzy
-#| msgid "Не получихте имейл?"
 msgid "С код по имейл"
 msgstr "With an emailed code"
 
 #: templates/partials/auth_modal.html:30
-#, fuzzy
-#| msgid "Въведете коментар"
 msgid "Въведете паролата си"
 msgstr "Enter your password"
 
@@ -1332,32 +1293,22 @@ msgid "Забравена парола?"
 msgstr "Forgot password?"
 
 #: templates/partials/auth_modal.html:42
-#, fuzzy
-#| msgid "Потвърдете своя имейл адрес"
 msgid "Потвърдете своя имейл"
 msgstr "Confirm your email"
 
 #: templates/partials/auth_modal.html:54
-#, fuzzy
-#| msgid "Не получихте имейл?"
 msgid "Не получихте код?"
 msgstr "Didn't receive a code?"
 
 #: templates/partials/auth_modal.html:54
-#, fuzzy
-#| msgid "Изпратете отново"
 msgid "Изпрати отново"
 msgstr "Resend"
 
 #: templates/partials/auth_modal.html:58
-#, fuzzy
-#| msgid "Връщане към профила"
 msgid "Създайте профил"
 msgstr "Create your account"
 
 #: templates/partials/auth_modal.html:76
-#, fuzzy
-#| msgid "Тове поле е задължително"
 msgid "Дата на раждане (незадължително)"
 msgstr "Date of birth (optional)"
 
@@ -1397,8 +1348,6 @@ msgid "Профил"
 msgstr "Profile"
 
 #: templates/registration/auth_entry.html:4
-#, fuzzy
-#| msgid "Моля, въведете своите данни, за да влезете в акаунта си."
 msgid "Моля, включете JavaScript, за да влезете в профила си."
 msgstr "Please enable JavaScript to log in to your account."
 
