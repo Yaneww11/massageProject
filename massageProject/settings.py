@@ -172,6 +172,10 @@ GMAIL_API_CLIENT_ID = env('GMAIL_API_CLIENT_ID', default='')
 GMAIL_API_CLIENT_SECRET = env('GMAIL_API_CLIENT_SECRET', default='')
 GMAIL_API_REFRESH_TOKEN = env('GMAIL_API_REFRESH_TOKEN', default='')
 GMAIL_API_USER_ID = env('GMAIL_API_USER_ID', default='me')
+
+# Cloudflare Turnstile (invisible bot-check widget on the booking auth modal)
+TURNSTILE_SITE_KEY = env('TURNSTILE_SITE_KEY', default='')
+TURNSTILE_SECRET_KEY = env('TURNSTILE_SECRET_KEY', default='')
 # Unfold Configuration
 UNFOLD = {
     "SITE_TITLE": "Relax & Health Admin",
