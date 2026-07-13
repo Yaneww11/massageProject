@@ -3,15 +3,6 @@
 
 {% block content %}
 
-{% if not user.is_authenticated %}
-
-<section class="bn-unauth">
-  <h2>{% trans "Запазете час" %}</h2>
-  <p>{% trans "За да направите резервация, моля" %} <a href="{% url 'register' %}">{% trans "регистрирайте се" %}</a> {% trans "или" %} <a href="{% url 'login' %}">{% trans "влезте" %}</a>.</p>
-</section>
-
-{% else %}
-
 <div class="book-page">
 
   <div class="book-page__head" id="book-head">
@@ -631,5 +622,4 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-{% endif %}
 {% endblock %}

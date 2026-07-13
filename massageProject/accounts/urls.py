@@ -1,22 +1,15 @@
-from django.urls import path
+from django.urls import path, reverse_lazy
 from django.contrib.auth.views import (
-    LoginView, LogoutView, PasswordResetDoneView,
-    PasswordResetConfirmView, PasswordResetCompleteView,
+    LogoutView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView,
 )
-from django.urls import reverse_lazy
-from django.views.generic import TemplateView
 
-from massageProject.accounts.views import (
-    UserRegisterView, VerifyEmailView, ResendVerificationView, BrandedPasswordResetView,
-)
-from massageProject.accounts.forms import CustomAuthenticationForm
+from massageProject.accounts.views import AuthEntryView, BrandedPasswordResetView
 from massageProject.accounts.booking_auth_views import (
     check_email, send_code, verify_code, register_via_modal, login_password,
 )
 
 urlpatterns = [
-    path('register/', UserRegisterView.as_view(), name='register'),
-    path('login/', LoginView.as_view(authentication_form=CustomAuthenticationForm), name='login'),
+    path('login/', AuthEntryView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
 
     path('auth-modal/check-email/', check_email, name='auth_check_email'),
@@ -24,10 +17,6 @@ urlpatterns = [
     path('auth-modal/verify-code/', verify_code, name='auth_verify_code'),
     path('auth-modal/register/', register_via_modal, name='auth_register'),
     path('auth-modal/login-password/', login_password, name='auth_login_password'),
-
-    path('verification-sent/', TemplateView.as_view(template_name='registration/verification_sent.html'), name='verification_sent'),
-    path('verify/<uidb64>/<token>/', VerifyEmailView.as_view(), name='verify_email'),
-    path('resend-verification/', ResendVerificationView.as_view(), name='resend_verification'),
 
     path('password-reset/', BrandedPasswordResetView.as_view(), name='password_reset'),
     path('password-reset/done/', PasswordResetDoneView.as_view(

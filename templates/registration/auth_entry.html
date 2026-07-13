@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+<noscript><p>{% trans "Моля, включете JavaScript, за да влезете в профила си." %}</p></noscript>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (window.AuthModal) {
+        window.AuthModal.open({ next: "{{ next|escapejs }}" });
+    }
+});
+</script>
+{% endblock %}
