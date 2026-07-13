@@ -1,0 +1,323 @@
+{% load i18n %}
+{% trans "Въведете имейл адрес." as msg_enter_email %}
+{% trans "Възникна грешка. Опитайте отново." as msg_generic_error %}
+{% trans "Въведете всичките 6 цифри." as msg_enter_all_digits %}
+<div class="auth-modal-overlay" id="auth-modal" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="auth-modal">
+    <button type="button" class="auth-modal-close" id="auth-modal-close" aria-label="{% trans "Затвори" %}">&times;</button>
+    {% csrf_token %}
+    <div class="cf-turnstile" id="auth-turnstile" data-sitekey="{{ turnstile_site_key }}" data-size="invisible" data-callback="authModalTurnstileCallback"></div>
+
+    <div class="auth-modal-step" data-step="email">
+      <h2 class="auth-modal-title">{% trans "Влезте или се регистрирайте" %}</h2>
+      <p class="auth-modal-subtitle">{% trans "За да завършите резервацията, трябва да потвърдим Вашия имейл." %}</p>
+      <div class="auth-modal-field">
+        <label class="auth-modal-label" for="auth-email-input">{% trans "Имейл" %}</label>
+        <input type="email" id="auth-email-input" class="auth-modal-input" autocomplete="email" placeholder="example@email.com">
+      </div>
+      <p class="auth-modal-error" id="auth-email-error"></p>
+      <button type="button" class="btn btn-primary auth-modal-submit" id="auth-email-continue">{% trans "Продължи" %}</button>
+    </div>
+
+    <div class="auth-modal-step" data-step="choice" hidden>
+      <h2 class="auth-modal-title">{% trans "Как искате да влезете?" %}</h2>
+      <p class="auth-modal-subtitle" id="auth-choice-email"></p>
+      <button type="button" class="btn btn-outline auth-modal-submit" id="auth-choice-password">{% trans "С парола" %}</button>
+      <button type="button" class="btn btn-outline auth-modal-submit" id="auth-choice-code">{% trans "С код по имейл" %}</button>
+    </div>
+
+    <div class="auth-modal-step" data-step="password" hidden>
+      <h2 class="auth-modal-title">{% trans "Въведете паролата си" %}</h2>
+      <p class="auth-modal-subtitle" id="auth-password-email"></p>
+      <div class="auth-modal-field">
+        <label class="auth-modal-label" for="auth-password-input">{% trans "Парола" %}</label>
+        <input type="password" id="auth-password-input" class="auth-modal-input" autocomplete="current-password">
+      </div>
+      <p class="auth-modal-error" id="auth-password-error"></p>
+      <button type="button" class="btn btn-primary auth-modal-submit" id="auth-password-continue">{% trans "Вход" %}</button>
+      <p class="auth-modal-footnote"><a href="{% url 'password_reset' %}">{% trans "Забравена парола?" %}</a></p>
+    </div>
+
+    <div class="auth-modal-step" data-step="code" hidden>
+      <h2 class="auth-modal-title">{% trans "Потвърдете своя имейл" %}</h2>
+      <p class="auth-modal-subtitle" id="auth-code-sent-to"></p>
+      <div class="auth-modal-code-inputs" id="auth-code-inputs">
+        <input type="text" inputmode="numeric" maxlength="1" class="auth-modal-code-digit">
+        <input type="text" inputmode="numeric" maxlength="1" class="auth-modal-code-digit">
+        <input type="text" inputmode="numeric" maxlength="1" class="auth-modal-code-digit">
+        <input type="text" inputmode="numeric" maxlength="1" class="auth-modal-code-digit">
+        <input type="text" inputmode="numeric" maxlength="1" class="auth-modal-code-digit">
+        <input type="text" inputmode="numeric" maxlength="1" class="auth-modal-code-digit">
+      </div>
+      <p class="auth-modal-error" id="auth-code-error"></p>
+      <button type="button" class="btn btn-primary auth-modal-submit" id="auth-code-continue">{% trans "Продължи" %}</button>
+      <p class="auth-modal-footnote">{% trans "Не получихте код?" %} <button type="button" class="auth-modal-link-btn" id="auth-code-resend">{% trans "Изпрати отново" %}</button></p>
+    </div>
+
+    <div class="auth-modal-step" data-step="register" hidden>
+      <h2 class="auth-modal-title">{% trans "Създайте профил" %}</h2>
+      <div class="auth-modal-field">
+        <label class="auth-modal-label" for="auth-register-first-name">{% trans "Име" %}</label>
+        <input type="text" id="auth-register-first-name" class="auth-modal-input">
+      </div>
+      <div class="auth-modal-field">
+        <label class="auth-modal-label" for="auth-register-last-name">{% trans "Фамилия" %}</label>
+        <input type="text" id="auth-register-last-name" class="auth-modal-input">
+      </div>
+      <div class="auth-modal-field">
+        <label class="auth-modal-label" for="auth-register-phone">{% trans "Телефон" %}</label>
+        <input type="text" id="auth-register-phone" class="auth-modal-input" placeholder="0899999999">
+      </div>
+      <div class="auth-modal-field">
+        <label class="auth-modal-label" for="auth-register-password">{% trans "Парола" %}</label>
+        <input type="password" id="auth-register-password" class="auth-modal-input" autocomplete="new-password">
+      </div>
+      <div class="auth-modal-field">
+        <label class="auth-modal-label" for="auth-register-dob">{% trans "Дата на раждане (незадължително)" %}</label>
+        <input type="date" id="auth-register-dob" class="auth-modal-input">
+      </div>
+      <div class="auth-modal-honeypot" aria-hidden="true">
+        <label for="auth-register-middle-name">{% trans "Презиме" %}</label>
+        <input type="text" id="auth-register-middle-name" tabindex="-1" autocomplete="off">
+      </div>
+      <p class="auth-modal-error" id="auth-register-error"></p>
+      <button type="button" class="btn btn-primary auth-modal-submit" id="auth-register-submit">{% trans "Регистрация" %}</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+    var overlay = document.getElementById('auth-modal');
+    if (!overlay) return;
+
+    var steps = {};
+    Array.prototype.forEach.call(overlay.querySelectorAll('.auth-modal-step'), function (el) {
+        steps[el.dataset.step] = el;
+    });
+
+    var closeBtn = document.getElementById('auth-modal-close');
+    var emailInput = document.getElementById('auth-email-input');
+    var emailError = document.getElementById('auth-email-error');
+    var emailContinueBtn = document.getElementById('auth-email-continue');
+
+    var choiceEmailLabel = document.getElementById('auth-choice-email');
+    var choicePasswordBtn = document.getElementById('auth-choice-password');
+    var choiceCodeBtn = document.getElementById('auth-choice-code');
+
+    var passwordEmailLabel = document.getElementById('auth-password-email');
+    var passwordInput = document.getElementById('auth-password-input');
+    var passwordError = document.getElementById('auth-password-error');
+    var passwordContinueBtn = document.getElementById('auth-password-continue');
+
+    var codeSentTo = document.getElementById('auth-code-sent-to');
+    var codeDigits = Array.prototype.slice.call(document.querySelectorAll('.auth-modal-code-digit'));
+    var codeError = document.getElementById('auth-code-error');
+    var codeContinueBtn = document.getElementById('auth-code-continue');
+    var codeResendBtn = document.getElementById('auth-code-resend');
+
+    var registerFirstName = document.getElementById('auth-register-first-name');
+    var registerLastName = document.getElementById('auth-register-last-name');
+    var registerPhone = document.getElementById('auth-register-phone');
+    var registerPassword = document.getElementById('auth-register-password');
+    var registerDob = document.getElementById('auth-register-dob');
+    var registerMiddleName = document.getElementById('auth-register-middle-name');
+    var registerError = document.getElementById('auth-register-error');
+    var registerSubmitBtn = document.getElementById('auth-register-submit');
+
+    var state = { email: '', next: '' };
+    var turnstileToken = '';
+
+    window.authModalTurnstileCallback = function (token) { turnstileToken = token; };
+
+    function resetTurnstile() {
+        turnstileToken = '';
+        if (window.turnstile && document.getElementById('auth-turnstile')) {
+            window.turnstile.reset('#auth-turnstile');
+        }
+    }
+
+    function getCsrf() {
+        var el = overlay.querySelector('[name=csrfmiddlewaretoken]');
+        return el ? el.value : '';
+    }
+
+    function showStep(name) {
+        Object.keys(steps).forEach(function (key) { steps[key].hidden = key !== name; });
+    }
+
+    function post(url, fields) {
+        var fd = new FormData();
+        fd.append('csrfmiddlewaretoken', getCsrf());
+        Object.keys(fields).forEach(function (key) { fd.append(key, fields[key]); });
+        return fetch(url, { method: 'POST', body: fd }).then(function (r) {
+            return r.json().then(function (data) { return { ok: r.ok, data: data }; });
+        });
+    }
+
+    function getCode() {
+        return codeDigits.map(function (d) { return d.value; }).join('');
+    }
+
+    function finishAuth(redirect) {
+        window.location.href = redirect || state.next || '/';
+    }
+
+    function open(opts) {
+        opts = opts || {};
+        state.next = opts.next || '';
+        state.email = '';
+        emailInput.value = '';
+        emailError.textContent = '';
+        codeDigits.forEach(function (d) { d.value = ''; });
+        showStep('email');
+        overlay.classList.add('open');
+        overlay.setAttribute('aria-hidden', 'false');
+        resetTurnstile();
+        setTimeout(function () { emailInput.focus(); }, 50);
+    }
+
+    function close() {
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+    }
+
+    closeBtn.addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && overlay.classList.contains('open')) close();
+    });
+
+    codeDigits.forEach(function (input, index) {
+        input.addEventListener('input', function () {
+            input.value = input.value.replace(/\D/g, '').slice(0, 1);
+            if (input.value && codeDigits[index + 1]) codeDigits[index + 1].focus();
+        });
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Backspace' && !input.value && codeDigits[index - 1]) codeDigits[index - 1].focus();
+        });
+    });
+
+    function requestCode() {
+        codeError.textContent = '';
+        codeSentTo.textContent = state.email;
+        showStep('code');
+        return post('{% url "auth_send_code" %}', { email: state.email, turnstile_token: turnstileToken }).then(function (res) {
+            resetTurnstile();
+            if (!res.data.success) { codeError.textContent = res.data.error || ''; }
+        }).catch(function () {
+            resetTurnstile();
+            codeError.textContent = '{{ msg_generic_error|escapejs }}';
+        });
+    }
+
+    emailContinueBtn.addEventListener('click', function () {
+        var email = emailInput.value.trim();
+        emailError.textContent = '';
+        if (!email) { emailError.textContent = '{{ msg_enter_email|escapejs }}'; return; }
+
+        state.email = email;
+        emailContinueBtn.disabled = true;
+
+        post('{% url "auth_check_email" %}', { email: email }).then(function (res) {
+            emailContinueBtn.disabled = false;
+            if (!res.data.success) { emailError.textContent = res.data.error || ''; return; }
+
+            if (res.data.exists) {
+                choiceEmailLabel.textContent = email;
+                passwordEmailLabel.textContent = email;
+                showStep('choice');
+            } else {
+                requestCode();
+            }
+        }).catch(function () {
+            emailContinueBtn.disabled = false;
+            emailError.textContent = '{{ msg_generic_error|escapejs }}';
+        });
+    });
+
+    choicePasswordBtn.addEventListener('click', function () {
+        passwordInput.value = '';
+        passwordError.textContent = '';
+        showStep('password');
+    });
+
+    choiceCodeBtn.addEventListener('click', function () { requestCode(); });
+    codeResendBtn.addEventListener('click', function () { requestCode(); });
+
+    passwordContinueBtn.addEventListener('click', function () {
+        passwordError.textContent = '';
+        passwordContinueBtn.disabled = true;
+        post('{% url "auth_login_password" %}', {
+            email: state.email, password: passwordInput.value, next: state.next,
+        }).then(function (res) {
+            passwordContinueBtn.disabled = false;
+            if (res.data.success) { finishAuth(res.data.redirect); }
+            else { passwordError.textContent = res.data.error || ''; }
+        }).catch(function () {
+            passwordContinueBtn.disabled = false;
+            passwordError.textContent = '{{ msg_generic_error|escapejs }}';
+        });
+    });
+
+    codeContinueBtn.addEventListener('click', function () {
+        var code = getCode();
+        codeError.textContent = '';
+        if (code.length !== 6) { codeError.textContent = '{{ msg_enter_all_digits|escapejs }}'; return; }
+
+        codeContinueBtn.disabled = true;
+        post('{% url "auth_verify_code" %}', { email: state.email, code: code, next: state.next }).then(function (res) {
+            codeContinueBtn.disabled = false;
+            if (!res.data.success) { codeError.textContent = res.data.error || ''; return; }
+
+            if (res.data.status === 'logged_in') { finishAuth(res.data.redirect); return; }
+
+            if (res.data.status === 'verified') {
+                registerFirstName.value = '';
+                registerLastName.value = '';
+                registerPhone.value = '';
+                registerPassword.value = '';
+                registerDob.value = '';
+                registerMiddleName.value = '';
+                registerError.textContent = '';
+                showStep('register');
+            }
+        }).catch(function () {
+            codeContinueBtn.disabled = false;
+            codeError.textContent = '{{ msg_generic_error|escapejs }}';
+        });
+    });
+
+    registerSubmitBtn.addEventListener('click', function () {
+        registerError.textContent = '';
+        registerSubmitBtn.disabled = true;
+        post('{% url "auth_register" %}', {
+            first_name: registerFirstName.value,
+            last_name: registerLastName.value,
+            phone_number: registerPhone.value,
+            password: registerPassword.value,
+            date_of_birth: registerDob.value,
+            middle_name: registerMiddleName.value,
+            turnstile_token: turnstileToken,
+            next: state.next,
+        }).then(function (res) {
+            registerSubmitBtn.disabled = false;
+            resetTurnstile();
+            if (res.data.success) { finishAuth(res.data.redirect); return; }
+            if (res.data.errors) {
+                var firstField = Object.keys(res.data.errors)[0];
+                registerError.textContent = firstField ? res.data.errors[firstField][0] : (res.data.error || '');
+            } else {
+                registerError.textContent = res.data.error || '';
+            }
+        }).catch(function () {
+            registerSubmitBtn.disabled = false;
+            resetTurnstile();
+            registerError.textContent = '{{ msg_generic_error|escapejs }}';
+        });
+    });
+
+    window.AuthModal = { open: open, close: close };
+})();
+</script>
