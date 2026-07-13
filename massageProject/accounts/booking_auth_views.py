@@ -1,14 +1,20 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, login
 from django.http import JsonResponse
+from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 from django_ratelimit.decorators import ratelimit
 
 from massageProject.accounts.emails import send_otp_email
+from massageProject.accounts.forms import CustomAuthenticationForm
 from massageProject.accounts.models import EmailOTP
 from massageProject.accounts.turnstile import verify_turnstile_token
 
 User = get_user_model()
+
+SIGNUP_EMAIL_SESSION_KEY = 'verified_signup_email'
+SIGNUP_EMAIL_SESSION_TTL_SECONDS = 15 * 60
 
 
 @require_POST
@@ -41,3 +47,44 @@ def send_code(request):
     send_otp_email(request, email, code)
 
     return JsonResponse({'success': True})
+
+
+@require_POST
+@ratelimit(key='ip', rate='10/m', block=False)
+@ratelimit(key='post:email', rate='8/m', block=False)
+def verify_code(request):
+    if request.limited:
+        return JsonResponse({'success': False, 'error': _('Твърде много опити. Опитайте отново по-късно.')}, status=429)
+
+    email = request.POST.get('email', '').strip().lower()
+    code = request.POST.get('code', '').strip()
+    next_url = request.POST.get('next') or reverse('reservation_page')
+
+    if not email or not code:
+        return JsonResponse({'success': False, 'error': _('Въведете имейл и код.')}, status=400)
+
+    otp, error = EmailOTP.verify(email, code)
+    if error:
+        message = (
+            _('Кодът е грешен или е изтекъл.') if error == 'invalid_code'
+            else _('Няма активен код за този имейл. Изпратете нов.')
+        )
+        return JsonResponse({'success': False, 'error': str(message)}, status=400)
+
+    try:
+        user = User.objects.get(email__iexact=email)
+    except User.DoesNotExist:
+        request.session[SIGNUP_EMAIL_SESSION_KEY] = email
+        request.session[SIGNUP_EMAIL_SESSION_KEY + '_expires'] = (
+            timezone.now() + timezone.timedelta(seconds=SIGNUP_EMAIL_SESSION_TTL_SECONDS)
+        ).isoformat()
+        return JsonResponse({'success': True, 'status': 'verified', 'next': 'register'})
+
+    if not user.is_active:
+        return JsonResponse({
+            'success': False,
+            'error': str(CustomAuthenticationForm.error_messages['inactive']),
+        }, status=403)
+
+    login(request, user, backend='massageProject.accounts.backends.VerificationAwareBackend')
+    return JsonResponse({'success': True, 'status': 'logged_in', 'redirect': next_url})
