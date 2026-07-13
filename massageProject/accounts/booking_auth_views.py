@@ -29,6 +29,31 @@ def check_email(request):
 
 
 @require_POST
+@ratelimit(key='ip', rate='10/m', block=False)
+@ratelimit(key='post:email', rate='8/m', block=False)
+def login_password(request):
+    if request.limited:
+        return JsonResponse({'success': False, 'error': _('Твърде много опити. Опитайте отново по-късно.')}, status=429)
+
+    next_url = request.POST.get('next') or reverse('reservation_page')
+    form = CustomAuthenticationForm(request, data={
+        'username': request.POST.get('email', ''),
+        'password': request.POST.get('password', ''),
+    })
+    if not form.is_valid():
+        non_field = [str(e) for e in form.non_field_errors()]
+        field_errors = {f: [str(e) for e in errs] for f, errs in form.errors.items() if f != '__all__'}
+        return JsonResponse({
+            'success': False,
+            'error': non_field[0] if non_field else '',
+            'errors': field_errors,
+        }, status=400)
+
+    login(request, form.get_user())
+    return JsonResponse({'success': True, 'status': 'logged_in', 'redirect': next_url})
+
+
+@require_POST
 @ratelimit(key='ip', rate='5/m', block=False)
 @ratelimit(key='post:email', rate='3/m', block=False)
 def send_code(request):
