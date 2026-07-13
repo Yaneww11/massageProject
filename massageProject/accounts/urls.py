@@ -10,7 +10,7 @@ from massageProject.accounts.views import (
     UserRegisterView, VerifyEmailView, ResendVerificationView, BrandedPasswordResetView,
 )
 from massageProject.accounts.forms import CustomAuthenticationForm
-from massageProject.accounts.booking_auth_views import check_email, send_code, verify_code
+from massageProject.accounts.booking_auth_views import check_email, send_code, verify_code, register_via_modal
 
 urlpatterns = [
     path('register/', UserRegisterView.as_view(), name='register'),
@@ -20,6 +20,7 @@ urlpatterns = [
     path('auth-modal/check-email/', check_email, name='auth_check_email'),
     path('auth-modal/send-code/', send_code, name='auth_send_code'),
     path('auth-modal/verify-code/', verify_code, name='auth_verify_code'),
+    path('auth-modal/register/', register_via_modal, name='auth_register'),
 
     path('verification-sent/', TemplateView.as_view(template_name='registration/verification_sent.html'), name='verification_sent'),
     path('verify/<uidb64>/<token>/', VerifyEmailView.as_view(), name='verify_email'),
