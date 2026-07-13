@@ -14,3 +14,16 @@
     font-size: var(--fs-lg);
     line-height: 1.6;
 }
+
+.verification-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    margin: 0 auto var(--space-xl);
+}
+
+.verification-actions .btn {
+    gap: var(--space-sm);
+}
