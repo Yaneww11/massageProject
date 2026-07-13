@@ -1,4 +1,7 @@
+import random
+
 from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.models import PermissionsMixin, AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
@@ -87,3 +90,67 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def email_user(self, subject, message, from_email=None, **kwargs):
         """Send an email to this user."""
         send_mail(subject, message, from_email, [self.email], **kwargs)
+
+
+OTP_EXPIRY_MINUTES = 10
+OTP_MAX_ATTEMPTS = 5
+
+
+class EmailOTPManager(models.Manager):
+    def create_for_email(self, email, purpose):
+        code = f"{random.randint(0, 999999):06d}"
+        otp = self.create(
+            email=email,
+            code_hash=make_password(code),
+            purpose=purpose,
+            expires_at=timezone.now() + timezone.timedelta(minutes=OTP_EXPIRY_MINUTES),
+        )
+        return otp, code
+
+    def live_for_email(self, email):
+        return self.filter(
+            email__iexact=email,
+            consumed_at__isnull=True,
+            attempts__lt=OTP_MAX_ATTEMPTS,
+            expires_at__gt=timezone.now(),
+        ).order_by('-created_at')
+
+
+class EmailOTP(models.Model):
+    PURPOSE_SIGNUP = 'signup'
+    PURPOSE_LOGIN = 'login'
+    PURPOSE_CHOICES = [
+        (PURPOSE_SIGNUP, _('Signup')),
+        (PURPOSE_LOGIN, _('Login')),
+    ]
+
+    email = models.EmailField(db_index=True)
+    code_hash = models.CharField(max_length=128)
+    purpose = models.CharField(max_length=10, choices=PURPOSE_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    attempts = models.PositiveSmallIntegerField(default=0)
+    consumed_at = models.DateTimeField(null=True, blank=True)
+
+    objects = EmailOTPManager()
+
+    def check_code(self, code):
+        return check_password(code, self.code_hash)
+
+    @classmethod
+    def verify(cls, email, code):
+        """
+        Returns (otp, error). error is None on success, or 'no_code' /
+        'invalid_code' on failure. On success the matched row is stamped
+        consumed_at; on mismatch its attempts counter is incremented.
+        """
+        otp = cls.objects.live_for_email(email).first()
+        if otp is None:
+            return None, 'no_code'
+        if otp.check_code(code):
+            otp.consumed_at = timezone.now()
+            otp.save(update_fields=['consumed_at'])
+            return otp, None
+        otp.attempts += 1
+        otp.save(update_fields=['attempts'])
+        return None, 'invalid_code'
