@@ -226,11 +226,12 @@
 
 <div id="toast-container" class="toast-container"></div>
 
+{{ massages_data|json_script:"massages-data" }}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
   /* ── Data & elements ─────────────────────────────────── */
-  const MASSAGES     = {{ massages_json|safe }};
+  const MASSAGES     = JSON.parse(document.getElementById('massages-data').textContent);
   const INITIAL_MASSEUR = '{{ form.masseur.value|default:"" }}';
   const INITIAL_DATE    = '{{ form.date.value|date:"Y-m-d"|default:"" }}';
   const INITIAL_TIME    = '{{ form.time.value|default:"" }}';

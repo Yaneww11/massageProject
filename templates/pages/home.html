@@ -87,7 +87,11 @@
                 <span class="hp-eyebrow">{% trans "Мнения" %}</span>
                 <h2 class="hp-section-title">{% trans "Какво казват клиентите" %}</h2>
             </div>
+            {% if request.user.is_authenticated %}
             <button class="btn btn-outline hp-leave-review-btn" id="hp-open-modal">{% trans "Оставете мнение" %}</button>
+            {% else %}
+            <a href="#" class="btn btn-outline hp-leave-review-btn" data-auth-modal-trigger>{% trans "Оставете мнение" %}</a>
+            {% endif %}
         </div>
 
         {% if comments %}
@@ -146,12 +150,6 @@
                     <button type="button" class="hp-star-pick active" data-val="5">★</button>
                 </div>
             </div>
-            {% if not request.user.is_authenticated %}
-            <div class="hp-modal-field">
-                <label class="hp-modal-label" for="hp-modal-name">{% trans "Вашето Име" %}</label>
-                <input type="text" id="hp-modal-name" class="hp-modal-input" placeholder="{% trans "Име" %}">
-            </div>
-            {% endif %}
             <div class="hp-modal-field">
                 <label class="hp-modal-label" for="hp-modal-content">{% trans "Вашето Мнение" %}</label>
                 <textarea id="hp-modal-content" class="hp-modal-textarea" placeholder="{% trans "Споделете Вашето преживяване..." %}"></textarea>
@@ -299,7 +297,6 @@
         var modalBody = document.getElementById('hp-modal-body');
         var successDiv = document.getElementById('hp-modal-success');
         var submitBtn = document.getElementById('hp-submit-review');
-        var nameInput = document.getElementById('hp-modal-name');
         var contentInput = document.getElementById('hp-modal-content');
         var starSelector = document.getElementById('hp-star-selector');
         var starBtns = starSelector ? starSelector.querySelectorAll('.hp-star-pick') : [];
@@ -308,7 +305,7 @@
         function openModal() {
             overlay.classList.add('open');
             overlay.setAttribute('aria-hidden', 'false');
-            if (nameInput) nameInput.focus();
+            if (contentInput) contentInput.focus();
         }
 
         function closeModal() {
@@ -359,7 +356,6 @@
 
                 var fd = new FormData();
                 fd.append('csrfmiddlewaretoken', getCsrf());
-                fd.append('author', nameInput ? nameInput.value.trim() : '');
                 fd.append('content', content);
                 fd.append('rating', selectedRating);
 

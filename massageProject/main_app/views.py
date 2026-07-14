@@ -9,14 +9,15 @@ from django.utils.translation import gettext as _
 from datetime import datetime, timedelta, time, date
 from django.db.models import Count
 from django.contrib import messages
+from django.core.cache import cache
 from django.http import JsonResponse
-import json
 
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
     ReservationDeleteForm, CommentForm, UserNameForm
 from massageProject.main_app.models import Massage, HomePage, Masseur, MessageStudio, MessageReservation, Comment, WorkingHours, ServiceGroup, GalleryAlbum
 
 
+@login_required
 def check_availability(request):
     masseur_id = request.GET.get('masseur_id')
     date_str = request.GET.get('date')
@@ -137,7 +138,7 @@ class ReservationPage(LoginRequiredMixin, CreateView):
         if not (user.first_name and user.last_name) and 'name_form' not in context:
             context['name_form'] = UserNameForm()
         context['masseurs'] = Masseur.objects.all()
-        context['massages_json'] = json.dumps([
+        context['massages_data'] = [
             {
                 'id': m.pk,
                 'name': m.name,
@@ -146,7 +147,7 @@ class ReservationPage(LoginRequiredMixin, CreateView):
                 'desc': m.short_description or (m.description[:100] if m.description else ''),
             }
             for m in Massage.objects.all()
-        ])
+        ]
         return context
 
     def post(self, request, *args, **kwargs):
@@ -264,10 +265,18 @@ class AboutPage(TemplateView):
 
 from django.views.decorators.http import require_POST
 
+@login_required
 @require_POST
 def submit_comment(request):
+    # Rate limit: 1 comment per 60 seconds per IP
+    ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', ''))
+    ip = ip.split(',')[0].strip()
+    cache_key = f'comment_rl_{ip}'
+    if cache.get(cache_key):
+        return JsonResponse({'success': False, 'error': _('Моля, изчакайте преди да изпратите нов коментар.')}, status=429)
+    cache.set(cache_key, 1, timeout=60)
+
     content = request.POST.get('content', '').strip()
-    author_name = request.POST.get('author', '').strip()
     try:
         rating = max(1, min(5, int(request.POST.get('rating', 5))))
     except (ValueError, TypeError):
@@ -276,19 +285,19 @@ def submit_comment(request):
     if not content:
         return JsonResponse({'success': False, 'error': _('Въведете мнение')}, status=400)
 
+    if len(content) > 2000:
+        return JsonResponse({'success': False, 'error': _('Мнението не може да надвишава 2000 символа.')}, status=400)
+
     comment = Comment(content=content, rating=rating, is_reviewed=False)
     user = request.user
-    if user.is_authenticated:
-        comment.user = user
-        comment.author = user.get_full_name() or str(user.phone_number)
-        reservation_id = request.POST.get('reservation_id')
-        if reservation_id:
-            try:
-                comment.reservation = MessageReservation.all_objects.get(pk=reservation_id, user=user)
-            except (MessageReservation.DoesNotExist, ValueError):
-                pass
-    elif author_name:
-        comment.author = author_name
+    comment.user = user
+    comment.author = user.get_full_name() or str(user.phone_number)
+    reservation_id = request.POST.get('reservation_id')
+    if reservation_id:
+        try:
+            comment.reservation = MessageReservation.all_objects.get(pk=reservation_id, user=user)
+        except (MessageReservation.DoesNotExist, ValueError):
+            pass
 
     comment.save()
     return JsonResponse({'success': True})
@@ -349,12 +358,12 @@ class MassageDetail(TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        context['massage'] = Massage.objects.get(pk=kwargs['pk'])
+        context['massage'] = get_object_or_404(Massage, pk=kwargs['pk'])
         return self.render_to_response(context)
 
 @login_required
 def edit_reservation(request, pk: int):
-    reservation = MessageReservation.objects.get(pk=pk)
+    reservation = get_object_or_404(MessageReservation, pk=pk)
 
     # Ownership check
     if reservation.user != request.user:
@@ -384,7 +393,7 @@ def edit_reservation(request, pk: int):
 
 @login_required
 def delete_reservation(request, pk: int):
-    reservation = MessageReservation.objects.get(pk=pk)
+    reservation = get_object_or_404(MessageReservation, pk=pk)
 
     # Ownership check
     if reservation.user != request.user:

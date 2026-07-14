@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxLengthValidator
 from django.db.models import JSONField
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -152,7 +153,7 @@ class MessageReservation(models.Model):
         blank=True,
         related_name='status_updates'
     )
-    additional_text = models.TextField(default='', blank=True)
+    additional_text = models.TextField(default='', blank=True, max_length=500, validators=[MaxLengthValidator(500)])
 
     # Custom Managers
     class ReservationQuerySet(models.QuerySet):
@@ -411,7 +412,7 @@ class Comment(models.Model):
         blank=True,
     )
 
-    content = models.TextField()
+    content = models.TextField(max_length=2000, validators=[MaxLengthValidator(2000)])
 
     rating = models.IntegerField(default=5)
 
