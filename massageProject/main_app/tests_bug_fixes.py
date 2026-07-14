@@ -171,6 +171,23 @@ class OversizedPayloadTest(BugFixTestBase):
             reservation.full_clean()
 
 
+class HomeReviewButtonTest(BugFixTestBase):
+    """B12 — the review button opens the auth modal for anonymous visitors."""
+
+    def test_anonymous_gets_auth_modal_trigger(self):
+        response = self.client.get(reverse('index'))
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+        self.assertNotIn('id="hp-open-modal"', html)
+        self.assertIn('data-auth-modal-trigger', html)
+
+    def test_authenticated_gets_review_modal_button(self):
+        self.login()
+        response = self.client.get(reverse('index'))
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('id="hp-open-modal"', response.content.decode())
+
+
 class PrivacyPolicySanitizationTest(TestCase):
     """B03 — privacy policy content is sanitised, not rendered raw."""
 
