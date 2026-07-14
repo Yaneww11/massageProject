@@ -52,10 +52,26 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rosetta',
+    'django_bleach',
 
     'massageProject.accounts.apps.AccountsConfig',
     'massageProject.main_app.apps.MainAppConfig',
 ]
+
+# HTML sanitisation for admin-authored rich-text fields rendered outside the
+# admin (e.g. HomePage.privacy_policy_content). Strips scripts and event
+# handlers while keeping the formatting markup the content actually uses.
+BLEACH_ALLOWED_TAGS = [
+    'p', 'br', 'strong', 'em', 'b', 'i', 'ul', 'ol', 'li',
+    'h2', 'h3', 'h4', 'a', 'span', 'div',
+]
+BLEACH_ALLOWED_ATTRIBUTES = {'a': ['href', 'title', 'rel'], '*': ['style']}
+BLEACH_ALLOWED_STYLES = [
+    'background', 'border-bottom', 'border-radius', 'color', 'font-family',
+    'font-size', 'font-style', 'font-weight', 'margin', 'margin-bottom',
+    'margin-top', 'padding', 'padding-bottom', 'padding-left', 'text-align',
+]
+BLEACH_STRIP_TAGS = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
