@@ -39,6 +39,25 @@ DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 
+if not DEBUG:
+    # Force HTTPS
+    SECURE_SSL_REDIRECT = True
+
+    # HSTS: tell browsers to only use HTTPS for 1 year
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+    # Cookies must only be sent over HTTPS
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+    # Prevent MIME-type sniffing (explicit, even though Django 3+ defaults True)
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+
+    # Prevent the site from being embedded in an iframe on other domains
+    X_FRAME_OPTIONS = 'DENY'
+
 
 # Application definition
 
