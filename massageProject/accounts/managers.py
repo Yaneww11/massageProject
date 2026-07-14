@@ -70,7 +70,7 @@ class AppUserManager(BaseUserManager):
         return self.none()
 
     def normalize_phone_number(self, phone_number):
-        phone_number.strip()
+        phone_number = phone_number.strip()
         if phone_number.startswith("+359"):
             phone_number = phone_number.replace("+359", "0")
         return phone_number

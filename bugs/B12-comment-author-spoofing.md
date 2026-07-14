@@ -43,29 +43,7 @@ The `AboutPage.post` handler has the same issue at lines 247–251, where an una
 5. A fake positive review attributed to a real person (or a fake negative review attributed to a competitor's name) is now live on the site.
 
 ## Fix Plan
-
-### Option A — Restrict unauthenticated author names with a stricter allowlist (minimum viable fix)
-
-Add a length cap and character-class restriction to `author_name` in `submit_comment`. This does not stop impersonation of real names but limits the most egregious spoofing (titles, HTML, emoji, etc.).
-
-**`views.py` — before (lines 286–287):**
-```python
-    elif author_name:
-        comment.author = author_name
-```
-
-**After:**
-```python
-    elif author_name:
-        import re
-        if not re.fullmatch(r'[A-Za-zА-Яа-яЁёЪъЮюЯяЙй\s\-]{2,60}', author_name):
-            return JsonResponse({'success': False, 'error': _('Невалидно име.')}, status=400)
-        comment.author = author_name
-```
-
-This blocks names containing HTML tags, SQL, special characters, and role-implying punctuation, while still allowing normal Cyrillic and Latin names.
-
-### Option B — Require authentication to submit comments (strongest fix)
+### Require authentication to submit comments (strongest fix)
 
 If business requirements allow it, restricting `submit_comment` to authenticated users eliminates the spoofing vector entirely. The author is then always derived from `user.get_full_name()` (line 279), which comes from the verified account record.
 
@@ -90,21 +68,6 @@ def submit_comment(request):
 ```
 
 With this change, the `elif author_name:` branch (lines 286–287) becomes unreachable and can be removed.
-
-### Option C — Flag unauthenticated comments visually in admin (supplemental)
-
-Regardless of which option above is chosen, annotate unauthenticated comments in the admin moderation list so reviewers can apply extra scrutiny:
-
-In `massageProject/main_app/admin.py`, add a computed column to `CommentAdmin`:
-
-```python
-def is_anonymous(self, obj):
-    return obj.user_id is None
-is_anonymous.boolean = True
-is_anonymous.short_description = 'Anonymous'
-
-list_display = [..., 'is_anonymous']
-```
 
 ## Verification
 

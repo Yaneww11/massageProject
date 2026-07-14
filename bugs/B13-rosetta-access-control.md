@@ -74,8 +74,6 @@ if settings.DEBUG:
     ]
 ```
 
-Option B — keep Rosetta available in production but make the intent explicit by adding both the URL guard (Step 2A) and the `ROSETTA_ACCESS_CONTROL_FUNCTION` (Step 1). This is the safer combination if production translation editing is genuinely needed.
-
 ## Verification
 
 1. Log in as a non-staff user and navigate to `/rosetta/` — expect a 403 or redirect to login.
