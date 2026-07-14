@@ -28,8 +28,12 @@ admin.site.index_title = "Welcome to the Studio Management Dashboard"
 
 urlpatterns = [
     path('i18n/', include(i18n_urls)),
-    path('rosetta/', include('rosetta.urls')),
 ]
+
+if settings.DEBUG:
+    urlpatterns += [
+        path('rosetta/', include('rosetta.urls')),
+    ]
 
 urlpatterns += i18n_patterns(
     path("admin/", admin.site.urls),

@@ -77,6 +77,13 @@ INSTALLED_APPS = [
     'massageProject.main_app.apps.MainAppConfig',
 ]
 
+# Rosetta must never rely on its library-internal default: staff only,
+# stated explicitly so an upgrade or misconfiguration can't widen access.
+def _rosetta_staff_only(user):
+    return user.is_active and user.is_staff
+
+ROSETTA_ACCESS_CONTROL_FUNCTION = 'massageProject.settings._rosetta_staff_only'
+
 # HTML sanitisation for admin-authored rich-text fields rendered outside the
 # admin (e.g. HomePage.privacy_policy_content). Strips scripts and event
 # handlers while keeping the formatting markup the content actually uses.
