@@ -8,6 +8,8 @@ from django.urls import reverse
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount, SocialLogin
 
+from massageProject.accounts.forms import SocialCompleteProfileForm
+
 User = get_user_model()
 
 TEST_PROVIDERS = {
@@ -116,3 +118,67 @@ class AdapterTests(GoogleCallbackTestMixin, TestCase):
             response, reverse('socialaccount_signup'), fetch_redirect_response=False
         )
         self.assertEqual(User.objects.count(), 0)
+
+
+@override_settings(SOCIALACCOUNT_PROVIDERS=TEST_PROVIDERS)
+class SocialCompleteProfileFormTests(TestCase):
+    def form(self, data=None, email='newcomer@gmail.com'):
+        return SocialCompleteProfileForm(data=data, sociallogin=make_sociallogin(email))
+
+    def test_names_are_prefilled_from_google(self):
+        form = self.form()
+        self.assertEqual(form.initial.get('first_name'), 'Иван')
+        self.assertEqual(form.initial.get('last_name'), 'Петров')
+
+    def test_phone_is_required(self):
+        form = self.form(data={
+            'email': 'newcomer@gmail.com', 'first_name': 'Иван',
+            'last_name': 'Петров', 'phone_number': '',
+        })
+        self.assertFalse(form.is_valid())
+        self.assertIn('phone_number', form.errors)
+
+    def test_invalid_phone_format_is_rejected(self):
+        form = self.form(data={
+            'email': 'newcomer@gmail.com', 'first_name': 'Иван',
+            'last_name': 'Петров', 'phone_number': '123456',
+        })
+        self.assertFalse(form.is_valid())
+        self.assertIn('phone_number', form.errors)
+
+    def test_phone_is_normalized(self):
+        form = self.form(data={
+            'email': 'newcomer@gmail.com', 'first_name': 'Иван',
+            'last_name': 'Петров', 'phone_number': '+359899123456',
+        })
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data['phone_number'], '0899123456')
+
+    def test_date_of_birth_is_optional(self):
+        form = self.form(data={
+            'email': 'newcomer@gmail.com', 'first_name': 'Иван',
+            'last_name': 'Петров', 'phone_number': '0899123456',
+        })
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_phone_of_registered_user_is_rejected(self):
+        User.objects.create_user(
+            email='taken@example.com', phone_number='0899123456', password='Str0ng-pass1',
+        )
+        form = self.form(data={
+            'email': 'newcomer@gmail.com', 'first_name': 'Иван',
+            'last_name': 'Петров', 'phone_number': '0899123456',
+        })
+        self.assertFalse(form.is_valid())
+        self.assertIn('phone_number', form.errors)
+
+    def test_phone_of_passwordless_user_is_claimable(self):
+        staff_created = User.objects.create_user(
+            email='placeholder@example.com', phone_number='0899123456', password=None,
+        )
+        form = self.form(data={
+            'email': 'newcomer@gmail.com', 'first_name': 'Иван',
+            'last_name': 'Петров', 'phone_number': '0899123456',
+        })
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form._claimed_user, staff_created)

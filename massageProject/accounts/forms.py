@@ -1,3 +1,4 @@
+from allauth.socialaccount.forms import SignupForm as SocialSignupFormBase
 from django import forms
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.forms import AuthenticationForm
@@ -97,3 +98,71 @@ class BookingRegistrationForm(PhoneClaimFormMixin, forms.ModelForm):
         if commit:
             user.save()
         return user
+
+
+class SocialCompleteProfileForm(SocialSignupFormBase):
+    """Complete-profile step shown to first-time Google users: Google supplies
+    a verified email and names, but reservations need a phone number."""
+
+    first_name = forms.CharField(label=_('Име'), max_length=50)
+    last_name = forms.CharField(label=_('Фамилия'), max_length=50)
+    phone_number = forms.CharField(
+        label=_('Телефон'),
+        max_length=15,
+        validators=get_user_model()._meta.get_field('phone_number').validators,
+        widget=forms.TextInput(attrs={'placeholder': '0899999999'}),
+    )
+    date_of_birth = forms.DateField(
+        label=_('Дата на раждане (незадължително)'),
+        required=False,
+        widget=forms.DateInput(attrs={'type': 'date'}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._claimed_user = None
+        # The email comes verified from Google and must not be edited.
+        if 'email' in self.fields:
+            self.fields['email'].disabled = True
+        for field in self.fields.values():
+            field.widget.attrs.setdefault('class', 'auth-modal-input')
+
+    def clean_phone_number(self):
+        phone_number = self.cleaned_data['phone_number']
+        User = get_user_model()
+        normalized = User.objects.normalize_phone_number(phone_number)
+        try:
+            existing_user = User.objects.get(phone_number__iexact=normalized)
+        except User.DoesNotExist:
+            pass
+        else:
+            if existing_user.has_usable_password():
+                raise ValidationError(
+                    PhoneClaimFormMixin.error_messages['already_registered']
+                )
+            self._claimed_user = existing_user
+        return normalized
+
+    def save(self, request):
+        if self._claimed_user is not None:
+            # A passwordless (staff-created) record owns this phone number:
+            # claim it instead of creating a duplicate. The verified Google
+            # email wins, mirroring BookingRegistrationForm.save().
+            user = self._claimed_user
+            user.first_name = self.cleaned_data['first_name']
+            user.last_name = self.cleaned_data['last_name']
+            user.phone_number = self.cleaned_data['phone_number']
+            if self.cleaned_data.get('date_of_birth'):
+                user.date_of_birth = self.cleaned_data['date_of_birth']
+            user.email = self.sociallogin.user.email or user.email
+            user.is_active = True
+            user.save()
+            self.sociallogin.connect(request, user)
+            return user
+
+        # Set the extra fields on the pending user BEFORE the allauth adapter
+        # saves it, so the row never exists without a phone number. The
+        # adapter copies first/last name and email from cleaned_data itself.
+        self.sociallogin.user.phone_number = self.cleaned_data['phone_number']
+        self.sociallogin.user.date_of_birth = self.cleaned_data.get('date_of_birth')
+        return super().save(request)
