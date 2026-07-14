@@ -30,18 +30,35 @@ def make_sociallogin(email, first_name='Иван', last_name='Петров', uid
     return sociallogin
 
 
+def google_profile(email, first_name='Иван', last_name='Петров', uid='google-uid-1'):
+    """The decoded id-token payload Google would return for this user."""
+    return {
+        'sub': uid,
+        'email': email,
+        'email_verified': True,
+        'given_name': first_name,
+        'family_name': last_name,
+    }
+
+
 class GoogleCallbackTestMixin:
     """Drives a real /accounts/google/login/ -> callback round-trip with the
-    Google token exchange mocked out."""
+    Google token exchange mocked out. The sociallogin is built through the
+    real provider machinery so it carries the provider/app wiring allauth
+    relies on."""
 
-    def run_google_callback(self, sociallogin, next_url=''):
+    def run_google_callback(self, profile, next_url=''):
         data = {'next': next_url} if next_url else {}
         start = self.client.post(reverse('google_login'), data)
         self.assertEqual(start.status_code, 302)
         state = parse_qs(urlparse(start['Location']).query)['state'][0]
+
+        def fake_complete_login(request, app, token, **kwargs):
+            return app.get_provider(request).sociallogin_from_response(request, profile)
+
         with patch(
             'allauth.socialaccount.providers.google.views.GoogleOAuth2Adapter.complete_login',
-            return_value=sociallogin,
+            side_effect=fake_complete_login,
         ), patch(
             'allauth.socialaccount.providers.oauth2.client.OAuth2Client.get_access_token',
             return_value={'access_token': 'dummy-token'},
@@ -65,3 +82,37 @@ class GoogleWiringTests(TestCase):
         response = self.client.get(reverse('login'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'registration/auth_entry.html')
+
+
+@override_settings(SOCIALACCOUNT_PROVIDERS=TEST_PROVIDERS)
+class AdapterTests(GoogleCallbackTestMixin, TestCase):
+    def test_local_allauth_signup_is_closed(self):
+        response = self.client.get(reverse('account_signup'))
+        self.assertTemplateUsed(response, 'account/signup_closed.html')
+
+    def test_google_login_with_known_email_links_and_logs_in(self):
+        user = User.objects.create_user(
+            email='known@example.com', phone_number='0899123456', password='Str0ng-pass1',
+        )
+        response = self.run_google_callback(google_profile('known@example.com'))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(int(self.client.session['_auth_user_id']), user.pk)
+        self.assertTrue(
+            SocialAccount.objects.filter(user=user, provider='google').exists()
+        )
+
+    def test_returning_google_user_logs_straight_in(self):
+        user = User.objects.create_user(
+            email='returning@example.com', phone_number='0899123457', password='Str0ng-pass1',
+        )
+        SocialAccount.objects.create(user=user, provider='google', uid='google-uid-1')
+        response = self.run_google_callback(google_profile('returning@example.com'))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(int(self.client.session['_auth_user_id']), user.pk)
+
+    def test_unknown_email_is_sent_to_complete_profile(self):
+        response = self.run_google_callback(google_profile('newcomer@gmail.com'))
+        self.assertRedirects(
+            response, reverse('socialaccount_signup'), fetch_redirect_response=False
+        )
+        self.assertEqual(User.objects.count(), 0)
