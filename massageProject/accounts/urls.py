@@ -1,4 +1,4 @@
-from django.urls import path, reverse_lazy
+from django.urls import include, path, reverse_lazy
 from django.contrib.auth.views import (
     LogoutView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView,
 )
@@ -29,4 +29,8 @@ urlpatterns = [
     path('reset/done/', PasswordResetCompleteView.as_view(
         template_name='registration/password_reset_complete.html'
     ), name='password_reset_complete'),
+
+    # allauth is appended last so the custom login/logout routes above win.
+    # Provides google_login, google_callback, socialaccount_signup, etc.
+    path('', include('allauth.urls')),
 ]

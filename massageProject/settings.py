@@ -73,6 +73,11 @@ INSTALLED_APPS = [
     'rosetta',
     'django_bleach',
 
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+
     'massageProject.accounts.apps.AccountsConfig',
     'massageProject.main_app.apps.MainAppConfig',
 ]
@@ -108,6 +113,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'massageProject.urls'
@@ -197,7 +203,10 @@ MEDIA_ROOT = BASE_DIR / 'media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.CustomUser'
 # VerificationAwareBackend (not ModelBackend/AllowAllUsersModelBackend): authenticate() succeeds for is_active=False users, letting AuthenticationForm.confirm_login_allowed() surface our custom inactive-user message instead of a generic invalid-login error, while get_user()/user_can_authenticate() stay unmodified from ModelBackend so deactivating an account still invalidates that user's existing session on their next request.
-AUTHENTICATION_BACKENDS = ['massageProject.accounts.backends.VerificationAwareBackend']
+AUTHENTICATION_BACKENDS = [
+    'massageProject.accounts.backends.VerificationAwareBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
 
 LOGIN_REDIRECT_URL = reverse_lazy('reservation_page')
 LOGOUT_REDIRECT_URL = reverse_lazy('index')
@@ -219,6 +228,31 @@ GMAIL_API_USER_ID = env('GMAIL_API_USER_ID', default='me')
 # Cloudflare Turnstile (invisible bot-check widget on the booking auth modal)
 TURNSTILE_SITE_KEY = env('TURNSTILE_SITE_KEY', default='')
 TURNSTILE_SECRET_KEY = env('TURNSTILE_SECRET_KEY', default='')
+
+# django-allauth -- used ONLY for "Continue with Google"; the email/OTP/password
+# flows stay on the custom booking auth modal endpoints.
+GOOGLE_OAUTH_CLIENT_ID = env('GOOGLE_OAUTH_CLIENT_ID', default='')
+GOOGLE_OAUTH_CLIENT_SECRET = env('GOOGLE_OAUTH_CLIENT_SECRET', default='')
+
+ACCOUNT_ADAPTER = 'massageProject.accounts.adapters.ClosedSignupAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'massageProject.accounts.adapters.GoogleSocialAccountAdapter'
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*']
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+# Every new Google user must pass through the complete-profile form (phone is required).
+SOCIALACCOUNT_AUTO_SIGNUP = False
+SOCIALACCOUNT_FORMS = {'signup': 'massageProject.accounts.forms.SocialCompleteProfileForm'}
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': GOOGLE_OAUTH_CLIENT_ID,
+            'secret': GOOGLE_OAUTH_CLIENT_SECRET,
+        },
+        'SCOPE': ['profile', 'email'],
+    },
+}
+
 # Unfold Configuration
 UNFOLD = {
     "SITE_TITLE": "Relax & Health Admin",
