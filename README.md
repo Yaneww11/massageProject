@@ -66,3 +66,21 @@ Contributions are welcome! Please fork the repository and create a pull request 
 ## License
 
 This project is licensed under the MIT License. See the `LICENSE` file for more details.
+
+## Google OAuth setup ("Continue with Google")
+
+1. In [Google Cloud Console](https://console.cloud.google.com/) create (or pick) a project, then
+   **APIs & Services → Credentials → Create Credentials → OAuth client ID** (type: *Web application*).
+   Configure the OAuth consent screen first if prompted (External, app name, support email).
+2. Add **Authorized redirect URIs** for every language prefix and host:
+   - `http://localhost:8000/bg/accounts/google/login/callback/`
+   - `http://localhost:8000/en/accounts/google/login/callback/`
+   - the same two paths on the production domain, over `https`.
+3. Put the credentials in `.env`:
+
+   ```
+   GOOGLE_OAUTH_CLIENT_ID=<client id>.apps.googleusercontent.com
+   GOOGLE_OAUTH_CLIENT_SECRET=<client secret>
+   ```
+
+4. Restart the server. The button lives on the login/register modal.

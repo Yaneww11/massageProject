@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-14 20:32+0000\n"
+"POT-Creation-Date: 2026-07-17 16:44+0000\n"
 "PO-Revision-Date: 2026-06-14 19:15+0000\n"
 "Last-Translator: Яне Янев <s@ex.com>\n"
 "Language-Team: English\n"
@@ -58,7 +58,8 @@ msgstr "The email hasn't been verified, or verification has expired."
 msgid "Relax & Health"
 msgstr ""
 
-#: massageProject/accounts/forms.py:13
+#: massageProject/accounts/forms.py:14
+#: templates/account/account_inactive.html:7
 msgid ""
 "Моля, потвърдете имейла си, преди да влезете. Проверете пощата си за линк за "
 "потвърждение, или поискайте нов по-долу."
@@ -66,23 +67,42 @@ msgstr ""
 "Please verify your email before logging in. Check your inbox for the "
 "confirmation link, or request a new one below."
 
-#: massageProject/accounts/forms.py:20 templates/partials/auth_modal.html:15
+#: massageProject/accounts/forms.py:21 templates/partials/auth_modal.html:15
+#: templates/socialaccount/signup.html:14
 msgid "Имейл"
 msgstr "Email"
 
-#: massageProject/accounts/forms.py:34
+#: massageProject/accounts/forms.py:35
 msgid "Този телефонен номер вече е регистриран. Моля, влезте в профила си."
 msgstr ""
 "This phone number is already registered. Please log in to your account."
 
-#: massageProject/accounts/forms.py:58 templates/partials/auth_modal.html:33
-#: templates/partials/auth_modal.html:72
+#: massageProject/accounts/forms.py:59 templates/partials/auth_modal.html:42
+#: templates/partials/auth_modal.html:81
 msgid "Парола"
 msgstr "Password"
 
-#: massageProject/accounts/forms.py:87
+#: massageProject/accounts/forms.py:88
 msgid "Имейлът не е потвърден."
 msgstr "The email hasn't been verified."
+
+#: massageProject/accounts/forms.py:107 templates/partials/auth_modal.html:69
+msgid "Име"
+msgstr "Name"
+
+#: massageProject/accounts/forms.py:108 massageProject/main_app/forms.py:29
+#: templates/pages/reservation.html:115 templates/partials/auth_modal.html:73
+msgid "Фамилия"
+msgstr "Last Name"
+
+#: massageProject/accounts/forms.py:110 templates/pages/home.html:196
+#: templates/partials/auth_modal.html:77
+msgid "Телефон"
+msgstr "Phone"
+
+#: massageProject/accounts/forms.py:116 templates/partials/auth_modal.html:85
+msgid "Дата на раждане (незадължително)"
+msgstr "Date of birth (optional)"
 
 #: massageProject/accounts/models.py:19
 msgid "email address"
@@ -122,7 +142,7 @@ msgstr ""
 msgid "Потребител"
 msgstr ""
 
-#: massageProject/accounts/models.py:69 massageProject/settings.py:301
+#: massageProject/accounts/models.py:69 massageProject/settings.py:335
 msgid "Потребители"
 msgstr "Duration:"
 
@@ -270,11 +290,6 @@ msgstr "Minimum length is %(limit_value)d characters."
 msgid "Максималната дължина е %(limit_value)d символа."
 msgstr "Maximum length is %(limit_value)d characters."
 
-#: massageProject/main_app/forms.py:29 templates/pages/reservation.html:115
-#: templates/partials/auth_modal.html:64
-msgid "Фамилия"
-msgstr "Last Name"
-
 #: massageProject/main_app/forms.py:46 massageProject/main_app/forms.py:49
 #: massageProject/main_app/forms.py:52 massageProject/main_app/forms.py:55
 msgid "Тове поле е задължително"
@@ -326,19 +341,19 @@ msgstr ""
 msgid "Терапевт"
 msgstr ""
 
-#: massageProject/main_app/models.py:68 massageProject/settings.py:250
+#: massageProject/main_app/models.py:68 massageProject/settings.py:284
 msgid "Терапевти"
 msgstr ""
 
 # Templates - working_hours
 #: massageProject/main_app/models.py:85 massageProject/main_app/models.py:86
-#: massageProject/settings.py:255 templates/pages/home.html:175
+#: massageProject/settings.py:289 templates/pages/home.html:175
 #: templates/partials/working_hours.html:4
 msgid "Работно време"
 msgstr "Working Hours"
 
 # Templates - footer
-#: massageProject/main_app/models.py:103 massageProject/settings.py:236
+#: massageProject/main_app/models.py:103 massageProject/settings.py:270
 msgid "Студио"
 msgstr "Studio"
 
@@ -390,7 +405,7 @@ msgstr "The time overlaps with another reservation for %(name)s."
 msgid "Резервация"
 msgstr "Reservations"
 
-#: massageProject/main_app/models.py:246 massageProject/settings.py:268
+#: massageProject/main_app/models.py:246 massageProject/settings.py:302
 msgid "Резервации"
 msgstr "Reservations"
 
@@ -402,7 +417,7 @@ msgstr "Title"
 msgid "Кратко описание"
 msgstr "Short description"
 
-#: massageProject/main_app/models.py:257 massageProject/settings.py:280
+#: massageProject/main_app/models.py:257 massageProject/settings.py:314
 #: templates/pages/gallery.html:9 templates/partials/header.html:13
 msgid "Галерия"
 msgstr "Gallery"
@@ -439,7 +454,7 @@ msgstr "Slug"
 msgid "Албум"
 msgstr "Album"
 
-#: massageProject/main_app/models.py:298 massageProject/settings.py:284
+#: massageProject/main_app/models.py:298 massageProject/settings.py:318
 msgid "Албуми"
 msgstr "Albums"
 
@@ -451,11 +466,11 @@ msgstr "Alt text"
 msgid "Снимка в албум"
 msgstr "Album photo"
 
-#: massageProject/main_app/models.py:321 massageProject/settings.py:289
+#: massageProject/main_app/models.py:321 massageProject/settings.py:323
 msgid "Снимки в албум"
 msgstr "Album photos"
 
-#: massageProject/main_app/models.py:340 massageProject/settings.py:240
+#: massageProject/main_app/models.py:340 massageProject/settings.py:274
 msgid "Начална страница"
 msgstr ""
 
@@ -493,7 +508,7 @@ msgstr "Reservations"
 msgid "Коментар"
 msgstr "Comments"
 
-#: massageProject/main_app/models.py:429 massageProject/settings.py:306
+#: massageProject/main_app/models.py:429 massageProject/settings.py:340
 #: templates/pages/about.html:30
 msgid "Коментари"
 msgstr "Comments"
@@ -535,29 +550,40 @@ msgid "Резервацията беше отменена успешно."
 msgstr "The reservation was successfully cancelled."
 
 # settings.py
-#: massageProject/settings.py:170
+#: massageProject/settings.py:176
 msgid "Bulgarian"
 msgstr "Bulgarian"
 
-#: massageProject/settings.py:171
+#: massageProject/settings.py:177
 msgid "English"
 msgstr "English"
 
-#: massageProject/settings.py:245 templates/partials/header.html:12
+#: massageProject/settings.py:279 templates/partials/header.html:12
 msgid "Услуги"
 msgstr "Services"
 
-#: massageProject/settings.py:260
+#: massageProject/settings.py:294
 msgid "Обекти"
 msgstr ""
 
-#: massageProject/settings.py:272
+#: massageProject/settings.py:306
 msgid "Всички резервации"
 msgstr "Upcoming bookings"
 
-#: massageProject/settings.py:297
+#: massageProject/settings.py:331
 msgid "Потребители и Отзиви"
 msgstr "Additional Notes"
+
+#: templates/account/account_inactive.html:6
+msgid "Този профил е деактивиран."
+msgstr "This account is inactive."
+
+# Templates - register
+#: templates/account/account_inactive.html:8
+#: templates/socialaccount/authentication_error.html:9
+#: templates/socialaccount/login_cancelled.html:9
+msgid "Към началната страница"
+msgstr "Back to the home page"
 
 #: templates/emails/otp_email.html:3 templates/emails/otp_email_subject.txt:1
 msgid "Ваш код за потвърждение"
@@ -890,10 +916,6 @@ msgstr "Day Off"
 #: templates/pages/home.html:190 templates/partials/footer.html:25
 msgid "Адрес"
 msgstr "Address"
-
-#: templates/pages/home.html:196 templates/partials/auth_modal.html:68
-msgid "Телефон"
-msgstr "Phone"
 
 # Templates - massage_detail
 #: templates/pages/massage_detail.html:15
@@ -1259,66 +1281,67 @@ msgstr "Log in or sign up"
 msgid "За да завършите резервацията, трябва да потвърдим Вашия имейл."
 msgstr "To complete your booking, we need to verify your email."
 
-#: templates/partials/auth_modal.html:19 templates/partials/auth_modal.html:53
+#: templates/partials/auth_modal.html:19 templates/partials/auth_modal.html:62
+#: templates/socialaccount/signup.html:38
 msgid "Продължи"
 msgstr "Continue"
 
-#: templates/partials/auth_modal.html:23
+#: templates/partials/auth_modal.html:20
+msgid "или"
+msgstr "or"
+
+#: templates/partials/auth_modal.html:26
+msgid "Продължи с Google"
+msgstr "Continue with Google"
+
+#: templates/partials/auth_modal.html:32
 msgid "Как искате да влезете?"
 msgstr "How would you like to log in?"
 
-#: templates/partials/auth_modal.html:25
+#: templates/partials/auth_modal.html:34
 msgid "С парола"
 msgstr "With a password"
 
-#: templates/partials/auth_modal.html:26
+#: templates/partials/auth_modal.html:35
 msgid "С код по имейл"
 msgstr "With an emailed code"
 
-#: templates/partials/auth_modal.html:30
+#: templates/partials/auth_modal.html:39
 msgid "Въведете паролата си"
 msgstr "Enter your password"
 
-#: templates/partials/auth_modal.html:37 templates/partials/header.html:31
+#: templates/partials/auth_modal.html:46 templates/partials/header.html:31
 #: templates/partials/header.html:62
 #: templates/registration/password_reset_complete.html:9
 msgid "Вход"
 msgstr "Login"
 
-#: templates/partials/auth_modal.html:38
+#: templates/partials/auth_modal.html:47
 msgid "Забравена парола?"
 msgstr "Forgot password?"
 
-#: templates/partials/auth_modal.html:42
+#: templates/partials/auth_modal.html:51
 msgid "Потвърдете своя имейл"
 msgstr "Confirm your email"
 
-#: templates/partials/auth_modal.html:54
+#: templates/partials/auth_modal.html:63
 msgid "Не получихте код?"
 msgstr "Didn't receive a code?"
 
-#: templates/partials/auth_modal.html:54
+#: templates/partials/auth_modal.html:63
 msgid "Изпрати отново"
 msgstr "Resend"
 
-#: templates/partials/auth_modal.html:58
+#: templates/partials/auth_modal.html:67
 msgid "Създайте профил"
 msgstr "Create your account"
 
-#: templates/partials/auth_modal.html:60
-msgid "Име"
-msgstr "Name"
-
-#: templates/partials/auth_modal.html:76
-msgid "Дата на раждане (незадължително)"
-msgstr "Date of birth (optional)"
-
-#: templates/partials/auth_modal.html:80
+#: templates/partials/auth_modal.html:89
 msgid "Презиме"
 msgstr "Middle name"
 
 # Templates - register
-#: templates/partials/auth_modal.html:84 templates/partials/header.html:32
+#: templates/partials/auth_modal.html:93 templates/partials/header.html:32
 #: templates/partials/header.html:63
 msgid "Регистрация"
 msgstr "Registration"
@@ -1488,6 +1511,33 @@ msgstr "Please fill in all fields."
 #: templates/reservation/edit-reservation.html:172
 msgid "Моля, изберете час за вашата резервация."
 msgstr "Please select a time for your reservation."
+
+#: templates/socialaccount/authentication_error.html:6
+msgid "Възникна проблем при входа с Google."
+msgstr "Something went wrong while signing in with Google."
+
+#: templates/socialaccount/authentication_error.html:7
+#: templates/socialaccount/login_cancelled.html:7
+msgid "Опитайте отново или влезте с имейл и код."
+msgstr "Try again or sign in with your email and a code."
+
+#: templates/socialaccount/authentication_error.html:8
+#: templates/socialaccount/login_cancelled.html:8
+msgid "Опитайте отново"
+msgstr "Try again"
+
+#: templates/socialaccount/login_cancelled.html:6
+msgid "Входът с Google беше отменен."
+msgstr "Google sign-in was cancelled."
+
+#: templates/socialaccount/signup.html:6
+msgid "Завършете профила си"
+msgstr "Complete your profile"
+
+#: templates/socialaccount/signup.html:7
+msgid ""
+"Влязохте с Google. Трябва ни само телефонен номер за връзка при резервации."
+msgstr "You signed in with Google. We just need a phone number to contact you about your reservations."
 
 #: templates/unfold/helpers/site_logo.html:5
 #: templates/unfold/helpers/site_logo.html:8
@@ -3806,9 +3856,6 @@ msgstr ""
 #~ msgid "регистрирайте се"
 #~ msgstr "register"
 
-#~ msgid "или"
-#~ msgstr "or"
-
 #~ msgid "влезте"
 #~ msgstr "log in"
 
@@ -3821,9 +3868,6 @@ msgstr ""
 
 #~ msgid "Регистрирайте се тук"
 #~ msgstr "Register here"
-
-#~ msgid "Изпратете отново линк за потвърждение"
-#~ msgstr "Resend verification email"
 
 #~ msgid ""
 #~ "Създайте нов акаунт, за да започнете да планирате своите моменти на "
