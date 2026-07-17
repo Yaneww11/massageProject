@@ -182,3 +182,82 @@ class SocialCompleteProfileFormTests(TestCase):
         })
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form._claimed_user, staff_created)
+
+
+@override_settings(SOCIALACCOUNT_PROVIDERS=TEST_PROVIDERS)
+class CompleteProfileFlowTests(GoogleCallbackTestMixin, TestCase):
+    def start_signup(self, email='newcomer@gmail.com', next_url=''):
+        response = self.run_google_callback(google_profile(email), next_url=next_url)
+        self.assertRedirects(
+            response, reverse('socialaccount_signup'), fetch_redirect_response=False
+        )
+
+    def test_complete_profile_page_renders_prefilled(self):
+        self.start_signup()
+        response = self.client.get(reverse('socialaccount_signup'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'socialaccount/signup.html')
+        self.assertContains(response, 'Иван')
+        self.assertContains(response, 'newcomer@gmail.com')
+
+    def test_submitting_profile_creates_user_and_logs_in(self):
+        self.start_signup()
+        response = self.client.post(reverse('socialaccount_signup'), {
+            'email': 'newcomer@gmail.com',
+            'first_name': 'Иван',
+            'last_name': 'Петров',
+            'phone_number': '0899111222',
+            'date_of_birth': '',
+        })
+        self.assertEqual(response.status_code, 302)
+        user = User.objects.get(email='newcomer@gmail.com')
+        self.assertEqual(user.phone_number, '0899111222')
+        self.assertEqual(user.first_name, 'Иван')
+        self.assertFalse(user.has_usable_password())
+        self.assertTrue(user.is_active)
+        self.assertEqual(int(self.client.session['_auth_user_id']), user.pk)
+        self.assertTrue(
+            SocialAccount.objects.filter(user=user, provider='google').exists()
+        )
+
+    def test_next_is_honored_after_signup(self):
+        next_url = reverse('reservation_page')
+        self.start_signup(next_url=next_url)
+        response = self.client.post(reverse('socialaccount_signup'), {
+            'email': 'newcomer@gmail.com',
+            'first_name': 'Иван',
+            'last_name': 'Петров',
+            'phone_number': '0899111222',
+            'date_of_birth': '',
+        })
+        self.assertRedirects(response, next_url, fetch_redirect_response=False)
+
+    def test_invalid_phone_re_renders_with_error(self):
+        self.start_signup()
+        response = self.client.post(reverse('socialaccount_signup'), {
+            'email': 'newcomer@gmail.com',
+            'first_name': 'Иван',
+            'last_name': 'Петров',
+            'phone_number': 'not-a-phone',
+            'date_of_birth': '',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(User.objects.count(), 0)
+        self.assertContains(response, 'auth-modal-error')
+
+    def test_claiming_staff_created_user_updates_instead_of_duplicating(self):
+        staff_created = User.objects.create_user(
+            email='placeholder@example.com', phone_number='0899111222', password=None,
+        )
+        self.start_signup()
+        self.client.post(reverse('socialaccount_signup'), {
+            'email': 'newcomer@gmail.com',
+            'first_name': 'Иван',
+            'last_name': 'Петров',
+            'phone_number': '0899111222',
+            'date_of_birth': '',
+        })
+        self.assertEqual(User.objects.count(), 1)
+        staff_created.refresh_from_db()
+        self.assertEqual(staff_created.email, 'newcomer@gmail.com')
+        self.assertEqual(int(self.client.session['_auth_user_id']), staff_created.pk)

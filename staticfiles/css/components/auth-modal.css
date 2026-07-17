@@ -73,6 +73,18 @@
     margin-bottom: 0.5rem;
 }
 
+/* Standalone auth pages (Google complete-profile, OAuth errors) reuse the
+   modal card outside of an overlay. */
+.auth-page {
+    display: flex;
+    justify-content: center;
+    padding: 4rem 1rem;
+}
+
+.auth-page .auth-modal {
+    box-shadow: 0 8px 30px rgba(74, 55, 40, 0.12);
+}
+
 .auth-modal-input {
     width: 100%;
     padding: 0.75rem 1rem;
