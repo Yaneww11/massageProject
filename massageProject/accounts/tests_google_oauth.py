@@ -261,3 +261,12 @@ class CompleteProfileFlowTests(GoogleCallbackTestMixin, TestCase):
         staff_created.refresh_from_db()
         self.assertEqual(staff_created.email, 'newcomer@gmail.com')
         self.assertEqual(int(self.client.session['_auth_user_id']), staff_created.pk)
+
+
+@override_settings(SOCIALACCOUNT_PROVIDERS=TEST_PROVIDERS)
+class AuthModalGoogleButtonTests(TestCase):
+    def test_modal_email_step_contains_google_form(self):
+        response = self.client.get(reverse('login'))
+        self.assertContains(response, 'id="auth-google-next"')
+        self.assertContains(response, reverse('google_login'))
+        self.assertContains(response, 'auth-modal-google-btn')
