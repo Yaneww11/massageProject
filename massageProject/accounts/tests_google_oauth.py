@@ -270,3 +270,32 @@ class AuthModalGoogleButtonTests(TestCase):
         self.assertContains(response, 'id="auth-google-next"')
         self.assertContains(response, reverse('google_login'))
         self.assertContains(response, 'auth-modal-google-btn')
+
+
+@override_settings(SOCIALACCOUNT_PROVIDERS=TEST_PROVIDERS)
+class BrandedAllauthPagesTests(GoogleCallbackTestMixin, TestCase):
+    def test_authentication_error_page_is_branded(self):
+        # Hitting the callback with no state/code triggers the error page.
+        response = self.client.get(reverse('google_callback'))
+        self.assertTemplateUsed(response, 'socialaccount/authentication_error.html')
+        self.assertContains(
+            response, 'auth-page', status_code=response.status_code
+        )
+
+    def test_login_cancelled_page_is_branded(self):
+        response = self.client.get(reverse('socialaccount_login_cancelled'))
+        self.assertTemplateUsed(response, 'socialaccount/login_cancelled.html')
+        self.assertContains(response, 'auth-page')
+
+    def test_inactive_user_lands_on_branded_inactive_page(self):
+        User.objects.create_user(
+            email='inactive@example.com', phone_number='0899123458',
+            password='Str0ng-pass1', is_active=False,
+        )
+        response = self.run_google_callback(google_profile('inactive@example.com'))
+        self.assertRedirects(
+            response, reverse('account_inactive'), fetch_redirect_response=False
+        )
+        page = self.client.get(reverse('account_inactive'))
+        self.assertTemplateUsed(page, 'account/account_inactive.html')
+        self.assertContains(page, 'auth-page')

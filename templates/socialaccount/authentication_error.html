@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+<div class="auth-page">
+  <div class="auth-modal">
+    <h2 class="auth-modal-title">{% trans "Възникна проблем при входа с Google." %}</h2>
+    <p class="auth-modal-subtitle">{% trans "Опитайте отново или влезте с имейл и код." %}</p>
+    <a class="btn btn-primary auth-modal-submit" href="{% url 'login' %}">{% trans "Опитайте отново" %}</a>
+    <p class="auth-modal-footnote"><a href="{% url 'index' %}">{% trans "Към началната страница" %}</a></p>
+  </div>
+</div>
+{% endblock %}

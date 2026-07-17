@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+<div class="auth-page">
+  <div class="auth-modal">
+    <h2 class="auth-modal-title">{% trans "Този профил е деактивиран." %}</h2>
+    <p class="auth-modal-subtitle">{% trans "Моля, потвърдете имейла си, преди да влезете. Проверете пощата си за линк за потвърждение, или поискайте нов по-долу." %}</p>
+    <p class="auth-modal-footnote"><a href="{% url 'index' %}">{% trans "Към началната страница" %}</a></p>
+  </div>
+</div>
+{% endblock %}
