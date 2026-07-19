@@ -14,7 +14,7 @@ from django.http import JsonResponse
 
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
     ReservationDeleteForm, CommentForm, UserNameForm
-from massageProject.main_app.models import Service, HomePage, Specialist, MessageStudio, MessageReservation, Comment, WorkingHours, ServiceGroup, GalleryAlbum
+from massageProject.main_app.models import Service, HomePage, Specialist, BusinessInfo, Reservation, Comment, WorkingHours, ServiceGroup, GalleryAlbum
 
 
 @login_required
@@ -51,10 +51,10 @@ def check_availability(request):
     duration = timedelta(minutes=service.duration_in_minutes)
 
     # 3. Get existing reservations for overlap check
-    existing_reservations = MessageReservation.objects.filter(
+    existing_reservations = Reservation.objects.filter(
         specialist=specialist,
         date=date_obj,
-        status=MessageReservation.STATUS_ACTIVE
+        status=Reservation.STATUS_ACTIVE
     )
 
     while current_dt + duration <= end_dt:
@@ -127,7 +127,7 @@ class ServicesDashboard(ListView):
         return context
 
 class ReservationPage(LoginRequiredMixin, CreateView):
-    model = MessageReservation
+    model = Reservation
     template_name = 'pages/reservation.html'
     form_class = ReservationCreateForm
     success_url = reverse_lazy('profile_page')
@@ -220,7 +220,7 @@ class AboutPage(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['specialist'] = Specialist.objects.first()
-        context['studio'] = MessageStudio.objects.values('description', 'main_image').first()
+        context['business_info'] = BusinessInfo.objects.values('description', 'main_image').first()
         context['comments'] = Comment.objects.filter(is_reviewed=True).order_by('-created_at')[:15]
         context['total_comments_count'] = Comment.objects.filter(is_reviewed=True).count()
         if 'form' not in context:
@@ -295,8 +295,8 @@ def submit_comment(request):
     reservation_id = request.POST.get('reservation_id')
     if reservation_id:
         try:
-            comment.reservation = MessageReservation.all_objects.get(pk=reservation_id, user=user)
-        except (MessageReservation.DoesNotExist, ValueError):
+            comment.reservation = Reservation.all_objects.get(pk=reservation_id, user=user)
+        except (Reservation.DoesNotExist, ValueError):
             pass
 
     comment.save()
@@ -320,11 +320,11 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
         user = self.request.user
 
         if user.has_perm('main_app.view_all_reservations'):
-            active_reservations = list(MessageReservation.objects.active().order_by('date', 'time')[:15])
-            past_reservations = list(MessageReservation.objects.past().order_by('-date', '-time')[:15])
+            active_reservations = list(Reservation.objects.active().order_by('date', 'time')[:15])
+            past_reservations = list(Reservation.objects.past().order_by('-date', '-time')[:15])
             context['title'] = _('Управление на резервации')
         else:
-            user_qs = MessageReservation.objects.filter(user=user)
+            user_qs = Reservation.objects.filter(user=user)
             active_reservations = list(user_qs.active().order_by('date', 'time'))
             past_reservations = list(user_qs.past().order_by('-date', '-time')[:5])
             context['title'] = f'{user.get_full_name()} - {_("резервации")}'
@@ -335,17 +335,17 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
         context['today'] = date.today()
 
         # Metrics
-        context['total_visits'] = MessageReservation.all_objects.filter(user=user, status='completed').count()
+        context['total_visits'] = Reservation.all_objects.filter(user=user, status='completed').count()
         context['upcoming_count'] = len(active_reservations)
-        fav = (MessageReservation.objects.filter(user=user)
+        fav = (Reservation.objects.filter(user=user)
                .values('service__name').annotate(c=Count('id')).order_by('-c').first())
         context['favorite_service'] = fav['service__name'] if fav else None
         context['client_since'] = user.date_joined.year
 
         # Studio info and working hours
-        context['studio'] = MessageStudio.objects.first()
+        context['business_info'] = BusinessInfo.objects.first()
         homepage = HomePage.objects.first()
-        context['working_hours'] = list(homepage.studio_working_hours.order_by('order')) if homepage else []
+        context['working_hours'] = list(homepage.business_working_hours.order_by('order')) if homepage else []
 
         # Map of reviewed past reservations {reservation_id: comment}
         reviewed = Comment.objects.filter(reservation__in=past_reservations).select_related('reservation')
@@ -363,7 +363,7 @@ class ServiceDetail(TemplateView):
 
 @login_required
 def edit_reservation(request, pk: int):
-    reservation = get_object_or_404(MessageReservation, pk=pk)
+    reservation = get_object_or_404(Reservation, pk=pk)
 
     # Ownership check
     if reservation.user != request.user:
@@ -393,7 +393,7 @@ def edit_reservation(request, pk: int):
 
 @login_required
 def delete_reservation(request, pk: int):
-    reservation = get_object_or_404(MessageReservation, pk=pk)
+    reservation = get_object_or_404(Reservation, pk=pk)
 
     # Ownership check
     if reservation.user != request.user:
@@ -408,7 +408,7 @@ def delete_reservation(request, pk: int):
     form = ReservationDeleteForm(instance=reservation)
 
     if request.method == 'POST':
-        reservation.change_status(MessageReservation.STATUS_DELETED, user=request.user)
+        reservation.change_status(Reservation.STATUS_DELETED, user=request.user)
         messages.success(request, _("Резервацията беше отменена успешно."))
         return redirect('profile_page')
 

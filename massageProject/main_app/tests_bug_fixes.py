@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from massageProject.accounts.models import CustomUser
 from massageProject.main_app.models import (
-    Comment, Gallery, HomePage, Service, Specialist, MessageReservation,
+    Comment, Gallery, HomePage, Service, Specialist, Reservation,
     WorkingHours,
 )
 
@@ -159,7 +159,7 @@ class OversizedPayloadTest(BugFixTestBase):
 
     def test_oversized_additional_text_fails_validation(self):
         future = timezone.localtime(timezone.now()) + timedelta(days=3)
-        reservation = MessageReservation(
+        reservation = Reservation(
             user=self.user,
             service=self.service,
             specialist=self.specialist,

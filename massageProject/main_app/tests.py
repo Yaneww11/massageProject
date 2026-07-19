@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-from massageProject.main_app.models import Service, Specialist, MessageReservation, WorkingHours, HomePage
+from massageProject.main_app.models import Service, Specialist, Reservation, WorkingHours, HomePage
 from massageProject.accounts.models import CustomUser
 from datetime import datetime, time, date, timedelta
 
@@ -50,7 +50,7 @@ class SchedulingLogicTest(TestCase):
         self.test_date = candidate
 
     def create_reservation(self, service, specialist, date_val, time_val):
-        return MessageReservation.objects.create(
+        return Reservation.objects.create(
             user=self.user,
             service=service,
             specialist=specialist,
@@ -60,7 +60,7 @@ class SchedulingLogicTest(TestCase):
 
     def test_successful_reservation(self):
         res = self.create_reservation(self.massage_60, self.specialist, self.test_date, time(10, 0))
-        self.assertEqual(MessageReservation.objects.count(), 1)
+        self.assertEqual(Reservation.objects.count(), 1)
 
     def test_overlap_exact_same_time(self):
         self.create_reservation(self.massage_60, self.specialist, self.test_date, time(10, 0))
@@ -87,7 +87,7 @@ class SchedulingLogicTest(TestCase):
         self.create_reservation(self.massage_60, self.specialist, self.test_date, time(10, 0))
         # 11:00 - 11:30 (should work)
         res2 = self.create_reservation(self.massage_30, self.specialist, self.test_date, time(11, 0))
-        self.assertEqual(MessageReservation.objects.count(), 2)
+        self.assertEqual(Reservation.objects.count(), 2)
 
     def test_outside_working_hours_early(self):
         with self.assertRaises(ValidationError) as cm:
@@ -133,7 +133,7 @@ class SchedulingLogicTest(TestCase):
         self.create_reservation(self.massage_60, self.specialist, self.test_date, time(10, 0))
         # Jane should be free at 10:00
         self.create_reservation(self.massage_60, specialist2, self.test_date, time(10, 0))
-        self.assertEqual(MessageReservation.objects.count(), 2)
+        self.assertEqual(Reservation.objects.count(), 2)
 
 class SecurityAndBusinessRulesTest(TestCase):
     def setUp(self):
@@ -158,7 +158,7 @@ class SecurityAndBusinessRulesTest(TestCase):
 
     def test_edit_other_user_reservation_denied(self):
         future_date = timezone.localdate() + timedelta(days=14)
-        res = MessageReservation.objects.create(
+        res = Reservation.objects.create(
             user=self.user1, service=self.service, specialist=self.specialist,
             date=future_date, time=time(10, 0)
         )
@@ -170,7 +170,7 @@ class SecurityAndBusinessRulesTest(TestCase):
         # Create a reservation for tomorrow
         # But set it to less than 24h from now (e.g. 23h)
         res_datetime = timezone.now() + timedelta(hours=23)
-        res = MessageReservation.objects.create(
+        res = Reservation.objects.create(
             user=self.user1, service=self.service, specialist=self.specialist,
             date=res_datetime.date(), time=res_datetime.time()
         )
@@ -185,7 +185,7 @@ class SecurityAndBusinessRulesTest(TestCase):
 
     def test_24h_rule_delete(self):
         res_datetime = timezone.now() + timedelta(hours=23)
-        res = MessageReservation.objects.create(
+        res = Reservation.objects.create(
             user=self.user1, service=self.service, specialist=self.specialist,
             date=res_datetime.date(), time=res_datetime.time()
         )

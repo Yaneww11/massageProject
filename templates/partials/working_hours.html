@@ -2,9 +2,9 @@
 <section class="working-hours">
     <div class="description">
         <h2>{% trans "Работно време" %}</h2>
-        {% if page.studio_working_hours.all %}
+        {% if page.business_working_hours.all %}
             <ul class="hours-list">
-                {% for entry in page.studio_working_hours.all %}
+                {% for entry in page.business_working_hours.all %}
                     <li>{{ entry.day_label }}{% if entry.hours %}: {{ entry.hours }}{% else %}: {% trans "Почивен ден" %}{% endif %}</li>
                 {% endfor %}
             </ul>

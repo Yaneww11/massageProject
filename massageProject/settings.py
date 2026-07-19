@@ -293,7 +293,7 @@ UNFOLD = {
                     {
                         "title": _("Обекти"),
                         "icon": "location_on",
-                        "link": reverse_lazy("admin:main_app_messagestudio_changelist"),
+                        "link": reverse_lazy("admin:main_app_businessinfo_changelist"),
                     },
                 ],
             },
@@ -305,7 +305,7 @@ UNFOLD = {
                     {
                         "title": _("Всички резервации"),
                         "icon": "event",
-                        "link": reverse_lazy("admin:main_app_messagereservation_changelist"),
+                        "link": reverse_lazy("admin:main_app_reservation_changelist"),
                     },
                 ],
             },

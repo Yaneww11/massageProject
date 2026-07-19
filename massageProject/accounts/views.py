@@ -30,16 +30,16 @@ class BrandedPasswordResetView(PasswordResetView):
 
     @property
     def extra_email_context(self):
-        from massageProject.main_app.models import HomePage, MessageStudio
+        from massageProject.main_app.models import HomePage, BusinessInfo
 
         homepage = HomePage.get_solo()
-        studio = MessageStudio.objects.first()
+        business_info = BusinessInfo.objects.first()
         logo_url = None
         if homepage and homepage.logo:
             logo_url = self.request.build_absolute_uri(homepage.logo.url)
 
         return {
             'brand_name': homepage.brand_name if homepage else _('Relax & Health'),
-            'studio': studio,
+            'business_info': business_info,
             'logo_url': logo_url,
         }

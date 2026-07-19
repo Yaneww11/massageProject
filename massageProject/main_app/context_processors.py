@@ -1,4 +1,4 @@
-from massageProject.main_app.models import HomePage, MessageStudio
+from massageProject.main_app.models import HomePage, BusinessInfo
 
 def admin_branding(request):
     try:
@@ -15,13 +15,13 @@ def admin_branding(request):
     request.brand_logo = brand_logo
 
     try:
-        studio = MessageStudio.objects.first()
+        business_info = BusinessInfo.objects.first()
     except Exception:
-        studio = None
+        business_info = None
 
     return {
         'brand_name': brand_name,
         'brand_logo': brand_logo,
         'footer_tagline': footer_tagline,
-        'studio': studio,
+        'business_info': business_info,
     }

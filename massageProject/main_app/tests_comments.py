@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
-from massageProject.main_app.models import Comment, Specialist, MessageStudio
+from massageProject.main_app.models import Comment, Specialist, BusinessInfo
 from massageProject.accounts.models import CustomUser
 
 class CommentLogicTest(TestCase):
@@ -14,10 +14,10 @@ class CommentLogicTest(TestCase):
             first_name='John',
             last_name='Doe'
         )
-        # AboutPage needs a Specialist and MessageStudio to render
+        # AboutPage needs a Specialist and BusinessInfo to render
         dummy_image = SimpleUploadedFile(name='test_image.jpg', content=b'', content_type='image/jpeg')
         Specialist.objects.create(name="Test Specialist", image=dummy_image)
-        MessageStudio.objects.create(description="Test Studio")
+        BusinessInfo.objects.create(description="Test Studio")
 
         # Create some reviewed and unreviewed comments
         for i in range(20):

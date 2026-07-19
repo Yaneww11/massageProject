@@ -1,6 +1,6 @@
 from modeltranslation.translator import register, TranslationOptions
 from massageProject.main_app.models import (
-    Service, Specialist, HomePage, MessageStudio, StudioWorkingHours, Image, ServiceGroup,
+    Service, Specialist, HomePage, BusinessInfo, BusinessWorkingHours, Image, ServiceGroup,
     Gallery, GalleryAlbum, AlbumPhoto,
 )
 
@@ -20,13 +20,13 @@ class HomePageTranslationOptions(TranslationOptions):
     fields = ('brand_name', 'description', 'privacy_policy_content', 'footer_tagline')
 
 
-@register(MessageStudio)
-class MessageStudioTranslationOptions(TranslationOptions):
+@register(BusinessInfo)
+class BusinessInfoTranslationOptions(TranslationOptions):
     fields = ('name', 'description', 'address')
 
 
-@register(StudioWorkingHours)
-class StudioWorkingHoursTranslationOptions(TranslationOptions):
+@register(BusinessWorkingHours)
+class BusinessWorkingHoursTranslationOptions(TranslationOptions):
     fields = ('day_label', 'hours')
 
 

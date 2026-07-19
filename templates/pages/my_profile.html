@@ -70,17 +70,17 @@
             <span class="specialist-role">{% trans "Масажист" %}</span>
           </div>
         </div>
-        {% if studio %}
+        {% if business_info %}
         <div class="next-booking-location">
-          <i class="fas fa-map-marker-alt"></i> {{ studio.address }}
+          <i class="fas fa-map-marker-alt"></i> {{ business_info.address }}
         </div>
         {% endif %}
         <div class="next-booking-actions">
           <button class="btn-calendar" disabled>
             <i class="fas fa-calendar-plus"></i> {% trans "Добави в календар" %}
           </button>
-          {% if studio %}
-          <a href="https://www.google.com/maps/search/?api=1&query={{ studio.address|urlencode }}"
+          {% if business_info %}
+          <a href="https://www.google.com/maps/search/?api=1&query={{ business_info.address|urlencode }}"
              target="_blank" rel="noopener noreferrer" class="btn-outline-profile">
             <i class="fas fa-directions"></i> {% trans "Упътвания" %}
           </a>
@@ -198,7 +198,7 @@
     </div>
 
     <!-- Working hours + Contacts -->
-    {% if working_hours or studio %}
+    {% if working_hours or business_info %}
     <div class="info-grid">
       {% if working_hours %}
       <div class="info-card">
@@ -211,17 +211,17 @@
         {% endfor %}
       </div>
       {% endif %}
-      {% if studio %}
+      {% if business_info %}
       <div class="info-card">
         <span class="profile-eyebrow">{% trans "КОНТАКТИ" %}</span>
         <div class="contact-row">
           <i class="fas fa-map-marker-alt contact-icon"></i>
-          <span>{{ studio.address }}</span>
+          <span>{{ business_info.address }}</span>
         </div>
-        {% if studio.phone %}
+        {% if business_info.phone %}
         <div class="contact-row">
           <i class="fas fa-phone contact-icon"></i>
-          <span>{{ studio.phone }}</span>
+          <span>{{ business_info.phone }}</span>
         </div>
         {% endif %}
       </div>

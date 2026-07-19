@@ -166,7 +166,7 @@
 </div>
 
 <!-- ========== WORKING HOURS — Two-column with contact card ========== -->
-{% if page.studio_working_hours.all %}
+{% if page.business_working_hours.all %}
 <section class="hp-hours" id="contacts">
     <div class="hp-container">
         <div class="hp-hours-grid">
@@ -174,7 +174,7 @@
                 <span class="hp-eyebrow">{% trans "Заповядайте" %}</span>
                 <h2 class="hp-section-title">{% trans "Работно време" %}</h2>
                 <ul class="hp-hours-list">
-                    {% for entry in page.studio_working_hours.all %}
+                    {% for entry in page.business_working_hours.all %}
                     <li class="hp-hours-row">
                         <span class="hp-hours-day">{{ entry.day_label }}</span>
                         <span class="hp-hours-sep"></span>
@@ -184,17 +184,17 @@
                 </ul>
             </div>
             <div class="hp-contact-card hp-reveal">
-                {% if studio %}
-                {% if studio.address %}
+                {% if business_info %}
+                {% if business_info.address %}
                 <div class="hp-contact-field">
                     <span class="hp-contact-label">{% trans "Адрес" %}</span>
-                    <span class="hp-contact-value">{{ studio.address }}</span>
+                    <span class="hp-contact-value">{{ business_info.address }}</span>
                 </div>
                 {% endif %}
-                {% if studio.phone %}
+                {% if business_info.phone %}
                 <div class="hp-contact-field">
                     <span class="hp-contact-label">{% trans "Телефон" %}</span>
-                    <span class="hp-contact-value">{{ studio.phone }}</span>
+                    <span class="hp-contact-value">{{ business_info.phone }}</span>
                 </div>
                 {% endif %}
                 {% endif %}

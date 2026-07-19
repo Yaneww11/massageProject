@@ -11,8 +11,8 @@ from modeltranslation.admin import TabbedTranslationAdmin
 
 from massageProject.main_app.models import (
     Service, Image, Gallery, HomePage, GalleryImage,
-    MessageStudio, Specialist, WorkingHours, MessageReservation, Comment,
-    StudioWorkingHours, ServiceGroup, GalleryAlbum, AlbumPhoto,
+    BusinessInfo, Specialist, WorkingHours, Reservation, Comment,
+    BusinessWorkingHours, ServiceGroup, GalleryAlbum, AlbumPhoto,
 )
 
 # --- Actions ---
@@ -37,12 +37,12 @@ def mark_as_reviewed(modeladmin, request, queryset):
 @admin.action(description=_('Маркирай като Завършена'))
 def mark_as_completed(modeladmin, request, queryset):
     for obj in queryset:
-        obj.change_status(MessageReservation.STATUS_COMPLETED, user=request.user)
+        obj.change_status(Reservation.STATUS_COMPLETED, user=request.user)
 
 @admin.action(description=_('Маркирай като Не се е явил'))
 def mark_as_noshow(modeladmin, request, queryset):
     for obj in queryset:
-        obj.change_status(MessageReservation.STATUS_NOSHOW, user=request.user)
+        obj.change_status(Reservation.STATUS_NOSHOW, user=request.user)
 
 # --- Filters ---
 
@@ -117,8 +117,8 @@ class WorkingHoursAdmin(ModelAdmin):
         return dict(WorkingHours.DAYS_OF_WEEK).get(obj.day_of_week)
     get_day_display.short_description = _('Ден')
 
-@admin.register(MessageReservation)
-class MessageReservationAdmin(ModelAdmin):
+@admin.register(Reservation)
+class ReservationAdmin(ModelAdmin):
     list_display = ('date', 'time', 'get_client_name', 'service', 'specialist', 'status', 'status_updated_at')
     list_filter = ('status', ReservationDateFilter, 'specialist', 'service', 'date')
     search_fields = ('user__phone_number', 'user__first_name', 'user__last_name', 'service__name')
@@ -139,7 +139,7 @@ class MessageReservationAdmin(ModelAdmin):
     get_client_name.short_description = _('Клиент')
 
     def get_queryset(self, request):
-        return MessageReservation.all_objects.all()
+        return Reservation.all_objects.all()
 
     def save_model(self, request, obj, form, change):
         if 'status' in form.changed_data:
@@ -220,22 +220,22 @@ class AlbumPhotoAdmin(ModelAdmin, TabbedTranslationAdmin):
         return _("Няма изображение")
     display_image.short_description = _('Преглед')
 
-class StudioWorkingHoursInline(TabularInline):
-    model = StudioWorkingHours
+class BusinessWorkingHoursInline(TabularInline):
+    model = BusinessWorkingHours
     extra = 1
     fields = ('day_label', 'hours', 'order')
 
 @admin.register(HomePage)
 class HomePageAdmin(ModelAdmin, TabbedTranslationAdmin):
     list_display = ('brand_name',)
-    inlines = [StudioWorkingHoursInline]
+    inlines = [BusinessWorkingHoursInline]
     fieldsets = (
         (None, {'fields': ('brand_name', 'logo', 'description', 'footer_tagline', 'gallery')}),
         (_('Политика за поверителност'), {'fields': ('privacy_policy_content',), 'classes': ('collapse',)}),
     )
 
-@admin.register(MessageStudio)
-class MessageStudiosAdmin(ModelAdmin, TabbedTranslationAdmin):
+@admin.register(BusinessInfo)
+class BusinessInfosAdmin(ModelAdmin, TabbedTranslationAdmin):
     list_display = ('display_image', 'name', 'address', 'phone')
     list_filter_sheet = True
     

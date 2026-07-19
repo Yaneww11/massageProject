@@ -3,7 +3,7 @@ from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
 
 from massageProject.main_app.mixins import DisableFieldMixin
-from massageProject.main_app.models import MessageReservation, Comment
+from massageProject.main_app.models import Reservation, Comment
 
 _NAME_VALIDATOR = RegexValidator(
     regex=r'^[A-Za-zА-Яа-яЁё\s\-]+$',
@@ -38,7 +38,7 @@ class UserNameForm(forms.Form):
 
 class ReservationBaseForm(forms.ModelForm):
     class Meta:
-        model = MessageReservation
+        model = Reservation
         fields = ['service', 'specialist', 'date', 'time', 'additional_text']
 
         error_messages = {

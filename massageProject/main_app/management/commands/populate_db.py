@@ -3,8 +3,8 @@ from datetime import date, time, timedelta
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from massageProject.main_app.models import (
-    Service, Specialist, MessageStudio, HomePage, Gallery, Image, GalleryImage,
-    MessageReservation, Comment
+    Service, Specialist, BusinessInfo, HomePage, Gallery, Image, GalleryImage,
+    Reservation, Comment
 )
 from django.utils import timezone
 
@@ -94,17 +94,17 @@ class Command(BaseCommand):
             if created:
                 self.stdout.write(f"Created massage: {name}")
 
-        # 4. Create MessageStudio
-        studio, created = MessageStudio.objects.get_or_create(
+        # 4. Create BusinessInfo
+        business_info, created = BusinessInfo.objects.get_or_create(
             name='Tranquil Oasis Studio',
             defaults={
                 'description': 'A sanctuary of peace and relaxation. Our studio offers a wide range of therapeutic massages in a tranquil environment.',
-                'main_image': 'studios/massage_studio.jpg',
+                'main_image': 'business/massage_studio.jpg',
                 'address': 'ul. "Tsar Ivan Asen II" 12, 1124 Sofia, Bulgaria'
             }
         )
         if created:
-            self.stdout.write(f"Created studio: {studio.name}")
+            self.stdout.write(f"Created studio: {business_info.name}")
 
         # 5. Create Gallery and Home Page
         gallery, created = Gallery.objects.get_or_create()
@@ -112,7 +112,7 @@ class Command(BaseCommand):
             # Create some images for the gallery
             for i in range(3):
                 img = Image.objects.create(
-                    image='studios/gallery/massage_studio.jpg',
+                    image='business/gallery/massage_studio.jpg',
                     alt_text=f'Studio Interior {i+1}'
                 )
                 GalleryImage.objects.create(gallery=gallery, image=img)
@@ -120,7 +120,7 @@ class Command(BaseCommand):
         elif not gallery.images.exists():
              for i in range(3):
                 img = Image.objects.create(
-                    image='studios/gallery/massage_studio.jpg',
+                    image='business/gallery/massage_studio.jpg',
                     alt_text=f'Studio Interior {i+1}'
                 )
                 GalleryImage.objects.create(gallery=gallery, image=img)
@@ -159,8 +159,8 @@ class Command(BaseCommand):
             }
             if d < today:
                 # Past reservations can't be 'active' (2-hour lead time check applies only to active ones)
-                defaults['status'] = MessageReservation.STATUS_COMPLETED
-            res, created = MessageReservation.objects.get_or_create(
+                defaults['status'] = Reservation.STATUS_COMPLETED
+            res, created = Reservation.objects.get_or_create(
                 service=msg,
                 user=user,
                 date=d,

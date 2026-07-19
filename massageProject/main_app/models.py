@@ -88,10 +88,10 @@ class WorkingHours(models.Model):
     def __str__(self):
         return f"{self.specialist.name} - {self.get_day_of_week_display()}"
 
-class MessageStudio(models.Model):
+class BusinessInfo(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
-    main_image = models.ImageField(upload_to='studios/')
+    main_image = models.ImageField(upload_to='business/')
     address = models.CharField(max_length=255)
     phone = models.CharField(max_length=50, blank=True)
     email_address = models.EmailField()
@@ -106,7 +106,7 @@ class MessageStudio(models.Model):
     def __str__(self):
         return self.name
 
-class MessageReservation(models.Model):
+class Reservation(models.Model):
     STATUS_ACTIVE = 'active'
     STATUS_COMPLETED = 'completed'
     STATUS_NOSHOW = 'no_show'
@@ -166,7 +166,7 @@ class MessageReservation(models.Model):
 
     class ReservationManager(models.Manager):
         def get_queryset(self):
-            return MessageReservation.ReservationQuerySet(self.model, using=self._db).exclude(status='deleted')
+            return Reservation.ReservationQuerySet(self.model, using=self._db).exclude(status='deleted')
         def active(self):
             return self.get_queryset().active()
         def past(self):
@@ -214,7 +214,7 @@ class MessageReservation(models.Model):
             )
 
         # 3. Overlap check
-        existing_reservations = MessageReservation.objects.filter(
+        existing_reservations = Reservation.objects.filter(
             specialist=self.specialist,
             date=self.date,
             status=self.STATUS_ACTIVE
@@ -361,11 +361,11 @@ class HomePage(models.Model):
         return self.brand_name
 
 
-class StudioWorkingHours(models.Model):
+class BusinessWorkingHours(models.Model):
     home_page = models.ForeignKey(
         HomePage,
         on_delete=models.CASCADE,
-        related_name='studio_working_hours',
+        related_name='business_working_hours',
     )
     day_label = models.CharField(
         max_length=100,
@@ -398,7 +398,7 @@ class Comment(models.Model):
     )
 
     reservation = models.ForeignKey(
-        'MessageReservation',
+        'Reservation',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
