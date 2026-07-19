@@ -172,7 +172,7 @@
     const MSG_SELECT_TIME = "{% trans 'Моля, изберете час за вашата резервация.' %}";
 
     document.addEventListener('DOMContentLoaded', function() {
-        const massageSelect = document.getElementById('service');
+        const serviceSelect = document.getElementById('service');
         const specialistSelect = document.getElementById('specialist');
         const dateInput = document.getElementById('date');
         const timeValueInput = document.getElementById('time_value');
@@ -205,7 +205,7 @@
         }
 
         async function fetchAvailability() {
-            const serviceId = massageSelect.value;
+            const serviceId = serviceSelect.value;
             const specialistId = specialistSelect.value;
             const date = dateInput.value;
 
@@ -255,12 +255,12 @@
 
         // Click handling for help message
         timeSlotsContainer.addEventListener('click', (e) => {
-            if (!massageSelect.value || !specialistSelect.value || !dateInput.value) {
+            if (!serviceSelect.value || !specialistSelect.value || !dateInput.value) {
                 showToast(MSG_SELECT_FIRST);
             }
         });
 
-        massageSelect.addEventListener('change', debouncedFetch);
+        serviceSelect.addEventListener('change', debouncedFetch);
         specialistSelect.addEventListener('change', debouncedFetch);
         dateInput.addEventListener('change', debouncedFetch);
 

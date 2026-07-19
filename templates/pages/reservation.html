@@ -231,13 +231,13 @@
 document.addEventListener('DOMContentLoaded', function () {
 
   /* ── Data & elements ─────────────────────────────────── */
-  const MASSAGES     = JSON.parse(document.getElementById('services-data').textContent);
+  const SERVICES     = JSON.parse(document.getElementById('services-data').textContent);
   const INITIAL_SPECIALIST = '{{ form.specialist.value|default:"" }}';
   const INITIAL_DATE    = '{{ form.date.value|date:"Y-m-d"|default:"" }}';
   const INITIAL_TIME    = '{{ form.time.value|default:"" }}';
   const LANG = document.documentElement.lang || 'bg';
 
-  const massageSelect = document.getElementById('service');
+  const serviceSelect = document.getElementById('service');
   const specialistValue  = document.getElementById('specialist-value');
   const dateValue     = document.getElementById('date-value');
   const timeValue     = document.getElementById('time-value');
@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const MSG_LOADING        = "{% trans 'Зареждане...' %}";
   const MSG_NO_SLOTS       = "{% trans 'Няма свободни часове за избрания ден.' %}";
   const MSG_ERROR          = "{% trans 'Възникна грешка. Моля, опитайте отново.' %}";
-  const MSG_MASSAGE_CHANGED= "{% trans 'Типът масаж беше променен. Моля, изберете нов час.' %}";
+  const MSG_SERVICE_CHANGED= "{% trans 'Типът масаж беше променен. Моля, изберете нов час.' %}";
   const MSG_MORNING        = "{% trans 'Сутрин' %}";
   const MSG_AFTERNOON      = "{% trans 'Следобед' %}";
   const MSG_EVENING        = "{% trans 'Вечер' %}";
@@ -283,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ── Confirm button state ─────────────────────────────── */
   function updateConfirmBtn() {
-    let ok = massageSelect.value && specialistValue.value && dateValue.value && timeValue.value;
+    let ok = serviceSelect.value && specialistValue.value && dateValue.value && timeValue.value;
     const fn = document.getElementById('first_name');
     const ln = document.getElementById('last_name');
     if (fn && ln) ok = ok && fn.value.trim() && ln.value.trim();
@@ -291,26 +291,26 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /* ── A: Service select ────────────────────────────────── */
-  function applyMassage() {
-    const m = MASSAGES.find(x => x.id == massageSelect.value);
+  function applyService() {
+    const m = SERVICES.find(x => x.id == serviceSelect.value);
     if (!m) return;
     svcDesc.textContent = m.desc;
     sSvc.textContent    = m.name;
     sDur.textContent    = m.duration + ' мин';
   }
 
-  massageSelect.addEventListener('change', () => {
+  serviceSelect.addEventListener('change', () => {
     if (timeValue.value) {
       timeValue.value = '';
       sTime.textContent = '—';
-      showToast(MSG_MASSAGE_CHANGED);
+      showToast(MSG_SERVICE_CHANGED);
     }
-    applyMassage();
+    applyService();
     debouncedFetch();
     updateConfirmBtn();
   });
 
-  applyMassage(); // initialize from server-rendered select
+  applyService(); // initialize from server-rendered select
 
   /* ── B: Therapist tiles ───────────────────────────────── */
   document.querySelectorAll('.bn-therapist-tile').forEach(tile => {
@@ -488,7 +488,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   async function fetchAvailability() {
-    const serviceId = massageSelect.value;
+    const serviceId = serviceSelect.value;
     const specialistId = specialistValue.value;
     const date      = dateValue.value;
 
@@ -566,7 +566,7 @@ document.addEventListener('DOMContentLoaded', function () {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    if (!massageSelect.value || !specialistValue.value || !dateValue.value) {
+    if (!serviceSelect.value || !specialistValue.value || !dateValue.value) {
       showToast(MSG_SELECT_FIRST);
       return;
     }
@@ -616,7 +616,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   /* ── Initial state ────────────────────────────────────── */
-  if (massageSelect.value && specialistValue.value && INITIAL_DATE) {
+  if (serviceSelect.value && specialistValue.value && INITIAL_DATE) {
     fetchAvailability();
   }
   updateConfirmBtn();

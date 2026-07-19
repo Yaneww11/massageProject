@@ -12,14 +12,14 @@ class SchedulingLogicTest(TestCase):
             email='test@example.com',
             password='password123'
         )
-        self.massage_60 = Service.objects.create(
+        self.service_60 = Service.objects.create(
             name='60 min Service',
             description='desc',
             price=50.00,
             duration_in_minutes=60,
             short_description='short'
         )
-        self.massage_30 = Service.objects.create(
+        self.service_30 = Service.objects.create(
             name='30 min Service',
             description='desc',
             price=30.00,
@@ -59,49 +59,49 @@ class SchedulingLogicTest(TestCase):
         )
 
     def test_successful_reservation(self):
-        res = self.create_reservation(self.massage_60, self.specialist, self.test_date, time(10, 0))
+        res = self.create_reservation(self.service_60, self.specialist, self.test_date, time(10, 0))
         self.assertEqual(Reservation.objects.count(), 1)
 
     def test_overlap_exact_same_time(self):
-        self.create_reservation(self.massage_60, self.specialist, self.test_date, time(10, 0))
+        self.create_reservation(self.service_60, self.specialist, self.test_date, time(10, 0))
         with self.assertRaises(ValidationError) as cm:
-            self.create_reservation(self.massage_60, self.specialist, self.test_date, time(10, 0))
+            self.create_reservation(self.service_60, self.specialist, self.test_date, time(10, 0))
         self.assertIn("застъпва", str(cm.exception))
 
     def test_overlap_inside_duration(self):
         # 10:00 - 11:00
-        self.create_reservation(self.massage_60, self.specialist, self.test_date, time(10, 0))
+        self.create_reservation(self.service_60, self.specialist, self.test_date, time(10, 0))
         # Try 10:30 - 11:00 (overlaps)
         with self.assertRaises(ValidationError):
-            self.create_reservation(self.massage_30, self.specialist, self.test_date, time(10, 30))
+            self.create_reservation(self.service_30, self.specialist, self.test_date, time(10, 30))
 
     def test_overlap_end_time_clash(self):
         # 10:00 - 11:00
-        self.create_reservation(self.massage_60, self.specialist, self.test_date, time(10, 0))
+        self.create_reservation(self.service_60, self.specialist, self.test_date, time(10, 0))
         # Try 09:45 - 10:15 (overlaps)
         with self.assertRaises(ValidationError):
-            self.create_reservation(self.massage_30, self.specialist, self.test_date, time(9, 45))
+            self.create_reservation(self.service_30, self.specialist, self.test_date, time(9, 45))
 
     def test_no_overlap_back_to_back(self):
         # 10:00 - 11:00
-        self.create_reservation(self.massage_60, self.specialist, self.test_date, time(10, 0))
+        self.create_reservation(self.service_60, self.specialist, self.test_date, time(10, 0))
         # 11:00 - 11:30 (should work)
-        res2 = self.create_reservation(self.massage_30, self.specialist, self.test_date, time(11, 0))
+        res2 = self.create_reservation(self.service_30, self.specialist, self.test_date, time(11, 0))
         self.assertEqual(Reservation.objects.count(), 2)
 
     def test_outside_working_hours_early(self):
         with self.assertRaises(ValidationError) as cm:
-            self.create_reservation(self.massage_60, self.specialist, self.test_date, time(8, 30))
+            self.create_reservation(self.service_60, self.specialist, self.test_date, time(8, 30))
         self.assertIn("извън работното време", str(cm.exception))
 
     def test_outside_working_hours_late(self):
         with self.assertRaises(ValidationError):
-            self.create_reservation(self.massage_60, self.specialist, self.test_date, time(16, 30)) # Ends at 17:30
+            self.create_reservation(self.service_60, self.specialist, self.test_date, time(16, 30)) # Ends at 17:30
 
     def test_not_working_on_weekend(self):
         sunday = self.test_date - timedelta(days=1)
         with self.assertRaises(ValidationError) as cm:
-            self.create_reservation(self.massage_60, self.specialist, sunday, time(10, 0))
+            self.create_reservation(self.service_60, self.specialist, sunday, time(10, 0))
         self.assertIn("не работи в този ден", str(cm.exception))
 
     def test_lead_time_validation(self):
@@ -111,7 +111,7 @@ class SchedulingLogicTest(TestCase):
         future_1h = now + timedelta(hours=1)
         with self.assertRaises(ValidationError) as cm:
             self.create_reservation(
-                self.massage_60, 
+                self.service_60, 
                 self.specialist, 
                 future_1h.date(), 
                 future_1h.time()
@@ -130,9 +130,9 @@ class SchedulingLogicTest(TestCase):
             start_time=time(9, 0),
             end_time=time(17, 0)
         )
-        self.create_reservation(self.massage_60, self.specialist, self.test_date, time(10, 0))
+        self.create_reservation(self.service_60, self.specialist, self.test_date, time(10, 0))
         # Jane should be free at 10:00
-        self.create_reservation(self.massage_60, specialist2, self.test_date, time(10, 0))
+        self.create_reservation(self.service_60, specialist2, self.test_date, time(10, 0))
         self.assertEqual(Reservation.objects.count(), 2)
 
 class SecurityAndBusinessRulesTest(TestCase):

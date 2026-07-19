@@ -211,7 +211,7 @@ class PrivacyPolicySanitizationTest(TestCase):
         self.assertIn('<div style="color: #555;">', html)
 
 
-class MassagesJsonEmbeddingTest(BugFixTestBase):
+class ServicesJsonEmbeddingTest(BugFixTestBase):
     """B04 — services data must be embedded via json_script, not |safe."""
 
     def test_script_breakout_is_escaped(self):
