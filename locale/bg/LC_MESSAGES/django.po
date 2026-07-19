@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 16:44+0000\n"
+"POT-Creation-Date: 2026-07-19 23:44+0000\n"
 "PO-Revision-Date: 2026-06-15 15:05+0000\n"
 "Last-Translator: Яне Янев <s@ex.com>\n"
 "Language-Team: Bulgarian\n"
@@ -894,74 +894,6 @@ msgstr "Почивен ден"
 msgid "Адрес"
 msgstr ""
 
-# Templates - massage_detail
-#: templates/pages/massage_detail.html:15
-msgid "Цена:"
-msgstr ""
-
-#: templates/pages/massage_detail.html:16
-msgid "Продължителност:"
-msgstr ""
-
-#: templates/pages/massage_detail.html:16
-#: templates/pages/massages_page.html:304 templates/pages/my_profile.html:62
-#: templates/pages/my_profile.html:129 templates/pages/reservation.html:36
-#: templates/partials/featured_with_image.html:13
-#: templates/partials/featured_without_image.html:12
-#: templates/reservation/edit-reservation.html:24
-msgid "мин"
-msgstr "мин"
-
-#: templates/pages/massage_detail.html:18
-msgid "Направи резервация"
-msgstr ""
-
-#: templates/pages/massages_page.html:264 templates/partials/header.html:11
-msgid "Начало"
-msgstr ""
-
-#: templates/pages/massages_page.html:266
-msgid "УСЛУГИ"
-msgstr "УСЛУГИ"
-
-#: templates/pages/massages_page.html:267
-msgid "Всички наши услуги"
-msgstr "Всички наши услуги"
-
-#: templates/pages/massages_page.html:268
-msgid ""
-"Открийте пълния списък с нашите масажни процедури — всяка е съобразена с "
-"вашето тяло и нужди."
-msgstr ""
-"Открийте пълния списък с нашите масажни процедури — всяка е съобразена с "
-"вашето тяло и нужди."
-
-#: templates/pages/massages_page.html:279
-msgid "Всички"
-msgstr "Всички"
-
-#: templates/pages/massages_page.html:296 templates/pages/my_profile.html:64
-#: templates/pages/my_profile.html:129 templates/pages/reservation.html:36
-msgid "лв"
-msgstr "лв"
-
-#: templates/pages/massages_page.html:317
-#: templates/pages/massages_page.html:319
-msgid "Научете повече"
-msgstr "Научете повече"
-
-#: templates/pages/massages_page.html:318
-msgid "Покажи по-малко"
-msgstr "Покажи по-малко"
-
-#: templates/pages/massages_page.html:320
-msgid "Резервирай"
-msgstr "Резервирай"
-
-#: templates/pages/massages_page.html:328
-msgid "Няма услуги в тази категория."
-msgstr "Няма услуги в тази категория."
-
 # my_profile.html — Profile page redesign
 #: templates/pages/my_profile.html:17
 msgid "МОИТЕ ЧАСОВЕ"
@@ -990,6 +922,20 @@ msgstr "КЛИЕНТ ОТ"
 #: templates/pages/my_profile.html:53
 msgid "СЛЕДВАЩА РЕЗЕРВАЦИЯ"
 msgstr "СЛЕДВАЩА РЕЗЕРВАЦИЯ"
+
+#: templates/pages/my_profile.html:62 templates/pages/my_profile.html:129
+#: templates/pages/reservation.html:36 templates/pages/service_detail.html:16
+#: templates/pages/services_page.html:304
+#: templates/partials/featured_with_image.html:13
+#: templates/partials/featured_without_image.html:12
+#: templates/reservation/edit-reservation.html:24
+msgid "мин"
+msgstr "мин"
+
+#: templates/pages/my_profile.html:64 templates/pages/my_profile.html:129
+#: templates/pages/reservation.html:36 templates/pages/services_page.html:296
+msgid "лв"
+msgstr "лв"
 
 #: templates/pages/my_profile.html:70 templates/pages/reservation.html:49
 #: templates/pages/reservation.html:166 templates/pages/reservation.html:213
@@ -1249,6 +1195,60 @@ msgstr ""
 #| msgid "Изпратете"
 msgid "Изпращане..."
 msgstr "Изпратете"
+
+# Templates - massage_detail
+#: templates/pages/service_detail.html:15
+msgid "Цена:"
+msgstr ""
+
+#: templates/pages/service_detail.html:16
+msgid "Продължителност:"
+msgstr ""
+
+#: templates/pages/service_detail.html:18
+msgid "Направи резервация"
+msgstr ""
+
+#: templates/pages/services_page.html:264 templates/partials/header.html:11
+msgid "Начало"
+msgstr ""
+
+#: templates/pages/services_page.html:266
+msgid "УСЛУГИ"
+msgstr "УСЛУГИ"
+
+#: templates/pages/services_page.html:267
+msgid "Всички наши услуги"
+msgstr "Всички наши услуги"
+
+#: templates/pages/services_page.html:268
+msgid ""
+"Открийте пълния списък с нашите масажни процедури — всяка е съобразена с "
+"вашето тяло и нужди."
+msgstr ""
+"Открийте пълния списък с нашите масажни процедури — всяка е съобразена с "
+"вашето тяло и нужди."
+
+#: templates/pages/services_page.html:279
+msgid "Всички"
+msgstr "Всички"
+
+#: templates/pages/services_page.html:317
+#: templates/pages/services_page.html:319
+msgid "Научете повече"
+msgstr "Научете повече"
+
+#: templates/pages/services_page.html:318
+msgid "Покажи по-малко"
+msgstr "Покажи по-малко"
+
+#: templates/pages/services_page.html:320
+msgid "Резервирай"
+msgstr "Резервирай"
+
+#: templates/pages/services_page.html:328
+msgid "Няма услуги в тази категория."
+msgstr "Няма услуги в тази категория."
 
 #: templates/partials/auth_modal.html:3
 msgid "Възникна грешка. Опитайте отново."
@@ -1513,7 +1513,8 @@ msgstr "Завършете профила си"
 #: templates/socialaccount/signup.html:7
 msgid ""
 "Влязохте с Google. Трябва ни само телефонен номер за връзка при резервации."
-msgstr "Влязохте с Google. Трябва ни само телефонен номер за връзка при резервации."
+msgstr ""
+"Влязохте с Google. Трябва ни само телефонен номер за връзка при резервации."
 
 #: templates/unfold/helpers/site_logo.html:5
 #: templates/unfold/helpers/site_logo.html:8
