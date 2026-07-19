@@ -141,9 +141,11 @@ class Command(BaseCommand):
         today = date.today()
 
         def next_working_day(d):
-            # No specialist has working hours on Sunday (day_of_week=6)
-            if d.weekday() == 6:
-                d += timedelta(days=1)
+            # No specialist has working hours on Sunday (day_of_week=6), and
+            # Saturday's shorter hours (10:00-16:00) don't fit every seeded
+            # service duration, so bump both weekend days to Monday.
+            if d.weekday() in (5, 6):
+                d += timedelta(days=7 - d.weekday())
             return d
 
         reservations_data = [
