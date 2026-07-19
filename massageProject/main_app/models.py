@@ -19,7 +19,7 @@ class ServiceGroup(models.Model):
         return self.name
 
 
-class Massage(models.Model):
+class Service(models.Model):
     name = models.CharField(max_length=80)
     description = models.TextField()
     price = models.DecimalField(
@@ -28,14 +28,14 @@ class Massage(models.Model):
     )
     duration_in_minutes = models.IntegerField()
     short_description = models.CharField(max_length=255)
-    image = models.ImageField(upload_to='massages/')
+    image = models.ImageField(upload_to='services/')
     home_page = models.BooleanField(default=False)
     group = models.ForeignKey(
         'ServiceGroup',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='massages',
+        related_name='services',
         verbose_name=_('Група'),
     )
 
@@ -45,7 +45,7 @@ class Massage(models.Model):
 
     def clean(self):
         if self.home_page:
-            qs = Massage.objects.filter(home_page=True)
+            qs = Service.objects.filter(home_page=True)
             if self.pk:
                 qs = qs.exclude(pk=self.pk)
             if qs.count() >= 3:
@@ -119,8 +119,8 @@ class MessageReservation(models.Model):
         (STATUS_DELETED, _('Отказана')),
     ]
 
-    massage = models.ForeignKey(
-        Massage,
+    service = models.ForeignKey(
+        Service,
         on_delete=models.CASCADE,
         related_name='reservations'
     )
@@ -178,12 +178,12 @@ class MessageReservation(models.Model):
     @property
     def end_time(self):
         start_dt = datetime.combine(self.date, self.time)
-        duration = timedelta(minutes=self.massage.duration_in_minutes)
+        duration = timedelta(minutes=self.service.duration_in_minutes)
         return (start_dt + duration).time()
 
     def clean(self):
         # Use _id to avoid RelatedObjectDoesNotExist if the field is not set
-        if not all([self.massage_id, self.masseur_id, self.date, self.time]):
+        if not all([self.service_id, self.masseur_id, self.date, self.time]):
             return
 
         # 0. Only validate Active reservations for overlaps
@@ -201,7 +201,7 @@ class MessageReservation(models.Model):
         if not hours:
             raise ValidationError(_("%(name)s не работи в този ден.") % {'name': self.masseur.name})
 
-        duration = timedelta(minutes=self.massage.duration_in_minutes)
+        duration = timedelta(minutes=self.service.duration_in_minutes)
         end_time = (datetime.combine(self.date, self.time) + duration).time()
 
         if self.time < hours.start_time or end_time > hours.end_time:
@@ -221,7 +221,7 @@ class MessageReservation(models.Model):
         ).exclude(pk=self.pk)
 
         for res in existing_reservations:
-            res_duration = timedelta(minutes=res.massage.duration_in_minutes)
+            res_duration = timedelta(minutes=res.service.duration_in_minutes)
             res_end = (datetime.combine(res.date, res.time) + res_duration).time()
 
             # (StartA < EndB) and (EndA > StartB)
@@ -246,7 +246,7 @@ class MessageReservation(models.Model):
         verbose_name_plural = _('Резервации')
 
     def __str__(self):
-        return f"{self.massage.name} - {self.date} {self.time.strftime('%H:%M')}"
+        return f"{self.service.name} - {self.date} {self.time.strftime('%H:%M')}"
 
 class Gallery(models.Model):
     images = models.ManyToManyField('Image', related_name='galleries', through='GalleryImage')

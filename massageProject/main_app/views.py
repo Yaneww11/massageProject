@@ -14,23 +14,23 @@ from django.http import JsonResponse
 
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
     ReservationDeleteForm, CommentForm, UserNameForm
-from massageProject.main_app.models import Massage, HomePage, Masseur, MessageStudio, MessageReservation, Comment, WorkingHours, ServiceGroup, GalleryAlbum
+from massageProject.main_app.models import Service, HomePage, Masseur, MessageStudio, MessageReservation, Comment, WorkingHours, ServiceGroup, GalleryAlbum
 
 
 @login_required
 def check_availability(request):
     masseur_id = request.GET.get('masseur_id')
     date_str = request.GET.get('date')
-    massage_id = request.GET.get('massage_id')
+    service_id = request.GET.get('service_id')
 
-    if not all([masseur_id, date_str, massage_id]):
+    if not all([masseur_id, date_str, service_id]):
         return JsonResponse({'error': 'Missing parameters'}, status=400)
 
     try:
         date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
-        massage = Massage.objects.get(pk=massage_id)
+        service = Service.objects.get(pk=service_id)
         masseur = Masseur.objects.get(pk=masseur_id)
-    except (ValueError, Massage.DoesNotExist, Masseur.DoesNotExist):
+    except (ValueError, Service.DoesNotExist, Masseur.DoesNotExist):
         return JsonResponse({'error': 'Invalid parameters'}, status=400)
 
     # 1. Get working hours for the day
@@ -48,7 +48,7 @@ def check_availability(request):
     # Lead time check (2 hours)
     min_time = timezone.localtime(timezone.now()) + timedelta(hours=2)
 
-    duration = timedelta(minutes=massage.duration_in_minutes)
+    duration = timedelta(minutes=service.duration_in_minutes)
 
     # 3. Get existing reservations for overlap check
     existing_reservations = MessageReservation.objects.filter(
@@ -72,7 +72,7 @@ def check_availability(request):
             # Check overlap
             for res in existing_reservations:
                 res_start = datetime.combine(date_obj, res.time)
-                res_end = res_start + timedelta(minutes=res.massage.duration_in_minutes)
+                res_end = res_start + timedelta(minutes=res.service.duration_in_minutes)
                 
                 # Overlap if: (StartA < EndB) and (EndA > StartB)
                 if current_dt < res_end and slot_end_dt > res_start:
@@ -98,9 +98,9 @@ class Index(TemplateView):
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         context['page'] = HomePage.objects.first()
-        massages = list(Massage.objects.filter(home_page=True)[:3])
-        context['massages'] = massages
-        context['featured_has_images'] = bool(massages) and all(m.image for m in massages)
+        services = list(Service.objects.filter(home_page=True)[:3])
+        context['services'] = services
+        context['featured_has_images'] = bool(services) and all(m.image for m in services)
         if context['page']:
             gallery = context['page'].gallery
             context['gallery'] = gallery
@@ -116,14 +116,14 @@ class PrivacyPolicyView(TemplateView):
         context['page'] = HomePage.objects.first()
         return context
 
-class MassagesDashboard(ListView):
-    model = Massage
+class ServicesDashboard(ListView):
+    model = Service
     template_name = 'pages/massages_page.html'
-    context_object_name = 'massages'
+    context_object_name = 'services'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['groups'] = ServiceGroup.objects.filter(massages__isnull=False).distinct()
+        context['groups'] = ServiceGroup.objects.filter(services__isnull=False).distinct()
         return context
 
 class ReservationPage(LoginRequiredMixin, CreateView):
@@ -138,7 +138,7 @@ class ReservationPage(LoginRequiredMixin, CreateView):
         if not (user.first_name and user.last_name) and 'name_form' not in context:
             context['name_form'] = UserNameForm()
         context['masseurs'] = Masseur.objects.all()
-        context['massages_data'] = [
+        context['services_data'] = [
             {
                 'id': m.pk,
                 'name': m.name,
@@ -146,7 +146,7 @@ class ReservationPage(LoginRequiredMixin, CreateView):
                 'price': str(m.price).rstrip('0').rstrip('.') if m.price else '',
                 'desc': m.short_description or (m.description[:100] if m.description else ''),
             }
-            for m in Massage.objects.all()
+            for m in Service.objects.all()
         ]
         return context
 
@@ -190,13 +190,13 @@ class ReservationPage(LoginRequiredMixin, CreateView):
         self.object = form.save()
         if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             r = self.object
-            price = r.massage.price
+            price = r.service.price
             price_str = str(price).rstrip('0').rstrip('.') if price else ''
             return JsonResponse({
                 'success': True,
                 'booking': {
-                    'service': r.massage.name,
-                    'duration': f"{r.massage.duration_in_minutes} мин",
+                    'service': r.service.name,
+                    'duration': f"{r.service.duration_in_minutes} мин",
                     'price': f"{price_str} лв" if price_str else '',
                     'masseur': r.masseur.name,
                     'date': r.date.strftime('%d.%m.%Y'),
@@ -209,9 +209,9 @@ class ReservationPage(LoginRequiredMixin, CreateView):
     def get_initial(self):
         initial = super().get_initial()
         if 'pk' in self.kwargs:
-            initial['massage'] = self.kwargs['pk']
-        elif self.request.GET.get('massage'):
-            initial['massage'] = self.request.GET.get('massage')
+            initial['service'] = self.kwargs['pk']
+        elif self.request.GET.get('service'):
+            initial['service'] = self.request.GET.get('service')
         return initial
 
 class AboutPage(TemplateView):
@@ -338,8 +338,8 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
         context['total_visits'] = MessageReservation.all_objects.filter(user=user, status='completed').count()
         context['upcoming_count'] = len(active_reservations)
         fav = (MessageReservation.objects.filter(user=user)
-               .values('massage__name').annotate(c=Count('id')).order_by('-c').first())
-        context['favorite_service'] = fav['massage__name'] if fav else None
+               .values('service__name').annotate(c=Count('id')).order_by('-c').first())
+        context['favorite_service'] = fav['service__name'] if fav else None
         context['client_since'] = user.date_joined.year
 
         # Studio info and working hours
@@ -353,12 +353,12 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
 
         return context
 
-class MassageDetail(TemplateView):
+class ServiceDetail(TemplateView):
     template_name = 'pages/massage_detail.html'
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        context['massage'] = get_object_or_404(Massage, pk=kwargs['pk'])
+        context['service'] = get_object_or_404(Service, pk=kwargs['pk'])
         return self.render_to_response(context)
 
 @login_required

@@ -55,13 +55,13 @@
           <span class="badge-today">&#9711; {% trans "Днес" %}</span>
           {% endif %}
         </div>
-        <h2 class="next-booking-title">{{ next_reservation.massage.name }}</h2>
+        <h2 class="next-booking-title">{{ next_reservation.service.name }}</h2>
         <div class="next-booking-meta">
           <span class="nbd-time">{{ next_reservation.time|time:"H:i" }} &#8211; {{ next_reservation.end_time|time:"H:i" }}</span>
           <span class="nbd-sep">&middot;</span>
-          <span>{{ next_reservation.massage.duration_in_minutes }} {% trans "мин" %}</span>
+          <span>{{ next_reservation.service.duration_in_minutes }} {% trans "мин" %}</span>
           <span class="nbd-sep">&middot;</span>
-          <span>{{ next_reservation.massage.price }} {% trans "лв" %}</span>
+          <span>{{ next_reservation.service.price }} {% trans "лв" %}</span>
         </div>
         <div class="next-booking-masseur">
           <div class="masseur-avatar-sm">{{ next_reservation.masseur.name|initials }}</div>
@@ -125,8 +125,8 @@
               </td>
               <td data-label="{% trans 'ЧАС' %}">{{ r.time|time:"H:i" }} &#8211; {{ r.end_time|time:"H:i" }}</td>
               <td data-label="{% trans 'УСЛУГА' %}">
-                <span class="service-name">{{ r.massage.name }}</span>
-                <span class="service-meta">{{ r.massage.duration_in_minutes }} {% trans "мин" %} &middot; {{ r.massage.price }} {% trans "лв" %}</span>
+                <span class="service-name">{{ r.service.name }}</span>
+                <span class="service-meta">{{ r.service.duration_in_minutes }} {% trans "мин" %} &middot; {{ r.service.price }} {% trans "лв" %}</span>
               </td>
               <td data-label="{% trans 'СПЕЦИАЛИСТ' %}">
                 <div class="masseur-cell">
@@ -167,7 +167,7 @@
             <span class="date-sub">{{ r.time|time:"H:i" }} &#8211; {{ r.end_time|time:"H:i" }}</span>
           </div>
           <div class="history-service">
-            <span class="service-name">{{ r.massage.name }}</span>
+            <span class="service-name">{{ r.service.name }}</span>
             {% if review %}
             <div class="star-rating">
               {% for i in "12345" %}{% if forloop.counter <= review.rating %}<span class="star filled">&#9733;</span>{% else %}<span class="star">&#9734;</span>{% endif %}{% endfor %}
@@ -180,11 +180,11 @@
             {% else %}
             <button class="btn-outline-sm btn-review"
                     data-reservation-id="{{ r.pk }}"
-                    data-massage="{{ r.massage.name }}">
+                    data-service="{{ r.service.name }}">
               &#9734; {% trans "Оставете мнение" %}
             </button>
             {% endif %}
-            <a href="{% url 'reservation_page' %}?massage={{ r.massage.pk }}" class="btn-outline-sm" data-auth-modal-link>
+            <a href="{% url 'reservation_page' %}?service={{ r.service.pk }}" class="btn-outline-sm" data-auth-modal-link>
               &rarr; {% trans "Запазете отново" %}
             </a>
           </div>
@@ -281,7 +281,7 @@
   document.querySelectorAll('.btn-review').forEach(function (btn) {
     btn.addEventListener('click', function () {
       document.getElementById('profile-review-reservation-id').value = btn.dataset.reservationId || '';
-      document.getElementById('profile-review-service').textContent = btn.dataset.massage || '';
+      document.getElementById('profile-review-service').textContent = btn.dataset.service || '';
       document.getElementById('profile-review-content').value = '';
       setStars(5);
       modal.style.display = 'flex';

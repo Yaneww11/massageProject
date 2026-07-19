@@ -39,10 +39,10 @@ class UserNameForm(forms.Form):
 class ReservationBaseForm(forms.ModelForm):
     class Meta:
         model = MessageReservation
-        fields = ['massage', 'masseur', 'date', 'time', 'additional_text']
+        fields = ['service', 'masseur', 'date', 'time', 'additional_text']
 
         error_messages = {
-            'massage': {
+            'service': {
                 'required': _('Тове поле е задължително'),
             },
             'masseur': {
@@ -58,7 +58,7 @@ class ReservationBaseForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['massage'].label_from_instance = lambda obj: f"{obj.name} ({obj.duration_in_minutes} {_('мин')})"
+        self.fields['service'].label_from_instance = lambda obj: f"{obj.name} ({obj.duration_in_minutes} {_('мин')})"
 
 class ReservationCreateForm(ReservationBaseForm):
     pass
@@ -67,7 +67,7 @@ class ReservationEditForm(ReservationBaseForm):
     pass
 
 class ReservationDeleteForm(ReservationBaseForm, DisableFieldMixin):
-    disabled_fields = ['massage', 'masseur', 'date', 'time', 'additional_text']
+    disabled_fields = ['service', 'masseur', 'date', 'time', 'additional_text']
 
 class CommentForm(forms.ModelForm):
     class Meta:

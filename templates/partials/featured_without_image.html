@@ -1,6 +1,6 @@
 {% load i18n %}
 <div class="hp-svc-list">
-    {% for m in massages %}
+    {% for m in services %}
     <a href="{% url 'massage_detail' pk=m.pk %}" class="hp-svc-row hp-reveal">
         <span class="hp-svc-num">0{{ forloop.counter }}</span>
         <div class="hp-svc-info">

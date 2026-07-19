@@ -13,8 +13,8 @@
             {% csrf_token %}
 
             <div class="form-group">
-                <label for="massage">{% trans "Тип масаж" %}</label>
-                <input type="text" id="massage" value="{{ reservation.massage.name }}" disabled>
+                <label for="service">{% trans "Тип масаж" %}</label>
+                <input type="text" id="service" value="{{ reservation.service.name }}" disabled>
             </div>
 
             <div class="form-group">

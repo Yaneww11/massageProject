@@ -3,7 +3,7 @@ from datetime import date, time, timedelta
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from massageProject.main_app.models import (
-    Massage, Masseur, MessageStudio, HomePage, Gallery, Image, GalleryImage,
+    Service, Masseur, MessageStudio, HomePage, Gallery, Image, GalleryImage,
     MessageReservation, Comment
 )
 from django.utils import timezone
@@ -69,7 +69,7 @@ class Command(BaseCommand):
                 self.stdout.write(f"Created masseur and working hours for: {name}")
 
         # 3. Create Massages
-        massages_data = [
+        services_data = [
             ('Swedish Massage', 'A gentle full-body massage that is great for people who are new to massage, have a lot of tension, or are sensitive to touch.', 60.00, 60, True),
             ('Deep Tissue Massage', 'Uses more pressure than a Swedish massage. It is a good option if you have muscle problems, such as soreness, injury, or imbalance.', 90.00, 90, True),
             ('Aromatherapy Massage', 'Best for people who want to have an emotional healing component to their massage. It can help boost your mood and reduce stress.', 70.00, 60, True),
@@ -77,20 +77,20 @@ class Command(BaseCommand):
             ('Sports Massage', 'A good option if you have a repetitive use injury to a muscle, such as what you may get from playing a sport.', 65.00, 60, False),
             ('Reflexology', 'Uses gentle to firm pressure on different pressure points of the feet, hands, and ears. It is best for people who are looking to relax or restore their energy levels.', 50.00, 45, False),
         ]
-        massages = []
-        for name, desc, price, duration, home in massages_data:
-            massage, created = Massage.objects.get_or_create(
+        services = []
+        for name, desc, price, duration, home in services_data:
+            service, created = Service.objects.get_or_create(
                 name=name,
                 defaults={
                     'description': desc,
                     'short_description': desc[:250],
                     'price': price,
                     'duration_in_minutes': duration,
-                    'image': 'massages/massage-1.jpg',
+                    'image': 'services/massage-1.jpg',
                     'home_page': home
                 }
             )
-            massages.append(massage)
+            services.append(service)
             if created:
                 self.stdout.write(f"Created massage: {name}")
 
@@ -139,14 +139,14 @@ class Command(BaseCommand):
         # 6. Create Reservations
         today = date.today()
         reservations_data = [
-            (massages[0], masseurs[0], today - timedelta(days=5), time(10, 0)),
-            (massages[1], masseurs[1], today - timedelta(days=1), time(14, 0)),
-            (massages[2], masseurs[0], today + timedelta(days=2), time(11, 0)),
-            (massages[3], masseurs[2], today + timedelta(days=7), time(16, 0)),
+            (services[0], masseurs[0], today - timedelta(days=5), time(10, 0)),
+            (services[1], masseurs[1], today - timedelta(days=1), time(14, 0)),
+            (services[2], masseurs[0], today + timedelta(days=2), time(11, 0)),
+            (services[3], masseurs[2], today + timedelta(days=7), time(16, 0)),
         ]
         for msg, msr, d, t in reservations_data:
             res, created = MessageReservation.objects.get_or_create(
-                massage=msg,
+                service=msg,
                 user=user,
                 date=d,
                 time=t,

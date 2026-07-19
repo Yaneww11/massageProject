@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from massageProject.accounts.models import CustomUser
 from massageProject.main_app.models import (
-    Comment, Gallery, HomePage, Massage, Masseur, MessageReservation,
+    Comment, Gallery, HomePage, Service, Masseur, MessageReservation,
     WorkingHours,
 )
 
@@ -25,8 +25,8 @@ class BugFixTestBase(TestCase):
             first_name='John',
             last_name='Doe',
         )
-        self.massage = Massage.objects.create(
-            name='Relax Massage',
+        self.service = Service.objects.create(
+            name='Relax Service',
             description='desc',
             price=50.00,
             duration_in_minutes=60,
@@ -57,7 +57,7 @@ class AvailabilityAuthTest(BugFixTestBase):
         date_str = (timezone.localdate() + timedelta(days=3)).strftime('%Y-%m-%d')
         return (
             reverse('check_availability')
-            + f'?masseur_id={self.masseur.pk}&date={date_str}&massage_id={self.massage.pk}'
+            + f'?masseur_id={self.masseur.pk}&date={date_str}&service_id={self.service.pk}'
         )
 
     def test_anonymous_is_redirected(self):
@@ -95,7 +95,7 @@ class SubmitCommentAuthTest(BugFixTestBase):
     def test_anonymous_post_is_redirected_and_saves_nothing(self):
         response = self.client.post(
             reverse('submit_comment'),
-            {'content': 'Great massage', 'author': 'Fake Person', 'rating': 5},
+            {'content': 'Great service', 'author': 'Fake Person', 'rating': 5},
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Comment.objects.count(), 0)
@@ -104,7 +104,7 @@ class SubmitCommentAuthTest(BugFixTestBase):
         self.login()
         response = self.client.post(
             reverse('submit_comment'),
-            {'content': 'Great massage', 'author': 'Fake Person', 'rating': 5},
+            {'content': 'Great service', 'author': 'Fake Person', 'rating': 5},
         )
         self.assertEqual(response.status_code, 200)
         comment = Comment.objects.get()
@@ -161,7 +161,7 @@ class OversizedPayloadTest(BugFixTestBase):
         future = timezone.localtime(timezone.now()) + timedelta(days=3)
         reservation = MessageReservation(
             user=self.user,
-            massage=self.massage,
+            service=self.service,
             masseur=self.masseur,
             date=future.date(),
             time=time(10, 0),
@@ -212,16 +212,16 @@ class PrivacyPolicySanitizationTest(TestCase):
 
 
 class MassagesJsonEmbeddingTest(BugFixTestBase):
-    """B04 — massages data must be embedded via json_script, not |safe."""
+    """B04 — services data must be embedded via json_script, not |safe."""
 
     def test_script_breakout_is_escaped(self):
-        self.massage.name = 'Test</script><script>alert("B04")</script>'
-        self.massage.save()
+        self.service.name = 'Test</script><script>alert("B04")</script>'
+        self.service.save()
         self.login()
         response = self.client.get(reverse('reservation_page'))
         self.assertEqual(response.status_code, 200)
         html = response.content.decode()
-        self.assertIn('id="massages-data"', html)
+        self.assertIn('id="services-data"', html)
         self.assertNotIn('</script><script>alert', html)
         # The payload survives as data after HTML-entity escaping.
         self.assertIn('\\u003C/script\\u003E', html)

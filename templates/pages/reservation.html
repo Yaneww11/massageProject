@@ -29,18 +29,18 @@
         <div class="bn-block bn-block--first">
           <div class="bn-step-label">{% trans "Масаж" %}</div>
           <div class="form-group" style="margin-bottom:0">
-            <select id="massage" name="massage" required>
-              {% for m in form.fields.massage.queryset %}
+            <select id="service" name="service" required>
+              {% for m in form.fields.service.queryset %}
                 <option value="{{ m.id }}"
-                  {% if form.massage.value|add:"0" == m.id %}selected{% endif %}>
+                  {% if form.service.value|add:"0" == m.id %}selected{% endif %}>
                   {{ m.name }} — {{ m.duration_in_minutes }} {% trans "мин" %}{% if m.price %} · {{ m.price }} {% trans "лв" %}{% endif %}
                 </option>
               {% endfor %}
             </select>
           </div>
           <div class="bn-svc-desc" id="svc-desc"></div>
-          {% if form.massage.errors %}
-            <div class="error-message">{{ form.massage.errors }}</div>
+          {% if form.service.errors %}
+            <div class="error-message">{{ form.service.errors }}</div>
           {% endif %}
         </div>
 
@@ -226,18 +226,18 @@
 
 <div id="toast-container" class="toast-container"></div>
 
-{{ massages_data|json_script:"massages-data" }}
+{{ services_data|json_script:"services-data" }}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
   /* ── Data & elements ─────────────────────────────────── */
-  const MASSAGES     = JSON.parse(document.getElementById('massages-data').textContent);
+  const MASSAGES     = JSON.parse(document.getElementById('services-data').textContent);
   const INITIAL_MASSEUR = '{{ form.masseur.value|default:"" }}';
   const INITIAL_DATE    = '{{ form.date.value|date:"Y-m-d"|default:"" }}';
   const INITIAL_TIME    = '{{ form.time.value|default:"" }}';
   const LANG = document.documentElement.lang || 'bg';
 
-  const massageSelect = document.getElementById('massage');
+  const massageSelect = document.getElementById('service');
   const masseurValue  = document.getElementById('masseur-value');
   const dateValue     = document.getElementById('date-value');
   const timeValue     = document.getElementById('time-value');
@@ -290,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function () {
     confirmBtn.disabled = !ok;
   }
 
-  /* ── A: Massage select ────────────────────────────────── */
+  /* ── A: Service select ────────────────────────────────── */
   function applyMassage() {
     const m = MASSAGES.find(x => x.id == massageSelect.value);
     if (!m) return;
@@ -488,11 +488,11 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   async function fetchAvailability() {
-    const massageId = massageSelect.value;
+    const serviceId = massageSelect.value;
     const masseurId = masseurValue.value;
     const date      = dateValue.value;
 
-    if (!massageId || !masseurId || !date) {
+    if (!serviceId || !masseurId || !date) {
       slotsEl.innerHTML = `<p class="bn-placeholder">${MSG_SELECT_FIRST}</p>`;
       return;
     }
@@ -500,7 +500,7 @@ document.addEventListener('DOMContentLoaded', function () {
     slotsEl.innerHTML = `<p class="bn-placeholder">${MSG_LOADING}</p>`;
 
     try {
-      const res  = await fetch(`${AVAIL_URL}?massage_id=${massageId}&masseur_id=${masseurId}&date=${date}`);
+      const res  = await fetch(`${AVAIL_URL}?service_id=${serviceId}&masseur_id=${masseurId}&date=${date}`);
       const data = await res.json();
 
       if (!data.slots || data.slots.length === 0) {

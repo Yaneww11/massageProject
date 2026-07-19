@@ -278,7 +278,7 @@ UNFOLD = {
                     {
                         "title": _("Услуги"),
                         "icon": "spa",
-                        "link": reverse_lazy("admin:main_app_massage_changelist"),
+                        "link": reverse_lazy("admin:main_app_service_changelist"),
                     },
                     {
                         "title": _("Терапевти"),

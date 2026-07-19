@@ -1,12 +1,12 @@
 from modeltranslation.translator import register, TranslationOptions
 from massageProject.main_app.models import (
-    Massage, Masseur, HomePage, MessageStudio, StudioWorkingHours, Image, ServiceGroup,
+    Service, Masseur, HomePage, MessageStudio, StudioWorkingHours, Image, ServiceGroup,
     Gallery, GalleryAlbum, AlbumPhoto,
 )
 
 
-@register(Massage)
-class MassageTranslationOptions(TranslationOptions):
+@register(Service)
+class ServiceTranslationOptions(TranslationOptions):
     fields = ('name', 'description', 'short_description')
 
 

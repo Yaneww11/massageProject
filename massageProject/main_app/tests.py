@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-from massageProject.main_app.models import Massage, Masseur, MessageReservation, WorkingHours, HomePage
+from massageProject.main_app.models import Service, Masseur, MessageReservation, WorkingHours, HomePage
 from massageProject.accounts.models import CustomUser
 from datetime import datetime, time, date, timedelta
 
@@ -12,15 +12,15 @@ class SchedulingLogicTest(TestCase):
             email='test@example.com',
             password='password123'
         )
-        self.massage_60 = Massage.objects.create(
-            name='60 min Massage',
+        self.massage_60 = Service.objects.create(
+            name='60 min Service',
             description='desc',
             price=50.00,
             duration_in_minutes=60,
             short_description='short'
         )
-        self.massage_30 = Massage.objects.create(
-            name='30 min Massage',
+        self.massage_30 = Service.objects.create(
+            name='30 min Service',
             description='desc',
             price=30.00,
             duration_in_minutes=30,
@@ -49,10 +49,10 @@ class SchedulingLogicTest(TestCase):
             candidate += timedelta(days=1)
         self.test_date = candidate
 
-    def create_reservation(self, massage, masseur, date_val, time_val):
+    def create_reservation(self, service, masseur, date_val, time_val):
         return MessageReservation.objects.create(
             user=self.user,
-            massage=massage,
+            service=service,
             masseur=masseur,
             date=date_val,
             time=time_val
@@ -143,8 +143,8 @@ class SecurityAndBusinessRulesTest(TestCase):
         self.user2 = CustomUser.objects.create_user(
             phone_number='0888888882', email='u2@e.com', password='p2'
         )
-        self.massage = Massage.objects.create(
-            name='Massage', duration_in_minutes=60, price=50
+        self.service = Service.objects.create(
+            name='Service', duration_in_minutes=60, price=50
         )
         self.masseur = Masseur.objects.create(
             name='Masseur', phone_number='0888888883', email='m@e.com'
@@ -159,7 +159,7 @@ class SecurityAndBusinessRulesTest(TestCase):
     def test_edit_other_user_reservation_denied(self):
         future_date = timezone.localdate() + timedelta(days=14)
         res = MessageReservation.objects.create(
-            user=self.user1, massage=self.massage, masseur=self.masseur,
+            user=self.user1, service=self.service, masseur=self.masseur,
             date=future_date, time=time(10, 0)
         )
         self.client.login(email='u2@e.com', password='p2')
@@ -171,7 +171,7 @@ class SecurityAndBusinessRulesTest(TestCase):
         # But set it to less than 24h from now (e.g. 23h)
         res_datetime = timezone.now() + timedelta(hours=23)
         res = MessageReservation.objects.create(
-            user=self.user1, massage=self.massage, masseur=self.masseur,
+            user=self.user1, service=self.service, masseur=self.masseur,
             date=res_datetime.date(), time=res_datetime.time()
         )
         self.client.login(email='u1@e.com', password='p1')
@@ -186,7 +186,7 @@ class SecurityAndBusinessRulesTest(TestCase):
     def test_24h_rule_delete(self):
         res_datetime = timezone.now() + timedelta(hours=23)
         res = MessageReservation.objects.create(
-            user=self.user1, massage=self.massage, masseur=self.masseur,
+            user=self.user1, service=self.service, masseur=self.masseur,
             date=res_datetime.date(), time=res_datetime.time()
         )
         self.client.login(email='u1@e.com', password='p1')

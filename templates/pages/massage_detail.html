@@ -4,18 +4,18 @@
 {% block content %}
 <div class="blog-container">
     <div class="blog-header">
-        <img src="{{ massage.image.url }}" alt="{{ massage.name }}" class="blog-image">
+        <img src="{{ service.image.url }}" alt="{{ service.name }}" class="blog-image">
     </div>
     <div class="blog-content">
-        <h1 class="blog-title">{{ massage.name }}</h1>
+        <h1 class="blog-title">{{ service.name }}</h1>
         <div class="blog-description">
-            <p>{{ massage.description }}</p>
+            <p>{{ service.description }}</p>
         </div>
         <div class="blog-details">
-            <p><strong>{% trans "Цена:" %}</strong> {{ massage.price }}лв</p>
-            <p><strong>{% trans "Продължителност:" %}</strong> {{ massage.duration_in_minutes }} {% trans "мин" %}</p>
+            <p><strong>{% trans "Цена:" %}</strong> {{ service.price }}лв</p>
+            <p><strong>{% trans "Продължителност:" %}</strong> {{ service.duration_in_minutes }} {% trans "мин" %}</p>
         </div>
-        <a href="{% url 'reservation_page' pk=massage.pk %}" class="btn" data-auth-modal-link>{% trans "Направи резервация" %}</a>
+        <a href="{% url 'reservation_page' pk=service.pk %}" class="btn" data-auth-modal-link>{% trans "Направи резервация" %}</a>
     </div>
 </div>
 {% endblock %}

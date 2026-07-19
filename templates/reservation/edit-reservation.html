@@ -17,16 +17,16 @@
             {% endif %}
 
             <div class="form-group">
-                <label for="massage">{% trans "Тип масаж" %}</label>
-                <select id="massage" name="massage" required>
-                    {% for massage in form.fields.massage.queryset %}
-                        <option value="{{ massage.id }}" {% if form.massage.value|add:"0" == massage.id %}selected{% endif %}>
-                            {{ massage.name }} ({{ massage.duration_in_minutes }} {% trans "мин" %})
+                <label for="service">{% trans "Тип масаж" %}</label>
+                <select id="service" name="service" required>
+                    {% for service in form.fields.service.queryset %}
+                        <option value="{{ service.id }}" {% if form.service.value|add:"0" == service.id %}selected{% endif %}>
+                            {{ service.name }} ({{ service.duration_in_minutes }} {% trans "мин" %})
                         </option>
                     {% endfor %}
                 </select>
-                {% if form.massage.errors %}
-                    <div class="error-message">{{ form.massage.errors }}</div>
+                {% if form.service.errors %}
+                    <div class="error-message">{{ form.service.errors }}</div>
                 {% endif %}
             </div>
 
@@ -172,7 +172,7 @@
     const MSG_SELECT_TIME = "{% trans 'Моля, изберете час за вашата резервация.' %}";
 
     document.addEventListener('DOMContentLoaded', function() {
-        const massageSelect = document.getElementById('massage');
+        const massageSelect = document.getElementById('service');
         const masseurSelect = document.getElementById('masseur');
         const dateInput = document.getElementById('date');
         const timeValueInput = document.getElementById('time_value');
@@ -205,11 +205,11 @@
         }
 
         async function fetchAvailability() {
-            const massageId = massageSelect.value;
+            const serviceId = massageSelect.value;
             const masseurId = masseurSelect.value;
             const date = dateInput.value;
 
-            if (!massageId || !masseurId || !date) {
+            if (!serviceId || !masseurId || !date) {
                 timeSlotsContainer.innerHTML = `<p class="placeholder-text">${MSG_FILL_ALL}</p>`;
                 return;
             }
@@ -217,7 +217,7 @@
             timeSlotsContainer.innerHTML = `<p class="placeholder-text">${MSG_LOADING}</p>`;
 
             try {
-                const response = await fetch(`${availabilityUrl}?massage_id=${massageId}&masseur_id=${masseurId}&date=${date}`);
+                const response = await fetch(`${availabilityUrl}?service_id=${serviceId}&masseur_id=${masseurId}&date=${date}`);
                 const data = await response.json();
 
                 if (data.slots && data.slots.length > 0) {

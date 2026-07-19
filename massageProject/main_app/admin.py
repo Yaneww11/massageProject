@@ -10,7 +10,7 @@ from unfold.admin import ModelAdmin, TabularInline
 from modeltranslation.admin import TabbedTranslationAdmin
 
 from massageProject.main_app.models import (
-    Massage, Image, Gallery, HomePage, GalleryImage,
+    Service, Image, Gallery, HomePage, GalleryImage,
     MessageStudio, Masseur, WorkingHours, MessageReservation, Comment,
     StudioWorkingHours, ServiceGroup, GalleryAlbum, AlbumPhoto,
 )
@@ -23,10 +23,10 @@ def export_reservations_csv(modeladmin, request, queryset):
     response['Content-Disposition'] = f'attachment; filename="reservations_{timezone.now().date()}.csv"'
     
     writer = csv.writer(response)
-    writer.writerow(['ID', 'User', 'Massage', 'Masseur', 'Date', 'Time', 'Additional Text'])
+    writer.writerow(['ID', 'User', 'Service', 'Masseur', 'Date', 'Time', 'Additional Text'])
     
     for obj in queryset:
-        writer.writerow([obj.id, obj.user.get_full_name(), obj.massage.name, obj.masseur.name, obj.date, obj.time, obj.additional_text])
+        writer.writerow([obj.id, obj.user.get_full_name(), obj.service.name, obj.masseur.name, obj.date, obj.time, obj.additional_text])
     
     return response
 
@@ -74,8 +74,8 @@ class ServiceGroupAdmin(ModelAdmin, TabbedTranslationAdmin):
     list_editable = ('order',)
 
 
-@admin.register(Massage)
-class MassageAdmin(ModelAdmin, TabbedTranslationAdmin):
+@admin.register(Service)
+class ServiceAdmin(ModelAdmin, TabbedTranslationAdmin):
     list_display = ('name', 'price', 'duration_in_minutes', 'home_page', 'group')
     search_fields = ('name', 'short_description')
     list_filter = ('home_page', 'group', 'price', 'duration_in_minutes')
@@ -119,9 +119,9 @@ class WorkingHoursAdmin(ModelAdmin):
 
 @admin.register(MessageReservation)
 class MessageReservationAdmin(ModelAdmin):
-    list_display = ('date', 'time', 'get_client_name', 'massage', 'masseur', 'status', 'status_updated_at')
-    list_filter = ('status', ReservationDateFilter, 'masseur', 'massage', 'date')
-    search_fields = ('user__phone_number', 'user__first_name', 'user__last_name', 'massage__name')
+    list_display = ('date', 'time', 'get_client_name', 'service', 'masseur', 'status', 'status_updated_at')
+    list_filter = ('status', ReservationDateFilter, 'masseur', 'service', 'date')
+    search_fields = ('user__phone_number', 'user__first_name', 'user__last_name', 'service__name')
     date_hierarchy = 'date'
     actions = [export_reservations_csv, mark_as_completed, mark_as_noshow]
     readonly_fields = ('updated_at', 'status_updated_at', 'status_updated_by')
@@ -129,7 +129,7 @@ class MessageReservationAdmin(ModelAdmin):
     
     fieldsets = (
         (_('Детайли за резервацията'), {'fields': ('date', 'time', 'user', 'status')}),
-        (_('Информация за услугата'), {'fields': ('massage', 'masseur')}),
+        (_('Информация за услугата'), {'fields': ('service', 'masseur')}),
         (_('Допълнителни бележки'), {'fields': ('additional_text',)}),
         (_('Системен одит'), {'fields': ('updated_at', 'status_updated_at', 'status_updated_by'), 'classes': ('collapse',)}),
     )
