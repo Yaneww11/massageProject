@@ -41,9 +41,13 @@ class SchedulingLogicTest(TestCase):
                 end_time=time(17, 0)
             )
         
-        # We need a fixed date that is a Monday in the future
-        # Let's pick 2026-06-08 (Monday)
-        self.test_date = date(2026, 6, 8)
+        # We need a date that is a Monday, safely in the future (at least 7
+        # days out) so the 2-hour lead time and working-hours checks never
+        # collide with "now" as the test suite ages.
+        candidate = timezone.localdate() + timedelta(days=7)
+        while candidate.weekday() != 0:  # 0 == Monday
+            candidate += timedelta(days=1)
+        self.test_date = candidate
 
     def create_reservation(self, massage, masseur, date_val, time_val):
         return MessageReservation.objects.create(
@@ -95,7 +99,7 @@ class SchedulingLogicTest(TestCase):
             self.create_reservation(self.massage_60, self.masseur, self.test_date, time(16, 30)) # Ends at 17:30
 
     def test_not_working_on_weekend(self):
-        sunday = date(2026, 6, 7)
+        sunday = self.test_date - timedelta(days=1)
         with self.assertRaises(ValidationError) as cm:
             self.create_reservation(self.massage_60, self.masseur, sunday, time(10, 0))
         self.assertIn("не работи в този ден", str(cm.exception))
@@ -153,12 +157,13 @@ class SecurityAndBusinessRulesTest(TestCase):
             )
 
     def test_edit_other_user_reservation_denied(self):
+        future_date = timezone.localdate() + timedelta(days=14)
         res = MessageReservation.objects.create(
             user=self.user1, massage=self.massage, masseur=self.masseur,
-            date=date(2026, 6, 15), time=time(10, 0)
+            date=future_date, time=time(10, 0)
         )
         self.client.login(email='u2@e.com', password='p2')
-        response = self.client.get(f'/{res.pk}/edit_reserve/')
+        response = self.client.get(f'/bg/{res.pk}/edit_reserve/')
         self.assertEqual(response.status_code, 403) # PermissionDenied
 
     def test_24h_rule_edit(self):
@@ -170,10 +175,10 @@ class SecurityAndBusinessRulesTest(TestCase):
             date=res_datetime.date(), time=res_datetime.time()
         )
         self.client.login(email='u1@e.com', password='p1')
-        response = self.client.get(f'/{res.pk}/edit_reserve/')
+        response = self.client.get(f'/bg/{res.pk}/edit_reserve/')
         self.assertEqual(response.status_code, 302) # Redirect with error
-        self.assertRedirects(response, '/profile/')
-        
+        self.assertRedirects(response, '/bg/profile/')
+
         # Check for message
         messages = list(response.wsgi_request._messages)
         self.assertTrue(any("24 часа" in str(m) for m in messages))
@@ -185,11 +190,11 @@ class SecurityAndBusinessRulesTest(TestCase):
             date=res_datetime.date(), time=res_datetime.time()
         )
         self.client.login(email='u1@e.com', password='p1')
-        response = self.client.get(f'/{res.pk}/delete_reserve/')
-        self.assertRedirects(response, '/profile/')
+        response = self.client.get(f'/bg/{res.pk}/delete_reserve/')
+        self.assertRedirects(response, '/bg/profile/')
 
     def test_login_required_reservation_page(self):
-        response = self.client.get('/reserve/')
+        response = self.client.get('/bg/reserve/')
         self.assertEqual(response.status_code, 302)
         self.assertIn('/login/', response.url)
 
