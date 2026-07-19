@@ -31,16 +31,16 @@
             </div>
 
             <div class="form-group">
-                <label for="masseur">{% trans "Масажист" %}</label>
-                <select id="masseur" name="masseur" required>
-                    {% for masseur in form.fields.masseur.queryset %}
-                        <option value="{{ masseur.id }}" {% if form.masseur.value|add:"0" == masseur.id %}selected{% endif %}>
-                            {{ masseur.name }}
+                <label for="specialist">{% trans "Масажист" %}</label>
+                <select id="specialist" name="specialist" required>
+                    {% for specialist in form.fields.specialist.queryset %}
+                        <option value="{{ specialist.id }}" {% if form.specialist.value|add:"0" == specialist.id %}selected{% endif %}>
+                            {{ specialist.name }}
                         </option>
                     {% endfor %}
                 </select>
-                {% if form.masseur.errors %}
-                    <div class="error-message">{{ form.masseur.errors }}</div>
+                {% if form.specialist.errors %}
+                    <div class="error-message">{{ form.specialist.errors }}</div>
                 {% endif %}
             </div>
 
@@ -173,7 +173,7 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         const massageSelect = document.getElementById('service');
-        const masseurSelect = document.getElementById('masseur');
+        const specialistSelect = document.getElementById('specialist');
         const dateInput = document.getElementById('date');
         const timeValueInput = document.getElementById('time_value');
         const timeSlotsContainer = document.getElementById('time-slots');
@@ -206,10 +206,10 @@
 
         async function fetchAvailability() {
             const serviceId = massageSelect.value;
-            const masseurId = masseurSelect.value;
+            const specialistId = specialistSelect.value;
             const date = dateInput.value;
 
-            if (!serviceId || !masseurId || !date) {
+            if (!serviceId || !specialistId || !date) {
                 timeSlotsContainer.innerHTML = `<p class="placeholder-text">${MSG_FILL_ALL}</p>`;
                 return;
             }
@@ -217,7 +217,7 @@
             timeSlotsContainer.innerHTML = `<p class="placeholder-text">${MSG_LOADING}</p>`;
 
             try {
-                const response = await fetch(`${availabilityUrl}?service_id=${serviceId}&masseur_id=${masseurId}&date=${date}`);
+                const response = await fetch(`${availabilityUrl}?service_id=${serviceId}&specialist_id=${specialistId}&date=${date}`);
                 const data = await response.json();
 
                 if (data.slots && data.slots.length > 0) {
@@ -255,13 +255,13 @@
 
         // Click handling for help message
         timeSlotsContainer.addEventListener('click', (e) => {
-            if (!massageSelect.value || !masseurSelect.value || !dateInput.value) {
+            if (!massageSelect.value || !specialistSelect.value || !dateInput.value) {
                 showToast(MSG_SELECT_FIRST);
             }
         });
 
         massageSelect.addEventListener('change', debouncedFetch);
-        masseurSelect.addEventListener('change', debouncedFetch);
+        specialistSelect.addEventListener('change', debouncedFetch);
         dateInput.addEventListener('change', debouncedFetch);
 
         // Initial fetch

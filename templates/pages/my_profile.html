@@ -63,11 +63,11 @@
           <span class="nbd-sep">&middot;</span>
           <span>{{ next_reservation.service.price }} {% trans "лв" %}</span>
         </div>
-        <div class="next-booking-masseur">
-          <div class="masseur-avatar-sm">{{ next_reservation.masseur.name|initials }}</div>
-          <div class="masseur-info">
-            <span class="masseur-name">{{ next_reservation.masseur.name }}</span>
-            <span class="masseur-role">{% trans "Масажист" %}</span>
+        <div class="next-booking-specialist">
+          <div class="specialist-avatar-sm">{{ next_reservation.specialist.name|initials }}</div>
+          <div class="specialist-info">
+            <span class="specialist-name">{{ next_reservation.specialist.name }}</span>
+            <span class="specialist-role">{% trans "Масажист" %}</span>
           </div>
         </div>
         {% if studio %}
@@ -129,9 +129,9 @@
                 <span class="service-meta">{{ r.service.duration_in_minutes }} {% trans "мин" %} &middot; {{ r.service.price }} {% trans "лв" %}</span>
               </td>
               <td data-label="{% trans 'СПЕЦИАЛИСТ' %}">
-                <div class="masseur-cell">
-                  <div class="masseur-avatar-xs">{{ r.masseur.name|initials }}</div>
-                  <span>{{ r.masseur.name }}</span>
+                <div class="specialist-cell">
+                  <div class="specialist-avatar-xs">{{ r.specialist.name|initials }}</div>
+                  <span>{{ r.specialist.name }}</span>
                 </div>
               </td>
               <td class="action-cell" data-label="">

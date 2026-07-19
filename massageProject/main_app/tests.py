@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-from massageProject.main_app.models import Service, Masseur, MessageReservation, WorkingHours, HomePage
+from massageProject.main_app.models import Service, Specialist, MessageReservation, WorkingHours, HomePage
 from massageProject.accounts.models import CustomUser
 from datetime import datetime, time, date, timedelta
 
@@ -26,7 +26,7 @@ class SchedulingLogicTest(TestCase):
             duration_in_minutes=30,
             short_description='short'
         )
-        self.masseur = Masseur.objects.create(
+        self.specialist = Specialist.objects.create(
             name='John Doe',
             description='expert',
             phone_number='0888888889',
@@ -35,7 +35,7 @@ class SchedulingLogicTest(TestCase):
         # John works Monday to Friday, 09:00 - 17:00
         for i in range(5):
             WorkingHours.objects.create(
-                masseur=self.masseur,
+                specialist=self.specialist,
                 day_of_week=i,
                 start_time=time(9, 0),
                 end_time=time(17, 0)
@@ -49,59 +49,59 @@ class SchedulingLogicTest(TestCase):
             candidate += timedelta(days=1)
         self.test_date = candidate
 
-    def create_reservation(self, service, masseur, date_val, time_val):
+    def create_reservation(self, service, specialist, date_val, time_val):
         return MessageReservation.objects.create(
             user=self.user,
             service=service,
-            masseur=masseur,
+            specialist=specialist,
             date=date_val,
             time=time_val
         )
 
     def test_successful_reservation(self):
-        res = self.create_reservation(self.massage_60, self.masseur, self.test_date, time(10, 0))
+        res = self.create_reservation(self.massage_60, self.specialist, self.test_date, time(10, 0))
         self.assertEqual(MessageReservation.objects.count(), 1)
 
     def test_overlap_exact_same_time(self):
-        self.create_reservation(self.massage_60, self.masseur, self.test_date, time(10, 0))
+        self.create_reservation(self.massage_60, self.specialist, self.test_date, time(10, 0))
         with self.assertRaises(ValidationError) as cm:
-            self.create_reservation(self.massage_60, self.masseur, self.test_date, time(10, 0))
+            self.create_reservation(self.massage_60, self.specialist, self.test_date, time(10, 0))
         self.assertIn("застъпва", str(cm.exception))
 
     def test_overlap_inside_duration(self):
         # 10:00 - 11:00
-        self.create_reservation(self.massage_60, self.masseur, self.test_date, time(10, 0))
+        self.create_reservation(self.massage_60, self.specialist, self.test_date, time(10, 0))
         # Try 10:30 - 11:00 (overlaps)
         with self.assertRaises(ValidationError):
-            self.create_reservation(self.massage_30, self.masseur, self.test_date, time(10, 30))
+            self.create_reservation(self.massage_30, self.specialist, self.test_date, time(10, 30))
 
     def test_overlap_end_time_clash(self):
         # 10:00 - 11:00
-        self.create_reservation(self.massage_60, self.masseur, self.test_date, time(10, 0))
+        self.create_reservation(self.massage_60, self.specialist, self.test_date, time(10, 0))
         # Try 09:45 - 10:15 (overlaps)
         with self.assertRaises(ValidationError):
-            self.create_reservation(self.massage_30, self.masseur, self.test_date, time(9, 45))
+            self.create_reservation(self.massage_30, self.specialist, self.test_date, time(9, 45))
 
     def test_no_overlap_back_to_back(self):
         # 10:00 - 11:00
-        self.create_reservation(self.massage_60, self.masseur, self.test_date, time(10, 0))
+        self.create_reservation(self.massage_60, self.specialist, self.test_date, time(10, 0))
         # 11:00 - 11:30 (should work)
-        res2 = self.create_reservation(self.massage_30, self.masseur, self.test_date, time(11, 0))
+        res2 = self.create_reservation(self.massage_30, self.specialist, self.test_date, time(11, 0))
         self.assertEqual(MessageReservation.objects.count(), 2)
 
     def test_outside_working_hours_early(self):
         with self.assertRaises(ValidationError) as cm:
-            self.create_reservation(self.massage_60, self.masseur, self.test_date, time(8, 30))
+            self.create_reservation(self.massage_60, self.specialist, self.test_date, time(8, 30))
         self.assertIn("извън работното време", str(cm.exception))
 
     def test_outside_working_hours_late(self):
         with self.assertRaises(ValidationError):
-            self.create_reservation(self.massage_60, self.masseur, self.test_date, time(16, 30)) # Ends at 17:30
+            self.create_reservation(self.massage_60, self.specialist, self.test_date, time(16, 30)) # Ends at 17:30
 
     def test_not_working_on_weekend(self):
         sunday = self.test_date - timedelta(days=1)
         with self.assertRaises(ValidationError) as cm:
-            self.create_reservation(self.massage_60, self.masseur, sunday, time(10, 0))
+            self.create_reservation(self.massage_60, self.specialist, sunday, time(10, 0))
         self.assertIn("не работи в този ден", str(cm.exception))
 
     def test_lead_time_validation(self):
@@ -112,27 +112,27 @@ class SchedulingLogicTest(TestCase):
         with self.assertRaises(ValidationError) as cm:
             self.create_reservation(
                 self.massage_60, 
-                self.masseur, 
+                self.specialist, 
                 future_1h.date(), 
                 future_1h.time()
             )
         self.assertIn("поне 2 часа предварително", str(cm.exception))
 
-    def test_different_masseurs_same_time(self):
-        masseur2 = Masseur.objects.create(
+    def test_different_specialists_same_time(self):
+        specialist2 = Specialist.objects.create(
             name='Jane Doe',
             phone_number='0888888880',
             email='jane@example.com'
         )
         WorkingHours.objects.create(
-            masseur=masseur2,
+            specialist=specialist2,
             day_of_week=0, # Monday
             start_time=time(9, 0),
             end_time=time(17, 0)
         )
-        self.create_reservation(self.massage_60, self.masseur, self.test_date, time(10, 0))
+        self.create_reservation(self.massage_60, self.specialist, self.test_date, time(10, 0))
         # Jane should be free at 10:00
-        self.create_reservation(self.massage_60, masseur2, self.test_date, time(10, 0))
+        self.create_reservation(self.massage_60, specialist2, self.test_date, time(10, 0))
         self.assertEqual(MessageReservation.objects.count(), 2)
 
 class SecurityAndBusinessRulesTest(TestCase):
@@ -146,20 +146,20 @@ class SecurityAndBusinessRulesTest(TestCase):
         self.service = Service.objects.create(
             name='Service', duration_in_minutes=60, price=50
         )
-        self.masseur = Masseur.objects.create(
-            name='Masseur', phone_number='0888888883', email='m@e.com'
+        self.specialist = Specialist.objects.create(
+            name='Specialist', phone_number='0888888883', email='m@e.com'
         )
         # Add working hours for all days to avoid "not working today" errors
         for i in range(7):
             WorkingHours.objects.create(
-                masseur=self.masseur, day_of_week=i, 
+                specialist=self.specialist, day_of_week=i, 
                 start_time=time(0, 0), end_time=time(23, 59)
             )
 
     def test_edit_other_user_reservation_denied(self):
         future_date = timezone.localdate() + timedelta(days=14)
         res = MessageReservation.objects.create(
-            user=self.user1, service=self.service, masseur=self.masseur,
+            user=self.user1, service=self.service, specialist=self.specialist,
             date=future_date, time=time(10, 0)
         )
         self.client.login(email='u2@e.com', password='p2')
@@ -171,7 +171,7 @@ class SecurityAndBusinessRulesTest(TestCase):
         # But set it to less than 24h from now (e.g. 23h)
         res_datetime = timezone.now() + timedelta(hours=23)
         res = MessageReservation.objects.create(
-            user=self.user1, service=self.service, masseur=self.masseur,
+            user=self.user1, service=self.service, specialist=self.specialist,
             date=res_datetime.date(), time=res_datetime.time()
         )
         self.client.login(email='u1@e.com', password='p1')
@@ -186,7 +186,7 @@ class SecurityAndBusinessRulesTest(TestCase):
     def test_24h_rule_delete(self):
         res_datetime = timezone.now() + timedelta(hours=23)
         res = MessageReservation.objects.create(
-            user=self.user1, service=self.service, masseur=self.masseur,
+            user=self.user1, service=self.service, specialist=self.specialist,
             date=res_datetime.date(), time=res_datetime.time()
         )
         self.client.login(email='u1@e.com', password='p1')

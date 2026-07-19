@@ -11,7 +11,7 @@ from modeltranslation.admin import TabbedTranslationAdmin
 
 from massageProject.main_app.models import (
     Service, Image, Gallery, HomePage, GalleryImage,
-    MessageStudio, Masseur, WorkingHours, MessageReservation, Comment,
+    MessageStudio, Specialist, WorkingHours, MessageReservation, Comment,
     StudioWorkingHours, ServiceGroup, GalleryAlbum, AlbumPhoto,
 )
 
@@ -23,10 +23,10 @@ def export_reservations_csv(modeladmin, request, queryset):
     response['Content-Disposition'] = f'attachment; filename="reservations_{timezone.now().date()}.csv"'
     
     writer = csv.writer(response)
-    writer.writerow(['ID', 'User', 'Service', 'Masseur', 'Date', 'Time', 'Additional Text'])
+    writer.writerow(['ID', 'User', 'Service', 'Specialist', 'Date', 'Time', 'Additional Text'])
     
     for obj in queryset:
-        writer.writerow([obj.id, obj.user.get_full_name(), obj.service.name, obj.masseur.name, obj.date, obj.time, obj.additional_text])
+        writer.writerow([obj.id, obj.user.get_full_name(), obj.service.name, obj.specialist.name, obj.date, obj.time, obj.additional_text])
     
     return response
 
@@ -94,8 +94,8 @@ class ServiceAdmin(ModelAdmin, TabbedTranslationAdmin):
         return _("Няма снимка")
     display_image.short_description = _('Преглед')
 
-@admin.register(Masseur)
-class MasseurAdmin(ModelAdmin, TabbedTranslationAdmin):
+@admin.register(Specialist)
+class SpecialistAdmin(ModelAdmin, TabbedTranslationAdmin):
     list_display = ('display_image', 'name', 'phone_number', 'email')
     search_fields = ('name', 'email', 'phone_number')
     
@@ -107,10 +107,10 @@ class MasseurAdmin(ModelAdmin, TabbedTranslationAdmin):
 
 @admin.register(WorkingHours)
 class WorkingHoursAdmin(ModelAdmin):
-    list_display = ('masseur', 'get_day_display', 'start_time', 'end_time')
-    list_filter = ('day_of_week', 'masseur')
+    list_display = ('specialist', 'get_day_display', 'start_time', 'end_time')
+    list_filter = ('day_of_week', 'specialist')
     list_editable = ('start_time', 'end_time')
-    ordering = ('masseur', 'day_of_week')
+    ordering = ('specialist', 'day_of_week')
     list_filter_sheet = True
 
     def get_day_display(self, obj):
@@ -119,8 +119,8 @@ class WorkingHoursAdmin(ModelAdmin):
 
 @admin.register(MessageReservation)
 class MessageReservationAdmin(ModelAdmin):
-    list_display = ('date', 'time', 'get_client_name', 'service', 'masseur', 'status', 'status_updated_at')
-    list_filter = ('status', ReservationDateFilter, 'masseur', 'service', 'date')
+    list_display = ('date', 'time', 'get_client_name', 'service', 'specialist', 'status', 'status_updated_at')
+    list_filter = ('status', ReservationDateFilter, 'specialist', 'service', 'date')
     search_fields = ('user__phone_number', 'user__first_name', 'user__last_name', 'service__name')
     date_hierarchy = 'date'
     actions = [export_reservations_csv, mark_as_completed, mark_as_noshow]
@@ -129,7 +129,7 @@ class MessageReservationAdmin(ModelAdmin):
     
     fieldsets = (
         (_('Детайли за резервацията'), {'fields': ('date', 'time', 'user', 'status')}),
-        (_('Информация за услугата'), {'fields': ('service', 'masseur')}),
+        (_('Информация за услугата'), {'fields': ('service', 'specialist')}),
         (_('Допълнителни бележки'), {'fields': ('additional_text',)}),
         (_('Системен одит'), {'fields': ('updated_at', 'status_updated_at', 'status_updated_by'), 'classes': ('collapse',)}),
     )

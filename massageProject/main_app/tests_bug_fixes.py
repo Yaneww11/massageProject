@@ -9,7 +9,7 @@ from django.utils import timezone
 
 from massageProject.accounts.models import CustomUser
 from massageProject.main_app.models import (
-    Comment, Gallery, HomePage, Service, Masseur, MessageReservation,
+    Comment, Gallery, HomePage, Service, Specialist, MessageReservation,
     WorkingHours,
 )
 
@@ -32,7 +32,7 @@ class BugFixTestBase(TestCase):
             duration_in_minutes=60,
             short_description='short',
         )
-        self.masseur = Masseur.objects.create(
+        self.specialist = Specialist.objects.create(
             name='John Doe',
             description='expert',
             phone_number='0888888889',
@@ -40,7 +40,7 @@ class BugFixTestBase(TestCase):
         )
         for i in range(7):
             WorkingHours.objects.create(
-                masseur=self.masseur,
+                specialist=self.specialist,
                 day_of_week=i,
                 start_time=time(9, 0),
                 end_time=time(17, 0),
@@ -57,7 +57,7 @@ class AvailabilityAuthTest(BugFixTestBase):
         date_str = (timezone.localdate() + timedelta(days=3)).strftime('%Y-%m-%d')
         return (
             reverse('check_availability')
-            + f'?masseur_id={self.masseur.pk}&date={date_str}&service_id={self.service.pk}'
+            + f'?specialist_id={self.specialist.pk}&date={date_str}&service_id={self.service.pk}'
         )
 
     def test_anonymous_is_redirected(self):
@@ -162,7 +162,7 @@ class OversizedPayloadTest(BugFixTestBase):
         reservation = MessageReservation(
             user=self.user,
             service=self.service,
-            masseur=self.masseur,
+            specialist=self.specialist,
             date=future.date(),
             time=time(10, 0),
             additional_text='x' * 501,

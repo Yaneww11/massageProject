@@ -283,7 +283,7 @@ UNFOLD = {
                     {
                         "title": _("Терапевти"),
                         "icon": "person",
-                        "link": reverse_lazy("admin:main_app_masseur_changelist"),
+                        "link": reverse_lazy("admin:main_app_specialist_changelist"),
                     },
                     {
                         "title": _("Работно време"),

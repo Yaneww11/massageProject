@@ -39,13 +39,13 @@ class UserNameForm(forms.Form):
 class ReservationBaseForm(forms.ModelForm):
     class Meta:
         model = MessageReservation
-        fields = ['service', 'masseur', 'date', 'time', 'additional_text']
+        fields = ['service', 'specialist', 'date', 'time', 'additional_text']
 
         error_messages = {
             'service': {
                 'required': _('Тове поле е задължително'),
             },
-            'masseur': {
+            'specialist': {
                 'required': _('Тове поле е задължително'),
             },
             'date': {
@@ -67,7 +67,7 @@ class ReservationEditForm(ReservationBaseForm):
     pass
 
 class ReservationDeleteForm(ReservationBaseForm, DisableFieldMixin):
-    disabled_fields = ['service', 'masseur', 'date', 'time', 'additional_text']
+    disabled_fields = ['service', 'specialist', 'date', 'time', 'additional_text']
 
 class CommentForm(forms.ModelForm):
     class Meta:

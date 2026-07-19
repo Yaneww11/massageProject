@@ -14,28 +14,28 @@ from django.http import JsonResponse
 
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
     ReservationDeleteForm, CommentForm, UserNameForm
-from massageProject.main_app.models import Service, HomePage, Masseur, MessageStudio, MessageReservation, Comment, WorkingHours, ServiceGroup, GalleryAlbum
+from massageProject.main_app.models import Service, HomePage, Specialist, MessageStudio, MessageReservation, Comment, WorkingHours, ServiceGroup, GalleryAlbum
 
 
 @login_required
 def check_availability(request):
-    masseur_id = request.GET.get('masseur_id')
+    specialist_id = request.GET.get('specialist_id')
     date_str = request.GET.get('date')
     service_id = request.GET.get('service_id')
 
-    if not all([masseur_id, date_str, service_id]):
+    if not all([specialist_id, date_str, service_id]):
         return JsonResponse({'error': 'Missing parameters'}, status=400)
 
     try:
         date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
         service = Service.objects.get(pk=service_id)
-        masseur = Masseur.objects.get(pk=masseur_id)
-    except (ValueError, Service.DoesNotExist, Masseur.DoesNotExist):
+        specialist = Specialist.objects.get(pk=specialist_id)
+    except (ValueError, Service.DoesNotExist, Specialist.DoesNotExist):
         return JsonResponse({'error': 'Invalid parameters'}, status=400)
 
     # 1. Get working hours for the day
     day_of_week = date_obj.weekday()
-    working_hours = WorkingHours.objects.filter(masseur=masseur, day_of_week=day_of_week).first()
+    working_hours = WorkingHours.objects.filter(specialist=specialist, day_of_week=day_of_week).first()
 
     if not working_hours:
         return JsonResponse({'slots': []})  # Not working
@@ -52,7 +52,7 @@ def check_availability(request):
 
     # 3. Get existing reservations for overlap check
     existing_reservations = MessageReservation.objects.filter(
-        masseur=masseur,
+        specialist=specialist,
         date=date_obj,
         status=MessageReservation.STATUS_ACTIVE
     )
@@ -137,7 +137,7 @@ class ReservationPage(LoginRequiredMixin, CreateView):
         user = self.request.user
         if not (user.first_name and user.last_name) and 'name_form' not in context:
             context['name_form'] = UserNameForm()
-        context['masseurs'] = Masseur.objects.all()
+        context['specialists'] = Specialist.objects.all()
         context['services_data'] = [
             {
                 'id': m.pk,
@@ -198,7 +198,7 @@ class ReservationPage(LoginRequiredMixin, CreateView):
                     'service': r.service.name,
                     'duration': f"{r.service.duration_in_minutes} мин",
                     'price': f"{price_str} лв" if price_str else '',
-                    'masseur': r.masseur.name,
+                    'specialist': r.specialist.name,
                     'date': r.date.strftime('%d.%m.%Y'),
                     'time': r.time.strftime('%H:%M'),
                 },
@@ -219,7 +219,7 @@ class AboutPage(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['masseur'] = Masseur.objects.first()
+        context['specialist'] = Specialist.objects.first()
         context['studio'] = MessageStudio.objects.values('description', 'main_image').first()
         context['comments'] = Comment.objects.filter(is_reviewed=True).order_by('-created_at')[:15]
         context['total_comments_count'] = Comment.objects.filter(is_reviewed=True).count()

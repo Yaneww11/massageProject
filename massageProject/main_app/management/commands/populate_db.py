@@ -3,7 +3,7 @@ from datetime import date, time, timedelta
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from massageProject.main_app.models import (
-    Service, Masseur, MessageStudio, HomePage, Gallery, Image, GalleryImage,
+    Service, Specialist, MessageStudio, HomePage, Gallery, Image, GalleryImage,
     MessageReservation, Comment
 )
 from django.utils import timezone
@@ -34,39 +34,39 @@ class Command(BaseCommand):
             user.set_password('1234')
             user.save()
 
-        # 2. Create Masseurs
-        masseurs_data = [
+        # 2. Create Specialists
+        specialists_data = [
             ('Ivan Ivanov', 'ivan@example.com', '0891111111'),
             ('Maria Petrova', 'maria@example.com', '0892222222'),
             ('Elena Boneva', 'elena@example.com', '0893333333'),
         ]
-        masseurs = []
-        for name, email, phone in masseurs_data:
-            masseur, created = Masseur.objects.get_or_create(
+        specialists = []
+        for name, email, phone in specialists_data:
+            specialist, created = Specialist.objects.get_or_create(
                 name=name,
                 defaults={
                     'description': f'Expert in various massage techniques with years of experience. Part of the Tranquil Oasis team.',
-                    'image': 'masseurs/measure.jpg',
+                    'image': 'specialists/measure.jpg',
                     'email': email,
                     'phone_number': phone,
                 }
             )
-            masseurs.append(masseur)
+            specialists.append(specialist)
             if created:
-                # Add some working hours for each masseur (Mon-Fri 9-18, Sat 10-16)
+                # Add some working hours for each specialist (Mon-Fri 9-18, Sat 10-16)
                 from massageProject.main_app.models import WorkingHours
                 for day in range(5): # Mon-Fri
                     WorkingHours.objects.get_or_create(
-                        masseur=masseur,
+                        specialist=specialist,
                         day_of_week=day,
                         defaults={'start_time': time(9, 0), 'end_time': time(18, 0)}
                     )
                 WorkingHours.objects.get_or_create(
-                    masseur=masseur,
+                    specialist=specialist,
                     day_of_week=5, # Sat
                     defaults={'start_time': time(10, 0), 'end_time': time(16, 0)}
                 )
-                self.stdout.write(f"Created masseur and working hours for: {name}")
+                self.stdout.write(f"Created specialist and working hours for: {name}")
 
         # 3. Create Massages
         services_data = [
@@ -141,20 +141,20 @@ class Command(BaseCommand):
         today = date.today()
 
         def next_working_day(d):
-            # No masseur has working hours on Sunday (day_of_week=6)
+            # No specialist has working hours on Sunday (day_of_week=6)
             if d.weekday() == 6:
                 d += timedelta(days=1)
             return d
 
         reservations_data = [
-            (services[0], masseurs[0], today - timedelta(days=5), time(10, 0)),
-            (services[1], masseurs[1], today - timedelta(days=1), time(14, 0)),
-            (services[2], masseurs[0], next_working_day(today + timedelta(days=2)), time(11, 0)),
-            (services[3], masseurs[2], next_working_day(today + timedelta(days=7)), time(16, 0)),
+            (services[0], specialists[0], today - timedelta(days=5), time(10, 0)),
+            (services[1], specialists[1], today - timedelta(days=1), time(14, 0)),
+            (services[2], specialists[0], next_working_day(today + timedelta(days=2)), time(11, 0)),
+            (services[3], specialists[2], next_working_day(today + timedelta(days=7)), time(16, 0)),
         ]
         for msg, msr, d, t in reservations_data:
             defaults = {
-                'masseur': msr,
+                'specialist': msr,
                 'additional_text': 'Looking forward to the session.'
             }
             if d < today:

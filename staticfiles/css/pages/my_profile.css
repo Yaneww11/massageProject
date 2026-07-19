@@ -193,14 +193,14 @@
     color: var(--secondary-color);
 }
 
-.next-booking-masseur {
+.next-booking-specialist {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     margin-bottom: 0.75rem;
 }
 
-.masseur-avatar-sm {
+.specialist-avatar-sm {
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -216,7 +216,7 @@
     letter-spacing: 0.03em;
 }
 
-.masseur-avatar-xs {
+.specialist-avatar-xs {
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -232,19 +232,19 @@
     letter-spacing: 0.03em;
 }
 
-.masseur-info {
+.specialist-info {
     display: flex;
     flex-direction: column;
     gap: 0.1rem;
 }
 
-.masseur-name {
+.specialist-name {
     font-weight: 600;
     color: var(--text-main);
     font-size: var(--fs-sm);
 }
 
-.masseur-role {
+.specialist-role {
     color: var(--text-muted);
     font-size: var(--fs-xs);
 }
@@ -429,7 +429,7 @@
     margin-top: 0.15rem;
 }
 
-.masseur-cell {
+.specialist-cell {
     display: flex;
     align-items: center;
     gap: 0.5rem;
