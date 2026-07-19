@@ -74,8 +74,8 @@ class AvailabilityAuthTest(BugFixTestBase):
 class Missing404HandlerTest(BugFixTestBase):
     """B08 — nonexistent PKs must return 404, not 500."""
 
-    def test_massage_detail_unknown_pk_returns_404(self):
-        response = self.client.get(reverse('massage_detail', kwargs={'pk': 99999}))
+    def test_service_detail_unknown_pk_returns_404(self):
+        response = self.client.get(reverse('service_detail', kwargs={'pk': 99999}))
         self.assertEqual(response.status_code, 404)
 
     def test_edit_reservation_unknown_pk_returns_404(self):

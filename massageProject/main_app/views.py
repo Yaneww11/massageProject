@@ -118,7 +118,7 @@ class PrivacyPolicyView(TemplateView):
 
 class ServicesDashboard(ListView):
     model = Service
-    template_name = 'pages/massages_page.html'
+    template_name = 'pages/services_page.html'
     context_object_name = 'services'
 
     def get_context_data(self, **kwargs):
@@ -354,7 +354,7 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
         return context
 
 class ServiceDetail(TemplateView):
-    template_name = 'pages/massage_detail.html'
+    template_name = 'pages/service_detail.html'
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)

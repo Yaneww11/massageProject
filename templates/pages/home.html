@@ -13,7 +13,7 @@
             {% endif %}
             <div class="hp-hero-btns">
                 <a href="{% url 'reservation_page' %}" class="btn btn-primary btn-lg" data-auth-modal-link>{% trans "Запазете час" %}</a>
-                <a href="{% url 'massages_dashboard' %}" class="btn btn-outline btn-lg">{% trans "Вижте услугите" %}</a>
+                <a href="{% url 'services_dashboard' %}" class="btn btn-outline btn-lg">{% trans "Вижте услугите" %}</a>
             </div>
             <div class="hp-stats">
                 <div class="hp-stat">
@@ -51,7 +51,7 @@
             {% include 'partials/featured_without_image.html' %}
         {% endif %}
         <div class="hp-gallery-footer hp-reveal hp-centered-text">
-            <a href="{% url 'massages_dashboard' %}" class="btn-gallery">{% trans "Виж всички услуги" %} &rarr;</a>
+            <a href="{% url 'services_dashboard' %}" class="btn-gallery">{% trans "Виж всички услуги" %} &rarr;</a>
         </div>
     </div>
 </section>

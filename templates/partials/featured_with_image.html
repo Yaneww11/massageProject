@@ -2,7 +2,7 @@
 <div class="hp-feat-list">
     {% for m in services %}
     <article class="hp-feat-row hp-reveal">
-        <a href="{% url 'massage_detail' pk=m.pk %}" class="hp-feat-img">
+        <a href="{% url 'service_detail' pk=m.pk %}" class="hp-feat-img">
             <img src="{{ m.image.url }}" alt="{{ m.name }}">
         </a>
         <div class="hp-feat-body">
