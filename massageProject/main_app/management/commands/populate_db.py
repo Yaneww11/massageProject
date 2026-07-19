@@ -127,33 +127,45 @@ class Command(BaseCommand):
              self.stdout.write("Added images to existing empty gallery")
 
         home_page, created = HomePage.objects.get_or_create(
-            title='Tranquil Oasis - Your Path to Relaxation',
+            pk=1,
             defaults={
+                'brand_name': 'Tranquil Oasis - Your Path to Relaxation',
                 'description': 'Welcome to Tranquil Oasis, where we believe in the healing power of touch. Escape the city stress and rejuvenate your body and mind.',
                 'gallery': gallery
             }
         )
         if created:
-            self.stdout.write(f"Created home page: {home_page.title}")
+            self.stdout.write(f"Created home page: {home_page.brand_name}")
 
         # 6. Create Reservations
         today = date.today()
+
+        def next_working_day(d):
+            # No masseur has working hours on Sunday (day_of_week=6)
+            if d.weekday() == 6:
+                d += timedelta(days=1)
+            return d
+
         reservations_data = [
             (services[0], masseurs[0], today - timedelta(days=5), time(10, 0)),
             (services[1], masseurs[1], today - timedelta(days=1), time(14, 0)),
-            (services[2], masseurs[0], today + timedelta(days=2), time(11, 0)),
-            (services[3], masseurs[2], today + timedelta(days=7), time(16, 0)),
+            (services[2], masseurs[0], next_working_day(today + timedelta(days=2)), time(11, 0)),
+            (services[3], masseurs[2], next_working_day(today + timedelta(days=7)), time(16, 0)),
         ]
         for msg, msr, d, t in reservations_data:
+            defaults = {
+                'masseur': msr,
+                'additional_text': 'Looking forward to the session.'
+            }
+            if d < today:
+                # Past reservations can't be 'active' (2-hour lead time check applies only to active ones)
+                defaults['status'] = MessageReservation.STATUS_COMPLETED
             res, created = MessageReservation.objects.get_or_create(
                 service=msg,
                 user=user,
                 date=d,
                 time=t,
-                defaults={
-                    'masseur': msr,
-                    'additional_text': 'Looking forward to the session.'
-                }
+                defaults=defaults
             )
             if created:
                 self.stdout.write(f"Created reservation for {msg.name} on {d}")
