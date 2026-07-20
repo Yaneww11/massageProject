@@ -105,3 +105,18 @@ class CarouselHeroVariantTest(TestCase):
         finally:
             config.hero_variant = 'split'
             config.save()
+
+
+class FullbleedHeroVariantTest(TestCase):
+    def test_fullbleed_variant_renders_when_selected(self):
+        config = SiteConfiguration.get_solo()
+        config.hero_variant = 'fullbleed'
+        config.save()
+        try:
+            response = self.client.get('/bg/')
+            content = response.content.decode()
+            self.assertIn('hp-hero-fullbleed', content)
+            self.assertNotIn('hp-hero-inner', content)
+        finally:
+            config.hero_variant = 'split'
+            config.save()

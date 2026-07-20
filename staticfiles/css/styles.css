@@ -25,6 +25,7 @@
 @import url('components/form.css');
 @import url('components/auth-modal.css');
 @import url('components/hero-carousel.css');
+@import url('components/hero-fullbleed.css');
 
 /* Responsive styles */
 @import url('base/responsive.css');
