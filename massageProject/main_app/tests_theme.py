@@ -90,3 +90,18 @@ class HeroVariantSelectionTest(TestCase):
         content = response.content.decode()
         self.assertIn('hp-hero-inner', content)
         self.assertIn('home_background.jpg', content)
+
+
+class CarouselHeroVariantTest(TestCase):
+    def test_carousel_variant_renders_when_selected(self):
+        config = SiteConfiguration.get_solo()
+        config.hero_variant = 'carousel'
+        config.save()
+        try:
+            response = self.client.get('/bg/')
+            content = response.content.decode()
+            self.assertIn('hp-hero-carousel', content)
+            self.assertNotIn('hp-hero-inner', content)
+        finally:
+            config.hero_variant = 'split'
+            config.save()

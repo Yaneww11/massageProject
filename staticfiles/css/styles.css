@@ -24,6 +24,7 @@
 @import url('components/cards.css');
 @import url('components/form.css');
 @import url('components/auth-modal.css');
+@import url('components/hero-carousel.css');
 
 /* Responsive styles */
 @import url('base/responsive.css');

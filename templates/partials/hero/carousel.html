@@ -1,0 +1,33 @@
+{% load static i18n %}
+<section class="hp-hero-carousel">
+    <div class="hp-hero-carousel-track" id="hp-hero-carousel-track">
+        {% for image in gallery_images %}
+        <div class="hp-hero-carousel-slide{% if forloop.first %} hp-hero-carousel-slide--active{% endif %}">
+            <img src="{{ image.image.url }}" alt="{{ image.alt_text }}">
+        </div>
+        {% endfor %}
+    </div>
+    <div class="hp-hero-carousel-scrim"></div>
+    <div class="hp-hero-carousel-content">
+        {% if page %}
+            <h1 class="hp-hero-carousel-title">{{ page.brand_name }}</h1>
+            <p class="hp-hero-carousel-sub">{{ page.description }}</p>
+        {% endif %}
+        <div class="hp-hero-carousel-btns">
+            <a href="{% url 'reservation_page' %}" class="btn btn-primary btn-lg" data-auth-modal-link>{% trans "Запазете час" %}</a>
+            <a href="{% url 'services_dashboard' %}" class="btn btn-outline btn-lg">{% trans "Вижте услугите" %}</a>
+        </div>
+    </div>
+</section>
+<script>
+(function () {
+    var slides = document.querySelectorAll('#hp-hero-carousel-track .hp-hero-carousel-slide');
+    if (slides.length <= 1) return;
+    var current = 0;
+    setInterval(function () {
+        slides[current].classList.remove('hp-hero-carousel-slide--active');
+        current = (current + 1) % slides.length;
+        slides[current].classList.add('hp-hero-carousel-slide--active');
+    }, 5000);
+})();
+</script>
