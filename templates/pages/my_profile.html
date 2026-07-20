@@ -67,7 +67,7 @@
           <div class="specialist-avatar-sm">{{ next_reservation.specialist.name|initials }}</div>
           <div class="specialist-info">
             <span class="specialist-name">{{ next_reservation.specialist.name }}</span>
-            <span class="specialist-role">{% trans "Масажист" %}</span>
+            <span class="specialist-role">{{ site_config.specialist_singular|capfirst }}</span>
           </div>
         </div>
         {% if business_info %}
