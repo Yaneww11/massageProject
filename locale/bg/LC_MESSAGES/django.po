@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-20 22:12+0000\n"
+"POT-Creation-Date: 2026-07-20 23:06+0000\n"
 "PO-Revision-Date: 2026-06-15 15:05+0000\n"
 "Last-Translator: Яне Янев <s@ex.com>\n"
 "Language-Team: Bulgarian\n"
@@ -74,8 +74,8 @@ msgstr ""
 msgid "Този телефонен номер вече е регистриран. Моля, влезте в профила си."
 msgstr ""
 
-#: massageProject/accounts/forms.py:59 templates/partials/auth_modal.html:42
-#: templates/partials/auth_modal.html:81
+#: massageProject/accounts/forms.py:59 templates/partials/auth_modal.html:44
+#: templates/partials/auth_modal.html:83
 msgid "Парола"
 msgstr "Парола"
 
@@ -83,21 +83,21 @@ msgstr "Парола"
 msgid "Имейлът не е потвърден."
 msgstr "Имейлът не е потвърден."
 
-#: massageProject/accounts/forms.py:107 templates/partials/auth_modal.html:69
+#: massageProject/accounts/forms.py:107 templates/partials/auth_modal.html:71
 msgid "Име"
 msgstr ""
 
 #: massageProject/accounts/forms.py:108 massageProject/main_app/forms.py:29
-#: templates/pages/reservation.html:115 templates/partials/auth_modal.html:73
+#: templates/pages/reservation.html:115 templates/partials/auth_modal.html:75
 msgid "Фамилия"
 msgstr ""
 
-#: massageProject/accounts/forms.py:110 templates/pages/home.html:165
-#: templates/partials/auth_modal.html:77
+#: massageProject/accounts/forms.py:110 templates/pages/home.html:167
+#: templates/partials/auth_modal.html:79
 msgid "Телефон"
 msgstr ""
 
-#: massageProject/accounts/forms.py:116 templates/partials/auth_modal.html:85
+#: massageProject/accounts/forms.py:116 templates/partials/auth_modal.html:87
 msgid "Дата на раждане (незадължително)"
 msgstr "Дата на раждане (незадължително)"
 
@@ -356,7 +356,7 @@ msgstr ""
 
 # Templates - working_hours
 #: massageProject/main_app/models.py:85 massageProject/main_app/models.py:86
-#: massageProject/settings.py:290 templates/pages/home.html:144
+#: massageProject/settings.py:290 templates/pages/home.html:146
 #: templates/partials/working_hours.html:4
 msgid "Работно време"
 msgstr ""
@@ -515,7 +515,7 @@ msgid "Коментар"
 msgstr "Промени"
 
 #: massageProject/main_app/models.py:429 massageProject/settings.py:346
-#: templates/pages/about.html:30
+#: templates/pages/about.html:31
 msgid "Коментари"
 msgstr ""
 
@@ -641,35 +641,35 @@ msgid "Настройки на сайта"
 msgstr "Настройки на сайта"
 
 # views.py
-#: massageProject/main_app/views.py:257
+#: massageProject/main_app/views.py:263
 msgid "Вашият коментар е изпратен успешно и ще бъде публикуван след преглед."
 msgstr ""
 
-#: massageProject/main_app/views.py:276
+#: massageProject/main_app/views.py:283
 msgid "Моля, изчакайте преди да изпратите нов коментар."
 msgstr "Моля, изчакайте преди да изпратите нов коментар."
 
-#: massageProject/main_app/views.py:286
+#: massageProject/main_app/views.py:293
 msgid "Въведете мнение"
 msgstr ""
 
-#: massageProject/main_app/views.py:289
+#: massageProject/main_app/views.py:296
 msgid "Мнението не може да надвишава 2000 символа."
 msgstr "Мнението не може да надвишава 2000 символа."
 
-#: massageProject/main_app/views.py:325
+#: massageProject/main_app/views.py:332
 msgid "Управление на резервации"
 msgstr ""
 
-#: massageProject/main_app/views.py:375
+#: massageProject/main_app/views.py:383
 msgid "Не можете да променяте резервация по-малко от 24 часа преди часа."
 msgstr ""
 
-#: massageProject/main_app/views.py:405
+#: massageProject/main_app/views.py:414
 msgid "Не можете да отменяте резервация по-малко от 24 часа преди часа."
 msgstr ""
 
-#: massageProject/main_app/views.py:412
+#: massageProject/main_app/views.py:421
 msgid "Резервацията беше отменена успешно."
 msgstr ""
 
@@ -801,44 +801,44 @@ msgstr ""
 msgid "За мен и моето студио"
 msgstr ""
 
-#: templates/pages/about.html:40
+#: templates/pages/about.html:41
 msgid "Няма коментари"
 msgstr ""
 
-#: templates/pages/about.html:41
+#: templates/pages/about.html:42
 msgid "Бъди първенец и остави твоето мнение"
 msgstr ""
 
-#: templates/pages/about.html:52
+#: templates/pages/about.html:53
 #, python-format
 msgid "Виж всички коментари (%(count)s)"
 msgstr ""
 
-#: templates/pages/about.html:60
+#: templates/pages/about.html:61
 msgid "Остави коментар"
 msgstr ""
 
-#: templates/pages/about.html:63
+#: templates/pages/about.html:64
 msgid "Моля, въведете своите имена, за да публикувате коментар:"
 msgstr ""
 
-#: templates/pages/about.html:77
+#: templates/pages/about.html:78
 msgid "Публикуваш като:"
 msgstr ""
 
-#: templates/pages/about.html:82
+#: templates/pages/about.html:83
 msgid "Качи коментара"
 msgstr ""
 
-#: templates/pages/about.html:84
+#: templates/pages/about.html:85
 msgid "Влезте в профила си, за да оставите коментар."
 msgstr ""
 
-#: templates/pages/about.html:84
+#: templates/pages/about.html:85
 msgid "Кликнете тук"
 msgstr ""
 
-#: templates/pages/about.html:88
+#: templates/pages/about.html:89
 msgid "Вие нямате разрешение да оставяте коментари."
 msgstr ""
 
@@ -905,7 +905,7 @@ msgstr "Албумът все още няма добавени снимки."
 msgid "Увеличена снимка"
 msgstr "Увеличена снимка"
 
-#: templates/pages/gallery_album.html:57 templates/pages/my_profile.html:238
+#: templates/pages/gallery_album.html:57 templates/pages/my_profile.html:246
 #: templates/partials/auth_modal.html:7
 msgid "Затвори"
 msgstr "Затвори"
@@ -930,75 +930,75 @@ msgstr "Виж всички услуги"
 msgid "Виж пълната галерия"
 msgstr "Виж пълната галерия"
 
-#: templates/pages/home.html:56 templates/partials/header.html:14
+#: templates/pages/home.html:57 templates/partials/header.html:14
 msgid "Мнения"
 msgstr ""
 
-#: templates/pages/home.html:57
+#: templates/pages/home.html:58
 msgid "Какво казват клиентите"
 msgstr ""
 
-#: templates/pages/home.html:60 templates/pages/home.html:62
-#: templates/pages/home.html:109 templates/pages/my_profile.html:184
-#: templates/pages/my_profile.html:239
+#: templates/pages/home.html:61 templates/pages/home.html:63
+#: templates/pages/home.html:110 templates/pages/my_profile.html:190
+#: templates/pages/my_profile.html:247
 msgid "Оставете мнение"
 msgstr "Оставете мнение"
 
-#: templates/pages/home.html:69
+#: templates/pages/home.html:70
 msgid "Предишен"
 msgstr ""
 
-#: templates/pages/home.html:91
+#: templates/pages/home.html:92
 msgid "Следващ"
 msgstr ""
 
-#: templates/pages/home.html:98
+#: templates/pages/home.html:99
 msgid "Отзив"
 msgstr ""
 
-#: templates/pages/home.html:113 templates/pages/my_profile.html:245
+#: templates/pages/home.html:114 templates/pages/my_profile.html:253
 msgid "Оценка"
 msgstr ""
 
-#: templates/pages/home.html:123
+#: templates/pages/home.html:124
 msgid "Вашето Мнение"
 msgstr ""
 
-#: templates/pages/home.html:124
+#: templates/pages/home.html:125
 msgid "Споделете Вашето преживяване..."
 msgstr ""
 
-#: templates/pages/home.html:127 templates/reservation/edit-reservation.html:78
+#: templates/pages/home.html:128 templates/reservation/edit-reservation.html:78
 msgid "Отказ"
 msgstr ""
 
-#: templates/pages/home.html:128
+#: templates/pages/home.html:129
 msgid "Публикувай"
 msgstr ""
 
-#: templates/pages/home.html:132
+#: templates/pages/home.html:133
 msgid "Благодарим! Вашето мнение ще бъде публикувано след преглед."
 msgstr ""
 
-#: templates/pages/home.html:143
+#: templates/pages/home.html:145
 msgid "Заповядайте"
 msgstr ""
 
-#: templates/pages/home.html:150 templates/pages/my_profile.html:209
+#: templates/pages/home.html:152 templates/pages/my_profile.html:217
 #: templates/partials/working_hours.html:8
 msgid "Почивен ден"
 msgstr "Почивен ден"
 
-#: templates/pages/home.html:159 templates/partials/footer.html:25
+#: templates/pages/home.html:161 templates/partials/footer.html:25
 msgid "Адрес"
 msgstr ""
 
-#: templates/pages/home.html:170 templates/pages/reservation.html:10
+#: templates/pages/home.html:172 templates/pages/reservation.html:10
 #: templates/partials/featured_with_image.html:16
-#: templates/partials/header.html:45 templates/partials/header.html:47
-#: templates/partials/hero/carousel.html:17
-#: templates/partials/hero/fullbleed.html:14
-#: templates/partials/hero/split.html:11
+#: templates/partials/header.html:46 templates/partials/header.html:48
+#: templates/partials/hero/carousel.html:18
+#: templates/partials/hero/fullbleed.html:15
+#: templates/partials/hero/split.html:12
 msgid "Запазете час"
 msgstr ""
 
@@ -1031,7 +1031,7 @@ msgstr "КЛИЕНТ ОТ"
 msgid "СЛЕДВАЩА РЕЗЕРВАЦИЯ"
 msgstr "СЛЕДВАЩА РЕЗЕРВАЦИЯ"
 
-#: templates/pages/my_profile.html:62 templates/pages/my_profile.html:129
+#: templates/pages/my_profile.html:62 templates/pages/my_profile.html:133
 #: templates/pages/reservation.html:36 templates/pages/service_detail.html:16
 #: templates/pages/services_page.html:304
 #: templates/partials/featured_with_image.html:13
@@ -1040,12 +1040,12 @@ msgstr "СЛЕДВАЩА РЕЗЕРВАЦИЯ"
 msgid "мин"
 msgstr "мин"
 
-#: templates/pages/my_profile.html:64 templates/pages/my_profile.html:129
+#: templates/pages/my_profile.html:64 templates/pages/my_profile.html:133
 #: templates/pages/reservation.html:36 templates/pages/services_page.html:296
 msgid "лв"
 msgstr "лв"
 
-#: templates/pages/my_profile.html:80 templates/pages/my_profile.html:138
+#: templates/pages/my_profile.html:80 templates/pages/my_profile.html:142
 msgid "Добави в календар"
 msgstr "Добави в календар"
 
@@ -1053,95 +1053,95 @@ msgstr "Добави в календар"
 msgid "Упътвания"
 msgstr "Упътвания"
 
-#: templates/pages/my_profile.html:89 templates/pages/my_profile.html:141
+#: templates/pages/my_profile.html:90 templates/pages/my_profile.html:146
 msgid "Промени"
 msgstr "Промени"
 
-#: templates/pages/my_profile.html:100
+#: templates/pages/my_profile.html:102
 msgid "ПРЕДСТОЯЩИ РЕЗЕРВАЦИИ"
 msgstr "ПРЕДСТОЯЩИ РЕЗЕРВАЦИИ"
 
-#: templates/pages/my_profile.html:101
+#: templates/pages/my_profile.html:103
 msgid "Предстоящи резервации"
 msgstr "Предстоящи резервации"
 
-#: templates/pages/my_profile.html:102
+#: templates/pages/my_profile.html:104
 msgid "Очакваме Ви с нетърпение."
 msgstr "Очакваме Ви с нетърпение."
 
-#: templates/pages/my_profile.html:104 templates/pages/reservation.html:221
+#: templates/pages/my_profile.html:107 templates/pages/reservation.html:221
 msgid "Запазете нов час"
 msgstr "Запазете нов час"
 
-#: templates/pages/my_profile.html:112 templates/pages/my_profile.html:122
+#: templates/pages/my_profile.html:116 templates/pages/my_profile.html:126
 msgid "ДАТА"
 msgstr "ДАТА"
 
-#: templates/pages/my_profile.html:113 templates/pages/my_profile.html:126
+#: templates/pages/my_profile.html:117 templates/pages/my_profile.html:130
 msgid "ЧАС"
 msgstr "ЧАС"
 
-#: templates/pages/my_profile.html:114 templates/pages/my_profile.html:127
+#: templates/pages/my_profile.html:118 templates/pages/my_profile.html:131
 msgid "УСЛУГА"
 msgstr "УСЛУГА"
 
-#: templates/pages/my_profile.html:115 templates/pages/my_profile.html:131
+#: templates/pages/my_profile.html:119 templates/pages/my_profile.html:135
 msgid "СПЕЦИАЛИСТ"
 msgstr "СПЕЦИАЛИСТ"
 
-#: templates/pages/my_profile.html:142
+#: templates/pages/my_profile.html:147
 msgid "Отмени"
 msgstr "Отмени"
 
-#: templates/pages/my_profile.html:150
+#: templates/pages/my_profile.html:156
 msgid "Нямате предстоящи резервации."
 msgstr "Нямате предстоящи резервации."
 
-#: templates/pages/my_profile.html:156
+#: templates/pages/my_profile.html:162
 msgid "ИСТОРИЯ НА ПОСЕЩЕНИЯТА"
 msgstr "ИСТОРИЯ НА ПОСЕЩЕНИЯТА"
 
-#: templates/pages/my_profile.html:157
+#: templates/pages/my_profile.html:163
 msgid "История на посещенията"
 msgstr "История на посещенията"
 
-#: templates/pages/my_profile.html:158
+#: templates/pages/my_profile.html:164
 msgid "Вашите минали сеанси."
 msgstr "Вашите минали сеанси."
 
-#: templates/pages/my_profile.html:179
+#: templates/pages/my_profile.html:185
 msgid "ОЦЕНЕНО"
 msgstr "ОЦЕНЕНО"
 
-#: templates/pages/my_profile.html:188
+#: templates/pages/my_profile.html:195
 msgid "Запазете отново"
 msgstr "Запазете отново"
 
-#: templates/pages/my_profile.html:196
+#: templates/pages/my_profile.html:204
 msgid "Нямате предишни резервации."
 msgstr "Нямате предишни резервации."
 
-#: templates/pages/my_profile.html:205
+#: templates/pages/my_profile.html:213
 msgid "РАБОТНО ВРЕМЕ"
 msgstr "РАБОТНО ВРЕМЕ"
 
-#: templates/pages/my_profile.html:216
+#: templates/pages/my_profile.html:224
 msgid "КОНТАКТИ"
 msgstr "КОНТАКТИ"
 
-#: templates/pages/my_profile.html:256
+#: templates/pages/my_profile.html:264
 msgid "Вашето мнение"
 msgstr "Вашето мнение"
 
-#: templates/pages/my_profile.html:258
+#: templates/pages/my_profile.html:266
 msgid "Споделете своите впечатления..."
 msgstr "Споделете своите впечатления..."
 
-#: templates/pages/my_profile.html:260
+#: templates/pages/my_profile.html:268
 msgid "Изпратете"
 msgstr "Изпратете"
 
-#: templates/pages/my_profile.html:318
+#: templates/pages/my_profile.html:326
 msgid "Грешка при изпращане."
 msgstr "Грешка при изпращане."
 
@@ -1307,7 +1307,7 @@ msgstr ""
 msgid "Продължителност:"
 msgstr ""
 
-#: templates/pages/service_detail.html:18
+#: templates/pages/service_detail.html:19
 msgid "Направи резервация"
 msgstr ""
 
@@ -1365,71 +1365,71 @@ msgid "Влезте или се регистрирайте"
 msgstr "Влезте или се регистрирайте"
 
 #: templates/partials/auth_modal.html:13
-msgid "За да завършите резервацията, трябва да потвърдим Вашия имейл."
-msgstr "За да завършите резервацията, трябва да потвърдим Вашия имейл."
+msgid "Трябва да потвърдим Вашия имейл, за да продължите."
+msgstr "Трябва да потвърдим Вашия имейл, за да продължите."
 
-#: templates/partials/auth_modal.html:19 templates/partials/auth_modal.html:62
+#: templates/partials/auth_modal.html:19 templates/partials/auth_modal.html:64
 #: templates/socialaccount/signup.html:38
 msgid "Продължи"
 msgstr "Продължи"
 
-#: templates/partials/auth_modal.html:20
+#: templates/partials/auth_modal.html:21
 msgid "или"
 msgstr "или"
 
-#: templates/partials/auth_modal.html:26
+#: templates/partials/auth_modal.html:27
 msgid "Продължи с Google"
 msgstr "Продължи с Google"
 
-#: templates/partials/auth_modal.html:32
+#: templates/partials/auth_modal.html:34
 msgid "Как искате да влезете?"
 msgstr "Как искате да влезете?"
 
-#: templates/partials/auth_modal.html:34
+#: templates/partials/auth_modal.html:36
 msgid "С парола"
 msgstr "С парола"
 
-#: templates/partials/auth_modal.html:35
+#: templates/partials/auth_modal.html:37
 msgid "С код по имейл"
 msgstr "С код по имейл"
 
-#: templates/partials/auth_modal.html:39
+#: templates/partials/auth_modal.html:41
 msgid "Въведете паролата си"
 msgstr "Въведете паролата си"
 
-#: templates/partials/auth_modal.html:46 templates/partials/header.html:31
-#: templates/partials/header.html:62
+#: templates/partials/auth_modal.html:48 templates/partials/header.html:31
+#: templates/partials/header.html:64
 #: templates/registration/password_reset_complete.html:9
 msgid "Вход"
 msgstr ""
 
-#: templates/partials/auth_modal.html:47
+#: templates/partials/auth_modal.html:49
 msgid "Забравена парола?"
 msgstr ""
 
-#: templates/partials/auth_modal.html:51
+#: templates/partials/auth_modal.html:53
 msgid "Потвърдете своя имейл"
 msgstr "Потвърдете своя имейл"
 
-#: templates/partials/auth_modal.html:63
+#: templates/partials/auth_modal.html:65
 msgid "Не получихте код?"
 msgstr "Не получихте код?"
 
-#: templates/partials/auth_modal.html:63
+#: templates/partials/auth_modal.html:65
 msgid "Изпрати отново"
 msgstr "Изпрати отново"
 
-#: templates/partials/auth_modal.html:67
+#: templates/partials/auth_modal.html:69
 msgid "Създайте профил"
 msgstr "Създайте профил"
 
-#: templates/partials/auth_modal.html:89
+#: templates/partials/auth_modal.html:91
 msgid "Презиме"
 msgstr "Презиме"
 
 # Templates - register
-#: templates/partials/auth_modal.html:93 templates/partials/header.html:32
-#: templates/partials/header.html:63
+#: templates/partials/auth_modal.html:95 templates/partials/header.html:32
+#: templates/partials/header.html:65
 msgid "Регистрация"
 msgstr ""
 
@@ -1442,20 +1442,20 @@ msgstr ""
 msgid "Контакти"
 msgstr ""
 
-#: templates/partials/header.html:28 templates/partials/header.html:59
+#: templates/partials/header.html:28 templates/partials/header.html:61
 msgid "Моите часове"
 msgstr ""
 
-#: templates/partials/header.html:29 templates/partials/header.html:60
+#: templates/partials/header.html:29 templates/partials/header.html:62
 msgid "Изход"
 msgstr ""
 
-#: templates/partials/header.html:51
+#: templates/partials/header.html:53
 msgid "Профил"
 msgstr ""
 
-#: templates/partials/hero/carousel.html:18
-#: templates/partials/hero/split.html:12
+#: templates/partials/hero/carousel.html:20
+#: templates/partials/hero/split.html:14
 msgid "Вижте услугите"
 msgstr ""
 
@@ -1463,23 +1463,23 @@ msgstr ""
 msgid "Нашето студио · от 2014"
 msgstr "Нашето студио · от 2014"
 
-#: templates/partials/hero/split.html:16
+#: templates/partials/hero/split.html:18
 msgid "10+ години"
 msgstr ""
 
-#: templates/partials/hero/split.html:17
+#: templates/partials/hero/split.html:19
 msgid "опит"
 msgstr ""
 
-#: templates/partials/hero/split.html:21
+#: templates/partials/hero/split.html:23
 msgid "клиенти"
 msgstr ""
 
-#: templates/partials/hero/split.html:25
+#: templates/partials/hero/split.html:27
 msgid "оценка"
 msgstr ""
 
-#: templates/partials/hero/split.html:30
+#: templates/partials/hero/split.html:32
 msgid "Нашето студио"
 msgstr "Нашето студио"
 
@@ -3934,6 +3934,9 @@ msgstr ""
 #: venv/lib/python3.12/site-packages/unfold/widgets.py:969
 msgid "Select currency"
 msgstr ""
+
+#~ msgid "За да завършите резервацията, трябва да потвърдим Вашия имейл."
+#~ msgstr "За да завършите резервацията, трябва да потвърдим Вашия имейл."
 
 #~ msgid "Масажист"
 #~ msgstr "Масажист"
