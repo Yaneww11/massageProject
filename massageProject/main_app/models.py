@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxLengthValidator
+from django.core.validators import MaxLengthValidator, RegexValidator
 from django.db.models import JSONField
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -440,4 +440,106 @@ class Comment(models.Model):
         return 'Клиент'
 
 
+_HEX_COLOR_VALIDATOR = RegexValidator(
+    regex=r'^#[0-9A-Fa-f]{6}$',
+    message=_('Въведете валиден HEX цвят, напр. #4A3728.'),
+)
+
+
+class SiteConfiguration(models.Model):
+    FONT_PAIR_CHOICES = [
+        ('playfair_montserrat', _('Playfair Display + Montserrat')),
+        ('cormorant_lato', _('Cormorant Garamond + Lato')),
+        ('poppins_opensans', _('Poppins + Open Sans')),
+        ('merriweather_sourcesans', _('Merriweather + Source Sans 3')),
+        ('raleway_roboto', _('Raleway + Roboto')),
+    ]
+
+    STYLE_PRESET_CHOICES = [
+        ('soft', _('Мек (текущи radius и сенки)')),
+        ('sharp', _('Остър (минимални radius, плоски сенки)')),
+        ('round', _('Заоблен (pill бутони, големи radius)')),
+    ]
+
+    HERO_VARIANT_CHOICES = [
+        ('split', _('Split — текст и снимка една до друга')),
+        ('carousel', _('Carousel — въртяща се галерия')),
+        ('fullbleed', _('Fullbleed — снимка на цяла ширина')),
+    ]
+
+    primary_color = models.CharField(
+        max_length=7, default='#4A3728', validators=[_HEX_COLOR_VALIDATOR],
+        verbose_name=_('Основен цвят'),
+    )
+    primary_light_color = models.CharField(
+        max_length=7, default='#6D5442', validators=[_HEX_COLOR_VALIDATOR],
+        verbose_name=_('Основен цвят (светъл)'),
+    )
+    secondary_color = models.CharField(
+        max_length=7, default='#C2A38E', validators=[_HEX_COLOR_VALIDATOR],
+        verbose_name=_('Вторичен цвят'),
+    )
+    accent_color = models.CharField(
+        max_length=7, default='#8E735B', validators=[_HEX_COLOR_VALIDATOR],
+        verbose_name=_('Акцентен цвят'),
+    )
+    background_color = models.CharField(
+        max_length=7, default='#FAF7F2', validators=[_HEX_COLOR_VALIDATOR],
+        verbose_name=_('Фон'),
+    )
+    text_color = models.CharField(
+        max_length=7, default='#2D241E', validators=[_HEX_COLOR_VALIDATOR],
+        verbose_name=_('Текст'),
+    )
+    text_muted_color = models.CharField(
+        max_length=7, default='#6B5E55', validators=[_HEX_COLOR_VALIDATOR],
+        verbose_name=_('Текст (приглушен)'),
+    )
+
+    font_pair = models.CharField(
+        max_length=30, choices=FONT_PAIR_CHOICES, default='playfair_montserrat',
+        verbose_name=_('Двойка шрифтове'),
+    )
+    style_preset = models.CharField(
+        max_length=10, choices=STYLE_PRESET_CHOICES, default='soft',
+        verbose_name=_('Стил (форми и сенки)'),
+    )
+    hero_variant = models.CharField(
+        max_length=10, choices=HERO_VARIANT_CHOICES, default='split',
+        verbose_name=_('Начален банер'),
+    )
+
+    service_singular = models.CharField(
+        max_length=50, default='услуга', verbose_name=_('Услуга (ед. число)'),
+    )
+    service_plural = models.CharField(
+        max_length=50, default='услуги', verbose_name=_('Услуги (мн. число)'),
+    )
+    specialist_singular = models.CharField(
+        max_length=50, default='специалист', verbose_name=_('Специалист (ед. число)'),
+    )
+    specialist_plural = models.CharField(
+        max_length=50, default='специалисти', verbose_name=_('Специалисти (мн. число)'),
+    )
+
+    booking_enabled = models.BooleanField(default=True, verbose_name=_('Резервации активни'))
+    comments_enabled = models.BooleanField(default=True, verbose_name=_('Коментари активни'))
+    google_login_enabled = models.BooleanField(default=True, verbose_name=_('Вход с Google активен'))
+
+    class Meta:
+        verbose_name = _('Настройки на сайта')
+        verbose_name_plural = _('Настройки на сайта')
+
+    def save(self, *args, **kwargs):
+        if not self.pk and SiteConfiguration.objects.exists():
+            return
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_solo(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return str(self._meta.verbose_name)
 
