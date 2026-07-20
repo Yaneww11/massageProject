@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.template import Context, Template
 
 from massageProject.main_app.models import SiteConfiguration
 from massageProject.main_app.theme import FONT_PAIRS, STYLE_PRESETS
@@ -39,3 +40,31 @@ class ThemeDataTest(TestCase):
         self.assertIn('Montserrat', default['google_fonts_url'])
         self.assertEqual(default['heading_family'], "'Playfair Display', serif")
         self.assertEqual(default['body_family'], "'Montserrat', sans-serif")
+
+
+class ThemeTemplateFiltersTest(TestCase):
+    def test_font_pair_info_filter_returns_matching_dict(self):
+        # dict lookup via dot-notation in a template requires the filter's
+        # return value to support attribute/key access, which plain dicts do
+        rendered = Template(
+            "{% load theme_extras %}{% with pair='playfair_montserrat'|font_pair_info %}{{ pair.heading_family }}{% endwith %}"
+        ).render(Context({}))
+        self.assertEqual(rendered, "'Playfair Display', serif")
+
+    def test_font_pair_info_unknown_key_falls_back_to_default(self):
+        rendered = Template(
+            "{% load theme_extras %}{% with pair='not-a-real-key'|font_pair_info %}{{ pair.heading_family }}{% endwith %}"
+        ).render(Context({}))
+        self.assertEqual(rendered, "'Playfair Display', serif")
+
+    def test_style_preset_vars_filter_returns_matching_dict(self):
+        rendered = Template(
+            "{% load theme_extras %}{% with preset='sharp'|style_preset_vars %}{{ preset.radius_sm }}{% endwith %}"
+        ).render(Context({}))
+        self.assertEqual(rendered, '0px')
+
+    def test_style_preset_vars_unknown_key_falls_back_to_soft(self):
+        rendered = Template(
+            "{% load theme_extras %}{% with preset='not-a-real-key'|style_preset_vars %}{{ preset.radius_sm }}{% endwith %}"
+        ).render(Context({}))
+        self.assertEqual(rendered, '4px')
