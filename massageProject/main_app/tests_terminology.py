@@ -96,3 +96,53 @@ class ReservationPageTerminologyTest(TestCase):
         self.assertIn('>Специалист<', content)  # default specialist_singular, capitalized
         self.assertNotIn('Моля, изберете масаж, масажист и дата.', content)
         self.assertNotIn('Типът масаж беше променен', content)
+
+
+class EditDeleteReservationTerminologyTest(TestCase):
+    def _make_reservation(self):
+        from datetime import date, time, timedelta
+        from django.contrib.auth import get_user_model
+        from massageProject.main_app.models import Service, Specialist, WorkingHours, Reservation
+
+        User = get_user_model()
+        user = User.objects.create_user(
+            phone_number='0888555666', email='editdeletetest@example.com',
+            password='testpass123', first_name='Test', last_name='User',
+        )
+        specialist = Specialist.objects.create(
+            name='Test Specialist 2', description='desc', phone_number='0888555666',
+            email='specialist2@example.com',
+        )
+        service = Service.objects.create(
+            name='Test Service 2', description='desc', price=50, duration_in_minutes=60,
+            short_description='short',
+        )
+        WorkingHours.objects.create(
+            specialist=specialist, day_of_week=(date.today() + timedelta(days=5)).weekday(),
+            start_time=time(9, 0), end_time=time(18, 0),
+        )
+        reservation = Reservation.objects.create(
+            service=service, specialist=specialist, user=user,
+            date=date.today() + timedelta(days=5), time=time(10, 0),
+        )
+        self.client.force_login(user)
+        return reservation
+
+    def test_edit_reservation_page_uses_terminology(self):
+        reservation = self._make_reservation()
+        response = self.client.get(f'/bg/{reservation.pk}/edit_reserve/')
+        content = response.content.decode()
+        self.assertNotIn('Тип масаж', content)
+        self.assertNotIn('>Масажист<', content)
+        self.assertIn('>Услуга<', content)
+        self.assertIn('>Специалист<', content)
+        self.assertNotIn('Моля, първо изберете тип масаж, масажист и дата.', content)
+
+    def test_delete_reservation_page_uses_terminology(self):
+        reservation = self._make_reservation()
+        response = self.client.get(f'/bg/{reservation.pk}/delete_reserve/')
+        content = response.content.decode()
+        self.assertNotIn('Тип масаж', content)
+        self.assertNotIn('>Масажист<', content)
+        self.assertIn('>Услуга<', content)
+        self.assertIn('>Специалист<', content)

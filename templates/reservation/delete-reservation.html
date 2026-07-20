@@ -13,12 +13,12 @@
             {% csrf_token %}
 
             <div class="form-group">
-                <label for="service">{% trans "Тип масаж" %}</label>
+                <label for="service">{{ site_config.service_singular|capfirst }}</label>
                 <input type="text" id="service" value="{{ reservation.service.name }}" disabled>
             </div>
 
             <div class="form-group">
-                <label for="specialist">{% trans "Масажист" %}</label>
+                <label for="specialist">{{ site_config.specialist_singular|capfirst }}</label>
                 <input type="text" id="specialist" value="{{ reservation.specialist.name }}" disabled>
             </div>
 
