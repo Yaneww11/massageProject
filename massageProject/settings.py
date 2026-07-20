@@ -131,6 +131,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'massageProject.main_app.context_processors.admin_branding',
+                'massageProject.main_app.context_processors.site_configuration',
                 'massageProject.accounts.context_processors.turnstile',
             ],
         },

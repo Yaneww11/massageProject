@@ -124,3 +124,15 @@ class SiteConfigurationCacheInvalidationTest(TestCase):
         obj.save()
 
         self.assertIsNone(cache.get('site_configuration'))
+
+
+class SiteConfigurationContextProcessorTest(TestCase):
+    def test_site_config_present_in_rendered_page(self):
+        response = self.client.get('/bg/')
+        self.assertIn('site_config', response.context)
+        self.assertIsInstance(response.context['site_config'], SiteConfiguration)
+
+    def test_context_processor_populates_cache(self):
+        cache.delete('site_configuration')
+        self.client.get('/bg/')
+        self.assertIsNotNone(cache.get('site_configuration'))
