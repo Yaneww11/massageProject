@@ -105,7 +105,10 @@ class BookingEnabledUIHidingTest(TestCase):
         response = self.client.get('/bg/')
         content = response.content.decode()
         self.assertNotIn("{% url 'reservation_page' %}", content)  # sanity: raw tag never leaks
-        self.assertNotIn('/reserve/', content)
+        # Note: the reservation URL may still legitimately appear inside the
+        # universal auth-modal-trigger script (used as the post-login redirect
+        # target) — only the visible hero CTA link itself must be hidden.
+        self.assertNotIn('class="btn btn-primary btn-lg" data-auth-modal-link', content)
 
     def test_service_detail_booking_button_hidden_when_disabled(self):
         self._disable_booking()
@@ -119,3 +122,20 @@ class BookingEnabledUIHidingTest(TestCase):
         content = response.content.decode()
         self.assertNotIn('Запазете нов час', content)
         self.assertNotIn('Промени', content)
+
+    def test_auth_modal_trigger_script_present_when_booking_disabled(self):
+        self._disable_booking()
+        response = self.client.get('/bg/')
+        content = response.content.decode()
+        self.assertIn("document.querySelectorAll('[data-auth-modal-trigger]')", content)
+
+    def test_book_again_link_hidden_when_disabled(self):
+        Reservation.objects.create(
+            service=self.service, specialist=self.specialist, user=self.user,
+            date=date.today() - timedelta(days=3), time=time(10, 0),
+            status=Reservation.STATUS_COMPLETED,
+        )
+        self._disable_booking()
+        response = self.client.get('/bg/profile/')
+        content = response.content.decode()
+        self.assertNotIn('Запазете отново', content)

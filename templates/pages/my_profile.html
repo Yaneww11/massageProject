@@ -190,9 +190,11 @@
               &#9734; {% trans "Оставете мнение" %}
             </button>
             {% endif %}
+            {% if site_config.booking_enabled %}
             <a href="{% url 'reservation_page' %}?service={{ r.service.pk }}" class="btn-outline-sm" data-auth-modal-link>
               &rarr; {% trans "Запазете отново" %}
             </a>
+            {% endif %}
           </div>
         </div>
         {% endwith %}
