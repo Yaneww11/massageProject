@@ -21,8 +21,10 @@ class GoogleSocialAccountAdapter(DefaultSocialAccountAdapter):
 
     def is_open_for_signup(self, request, sociallogin):
         # The default delegates to the account adapter, which is closed;
-        # social signup (the Google complete-profile step) must stay open.
-        return True
+        # social signup (the Google complete-profile step) must stay open,
+        # unless the brand has turned Google login off entirely.
+        from massageProject.main_app.models import SiteConfiguration
+        return SiteConfiguration.get_solo().google_login_enabled
 
     def pre_social_login(self, request, sociallogin):
         if sociallogin.is_existing:

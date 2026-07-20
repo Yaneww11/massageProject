@@ -17,6 +17,7 @@
       </div>
       <p class="auth-modal-error" id="auth-email-error"></p>
       <button type="button" class="btn btn-primary auth-modal-submit" id="auth-email-continue">{% trans "Продължи" %}</button>
+      {% if site_config.google_login_enabled %}
       <div class="auth-modal-divider"><span>{% trans "или" %}</span></div>
       <form method="post" action="{% url 'google_login' %}" class="auth-modal-google-form">
         {% csrf_token %}
@@ -26,6 +27,7 @@
           {% trans "Продължи с Google" %}
         </button>
       </form>
+      {% endif %}
     </div>
 
     <div class="auth-modal-step" data-step="choice" hidden>
