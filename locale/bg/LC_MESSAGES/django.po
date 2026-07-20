@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-20 21:41+0000\n"
+"POT-Creation-Date: 2026-07-20 22:12+0000\n"
 "PO-Revision-Date: 2026-06-15 15:05+0000\n"
 "Last-Translator: Яне Янев <s@ex.com>\n"
 "Language-Team: Bulgarian\n"
@@ -334,8 +334,7 @@ msgstr "Групи услуги"
 msgid "Група"
 msgstr "Група"
 
-#: massageProject/main_app/models.py:43 templates/pages/reservation.html:30
-#: templates/pages/reservation.html:163 templates/pages/reservation.html:212
+#: massageProject/main_app/models.py:43
 msgid "Масаж"
 msgstr "Масажист"
 
@@ -915,10 +914,9 @@ msgstr "Затвори"
 msgid "Нашите услуги"
 msgstr ""
 
-# Templates - home
 #: templates/pages/home.html:14
-msgid "Предпочитани масажи"
-msgstr ""
+msgid "Предпочитани"
+msgstr "Предпочитани"
 
 #: templates/pages/home.html:15
 msgid "Всяка сесия е съобразена с вашето тяло и нужди."
@@ -1046,13 +1044,6 @@ msgstr "мин"
 #: templates/pages/reservation.html:36 templates/pages/services_page.html:296
 msgid "лв"
 msgstr "лв"
-
-#: templates/pages/my_profile.html:70 templates/pages/reservation.html:49
-#: templates/pages/reservation.html:166 templates/pages/reservation.html:213
-#: templates/reservation/delete-reservation.html:21
-#: templates/reservation/edit-reservation.html:34
-msgid "Масажист"
-msgstr "Масажист"
 
 #: templates/pages/my_profile.html:80 templates/pages/my_profile.html:138
 msgid "Добави в календар"
@@ -1262,8 +1253,9 @@ msgid "Вижте моите резервации"
 msgstr "Всички резервации"
 
 #: templates/pages/reservation.html:258
-msgid "Моля, изберете масаж, масажист и дата."
-msgstr ""
+#: templates/reservation/edit-reservation.html:166
+msgid "Моля, попълнете всички полета по-горе, преди да продължите."
+msgstr "Моля, попълнете всички полета по-горе, преди да продължите."
 
 #: templates/pages/reservation.html:259
 #, fuzzy
@@ -1285,8 +1277,8 @@ msgid "Възникна грешка. Моля, опитайте отново."
 msgstr ""
 
 #: templates/pages/reservation.html:263
-msgid "Типът масаж беше променен. Моля, изберете нов час."
-msgstr ""
+msgid "Вашият избор беше променен. Моля, изберете нов час."
+msgstr "Вашият избор беше променен. Моля, изберете нов час."
 
 #: templates/pages/reservation.html:264
 msgid "Сутрин"
@@ -1333,11 +1325,11 @@ msgstr "Всички наши услуги"
 
 #: templates/pages/services_page.html:268
 msgid ""
-"Открийте пълния списък с нашите масажни процедури — всяка е съобразена с "
-"вашето тяло и нужди."
+"Открийте пълния списък с нашите услуги — всяка е съобразена с вашето тяло и "
+"нужди."
 msgstr ""
-"Открийте пълния списък с нашите масажни процедури — всяка е съобразена с "
-"вашето тяло и нужди."
+"Открийте пълния списък с нашите услуги — всяка е съобразена с вашето тяло и "
+"нужди."
 
 #: templates/pages/services_page.html:279
 msgid "Всички"
@@ -1450,10 +1442,6 @@ msgstr ""
 msgid "Контакти"
 msgstr ""
 
-#: templates/partials/footer.html:53
-msgid "Масажно студио Сияние"
-msgstr ""
-
 #: templates/partials/header.html:28 templates/partials/header.html:59
 msgid "Моите часове"
 msgstr ""
@@ -1471,10 +1459,9 @@ msgstr ""
 msgid "Вижте услугите"
 msgstr ""
 
-# Templates - home (Quiet design)
 #: templates/partials/hero/split.html:5
-msgid "Масажно студио · от 2014"
-msgstr ""
+msgid "Нашето студио · от 2014"
+msgstr "Нашето студио · от 2014"
 
 #: templates/partials/hero/split.html:16
 msgid "10+ години"
@@ -1493,8 +1480,8 @@ msgid "оценка"
 msgstr ""
 
 #: templates/partials/hero/split.html:30
-msgid "Масажно студио"
-msgstr ""
+msgid "Нашето студио"
+msgstr "Нашето студио"
 
 #: templates/registration/auth_entry.html:4
 msgid "Моля, включете JavaScript, за да влезете в профила си."
@@ -1572,11 +1559,6 @@ msgid ""
 "необратимо."
 msgstr ""
 
-#: templates/reservation/delete-reservation.html:16
-#: templates/reservation/edit-reservation.html:20
-msgid "Тип масаж"
-msgstr ""
-
 #: templates/reservation/delete-reservation.html:31
 #: templates/reservation/edit-reservation.html:57
 msgid "Време"
@@ -1606,10 +1588,6 @@ msgstr ""
 
 #: templates/reservation/edit-reservation.html:77
 msgid "Запази промените"
-msgstr ""
-
-#: templates/reservation/edit-reservation.html:166
-msgid "Моля, първо изберете тип масаж, масажист и дата."
 msgstr ""
 
 #: templates/reservation/edit-reservation.html:168
@@ -3956,6 +3934,9 @@ msgstr ""
 #: venv/lib/python3.12/site-packages/unfold/widgets.py:969
 msgid "Select currency"
 msgstr ""
+
+#~ msgid "Масажист"
+#~ msgstr "Масажист"
 
 #~ msgid "Готови за вашия момент на грижа?"
 #~ msgstr "Готови за вашия момент на грижа?"
