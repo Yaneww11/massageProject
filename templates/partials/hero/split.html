@@ -2,7 +2,7 @@
 <section class="hp-hero">
     <div class="hp-container hp-hero-inner">
         <div class="hp-hero-text">
-            <span class="hp-eyebrow">{% trans "Масажно студио · от 2014" %}</span>
+            <span class="hp-eyebrow">{% trans "Нашето студио · от 2014" %}</span>
             {% if page %}
                 <h1 class="hp-hero-title">{{ page.brand_name }}</h1>
                 <p class="hp-hero-sub">{{ page.description }}</p>
@@ -27,7 +27,7 @@
             </div>
         </div>
         <div class="hp-hero-media">
-            <img src="{% static 'images/home_background.jpg' %}" alt="{% if page %}{{ page.brand_name }}{% else %}{% trans "Масажно студио" %}{% endif %}">
+            <img src="{% static 'images/home_background.jpg' %}" alt="{% if page %}{{ page.brand_name }}{% else %}{% trans "Нашето студио" %}{% endif %}">
         </div>
     </div>
 </section>
