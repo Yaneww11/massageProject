@@ -1,0 +1,33 @@
+{% load static i18n %}
+<section class="hp-hero">
+    <div class="hp-container hp-hero-inner">
+        <div class="hp-hero-text">
+            <span class="hp-eyebrow">{% trans "Масажно студио · от 2014" %}</span>
+            {% if page %}
+                <h1 class="hp-hero-title">{{ page.brand_name }}</h1>
+                <p class="hp-hero-sub">{{ page.description }}</p>
+            {% endif %}
+            <div class="hp-hero-btns">
+                <a href="{% url 'reservation_page' %}" class="btn btn-primary btn-lg" data-auth-modal-link>{% trans "Запазете час" %}</a>
+                <a href="{% url 'services_dashboard' %}" class="btn btn-outline btn-lg">{% trans "Вижте услугите" %}</a>
+            </div>
+            <div class="hp-stats">
+                <div class="hp-stat">
+                    <span class="hp-stat-val">{% trans "10+ години" %}</span>
+                    <span class="hp-stat-lbl">{% trans "опит" %}</span>
+                </div>
+                <div class="hp-stat">
+                    <span class="hp-stat-val">4000+</span>
+                    <span class="hp-stat-lbl">{% trans "клиенти" %}</span>
+                </div>
+                <div class="hp-stat">
+                    <span class="hp-stat-val">4.9★</span>
+                    <span class="hp-stat-lbl">{% trans "оценка" %}</span>
+                </div>
+            </div>
+        </div>
+        <div class="hp-hero-media">
+            <img src="{% static 'images/home_background.jpg' %}" alt="{% if page %}{{ page.brand_name }}{% else %}{% trans "Масажно студио" %}{% endif %}">
+        </div>
+    </div>
+</section>

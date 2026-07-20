@@ -82,3 +82,11 @@ class ThemeOverridesRenderingTest(TestCase):
         with open('staticfiles/css/base/variables.css') as f:
             content = f.read()
         self.assertNotIn('@import url(\'https://fonts.googleapis.com', content)
+
+
+class HeroVariantSelectionTest(TestCase):
+    def test_home_page_renders_split_hero_by_default(self):
+        response = self.client.get('/bg/')
+        content = response.content.decode()
+        self.assertIn('hp-hero-inner', content)
+        self.assertIn('home_background.jpg', content)
