@@ -295,6 +295,11 @@ UNFOLD = {
                         "icon": "location_on",
                         "link": reverse_lazy("admin:main_app_businessinfo_changelist"),
                     },
+                    {
+                        "title": _("Настройки на сайта"),
+                        "icon": "palette",
+                        "link": reverse_lazy("admin:main_app_siteconfiguration_changelist"),
+                    },
                 ],
             },
             # Reservation management pages.

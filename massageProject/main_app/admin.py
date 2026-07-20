@@ -1,4 +1,5 @@
 import csv
+from django import forms
 from django.contrib import admin
 from django.http import HttpResponse
 from django.utils.html import format_html
@@ -13,6 +14,7 @@ from massageProject.main_app.models import (
     Service, Image, Gallery, HomePage, GalleryImage,
     BusinessInfo, Specialist, WorkingHours, Reservation, Comment,
     BusinessWorkingHours, ServiceGroup, GalleryAlbum, AlbumPhoto,
+    SiteConfiguration,
 )
 
 # --- Actions ---
@@ -238,9 +240,41 @@ class HomePageAdmin(ModelAdmin, TabbedTranslationAdmin):
 class BusinessInfosAdmin(ModelAdmin, TabbedTranslationAdmin):
     list_display = ('display_image', 'name', 'address', 'phone')
     list_filter_sheet = True
-    
+
     def display_image(self, obj):
         if obj.main_image:
             return format_html('<img src="{}" style="width: 80px; height: 50px; object-fit: cover;" />', obj.main_image.url)
         return _("Няма изображение")
     display_image.short_description = _('Основна снимка')
+
+@admin.register(SiteConfiguration)
+class SiteConfigurationAdmin(ModelAdmin, TabbedTranslationAdmin):
+    COLOR_FIELDS = (
+        'primary_color', 'primary_light_color', 'secondary_color',
+        'accent_color', 'background_color', 'text_color', 'text_muted_color',
+    )
+
+    fieldsets = (
+        (_('Тема — цветове'), {'fields': (
+            'primary_color', 'primary_light_color', 'secondary_color',
+            'accent_color', 'background_color', 'text_color', 'text_muted_color',
+        )}),
+        (_('Типография и стил'), {'fields': ('font_pair', 'style_preset', 'hero_variant')}),
+        (_('Терминология'), {'fields': (
+            'service_singular', 'service_plural',
+            'specialist_singular', 'specialist_plural',
+        )}),
+        (_('Функционалности'), {'fields': ('booking_enabled', 'comments_enabled', 'google_login_enabled')}),
+    )
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        if db_field.name in self.COLOR_FIELDS:
+            formfield.widget = forms.TextInput(attrs={'type': 'color'})
+        return formfield
+
+    def has_add_permission(self, request):
+        return not SiteConfiguration.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False

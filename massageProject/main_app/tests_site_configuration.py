@@ -75,3 +75,39 @@ class SiteConfigurationTerminologyTranslationTest(TestCase):
             self.assertEqual(obj.service_plural, 'услуги')
         with translation.override('en'):
             self.assertEqual(obj.service_plural, 'services')
+
+
+class SiteConfigurationAdminTest(TestCase):
+    def setUp(self):
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        self.admin_user = User.objects.create_superuser(
+            email='admin@example.com', phone_number='0888888899', password='testpass123',
+        )
+        self.client.force_login(self.admin_user)
+
+    def test_changelist_shows_the_singleton_row(self):
+        from django.urls import reverse
+        SiteConfiguration.get_solo()
+        response = self.client.get(reverse('admin:main_app_siteconfiguration_changelist'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_add_view_forbidden_when_row_exists(self):
+        from django.urls import reverse
+        SiteConfiguration.get_solo()
+        response = self.client.get(reverse('admin:main_app_siteconfiguration_add'))
+        self.assertEqual(response.status_code, 403)
+
+    def test_delete_view_forbidden(self):
+        from django.urls import reverse
+        obj = SiteConfiguration.get_solo()
+        url = reverse('admin:main_app_siteconfiguration_delete', args=[obj.pk])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_color_field_renders_native_color_input(self):
+        from django.urls import reverse
+        obj = SiteConfiguration.get_solo()
+        url = reverse('admin:main_app_siteconfiguration_change', args=[obj.pk])
+        response = self.client.get(url)
+        self.assertContains(response, 'type="color"')
