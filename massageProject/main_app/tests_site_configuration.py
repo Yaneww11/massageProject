@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.utils import translation
 
 from massageProject.main_app.models import SiteConfiguration
 
@@ -60,3 +61,17 @@ class SiteConfigurationValidationTest(TestCase):
         obj = SiteConfiguration.get_solo()
         obj.primary_color = '#112233'
         obj.full_clean()  # must not raise
+
+
+class SiteConfigurationTerminologyTranslationTest(TestCase):
+    def test_terminology_fields_are_per_language(self):
+        obj = SiteConfiguration.get_solo()
+        obj.service_plural_bg = 'услуги'
+        obj.service_plural_en = 'services'
+        obj.save()
+
+        obj.refresh_from_db()
+        with translation.override('bg'):
+            self.assertEqual(obj.service_plural, 'услуги')
+        with translation.override('en'):
+            self.assertEqual(obj.service_plural, 'services')

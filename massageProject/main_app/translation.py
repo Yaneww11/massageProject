@@ -1,7 +1,7 @@
 from modeltranslation.translator import register, TranslationOptions
 from massageProject.main_app.models import (
     Service, Specialist, HomePage, BusinessInfo, BusinessWorkingHours, Image, ServiceGroup,
-    Gallery, GalleryAlbum, AlbumPhoto,
+    Gallery, GalleryAlbum, AlbumPhoto, SiteConfiguration,
 )
 
 
@@ -53,3 +53,8 @@ class GalleryAlbumTranslationOptions(TranslationOptions):
 @register(AlbumPhoto)
 class AlbumPhotoTranslationOptions(TranslationOptions):
     fields = ('alt_text',)
+
+
+@register(SiteConfiguration)
+class SiteConfigurationTranslationOptions(TranslationOptions):
+    fields = ('service_singular', 'service_plural', 'specialist_singular', 'specialist_plural')
