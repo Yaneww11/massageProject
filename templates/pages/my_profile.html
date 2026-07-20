@@ -85,9 +85,11 @@
             <i class="fas fa-directions"></i> {% trans "Упътвания" %}
           </a>
           {% endif %}
+          {% if site_config.booking_enabled %}
           <a href="{% url 'edit_reservation' next_reservation.id %}" class="btn-outline-profile">
             <i class="fas fa-pencil-alt"></i> {% trans "Промени" %}
           </a>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -101,7 +103,9 @@
           <h2 class="section-title">{% trans "Предстоящи резервации" %}</h2>
           <p class="section-subtitle">{% trans "Очакваме Ви с нетърпение." %}</p>
         </div>
+        {% if site_config.booking_enabled %}
         <a href="{% url 'reservation_page' %}" class="btn-primary-profile" data-auth-modal-link>+ {% trans "Запазете нов час" %}</a>
+        {% endif %}
       </div>
 
       {% if active_reservations %}
@@ -138,8 +142,10 @@
                 <button class="btn-icon-cal" disabled title="{% trans 'Добави в календар' %}">
                   <i class="far fa-calendar"></i>
                 </button>
+                {% if site_config.booking_enabled %}
                 <a href="{% url 'edit_reservation' r.id %}" class="btn-action-edit">{% trans "Промени" %}</a>
                 <a href="{% url 'delete_reservation' r.id %}" class="btn-action-cancel">&times; {% trans "Отмени" %}</a>
+                {% endif %}
               </td>
             </tr>
             {% endfor %}

@@ -8,7 +8,9 @@
                 <p class="hp-hero-sub">{{ page.description }}</p>
             {% endif %}
             <div class="hp-hero-btns">
+                {% if site_config.booking_enabled %}
                 <a href="{% url 'reservation_page' %}" class="btn btn-primary btn-lg" data-auth-modal-link>{% trans "Запазете час" %}</a>
+                {% endif %}
                 <a href="{% url 'services_dashboard' %}" class="btn btn-outline btn-lg">{% trans "Вижте услугите" %}</a>
             </div>
             <div class="hp-stats">

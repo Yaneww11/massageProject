@@ -42,10 +42,12 @@
             <button type="submit" name="language" value="en" class="lang-btn {% if CURRENT_LANG == 'en' %}active{% endif %}">EN</button>
         </form>
 
+        {% if site_config.booking_enabled %}
         <a href="{% url 'reservation_page' %}" class="btn btn-primary navbar-cta" data-auth-modal-link title="{% trans 'Запазете час' %}">
             <i class="fas fa-calendar-alt"></i>
             <span>{% trans "Запазете час" %}</span>
         </a>
+        {% endif %}
 
         <div class="user-menu" id="user-menu">
             <button class="user-menu-toggle" id="user-menu-toggle" aria-label="{% trans 'Профил' %}" aria-expanded="false">
@@ -108,11 +110,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    {% if site_config.booking_enabled %}
     document.querySelectorAll('[data-auth-modal-trigger]').forEach(function (link) {
         link.addEventListener('click', function (e) {
             e.preventDefault();
             openAuthModal('{% url "reservation_page" %}');
         });
     });
+    {% endif %}
 });
 </script>

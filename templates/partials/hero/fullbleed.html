@@ -11,6 +11,8 @@
             <h1 class="hp-hero-fullbleed-title">{{ page.brand_name }}</h1>
             <p class="hp-hero-fullbleed-sub">{{ page.description }}</p>
         {% endif %}
+        {% if site_config.booking_enabled %}
         <a href="{% url 'reservation_page' %}" class="btn btn-primary btn-lg" data-auth-modal-link>{% trans "Запазете час" %}</a>
+        {% endif %}
     </div>
 </section>
