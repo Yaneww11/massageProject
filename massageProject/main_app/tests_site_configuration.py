@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import translation
@@ -111,3 +112,15 @@ class SiteConfigurationAdminTest(TestCase):
         url = reverse('admin:main_app_siteconfiguration_change', args=[obj.pk])
         response = self.client.get(url)
         self.assertContains(response, 'type="color"')
+
+
+class SiteConfigurationCacheInvalidationTest(TestCase):
+    def test_save_invalidates_cache_key(self):
+        obj = SiteConfiguration.get_solo()
+        cache.set('site_configuration', obj, None)
+        self.assertIsNotNone(cache.get('site_configuration'))
+
+        obj.primary_color = '#123456'
+        obj.save()
+
+        self.assertIsNone(cache.get('site_configuration'))

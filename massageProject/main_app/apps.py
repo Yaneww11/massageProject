@@ -6,3 +6,6 @@ class MainAppConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'massageProject.main_app'
     verbose_name = _('Основни данни')
+
+    def ready(self):
+        from massageProject.main_app import signals  # noqa: F401
