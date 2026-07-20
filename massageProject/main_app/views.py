@@ -14,9 +14,11 @@ from django.http import JsonResponse
 
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
     ReservationDeleteForm, CommentForm, UserNameForm
+from massageProject.main_app.mixins import BookingEnabledMixin, booking_enabled_required
 from massageProject.main_app.models import Service, HomePage, Specialist, BusinessInfo, Reservation, Comment, WorkingHours, ServiceGroup, GalleryAlbum
 
 
+@booking_enabled_required
 @login_required
 def check_availability(request):
     specialist_id = request.GET.get('specialist_id')
@@ -126,7 +128,7 @@ class ServicesDashboard(ListView):
         context['groups'] = ServiceGroup.objects.filter(services__isnull=False).distinct()
         return context
 
-class ReservationPage(LoginRequiredMixin, CreateView):
+class ReservationPage(BookingEnabledMixin, LoginRequiredMixin, CreateView):
     model = Reservation
     template_name = 'pages/reservation.html'
     form_class = ReservationCreateForm
@@ -361,6 +363,7 @@ class ServiceDetail(TemplateView):
         context['service'] = get_object_or_404(Service, pk=kwargs['pk'])
         return self.render_to_response(context)
 
+@booking_enabled_required
 @login_required
 def edit_reservation(request, pk: int):
     reservation = get_object_or_404(Reservation, pk=pk)
@@ -391,6 +394,7 @@ def edit_reservation(request, pk: int):
 
     return render(request, 'reservation/edit-reservation.html', context)
 
+@booking_enabled_required
 @login_required
 def delete_reservation(request, pk: int):
     reservation = get_object_or_404(Reservation, pk=pk)
