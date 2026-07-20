@@ -139,3 +139,60 @@ class BookingEnabledUIHidingTest(TestCase):
         response = self.client.get('/bg/profile/')
         content = response.content.decode()
         self.assertNotIn('Запазете отново', content)
+
+
+class CommentsEnabledServerEnforcementTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            phone_number='0888777003', email='commentsflag@example.com',
+            password='testpass123', first_name='Test', last_name='User',
+        )
+        self.client.force_login(self.user)
+
+    def _disable_comments(self):
+        config = SiteConfiguration.get_solo()
+        config.comments_enabled = False
+        config.save()
+
+    def test_all_comments_view_404s_when_disabled(self):
+        self._disable_comments()
+        response = self.client.get('/bg/comments/')
+        self.assertEqual(response.status_code, 404)
+
+    def test_all_comments_view_200s_when_enabled(self):
+        response = self.client.get('/bg/comments/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_submit_comment_404s_when_disabled(self):
+        self._disable_comments()
+        response = self.client.post('/bg/submit-comment/', {'content': 'test', 'rating': 5})
+        self.assertEqual(response.status_code, 404)
+
+    def test_about_page_post_404s_when_comments_disabled(self):
+        self._disable_comments()
+        response = self.client.post('/bg/about/', {'content': 'test comment'})
+        self.assertEqual(response.status_code, 404)
+
+    def test_about_page_get_still_200s_when_comments_disabled(self):
+        self._disable_comments()
+        response = self.client.get('/bg/about/')
+        self.assertEqual(response.status_code, 200)
+
+
+class CommentsEnabledUIHidingTest(TestCase):
+    def _disable_comments(self):
+        config = SiteConfiguration.get_solo()
+        config.comments_enabled = False
+        config.save()
+
+    def test_home_reviews_section_hidden_when_disabled(self):
+        self._disable_comments()
+        response = self.client.get('/bg/')
+        content = response.content.decode()
+        self.assertNotIn('hp-reviews', content)
+
+    def test_about_page_comments_section_hidden_when_disabled(self):
+        self._disable_comments()
+        response = self.client.get('/bg/about/')
+        content = response.content.decode()
+        self.assertNotIn('class="comments"', content)

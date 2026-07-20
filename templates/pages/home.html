@@ -48,6 +48,7 @@
 </section>
 {% endif %}
 
+{% if site_config.comments_enabled %}
 <!-- ========== REVIEWS — Two-card carousel ========== -->
 <section class="hp-reviews">
     <div class="hp-container">
@@ -133,6 +134,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 
 <!-- ========== WORKING HOURS — Two-column with contact card ========== -->
 {% if page.business_working_hours.all %}
@@ -194,6 +196,7 @@
     }
 
     // Reviews two-card carousel
+    {% if site_config.comments_enabled %}
     (function () {
         var track = document.getElementById('hp-reviews-track');
         var wrap = document.getElementById('hp-reviews-wrap');
@@ -255,6 +258,7 @@
 
         slide(0);
     }());
+    {% endif %}
 
     // Review modal
     (function () {

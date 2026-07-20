@@ -10,11 +10,12 @@ from datetime import datetime, timedelta, time, date
 from django.db.models import Count
 from django.contrib import messages
 from django.core.cache import cache
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
     ReservationDeleteForm, CommentForm, UserNameForm
-from massageProject.main_app.mixins import BookingEnabledMixin, booking_enabled_required
+from massageProject.main_app.mixins import BookingEnabledMixin, booking_enabled_required, \
+    CommentsEnabledMixin, comments_enabled_required
 from massageProject.main_app.models import Service, HomePage, Specialist, BusinessInfo, Reservation, Comment, WorkingHours, ServiceGroup, GalleryAlbum
 
 
@@ -234,6 +235,9 @@ class AboutPage(TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
+        from massageProject.main_app.models import SiteConfiguration
+        if not SiteConfiguration.get_solo().comments_enabled:
+            raise Http404
         user = request.user
         name_form = None
         name_valid = True
@@ -267,6 +271,7 @@ class AboutPage(TemplateView):
 
 from django.views.decorators.http import require_POST
 
+@comments_enabled_required
 @login_required
 @require_POST
 def submit_comment(request):
@@ -305,7 +310,7 @@ def submit_comment(request):
     return JsonResponse({'success': True})
 
 
-class AllCommentsView(ListView):
+class AllCommentsView(CommentsEnabledMixin, ListView):
     model = Comment
     template_name = 'pages/all_comments.html'
     context_object_name = 'comments'

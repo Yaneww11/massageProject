@@ -25,6 +25,7 @@
     </div>
 </section>
 
+{% if site_config.comments_enabled %}
 <section class="comments">
     <div class="description">
         <h2>{% trans "Коментари" %}</h2>
@@ -89,6 +90,7 @@
         {% endif %}
     </div>
 </section>
+{% endif %}
 
 <script src="{% static 'js/comments.js' %}"></script>
 {% endblock %}
