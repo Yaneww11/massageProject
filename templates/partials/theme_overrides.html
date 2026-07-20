@@ -1,0 +1,20 @@
+{% load theme_extras %}{% with pair=site_config.font_pair|font_pair_info preset=site_config.style_preset|style_preset_vars %}<link rel="stylesheet" href="{{ pair.google_fonts_url }}">
+<style>
+:root {
+    --primary-color: {{ site_config.primary_color }};
+    --primary-light: {{ site_config.primary_light_color }};
+    --secondary-color: {{ site_config.secondary_color }};
+    --accent-color: {{ site_config.accent_color }};
+    --bg-light: {{ site_config.background_color }};
+    --text-main: {{ site_config.text_color }};
+    --text-muted: {{ site_config.text_muted_color }};
+    --font-main: {{ pair.body_family }};
+    --font-heading: {{ pair.heading_family }};
+    --radius-sm: {{ preset.radius_sm }};
+    --radius-md: {{ preset.radius_md }};
+    --radius-lg: {{ preset.radius_lg }};
+    --shadow-sm: {{ preset.shadow_sm }};
+    --shadow-md: {{ preset.shadow_md }};
+    --shadow-lg: {{ preset.shadow_lg }};
+}
+</style>{% endwith %}

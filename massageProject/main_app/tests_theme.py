@@ -68,3 +68,17 @@ class ThemeTemplateFiltersTest(TestCase):
             "{% load theme_extras %}{% with preset='not-a-real-key'|style_preset_vars %}{{ preset.radius_sm }}{% endwith %}"
         ).render(Context({}))
         self.assertEqual(rendered, '4px')
+
+
+class ThemeOverridesRenderingTest(TestCase):
+    def test_home_page_includes_theme_colors_and_font_link(self):
+        response = self.client.get('/bg/')
+        content = response.content.decode()
+        self.assertIn('--primary-color: #4A3728', content)
+        self.assertIn('--font-heading: \'Playfair Display\', serif', content)
+        self.assertIn('fonts.googleapis.com/css2?family=Playfair+Display', content)
+
+    def test_variables_css_no_longer_hardcodes_google_fonts_import(self):
+        with open('staticfiles/css/base/variables.css') as f:
+            content = f.read()
+        self.assertNotIn('@import url(\'https://fonts.googleapis.com', content)
