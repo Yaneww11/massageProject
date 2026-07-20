@@ -77,3 +77,22 @@ class ProfileSpecialistRoleLabelTest(TestCase):
         content = response.content.decode()
         self.assertNotIn('>Масажист<', content)
         self.assertIn('>Специалист<', content)  # default specialist_singular, capitalized
+
+
+class ReservationPageTerminologyTest(TestCase):
+    def test_reservation_page_labels_use_terminology_not_massage(self):
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        user = User.objects.create_user(
+            phone_number='0888333444', email='reservationtest@example.com',
+            password='testpass123', first_name='Test', last_name='User',
+        )
+        self.client.force_login(user)
+        response = self.client.get('/bg/reserve/')
+        content = response.content.decode()
+        self.assertNotIn('>Масаж<', content)
+        self.assertNotIn('>Масажист<', content)
+        self.assertIn('>Услуга<', content)  # default service_singular, capitalized
+        self.assertIn('>Специалист<', content)  # default specialist_singular, capitalized
+        self.assertNotIn('Моля, изберете масаж, масажист и дата.', content)
+        self.assertNotIn('Типът масаж беше променен', content)

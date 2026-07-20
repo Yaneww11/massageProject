@@ -27,7 +27,7 @@
 
         <!-- Block 1: Treatment -->
         <div class="bn-block bn-block--first">
-          <div class="bn-step-label">{% trans "Масаж" %}</div>
+          <div class="bn-step-label">{{ site_config.service_singular|capfirst }}</div>
           <div class="form-group" style="margin-bottom:0">
             <select id="service" name="service" required>
               {% for m in form.fields.service.queryset %}
@@ -46,7 +46,7 @@
 
         <!-- Block 2: Therapist -->
         <div class="bn-block">
-          <div class="bn-step-label">{% trans "Масажист" %}</div>
+          <div class="bn-step-label">{{ site_config.specialist_singular|capfirst }}</div>
           <div class="bn-therapist-grid">
             {% for m in specialists %}
             <button type="button" class="bn-therapist-tile"
@@ -160,10 +160,10 @@
         <span class="bn-eyebrow">{% trans "Вашата резервация" %}</span>
         <div class="bn-summary">
           <div class="bn-summary-row">
-            <span>{% trans "Масаж" %}</span><span id="s-svc">—</span>
+            <span>{{ site_config.service_singular|capfirst }}</span><span id="s-svc">—</span>
           </div>
           <div class="bn-summary-row">
-            <span>{% trans "Масажист" %}</span><span id="s-thp">—</span>
+            <span>{{ site_config.specialist_singular|capfirst }}</span><span id="s-thp">—</span>
           </div>
           <div class="bn-summary-row">
             <span>{% trans "Дата" %}</span><span id="s-date">—</span>
@@ -209,8 +209,8 @@
       {% trans "Потвърждение ще получите на" %} <strong id="conf-contact"></strong>
     </p>
     <div class="bn-confirm-summary">
-      <div class="bn-summary-row"><span>{% trans "Масаж" %}</span><span id="conf-svc"></span></div>
-      <div class="bn-summary-row"><span>{% trans "Масажист" %}</span><span id="conf-thp"></span></div>
+      <div class="bn-summary-row"><span>{{ site_config.service_singular|capfirst }}</span><span id="conf-svc"></span></div>
+      <div class="bn-summary-row"><span>{{ site_config.specialist_singular|capfirst }}</span><span id="conf-thp"></span></div>
       <div class="bn-summary-row"><span>{% trans "Дата" %}</span><span id="conf-date"></span></div>
       <div class="bn-summary-row"><span>{% trans "Час" %}</span><span id="conf-time"></span></div>
       <div class="bn-summary-row"><span>{% trans "Продължителност" %}</span><span id="conf-dur"></span></div>
@@ -255,12 +255,12 @@ document.addEventListener('DOMContentLoaded', function () {
   const AVAIL_URL     = slotsEl.dataset.availabilityUrl;
 
   /* ── i18n strings ─────────────────────────────────────── */
-  const MSG_SELECT_FIRST   = "{% trans 'Моля, изберете масаж, масажист и дата.' %}";
+  const MSG_SELECT_FIRST   = "{% trans 'Моля, попълнете всички полета по-горе, преди да продължите.' %}";
   const MSG_SELECT_TIME    = "{% trans 'Моля, изберете час за Вашата резервация.' %}";
   const MSG_LOADING        = "{% trans 'Зареждане...' %}";
   const MSG_NO_SLOTS       = "{% trans 'Няма свободни часове за избрания ден.' %}";
   const MSG_ERROR          = "{% trans 'Възникна грешка. Моля, опитайте отново.' %}";
-  const MSG_SERVICE_CHANGED= "{% trans 'Типът масаж беше променен. Моля, изберете нов час.' %}";
+  const MSG_SERVICE_CHANGED= "{% trans 'Вашият избор беше променен. Моля, изберете нов час.' %}";
   const MSG_MORNING        = "{% trans 'Сутрин' %}";
   const MSG_AFTERNOON      = "{% trans 'Следобед' %}";
   const MSG_EVENING        = "{% trans 'Вечер' %}";
