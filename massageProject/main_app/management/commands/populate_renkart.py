@@ -1,12 +1,15 @@
-from datetime import time
+from datetime import date, time, timedelta
+
+from django.contrib.auth import get_user_model
 
 import requests
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand, CommandError
 
 from massageProject.main_app.models import (
-    BusinessInfo, BusinessWorkingHours, Gallery, GalleryImage, HomePage, Image,
-    Service, ServiceGroup, Specialist, SiteConfiguration, WorkingHours,
+    BusinessInfo, BusinessWorkingHours, Comment, Gallery, GalleryImage, HomePage,
+    Image, Reservation, Service, ServiceGroup, Specialist, SiteConfiguration,
+    WorkingHours,
 )
 
 LOGO_URL = 'https://renkart.net/images/logo33.jpg'
@@ -26,11 +29,17 @@ class Command(BaseCommand):
         self._populate_business_info(reneta_bytes)
         specialist = self._populate_specialist(reneta_bytes)
         self._populate_working_hours(specialist)
-        self._populate_services(reneta_bytes)
+        services = self._populate_services(reneta_bytes)
         home_page = self._populate_home_page(logo_bytes, reneta_bytes)
         self._populate_business_working_hours(home_page)
+        self._populate_comments()
+        self._populate_reservations(services, specialist)
 
-        self.stdout.write(self.style.SUCCESS("RenkArt core data populated successfully!"))
+        self.stdout.write(self.style.SUCCESS("RenkArt data populated successfully!"))
+        self.stdout.write(self.style.WARNING(
+            "NOTE: working hours and the Art/Boudoir session price are placeholders -- "
+            "confirm real values with the client before go-live."
+        ))
 
     def _fetch_image(self, url):
         response = requests.get(url, timeout=10)
@@ -304,3 +313,72 @@ class Command(BaseCommand):
         self.stdout.write(
             "Set placeholder business hours display -- confirm real hours with the client"
         )
+
+    def _populate_comments(self):
+        comments_data = [
+            ('Виктория Н.',
+             'Фотосесията с Ренета беше невероятно преживяване! Снимките са живи, '
+             'топли и много артистични.', 5),
+            ('Стоян П.',
+             'Професионално отношение и страхотен резултат. Препоръчвам Fine Art '
+             'пакета на всеки, който търси нещо различно.', 5),
+            ('Мария Д.',
+             'Много благодаря за търпението по време на семейната ни фотосесия! '
+             'Децата се почувстваха напълно спокойно.', 5),
+            ('Георги К.',
+             'Артистичната фотосесия надмина очакванията ми — истинско произведение '
+             'на изкуството.', 5),
+            ('Ивелина Т.',
+             'Атмосферата в студиото е уютна, а Ренета има невероятно око за детайла.', 4),
+        ]
+        for author, content, rating in comments_data:
+            comment, created = Comment.objects.get_or_create(
+                author=author, content=content,
+                defaults={'rating': rating, 'is_reviewed': True},
+            )
+            if created:
+                self.stdout.write(f"Created comment by {author}")
+
+    def _populate_reservations(self, services, specialist):
+        User = get_user_model()
+        user, created = User.objects.get_or_create(
+            phone_number='0888920099',
+            defaults={
+                'email': 'demo.client@example.com',
+                'first_name': 'Виктория',
+                'last_name': 'Николова',
+            }
+        )
+        if created:
+            user.set_password('1234')
+            user.save()
+
+        services_by_name = {s.name: s for s in services}
+        mini_studio = services_by_name['Мини фотосесия в студио']
+        fine_art_couple = services_by_name['Fine Art фотосесия - двойка']
+        fine_art_individual = services_by_name['Fine Art фотосесия - индивидуална']
+        large_package = services_by_name['Голям фотопакет']
+
+        today = date.today()
+
+        def next_open_day(d):
+            # Reneta is closed Sunday (6) and Monday (0)
+            while d.weekday() in (0, 6):
+                d += timedelta(days=1)
+            return d
+
+        reservations_data = [
+            (mini_studio, today - timedelta(days=5), time(11, 0), True),
+            (fine_art_couple, today - timedelta(days=2), time(14, 0), True),
+            (fine_art_individual, next_open_day(today + timedelta(days=2)), time(10, 0), False),
+            (large_package, next_open_day(today + timedelta(days=7)), time(15, 0), False),
+        ]
+        for service, d, t, is_past in reservations_data:
+            defaults = {'specialist': specialist, 'additional_text': 'Очакваме сесията с нетърпение.'}
+            if is_past:
+                defaults['status'] = Reservation.STATUS_COMPLETED
+            reservation, created = Reservation.objects.get_or_create(
+                service=service, user=user, date=d, time=t, defaults=defaults,
+            )
+            if created:
+                self.stdout.write(f"Created reservation for {service.name} on {d}")

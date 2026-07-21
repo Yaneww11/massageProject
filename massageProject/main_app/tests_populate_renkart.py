@@ -1,6 +1,8 @@
 import tempfile
+from datetime import date
 from unittest.mock import Mock, patch
 
+from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import TestCase, override_settings
@@ -8,6 +10,7 @@ from django.test import TestCase, override_settings
 from massageProject.main_app.models import BusinessInfo, SiteConfiguration, Specialist, WorkingHours
 from massageProject.main_app.models import Service, ServiceGroup
 from massageProject.main_app.models import BusinessWorkingHours, HomePage
+from massageProject.main_app.models import Comment, Reservation
 
 _MEDIA_ROOT = tempfile.mkdtemp()
 
@@ -129,3 +132,45 @@ class PopulateRenkartHomePageTest(TestCase):
         home_page = HomePage.objects.get(pk=1)
         self.assertEqual(home_page.gallery.images.count(), 1)
         self.assertEqual(BusinessWorkingHours.objects.filter(home_page=home_page).count(), 2)
+
+
+@override_settings(MEDIA_ROOT=_MEDIA_ROOT)
+@patch('massageProject.main_app.management.commands.populate_renkart.requests.get', side_effect=_mocked_get)
+class PopulateRenkartDemoContentTest(TestCase):
+    def test_creates_comments_and_reservations(self, mock_get):
+        call_command('populate_renkart')
+
+        self.assertEqual(Comment.objects.count(), 5)
+        self.assertEqual(Comment.objects.filter(is_reviewed=True).count(), 5)
+
+        self.assertEqual(Reservation.objects.count(), 4)
+        self.assertEqual(Reservation.objects.filter(status=Reservation.STATUS_COMPLETED).count(), 2)
+        self.assertEqual(Reservation.objects.filter(status=Reservation.STATUS_ACTIVE).count(), 2)
+
+        User = get_user_model()
+        self.assertTrue(User.objects.filter(email='demo.client@example.com').exists())
+
+        for reservation in Reservation.objects.filter(status=Reservation.STATUS_ACTIVE):
+            self.assertNotIn(reservation.date.weekday(), (0, 6))  # closed Sun/Mon
+
+
+@override_settings(MEDIA_ROOT=_MEDIA_ROOT)
+@patch('massageProject.main_app.management.commands.populate_renkart.requests.get', side_effect=_mocked_get)
+class PopulateRenkartFullIdempotencyTest(TestCase):
+    def test_full_rerun_does_not_duplicate_anything(self, mock_get):
+        from massageProject.main_app.models import (
+            BusinessInfo, BusinessWorkingHours, Service, ServiceGroup, Specialist, WorkingHours,
+        )
+
+        call_command('populate_renkart')
+        call_command('populate_renkart')
+
+        self.assertEqual(BusinessInfo.objects.count(), 1)
+        self.assertEqual(Specialist.objects.count(), 1)
+        self.assertEqual(WorkingHours.objects.count(), 5)
+        self.assertEqual(ServiceGroup.objects.count(), 3)
+        self.assertEqual(Service.objects.count(), 10)
+        self.assertEqual(HomePage.objects.count(), 1)
+        self.assertEqual(BusinessWorkingHours.objects.count(), 2)
+        self.assertEqual(Comment.objects.count(), 5)
+        self.assertEqual(Reservation.objects.count(), 4)
