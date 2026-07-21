@@ -1,15 +1,20 @@
+import tempfile
 from unittest.mock import Mock, patch
 
 from django.core.management import call_command
-from django.test import TestCase
+from django.core.management.base import CommandError
+from django.test import TestCase, override_settings
 
 from massageProject.main_app.models import BusinessInfo, SiteConfiguration, Specialist, WorkingHours
+
+_MEDIA_ROOT = tempfile.mkdtemp()
 
 
 def _mocked_get(*args, **kwargs):
     return Mock(status_code=200, content=b'fake-image-bytes')
 
 
+@override_settings(MEDIA_ROOT=_MEDIA_ROOT)
 @patch('massageProject.main_app.management.commands.populate_renkart.requests.get', side_effect=_mocked_get)
 class PopulateRenkartCoreDataTest(TestCase):
     def test_creates_site_configuration_business_info_specialist_and_working_hours(self, mock_get):
@@ -49,3 +54,14 @@ class PopulateRenkartCoreDataTest(TestCase):
         self.assertEqual(Specialist.objects.count(), 1)
         self.assertEqual(WorkingHours.objects.count(), 5)
         self.assertEqual(mock_get.call_count, 4)  # 2 images fetched per run x 2 runs
+
+
+@override_settings(MEDIA_ROOT=_MEDIA_ROOT)
+class PopulateRenkartImageFetchFailureTest(TestCase):
+    @patch(
+        'massageProject.main_app.management.commands.populate_renkart.requests.get',
+        return_value=Mock(status_code=404),
+    )
+    def test_fetch_image_raises_command_error_on_non_200(self, mock_get):
+        with self.assertRaises(CommandError):
+            call_command('populate_renkart')
