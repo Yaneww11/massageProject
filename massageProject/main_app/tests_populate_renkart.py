@@ -7,6 +7,7 @@ from django.test import TestCase, override_settings
 
 from massageProject.main_app.models import BusinessInfo, SiteConfiguration, Specialist, WorkingHours
 from massageProject.main_app.models import Service, ServiceGroup
+from massageProject.main_app.models import BusinessWorkingHours, HomePage
 
 _MEDIA_ROOT = tempfile.mkdtemp()
 
@@ -98,3 +99,33 @@ class PopulateRenkartServicesTest(TestCase):
 
         self.assertEqual(ServiceGroup.objects.count(), 3)
         self.assertEqual(Service.objects.count(), 10)
+
+
+@override_settings(MEDIA_ROOT=_MEDIA_ROOT)
+@patch('massageProject.main_app.management.commands.populate_renkart.requests.get', side_effect=_mocked_get)
+class PopulateRenkartHomePageTest(TestCase):
+    def test_creates_home_page_gallery_image_and_business_hours(self, mock_get):
+        call_command('populate_renkart')
+
+        home_page = HomePage.objects.get(pk=1)
+        self.assertEqual(home_page.brand_name_bg, 'RenkArt — Портретна и Арт Фотография')
+        self.assertEqual(home_page.brand_name_en, 'RenkArt — Portrait & Art Photography')
+        self.assertTrue(home_page.logo.name)
+        self.assertEqual(home_page.gallery.images.count(), 1)
+        self.assertTrue(home_page.gallery.images.first().image.name)
+
+        self.assertEqual(BusinessWorkingHours.objects.filter(home_page=home_page).count(), 2)
+        self.assertTrue(
+            BusinessWorkingHours.objects.filter(
+                home_page=home_page, day_label_bg='Вторник – Събота', hours_bg='10:00 - 18:00',
+            ).exists()
+        )
+
+    def test_home_page_idempotent(self, mock_get):
+        call_command('populate_renkart')
+        call_command('populate_renkart')
+
+        self.assertEqual(HomePage.objects.count(), 1)
+        home_page = HomePage.objects.get(pk=1)
+        self.assertEqual(home_page.gallery.images.count(), 1)
+        self.assertEqual(BusinessWorkingHours.objects.filter(home_page=home_page).count(), 2)

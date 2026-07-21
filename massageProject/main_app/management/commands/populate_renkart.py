@@ -5,7 +5,8 @@ from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand, CommandError
 
 from massageProject.main_app.models import (
-    BusinessInfo, Service, ServiceGroup, Specialist, SiteConfiguration, WorkingHours,
+    BusinessInfo, BusinessWorkingHours, Gallery, GalleryImage, HomePage, Image,
+    Service, ServiceGroup, Specialist, SiteConfiguration, WorkingHours,
 )
 
 LOGO_URL = 'https://renkart.net/images/logo33.jpg'
@@ -26,6 +27,8 @@ class Command(BaseCommand):
         specialist = self._populate_specialist(reneta_bytes)
         self._populate_working_hours(specialist)
         self._populate_services(reneta_bytes)
+        home_page = self._populate_home_page(logo_bytes, reneta_bytes)
+        self._populate_business_working_hours(home_page)
 
         self.stdout.write(self.style.SUCCESS("RenkArt core data populated successfully!"))
 
@@ -247,3 +250,57 @@ class Command(BaseCommand):
                 self.stdout.write(f"Created service: {service.name}")
             services.append(service)
         return services
+
+    def _populate_home_page(self, logo_bytes, reneta_bytes):
+        home_page = HomePage.objects.filter(pk=1).first()
+        if home_page is None:
+            gallery = Gallery.objects.create(title_bg='RenkArt', title_en='RenkArt')
+            home_page = HomePage.objects.create(
+                pk=1,
+                brand_name_bg='RenkArt — Портретна и Арт Фотография',
+                brand_name_en='RenkArt — Portrait & Art Photography',
+                description_bg=(
+                    'Добре дошли в RenkArt — където всеки кадър разказва история. '
+                    'Портретна и арт фотография, вдъхновена от класическата живопис и '
+                    'съвременния разказ.'
+                ),
+                description_en=(
+                    'Welcome to RenkArt — where every frame tells a story. Portrait and '
+                    'art photography inspired by classical painting and modern storytelling.'
+                ),
+                footer_tagline_bg='Портретна и арт фотография в Стара Загора.',
+                footer_tagline_en='Portrait and art photography in Stara Zagora.',
+                gallery=gallery,
+            )
+            home_page.logo.save('logo33.jpg', ContentFile(logo_bytes), save=True)
+            self.stdout.write(f"Created home page: {home_page.brand_name}")
+
+        if not home_page.gallery.images.exists():
+            image = Image.objects.create(
+                alt_text_bg='Ренета Кирилова с фотоапарат',
+                alt_text_en='Reneta Kirilova with a camera',
+            )
+            image.image.save('reneta.jpg', ContentFile(reneta_bytes), save=True)
+            GalleryImage.objects.create(gallery=home_page.gallery, image=image)
+            self.stdout.write("Added hero image to gallery")
+
+        return home_page
+
+    def _populate_business_working_hours(self, home_page):
+        rows = [
+            ('Вторник – Събота', 'Tuesday – Saturday', '10:00 - 18:00', '10:00 - 18:00', 0),
+            ('Неделя, Понеделник', 'Sunday, Monday', '', '', 1),
+        ]
+        for day_label_bg, day_label_en, hours_bg, hours_en, order in rows:
+            BusinessWorkingHours.objects.get_or_create(
+                home_page=home_page, day_label_bg=day_label_bg,
+                defaults={
+                    'day_label_en': day_label_en,
+                    'hours_bg': hours_bg,
+                    'hours_en': hours_en,
+                    'order': order,
+                },
+            )
+        self.stdout.write(
+            "Set placeholder business hours display -- confirm real hours with the client"
+        )
