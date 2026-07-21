@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-20 23:06+0000\n"
+"POT-Creation-Date: 2026-07-21 19:56+0000\n"
 "PO-Revision-Date: 2026-06-15 15:05+0000\n"
 "Last-Translator: Яне Янев <s@ex.com>\n"
 "Language-Team: Bulgarian\n"
@@ -20,37 +20,37 @@ msgstr ""
 msgid "Потребители и достъп"
 msgstr ""
 
-#: massageProject/accounts/booking_auth_views.py:26
-#: massageProject/accounts/booking_auth_views.py:67
+#: massageProject/accounts/booking_auth_views.py:33
+#: massageProject/accounts/booking_auth_views.py:74
 #: templates/partials/auth_modal.html:2
 msgid "Въведете имейл адрес."
 msgstr "Въведете имейл адрес."
 
-#: massageProject/accounts/booking_auth_views.py:36
-#: massageProject/accounts/booking_auth_views.py:61
-#: massageProject/accounts/booking_auth_views.py:84
-#: massageProject/accounts/booking_auth_views.py:124
+#: massageProject/accounts/booking_auth_views.py:43
+#: massageProject/accounts/booking_auth_views.py:68
+#: massageProject/accounts/booking_auth_views.py:91
+#: massageProject/accounts/booking_auth_views.py:131
 msgid "Твърде много опити. Опитайте отново по-късно."
 msgstr "Твърде много опити. Опитайте отново по-късно."
 
-#: massageProject/accounts/booking_auth_views.py:70
-#: massageProject/accounts/booking_auth_views.py:138
+#: massageProject/accounts/booking_auth_views.py:77
+#: massageProject/accounts/booking_auth_views.py:145
 msgid "Проверката за робот не е успешна. Опитайте отново."
 msgstr "Проверката за робот не е успешна. Опитайте отново."
 
-#: massageProject/accounts/booking_auth_views.py:91
+#: massageProject/accounts/booking_auth_views.py:98
 msgid "Въведете имейл и код."
 msgstr "Въведете имейл и код."
 
-#: massageProject/accounts/booking_auth_views.py:96
+#: massageProject/accounts/booking_auth_views.py:103
 msgid "Кодът е грешен или е изтекъл."
 msgstr "Кодът е грешен или е изтекъл."
 
-#: massageProject/accounts/booking_auth_views.py:97
+#: massageProject/accounts/booking_auth_views.py:104
 msgid "Няма активен код за този имейл. Изпратете нов."
 msgstr "Няма активен код за този имейл. Изпратете нов."
 
-#: massageProject/accounts/booking_auth_views.py:131
+#: massageProject/accounts/booking_auth_views.py:138
 msgid "Имейлът не е потвърден или потвърждението е изтекло."
 msgstr "Имейлът не е потвърден или потвърждението е изтекло."
 
@@ -994,7 +994,7 @@ msgid "Адрес"
 msgstr ""
 
 #: templates/pages/home.html:172 templates/pages/reservation.html:10
-#: templates/partials/featured_with_image.html:16
+#: templates/partials/featured_with_image.html:17
 #: templates/partials/header.html:46 templates/partials/header.html:48
 #: templates/partials/hero/carousel.html:18
 #: templates/partials/hero/fullbleed.html:15
@@ -1041,9 +1041,12 @@ msgid "мин"
 msgstr "мин"
 
 #: templates/pages/my_profile.html:64 templates/pages/my_profile.html:133
-#: templates/pages/reservation.html:36 templates/pages/services_page.html:296
-msgid "лв"
-msgstr "лв"
+#: templates/pages/reservation.html:36 templates/pages/service_detail.html:15
+#: templates/pages/services_page.html:296
+#: templates/partials/featured_with_image.html:14
+#: templates/partials/featured_without_image.html:11
+msgid "€"
+msgstr "€"
 
 #: templates/pages/my_profile.html:80 templates/pages/my_profile.html:142
 msgid "Добави в календар"
@@ -1344,11 +1347,11 @@ msgstr "Научете повече"
 msgid "Покажи по-малко"
 msgstr "Покажи по-малко"
 
-#: templates/pages/services_page.html:320
+#: templates/pages/services_page.html:321
 msgid "Резервирай"
 msgstr "Резервирай"
 
-#: templates/pages/services_page.html:328
+#: templates/pages/services_page.html:330
 msgid "Няма услуги в тази категория."
 msgstr "Няма услуги в тази категория."
 
@@ -1431,11 +1434,6 @@ msgstr "Презиме"
 #: templates/partials/auth_modal.html:95 templates/partials/header.html:32
 #: templates/partials/header.html:65
 msgid "Регистрация"
-msgstr ""
-
-#: templates/partials/featured_with_image.html:14
-#: templates/partials/featured_without_image.html:11
-msgid "лв."
 msgstr ""
 
 #: templates/partials/footer.html:33 templates/partials/header.html:15
@@ -3934,6 +3932,9 @@ msgstr ""
 #: venv/lib/python3.12/site-packages/unfold/widgets.py:969
 msgid "Select currency"
 msgstr ""
+
+#~ msgid "лв"
+#~ msgstr "лв"
 
 #~ msgid "За да завършите резервацията, трябва да потвърдим Вашия имейл."
 #~ msgstr "За да завършите резервацията, трябва да потвърдим Вашия имейл."
