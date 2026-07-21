@@ -159,7 +159,7 @@ class PopulateRenkartDemoContentTest(TestCase):
 class PopulateRenkartFullIdempotencyTest(TestCase):
     def test_full_rerun_does_not_duplicate_anything(self, mock_get):
         from massageProject.main_app.models import (
-            BusinessInfo, BusinessWorkingHours, Service, ServiceGroup, Specialist, WorkingHours,
+            BusinessInfo, BusinessWorkingHours, Service, ServiceGroup, SiteConfiguration, Specialist, WorkingHours,
         )
 
         call_command('populate_renkart')
@@ -168,6 +168,7 @@ class PopulateRenkartFullIdempotencyTest(TestCase):
         self.assertEqual(BusinessInfo.objects.count(), 1)
         self.assertEqual(Specialist.objects.count(), 1)
         self.assertEqual(WorkingHours.objects.count(), 5)
+        self.assertEqual(SiteConfiguration.objects.count(), 1)
         self.assertEqual(ServiceGroup.objects.count(), 3)
         self.assertEqual(Service.objects.count(), 10)
         self.assertEqual(HomePage.objects.count(), 1)
