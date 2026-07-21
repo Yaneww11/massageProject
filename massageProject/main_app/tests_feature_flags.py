@@ -140,6 +140,20 @@ class BookingEnabledUIHidingTest(TestCase):
         content = response.content.decode()
         self.assertNotIn('Запазете отново', content)
 
+    def test_home_featured_cta_hidden_when_booking_disabled(self):
+        self.service.home_page = True
+        self.service.save()
+        self._disable_booking()
+        response = self.client.get('/bg/')
+        content = response.content.decode()
+        self.assertNotIn('hp-feat-book', content)
+
+    def test_services_page_reserve_button_hidden_when_booking_disabled(self):
+        self._disable_booking()
+        response = self.client.get('/bg/services/')
+        content = response.content.decode()
+        self.assertNotIn('Резервирай', content)
+
 
 class CommentsEnabledServerEnforcementTest(TestCase):
     def setUp(self):

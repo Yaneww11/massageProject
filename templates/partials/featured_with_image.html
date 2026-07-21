@@ -13,7 +13,9 @@
                 <span class="hp-feat-badge">{{ m.duration_in_minutes }} {% trans "мин" %}</span>
                 <span class="hp-feat-price">{{ m.price }} {% trans "лв." %}</span>
             </div>
+            {% if site_config.booking_enabled %}
             <a href="{% url 'reservation_page' %}?service={{ m.pk }}" class="btn btn-primary hp-feat-book" data-auth-modal-link>{% trans "Запазете час" %}</a>
+            {% endif %}
         </div>
     </article>
     {% endfor %}

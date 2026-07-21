@@ -4,6 +4,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from massageProject.accounts.forms import CustomAuthenticationForm
+from massageProject.main_app.models import SiteConfiguration
 
 User = get_user_model()
 
@@ -64,3 +65,25 @@ class LoginPasswordViewTest(TestCase):
         })
         response = self.client.get(reverse('profile_page'))
         self.assertTrue(response.wsgi_request.user.is_authenticated)
+
+    def test_no_next_redirects_to_profile_when_booking_disabled(self):
+        config = SiteConfiguration.get_solo()
+        config.booking_enabled = False
+        config.save()
+        self._create_user('bookingoff@example.com', '0888920006', is_active=True)
+        response = self.client.post(reverse('auth_login_password'), {
+            'email': 'bookingoff@example.com', 'password': self.PASSWORD,
+        })
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['redirect'], reverse('profile_page'))
+        self.assertNotEqual(data['redirect'], reverse('reservation_page'))
+
+    def test_no_next_redirects_to_reservation_when_booking_enabled(self):
+        self._create_user('bookingon@example.com', '0888920007', is_active=True)
+        response = self.client.post(reverse('auth_login_password'), {
+            'email': 'bookingon@example.com', 'password': self.PASSWORD,
+        })
+        data = response.json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['redirect'], reverse('reservation_page'))

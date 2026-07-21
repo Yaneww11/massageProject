@@ -19,6 +19,13 @@ SIGNUP_EMAIL_SESSION_KEY = 'verified_signup_email'
 SIGNUP_EMAIL_SESSION_TTL_SECONDS = 15 * 60
 
 
+def _default_next_url():
+    from massageProject.main_app.models import SiteConfiguration
+    if SiteConfiguration.get_solo().booking_enabled:
+        return reverse('reservation_page')
+    return reverse('profile_page')
+
+
 @require_POST
 def check_email(request):
     email = request.POST.get('email', '').strip().lower()
@@ -35,7 +42,7 @@ def login_password(request):
     if request.limited:
         return JsonResponse({'success': False, 'error': _('Твърде много опити. Опитайте отново по-късно.')}, status=429)
 
-    next_url = request.POST.get('next') or reverse('reservation_page')
+    next_url = request.POST.get('next') or _default_next_url()
     form = CustomAuthenticationForm(request, data={
         'username': request.POST.get('email', ''),
         'password': request.POST.get('password', ''),
@@ -85,7 +92,7 @@ def verify_code(request):
 
     email = request.POST.get('email', '').strip().lower()
     code = request.POST.get('code', '').strip()
-    next_url = request.POST.get('next') or reverse('reservation_page')
+    next_url = request.POST.get('next') or _default_next_url()
 
     if not email or not code:
         return JsonResponse({'success': False, 'error': _('Въведете имейл и код.')}, status=400)
@@ -123,7 +130,7 @@ def register_via_modal(request):
     if request.limited:
         return JsonResponse({'success': False, 'error': _('Твърде много опити. Опитайте отново по-късно.')}, status=429)
 
-    next_url = request.POST.get('next') or reverse('reservation_page')
+    next_url = request.POST.get('next') or _default_next_url()
 
     email = request.session.get(SIGNUP_EMAIL_SESSION_KEY)
     expires_raw = request.session.get(SIGNUP_EMAIL_SESSION_KEY + '_expires')
