@@ -12,7 +12,7 @@
             <p>{{ service.description }}</p>
         </div>
         <div class="blog-details">
-            <p><strong>{% trans "Цена:" %}</strong> {{ service.price }}лв</p>
+            <p><strong>{% trans "Цена:" %}</strong> {{ service.price }} {% trans "€" %}</p>
             <p><strong>{% trans "Продължителност:" %}</strong> {{ service.duration_in_minutes }} {% trans "мин" %}</p>
         </div>
         {% if site_config.booking_enabled %}

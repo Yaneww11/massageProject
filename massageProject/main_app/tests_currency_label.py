@@ -50,6 +50,18 @@ class ProfilePageCurrencyTest(TestCase):
         self.assertNotIn('лв', content)
 
 
+class ServiceDetailPageCurrencyTest(TestCase):
+    def test_service_detail_page_shows_euro_not_leva(self):
+        service = Service.objects.create(
+            name='Test Service', description='desc', price=50, duration_in_minutes=60,
+            short_description='short', image='specialists/measure.jpg',
+        )
+        response = self.client.get(f'/bg/service/{service.pk}/')
+        content = response.content.decode()
+        self.assertIn('€', content)
+        self.assertNotIn('лв', content)
+
+
 class ReservationAjaxPriceCurrencyTest(TestCase):
     def test_ajax_reservation_response_shows_euro_not_leva(self):
         User = get_user_model()
