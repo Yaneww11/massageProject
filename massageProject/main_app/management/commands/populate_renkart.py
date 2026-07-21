@@ -5,7 +5,7 @@ from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand, CommandError
 
 from massageProject.main_app.models import (
-    BusinessInfo, Specialist, SiteConfiguration, WorkingHours,
+    BusinessInfo, Service, ServiceGroup, Specialist, SiteConfiguration, WorkingHours,
 )
 
 LOGO_URL = 'https://renkart.net/images/logo33.jpg'
@@ -25,6 +25,7 @@ class Command(BaseCommand):
         self._populate_business_info(reneta_bytes)
         specialist = self._populate_specialist(reneta_bytes)
         self._populate_working_hours(specialist)
+        self._populate_services(reneta_bytes)
 
         self.stdout.write(self.style.SUCCESS("RenkArt core data populated successfully!"))
 
@@ -129,3 +130,120 @@ class Command(BaseCommand):
             "Set placeholder working hours (Tue-Sat 10:00-18:00) -- "
             "confirm real hours with the client"
         )
+
+    def _populate_services(self, reneta_bytes):
+        groups_data = [
+            ('Портретни фотосесии', 'Portrait Sessions', 0),
+            ('Fine Art фотосесии', 'Fine Art Portraits', 1),
+            ('Арт / Будоар фотосесии', 'Art & Concept Sessions', 2),
+        ]
+        groups = {}
+        for name_bg, name_en, order in groups_data:
+            group, _created = ServiceGroup.objects.get_or_create(
+                name_bg=name_bg, defaults={'name_en': name_en, 'order': order},
+            )
+            groups[name_bg] = group
+
+        services_data = [
+            ('Портретни фотосесии', 'Мини фотосесия в студио', 'Mini Studio Session',
+             '15 обработени снимки в студийна обстановка.',
+             '15 edited photos in a studio setting.',
+             'Компактна студийна фотосесия за индивидуален или семеен портрет. Включва '
+             '15 обработени снимки; допълнителна снимка — 10 евро (с включен 10×15см принт).',
+             'A compact studio session for an individual or family portrait. Includes 15 '
+             'edited photos; an extra photo is available for €10 (includes a 10×15cm print).',
+             120.00, 60, True),
+            ('Портретни фотосесии', 'Мини фотосесия навън', 'Mini Outdoor Session',
+             '15 обработени снимки на открито.',
+             '15 edited photos outdoors.',
+             'Същият мини пакет, заснет на открита локация по избор. Включва 15 обработени '
+             'снимки; допълнителна снимка — 10 евро (с включен 10×15см принт).',
+             'The same mini package, shot at an outdoor location of your choice. Includes '
+             '15 edited photos; an extra photo is available for €10 (includes a 10×15cm print).',
+             130.00, 60, False),
+            ('Портретни фотосесии', 'Голям фотопакет', 'Large Photo Package',
+             '35 обработени снимки + подарък 20×30см арт принт.',
+             '35 edited photos + a gift 20×30cm art print.',
+             'Разширена фотосесия с 35 обработени снимки и подарък — арт принт 20×30см.',
+             'An extended session with 35 edited photos and a gift 20×30cm art print.',
+             220.00, 90, False),
+            ('Портретни фотосесии', 'Макси фотопакет', 'Maxi Photo Package',
+             '50 обработени снимки + подарък 20×30см арт принт.',
+             '50 edited photos + a gift 20×30cm art print.',
+             'Най-пълният портретен пакет — 50 обработени снимки и подарък арт принт 20×30см.',
+             'Our most complete portrait package — 50 edited photos and a gift 20×30cm art print.',
+             280.00, 120, False),
+            ('Fine Art фотосесии', 'Fine Art фотосесия - дете', 'Fine Art Session - Child',
+             'Fine Art студийна фотосесия за дете.',
+             'Fine Art studio session for a child.',
+             'Студийна фотосесия на чист фон, вдъхновена от класическия портрет. Включва 10 '
+             'обработени снимки + архив; допълнителна снимка — 15 евро.',
+             'A studio session on a plain background, inspired by classical portrait '
+             'painting. Includes 10 edited photos + archive; an extra photo is €15.',
+             120.00, 90, False),
+            ('Fine Art фотосесии', 'Fine Art фотосесия - индивидуална', 'Fine Art Session - Individual',
+             'Fine Art портрет за тийнейджъри и възрастни.',
+             'Fine Art portrait for teens and adults.',
+             'Индивидуален Fine Art портрет на чист фон. Включва 10 обработени снимки + '
+             'архив; допълнителна снимка — 15 евро.',
+             'An individual Fine Art portrait on a plain background. Includes 10 edited '
+             'photos + archive; an extra photo is €15.',
+             140.00, 90, True),
+            ('Fine Art фотосесии', 'Fine Art фотосесия - двойка', 'Fine Art Session - Couple',
+             'Fine Art портрет за двойки.',
+             'Fine Art portrait for couples.',
+             'Fine Art фотосесия за двама на чист фон. Включва 10 обработени снимки + '
+             'архив; допълнителна снимка — 15 евро.',
+             'A Fine Art session for two on a plain background. Includes 10 edited photos '
+             '+ archive; an extra photo is €15.',
+             160.00, 90, False),
+            ('Fine Art фотосесии', 'Fine Art фотосесия - семейство', 'Fine Art Session - Family',
+             'Fine Art портрет за цялото семейство.',
+             'Fine Art portrait for the whole family.',
+             'Fine Art фамилен портрет на чист фон. Включва 10 обработени снимки + архив; '
+             'допълнителна снимка — 15 евро.',
+             'A Fine Art family portrait on a plain background. Includes 10 edited photos '
+             '+ archive; an extra photo is €15.',
+             180.00, 90, False),
+            ('Fine Art фотосесии', 'Fine Art макси пакет', 'Fine Art Maxi Package',
+             '30 обработени снимки + подарък 20×30см арт принт.',
+             '30 edited photos + a gift 20×30cm art print.',
+             'Разширеният Fine Art пакет — 30 обработени снимки и подарък арт принт 20×30см.',
+             'The extended Fine Art package — 30 edited photos and a gift 20×30cm art print.',
+             280.00, 90, False),
+            ('Арт / Будоар фотосесии', 'Арт / Будоар фотосесия', 'Art & Concept Session',
+             'Индивидуален концептуален проект — цена по договаряне.',
+             'A fully custom concept shoot — price by arrangement.',
+             'Напълно индивидуална арт фотосесия с избран от Вас концепт, гардероб, '
+             'аксесоари и локация. Продължителност 2–8 часа според концепцията. '
+             'Посочената цена е начална — точната цена се договаря индивидуално според '
+             'обхвата на проекта.',
+             'A fully custom art photo session with your chosen concept, wardrobe, props, '
+             'and location. Duration is 2–8 hours depending on the concept. The listed '
+             "price is a starting point — the final price is agreed individually based on "
+             "the project's scope.",
+             150.00, 180, True),
+        ]
+
+        services = []
+        for (group_name, name_bg, name_en, short_bg, short_en, desc_bg, desc_en,
+             price, duration, home_page) in services_data:
+            service, created = Service.objects.get_or_create(
+                name_bg=name_bg,
+                defaults={
+                    'name_en': name_en,
+                    'short_description_bg': short_bg,
+                    'short_description_en': short_en,
+                    'description_bg': desc_bg,
+                    'description_en': desc_en,
+                    'price': price,
+                    'duration_in_minutes': duration,
+                    'home_page': home_page,
+                    'group': groups[group_name],
+                }
+            )
+            if created:
+                service.image.save('reneta.jpg', ContentFile(reneta_bytes), save=True)
+                self.stdout.write(f"Created service: {service.name}")
+            services.append(service)
+        return services

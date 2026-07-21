@@ -6,6 +6,7 @@ from django.core.management.base import CommandError
 from django.test import TestCase, override_settings
 
 from massageProject.main_app.models import BusinessInfo, SiteConfiguration, Specialist, WorkingHours
+from massageProject.main_app.models import Service, ServiceGroup
 
 _MEDIA_ROOT = tempfile.mkdtemp()
 
@@ -65,3 +66,35 @@ class PopulateRenkartImageFetchFailureTest(TestCase):
     def test_fetch_image_raises_command_error_on_non_200(self, mock_get):
         with self.assertRaises(CommandError):
             call_command('populate_renkart')
+
+
+@override_settings(MEDIA_ROOT=_MEDIA_ROOT)
+@patch('massageProject.main_app.management.commands.populate_renkart.requests.get', side_effect=_mocked_get)
+class PopulateRenkartServicesTest(TestCase):
+    def test_creates_three_groups_and_ten_services(self, mock_get):
+        call_command('populate_renkart')
+
+        self.assertEqual(ServiceGroup.objects.count(), 3)
+        group_names = set(ServiceGroup.objects.values_list('name_bg', flat=True))
+        self.assertEqual(group_names, {
+            'Портретни фотосесии', 'Fine Art фотосесии', 'Арт / Будоар фотосесии',
+        })
+
+        self.assertEqual(Service.objects.count(), 10)
+        self.assertEqual(Service.objects.filter(home_page=True).count(), 3)
+
+        mini_studio = Service.objects.get(name_bg='Мини фотосесия в студио')
+        self.assertEqual(mini_studio.price, 120)
+        self.assertEqual(mini_studio.group.name_bg, 'Портретни фотосесии')
+        self.assertTrue(mini_studio.image.name)
+
+        art_session = Service.objects.get(name_bg='Арт / Будоар фотосесия')
+        self.assertIn('по договаряне', art_session.short_description_bg)
+        self.assertIn('by arrangement', art_session.short_description_en)
+
+    def test_services_idempotent(self, mock_get):
+        call_command('populate_renkart')
+        call_command('populate_renkart')
+
+        self.assertEqual(ServiceGroup.objects.count(), 3)
+        self.assertEqual(Service.objects.count(), 10)
