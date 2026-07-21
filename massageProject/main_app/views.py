@@ -200,7 +200,7 @@ class ReservationPage(BookingEnabledMixin, LoginRequiredMixin, CreateView):
                 'booking': {
                     'service': r.service.name,
                     'duration': f"{r.service.duration_in_minutes} мин",
-                    'price': f"{price_str} лв" if price_str else '',
+                    'price': f"{price_str} €" if price_str else '',
                     'specialist': r.specialist.name,
                     'date': r.date.strftime('%d.%m.%Y'),
                     'time': r.time.strftime('%H:%M'),

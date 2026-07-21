@@ -33,7 +33,7 @@
               {% for m in form.fields.service.queryset %}
                 <option value="{{ m.id }}"
                   {% if form.service.value|add:"0" == m.id %}selected{% endif %}>
-                  {{ m.name }} — {{ m.duration_in_minutes }} {% trans "мин" %}{% if m.price %} · {{ m.price }} {% trans "лв" %}{% endif %}
+                  {{ m.name }} — {{ m.duration_in_minutes }} {% trans "мин" %}{% if m.price %} · {{ m.price }} {% trans "€" %}{% endif %}
                 </option>
               {% endfor %}
             </select>

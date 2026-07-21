@@ -61,7 +61,7 @@
           <span class="nbd-sep">&middot;</span>
           <span>{{ next_reservation.service.duration_in_minutes }} {% trans "мин" %}</span>
           <span class="nbd-sep">&middot;</span>
-          <span>{{ next_reservation.service.price }} {% trans "лв" %}</span>
+          <span>{{ next_reservation.service.price }} {% trans "€" %}</span>
         </div>
         <div class="next-booking-specialist">
           <div class="specialist-avatar-sm">{{ next_reservation.specialist.name|initials }}</div>
@@ -130,7 +130,7 @@
               <td data-label="{% trans 'ЧАС' %}">{{ r.time|time:"H:i" }} &#8211; {{ r.end_time|time:"H:i" }}</td>
               <td data-label="{% trans 'УСЛУГА' %}">
                 <span class="service-name">{{ r.service.name }}</span>
-                <span class="service-meta">{{ r.service.duration_in_minutes }} {% trans "мин" %} &middot; {{ r.service.price }} {% trans "лв" %}</span>
+                <span class="service-meta">{{ r.service.duration_in_minutes }} {% trans "мин" %} &middot; {{ r.service.price }} {% trans "€" %}</span>
               </td>
               <td data-label="{% trans 'СПЕЦИАЛИСТ' %}">
                 <div class="specialist-cell">
