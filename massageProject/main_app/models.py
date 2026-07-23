@@ -498,6 +498,10 @@ class SiteConfiguration(models.Model):
         max_length=7, default='#6B5E55', validators=[_HEX_COLOR_VALIDATOR],
         verbose_name=_('Текст (приглушен)'),
     )
+    border_color = models.CharField(
+        max_length=7, default='#4A3728', validators=[_HEX_COLOR_VALIDATOR],
+        verbose_name=_('Цвят на рамки'),
+    )
 
     font_pair = models.CharField(
         max_length=30, choices=FONT_PAIR_CHOICES, default='playfair_montserrat',
