@@ -38,3 +38,21 @@ class AboutPageContextTest(TestCase):
         response = self.client.get(reverse('about_page'))
         self.assertIsInstance(response.context['business_info'], BusinessInfo)
         self.assertEqual(response.context['business_info'].description, "Reneta's studio.")
+
+
+class HeaderNavTest(TestCase):
+    def test_nav_has_six_links_in_order(self):
+        response = self.client.get(reverse('index'))
+        content = response.content.decode()
+        # Use reverse to get the correct URL with language prefix
+        about_url = reverse('about_page')
+        reviews_url = reverse('about_page') + '#reviews'
+        about_pos = content.find(f'href="{about_url}"')
+        reviews_pos = content.find(f'href="{reviews_url}"')
+        self.assertGreater(about_pos, 0)
+        self.assertGreater(reviews_pos, about_pos)
+
+    def test_about_page_has_reviews_anchor(self):
+        BusinessInfo.objects.create(description="Studio")
+        response = self.client.get(reverse('about_page'))
+        self.assertContains(response, 'id="reviews"')
