@@ -319,3 +319,54 @@
     color: var(--text-muted);
 }
 
+/* Credentials Section */
+.about-credentials {
+    max-width: 900px;
+    margin: 0 auto var(--space-xl);
+    padding: 0 var(--space-lg);
+}
+
+.about-credentials h2 {
+    font-family: var(--font-heading);
+    font-size: var(--fs-3xl);
+    color: var(--text-main);
+    text-align: center;
+    margin-bottom: var(--space-lg);
+}
+
+.credentials-group {
+    margin-bottom: var(--space-lg);
+}
+
+.credentials-group h3 {
+    font-family: var(--font-heading);
+    font-size: var(--fs-xl);
+    color: var(--primary-color);
+    margin-bottom: var(--space-md);
+}
+
+.credential-item {
+    padding: var(--space-md) 0;
+    border-bottom: 1px solid var(--secondary-color);
+}
+
+.credential-item:last-child {
+    border-bottom: none;
+}
+
+.credential-title {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.credential-meta {
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+    margin-bottom: var(--space-xs);
+}
+
+.credential-description {
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+

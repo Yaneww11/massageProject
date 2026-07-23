@@ -40,6 +40,36 @@
 </section>
 {% endif %}
 
+{% if business_info.credentials.training or business_info.credentials.recognition %}
+<section class="about-credentials">
+    <h2>{% trans "Обучения и признания" %}</h2>
+    {% if business_info.credentials.training %}
+    <div class="credentials-group credentials-group--training">
+        <h3>{% trans "Обучения" %}</h3>
+        {% for item in business_info.credentials.training %}
+        <div class="credential-item">
+            <div class="credential-title">{{ item.title }}</div>
+            <div class="credential-meta">{{ item.subtitle }}{% if item.year %} &middot; {{ item.year }}{% endif %}</div>
+            {% if item.description %}<p class="credential-description">{{ item.description }}</p>{% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% if business_info.credentials.recognition %}
+    <div class="credentials-group credentials-group--recognition">
+        <h3>{% trans "Признания" %}</h3>
+        {% for item in business_info.credentials.recognition %}
+        <div class="credential-item">
+            <div class="credential-title">{{ item.title }}</div>
+            <div class="credential-meta">{{ item.subtitle }}{% if item.year %} &middot; {{ item.year }}{% endif %}</div>
+            {% if item.description %}<p class="credential-description">{{ item.description }}</p>{% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+{% endif %}
+
 {% if site_config.comments_enabled %}
 <section class="comments" id="reviews">
     <div class="description">

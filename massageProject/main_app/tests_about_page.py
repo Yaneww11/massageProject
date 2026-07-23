@@ -108,3 +108,34 @@ class AboutPageStatsTest(TestCase):
         BusinessInfo.objects.create(description="Studio", stats={})
         response = self.client.get(reverse('about_page'))
         self.assertNotContains(response, 'class="about-stats"')
+
+
+class AboutPageCredentialsTest(TestCase):
+    def test_both_groups_render(self):
+        BusinessInfo.objects.create(
+            description="Studio",
+            credentials_bg={
+                "training": [{"title": "Swedish Massage", "subtitle": "Vienna Institute", "year": "2019", "description": "Foundational technique training."}],
+                "recognition": [{"title": "Best Wellness Studio", "subtitle": "City Awards", "year": "2023", "description": "Voted by readers."}],
+            },
+        )
+        response = self.client.get(reverse('about_page'))
+        self.assertContains(response, "Swedish Massage")
+        self.assertContains(response, "Best Wellness Studio")
+
+    def test_only_training_present_hides_recognition_group(self):
+        BusinessInfo.objects.create(
+            description="Studio",
+            credentials_bg={
+                "training": [{"title": "Swedish Massage", "subtitle": "Vienna Institute", "year": "2019", "description": "..."}],
+                "recognition": [],
+            },
+        )
+        response = self.client.get(reverse('about_page'))
+        self.assertContains(response, "Swedish Massage")
+        self.assertNotContains(response, 'class="credentials-group credentials-group--recognition"')
+
+    def test_empty_credentials_hides_whole_section(self):
+        BusinessInfo.objects.create(description="Studio", credentials_bg={})
+        response = self.client.get(reverse('about_page'))
+        self.assertNotContains(response, 'class="about-credentials"')
