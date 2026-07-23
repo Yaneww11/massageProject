@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from massageProject.main_app.models import BusinessInfo
@@ -158,3 +158,11 @@ class AboutPageFaqTest(TestCase):
         BusinessInfo.objects.create(description="Studio", faq_bg=[])
         response = self.client.get(reverse('about_page'))
         self.assertNotContains(response, 'class="about-faq"')
+
+
+class AboutPageEnglishLocaleTest(TestCase):
+    def test_hero_renders_in_english(self):
+        BusinessInfo.objects.create(description="Studio")
+        with override_settings(LANGUAGE_CODE='en'):
+            response = self.client.get(reverse('about_page'), HTTP_ACCEPT_LANGUAGE='en')
+        self.assertContains(response, "The story behind the studio")
