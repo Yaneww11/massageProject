@@ -75,3 +75,36 @@ class AboutPageHeroInfoTest(TestCase):
         response = self.client.get(reverse('about_page'))
         self.assertContains(response, "Реновирано студио с лично отношение.")
         self.assertNotContains(response, "specialist")  # sanity: no leftover specialist markup/var name leaks
+
+
+class AboutPageStatsTest(TestCase):
+    def test_all_four_stats_render(self):
+        BusinessInfo.objects.create(
+            description="Studio",
+            stats={
+                "years_of_practice": "8+",
+                "clients_served": "500+",
+                "average_rating": "4.9",
+                "certifications_count": "12+",
+            },
+        )
+        response = self.client.get(reverse('about_page'))
+        self.assertContains(response, "8+")
+        self.assertContains(response, "500+")
+        self.assertContains(response, "4.9")
+        self.assertContains(response, "12+")
+
+    def test_missing_single_stat_hides_only_that_card(self):
+        BusinessInfo.objects.create(
+            description="Studio",
+            stats={"years_of_practice": "8+", "clients_served": "500+"},
+        )
+        response = self.client.get(reverse('about_page'))
+        self.assertContains(response, "8+")
+        self.assertContains(response, "500+")
+        self.assertNotContains(response, 'class="stat-card"><div class="stat-value">4.9')
+
+    def test_empty_stats_hides_whole_section(self):
+        BusinessInfo.objects.create(description="Studio", stats={})
+        response = self.client.get(reverse('about_page'))
+        self.assertNotContains(response, 'class="about-stats"')

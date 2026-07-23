@@ -21,6 +21,25 @@
     </div>
 </section>
 
+{% if business_info.stats.years_of_practice or business_info.stats.clients_served or business_info.stats.average_rating or business_info.stats.certifications_count %}
+<section class="about-stats">
+    <div class="stats-grid">
+        {% if business_info.stats.years_of_practice %}
+        <div class="stat-card"><div class="stat-value">{{ business_info.stats.years_of_practice }}</div><div class="stat-label">{% trans "Години опит" %}</div></div>
+        {% endif %}
+        {% if business_info.stats.clients_served %}
+        <div class="stat-card"><div class="stat-value">{{ business_info.stats.clients_served }}</div><div class="stat-label">{% trans "Обслужени клиенти" %}</div></div>
+        {% endif %}
+        {% if business_info.stats.average_rating %}
+        <div class="stat-card"><div class="stat-value">{{ business_info.stats.average_rating }}</div><div class="stat-label">{% trans "Среден рейтинг" %}</div></div>
+        {% endif %}
+        {% if business_info.stats.certifications_count %}
+        <div class="stat-card"><div class="stat-value">{{ business_info.stats.certifications_count }}</div><div class="stat-label">{% trans "Сертификати" %}</div></div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+
 {% if site_config.comments_enabled %}
 <section class="comments" id="reviews">
     <div class="description">
