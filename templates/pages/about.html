@@ -2,25 +2,21 @@
 {% load static i18n %}
 
 {% block content %}
-<section class="about-me">
-    <div class="description">
-        <h2>{% trans "За мен и моето студио" %}</h2>
-        <div class="about-content">
-            <div class="photo-info-container">
-                <!-- Photo Section -->
-                <div class="photo-wrapper">
-                    <img src="{{ specialist.image.url }}" alt="Specialist's Photo">
-                </div>
-                <!-- Info Section -->
-                <div class="info-section">
-                    <p>
-                        {{ specialist.description }}
-                    </p>
-                    <p>
-                        {{ business_info.description }}
-                    </p>
-                </div>
-            </div>
+<section class="about-hero">
+    <p class="eyebrow">{% trans "ЗА НАС" %}</p>
+    <h1>{% trans "Историята зад студиото" %}</h1>
+    <p class="subtitle">{% trans "Лична практика, изградена върху обучение, внимание и години усъвършенстване на занаята — това е кратката версия." %}</p>
+</section>
+
+<section class="about-info">
+    <div class="photo-info-container">
+        <div class="photo-wrapper">
+            {% if business_info.main_image %}
+            <img src="{{ business_info.main_image.url }}" alt="{{ business_info.name }}">
+            {% endif %}
+        </div>
+        <div class="info-section">
+            <p>{{ business_info.description }}</p>
         </div>
     </div>
 </section>

@@ -56,3 +56,22 @@ class HeaderNavTest(TestCase):
         BusinessInfo.objects.create(description="Studio")
         response = self.client.get(reverse('about_page'))
         self.assertContains(response, 'id="reviews"')
+
+
+class AboutPageHeroInfoTest(TestCase):
+    def setUp(self):
+        dummy_image = SimpleUploadedFile(name='studio.jpg', content=b'', content_type='image/jpeg')
+        self.info = BusinessInfo.objects.create(
+            description="Реновирано студио с лично отношение.",
+            main_image=dummy_image,
+        )
+
+    def test_hero_heading_and_subtitle_render(self):
+        response = self.client.get(reverse('about_page'))
+        self.assertContains(response, "Историята зад студиото")
+        self.assertContains(response, "Лична практика, изградена върху обучение")
+
+    def test_info_section_shows_only_business_info_description(self):
+        response = self.client.get(reverse('about_page'))
+        self.assertContains(response, "Реновирано студио с лично отношение.")
+        self.assertNotContains(response, "specialist")  # sanity: no leftover specialist markup/var name leaks
