@@ -222,13 +222,11 @@ class AboutPage(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['specialist'] = Specialist.objects.first()
-        context['business_info'] = BusinessInfo.objects.values('description', 'main_image').first()
         context['comments'] = Comment.objects.filter(is_reviewed=True).order_by('-created_at')[:15]
         context['total_comments_count'] = Comment.objects.filter(is_reviewed=True).count()
         if 'form' not in context:
             context['form'] = CommentForm()
-        
+
         user = self.request.user
         if user.is_authenticated and not (user.first_name and user.last_name) and 'name_form' not in context:
             context['name_form'] = UserNameForm()
