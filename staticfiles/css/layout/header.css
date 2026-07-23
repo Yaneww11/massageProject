@@ -3,7 +3,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--space-md) var(--space-lg);
+    padding: var(--space-md) var(--space-xl);
     background-color: var(--bg-paper);
     color: var(--text-main);
     position: sticky;
@@ -48,7 +48,7 @@
 /* Navigation Links */
 .nav-links {
     display: flex;
-    gap: var(--space-lg);
+    gap: var(--space-xl);
     align-items: center;
 }
 
@@ -100,9 +100,9 @@
     align-items: center;
     gap: var(--space-sm);
     font-size: var(--fs-sm);
-    padding: 0.6rem 1.5rem;
+    padding: 0.7rem 1.75rem;
     white-space: nowrap;
-    border-radius: var(--radius-md);
+    border-radius: 999px;
     box-shadow: var(--shadow-sm);
 }
 
