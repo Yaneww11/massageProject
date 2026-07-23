@@ -51,7 +51,7 @@
 .photo-wrapper img {
     max-width: 350px;
     border-radius: 50%;
-    border: 5px solid #7a5e4d;
+    border: 5px solid var(--border-color);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -254,7 +254,7 @@
 .comment-form textarea {
     width: 100%;
     padding: 0.8rem;
-    border: 1px solid #7a5e4d;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     font-size: 1rem;
     background: #fff;
@@ -264,7 +264,7 @@
 
 .comment-form input:focus,
 .comment-form textarea:focus {
-    border-color: #5c3d2e;
+    border-color: var(--accent-color);
     outline: none;
     box-shadow: 0 0 6px rgba(92, 61, 46, 0.5);
 }

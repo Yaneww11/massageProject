@@ -355,7 +355,7 @@ class HomePage(models.Model):
             defaults={
                 'brand_name': 'Relax & Health',
                 'description': 'Welcome to our studio.',
-                'gallery': Gallery.objects.create(),
+                'gallery': Gallery.objects.create,
             }
         )
         return obj

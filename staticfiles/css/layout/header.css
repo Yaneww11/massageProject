@@ -24,16 +24,11 @@
 .logo-svg {
     width: 2.5rem;
     height: 2.5rem;
-    filter: brightness(0) saturate(100%) invert(20%) sepia(20%) saturate(1000%) hue-rotate(345deg) brightness(95%) contrast(90%);
+    object-fit: contain;
 }
 
 .logo-svg--light {
     filter: brightness(0) invert(1);
-}
-
-/* Black variant for PNG logos: force non-transparent pixels to black */
-.logo-svg--black {
-    color: var(--primary-color);
 }
 
 .logo-text {

@@ -84,3 +84,16 @@ This project is licensed under the MIT License. See the `LICENSE` file for more 
    ```
 
 4. Restart the server. The button lives on the login/register modal.
+
+# Ngrok
+Stop:
+pkill ngrok
+pkill -f "manage.py runserver"
+
+Run again later (two terminals, or one + background):
+# Terminal 1
+source venv/bin/activate
+python manage.py runserver 8000
+
+# Terminal 2
+ngrok http 8000

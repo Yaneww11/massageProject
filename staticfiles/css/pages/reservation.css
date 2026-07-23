@@ -53,7 +53,7 @@
     background: var(--bg-paper);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
-    border: 1px solid #E7DDD1;
+    border: 1px solid var(--border-color);
     padding: var(--space-lg);
     display: flex;
     flex-direction: column;
@@ -63,7 +63,7 @@
 /* ── Blocks inside the card ──────────────────────────────── */
 .bn-block {
     padding-top: var(--space-lg);
-    border-top: 1px solid #E7DDD1;
+    border-top: 1px solid var(--border-color);
 }
 
 .bn-block--first {
@@ -120,7 +120,7 @@
     text-align: left;
     transition: var(--transition);
     background: var(--bg-paper);
-    border: 1.5px solid #DCC9B8;
+    border: 1.5px solid var(--border-color);
     width: 100%;
     font-family: var(--font-main);
 }
@@ -195,7 +195,7 @@
 }
 
 .bn-slots-panel {
-    border-left: 1px solid #E7DDD1;
+    border-left: 1px solid var(--border-color);
     padding-left: var(--space-lg);
 }
 
@@ -218,7 +218,7 @@
     width: 32px;
     height: 32px;
     border-radius: var(--radius-sm);
-    border: 1px solid #DCC9B8;
+    border: 1px solid var(--border-color);
     background: var(--bg-paper);
     color: var(--primary-color);
     cursor: pointer;
@@ -384,7 +384,7 @@
     gap: var(--space-md);
     padding: var(--space-md);
     border-radius: var(--radius-md);
-    border: 1px solid #E7DDD1;
+    border: 1px solid var(--border-color);
     background: var(--bg-paper);
     flex-wrap: wrap;
 }
@@ -422,7 +422,7 @@
     background: var(--bg-paper);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
-    border: 1px solid #E7DDD1;
+    border: 1px solid var(--border-color);
     padding: var(--space-lg);
     display: flex;
     flex-direction: column;
@@ -448,7 +448,7 @@
     justify-content: space-between;
     gap: var(--space-md);
     padding: 11px 0;
-    border-top: 1px solid #E7DDD1;
+    border-top: 1px solid var(--border-color);
 }
 
 .bn-summary-row:first-child {
@@ -474,7 +474,7 @@
 
 .bn-divider {
     border: none;
-    border-top: 1px solid #E7DDD1;
+    border-top: 1px solid var(--border-color);
     margin: 0;
 }
 
@@ -538,7 +538,7 @@
 .bn-confirm-summary {
     text-align: left;
     background: var(--bg-paper);
-    border: 1px solid #E7DDD1;
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     padding: var(--space-lg);
@@ -652,7 +652,7 @@
     .bn-slots-panel {
         border-left: none;
         padding-left: 0;
-        border-top: 1px solid #E7DDD1;
+        border-top: 1px solid var(--border-color);
         padding-top: var(--space-md);
     }
 

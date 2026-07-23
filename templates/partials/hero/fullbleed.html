@@ -1,6 +1,6 @@
 {% load i18n %}
 <section class="hp-hero-fullbleed">
-    {% with first_image=gallery_images.0 %}
+{% with first_image=gallery_images.0 %}
     {% if first_image %}
         <img src="{{ first_image.image.url }}" alt="{{ first_image.alt_text }}" class="hp-hero-fullbleed-image">
     {% endif %}

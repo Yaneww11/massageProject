@@ -4,7 +4,7 @@
 
 /* Supplement tokens not in variables.css */
 :root {
-    --hp-border: #DCC9B8;
+    --hp-border: var(--border-color);
     --hp-sunken: #F2EBE2;
 }
 

@@ -29,7 +29,7 @@
             </div>
         </div>
         <div class="hp-hero-media">
-            <img src="{% static 'images/home_background.jpg' %}" alt="{% if page %}{{ page.brand_name }}{% else %}{% trans "Нашето студио" %}{% endif %}">
+            <img src="{{ first_image.image.url }}" alt="{% if page %}{{ page.brand_name }}{% else %}{% trans "Нашето студио" %}{% endif %}">
         </div>
     </div>
 </section>

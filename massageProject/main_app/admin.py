@@ -252,12 +252,14 @@ class SiteConfigurationAdmin(ModelAdmin, TabbedTranslationAdmin):
     COLOR_FIELDS = (
         'primary_color', 'primary_light_color', 'secondary_color',
         'accent_color', 'background_color', 'text_color', 'text_muted_color',
+        'border_color',
     )
 
     fieldsets = (
         (_('Тема — цветове'), {'fields': (
             'primary_color', 'primary_light_color', 'secondary_color',
             'accent_color', 'background_color', 'text_color', 'text_muted_color',
+            'border_color',
         )}),
         (_('Типография и стил'), {'fields': ('font_pair', 'style_preset', 'hero_variant')}),
         (_('Терминология'), {'fields': (

@@ -65,7 +65,7 @@
 .profile-stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    border: 1px solid #E7DDD1;
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     background: var(--bg-paper);
     box-shadow: var(--shadow-sm);
@@ -75,7 +75,7 @@
 
 .stat-card {
     padding: 1.25rem 1.5rem;
-    border-right: 1px solid #E7DDD1;
+    border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
@@ -110,7 +110,7 @@
     box-shadow: var(--shadow-md);
     margin-bottom: 3rem;
     overflow: hidden;
-    border: 1px solid #E7DDD1;
+    border: 1px solid var(--border-color);
 }
 
 .next-booking-date-block {
@@ -365,7 +365,7 @@
     background: var(--bg-paper);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
-    border: 1px solid #E7DDD1;
+    border: 1px solid var(--border-color);
     overflow-x: auto;
 }
 
@@ -384,12 +384,12 @@
     text-transform: uppercase;
     letter-spacing: 0.1em;
     text-align: left;
-    border-bottom: 1px solid #E7DDD1;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .bookings-table td {
     padding: 0.875rem 1rem;
-    border-bottom: 1px solid #F0E8E0;
+    border-bottom: 1px solid var(--border-color);
     font-size: var(--fs-sm);
     color: var(--text-main);
     vertical-align: middle;
@@ -446,7 +446,7 @@
 
 .btn-icon-cal {
     background: none;
-    border: 1.5px solid #E7DDD1;
+    border: 1.5px solid var(--border-color);
     border-radius: var(--radius-sm);
     padding: 0.35rem 0.5rem;
     cursor: not-allowed;
@@ -481,7 +481,7 @@
     align-items: center;
     gap: 0.25rem;
     padding: 0.35rem 0.9rem;
-    border: 1.5px solid #E7DDD1;
+    border: 1.5px solid var(--border-color);
     border-radius: var(--radius-sm);
     color: var(--error);
     font-size: var(--fs-xs);
@@ -512,7 +512,7 @@
     background: var(--bg-paper);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
-    border: 1px solid #E7DDD1;
+    border: 1px solid var(--border-color);
     overflow: hidden;
     margin-top: 1.5rem;
 }
@@ -522,7 +522,7 @@
     align-items: center;
     gap: 1.5rem;
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid #F0E8E0;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .history-row:last-child {
@@ -583,7 +583,7 @@
     align-items: center;
     gap: 0.3rem;
     padding: 0.35rem 0.85rem;
-    border: 1.5px solid #E7DDD1;
+    border: 1.5px solid var(--border-color);
     border-radius: var(--radius-sm);
     color: var(--primary-color);
     background: none;
@@ -614,7 +614,7 @@
     background: var(--bg-paper);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
-    border: 1px solid #E7DDD1;
+    border: 1px solid var(--border-color);
     padding: 1.5rem;
 }
 
@@ -627,7 +627,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 0.6rem 0;
-    border-bottom: 1px solid #F0E8E0;
+    border-bottom: 1px solid var(--border-color);
     font-size: var(--fs-sm);
     color: var(--text-main);
 }
@@ -643,7 +643,7 @@
     padding: 0.6rem 0;
     font-size: var(--fs-sm);
     color: var(--text-main);
-    border-bottom: 1px solid #F0E8E0;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .contact-row:last-child {
@@ -723,7 +723,7 @@
 
 .form-textarea {
     width: 100%;
-    border: 1.5px solid #E2E8F0;
+    border: 1.5px solid var(--border-color);
     border-radius: var(--radius-md);
     padding: 0.75rem 1rem;
     font-family: var(--font-main);
@@ -766,8 +766,8 @@
     }
     /* 2-col grid: remove right border on column-2 cards, add top border on row-2 cards */
     .stat-card:nth-child(2) { border-right: none; }
-    .stat-card:nth-child(3) { border-top: 1px solid #E7DDD1; }
-    .stat-card:nth-child(4) { border-top: 1px solid #E7DDD1; }
+    .stat-card:nth-child(3) { border-top: 1px solid var(--border-color); }
+    .stat-card:nth-child(4) { border-top: 1px solid var(--border-color); }
 
     .info-grid {
         grid-template-columns: 1fr;
@@ -812,7 +812,7 @@
     .bookings-table tr,
     .bookings-table td { display: block; width: 100%; box-sizing: border-box; }
     .bookings-table tr {
-        border: 1px solid #E7DDD1;
+        border: 1px solid var(--border-color);
         border-radius: var(--radius-md);
         margin-bottom: 0.75rem;
         padding: 0.25rem 0.75rem;
@@ -866,7 +866,7 @@
     /* Stats: single column, stacked */
     .profile-stats { grid-template-columns: 1fr; }
     .stat-card { border-right: none; }
-    .stat-card:nth-child(n+2) { border-top: 1px solid #E7DDD1; }
+    .stat-card:nth-child(n+2) { border-top: 1px solid var(--border-color); }
     .stat-value {
         font-size: var(--fs-xl);
         word-break: break-word;
