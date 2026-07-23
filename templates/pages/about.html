@@ -70,6 +70,18 @@
 </section>
 {% endif %}
 
+{% if business_info.faq %}
+<section class="about-faq">
+    <h2>{% trans "Често задавани въпроси" %}</h2>
+    {% for item in business_info.faq %}
+    <details class="faq-item">
+        <summary>{{ item.question }}</summary>
+        <p class="faq-answer">{{ item.answer }}</p>
+    </details>
+    {% endfor %}
+</section>
+{% endif %}
+
 {% if site_config.comments_enabled %}
 <section class="comments" id="reviews">
     <div class="description">

@@ -139,3 +139,22 @@ class AboutPageCredentialsTest(TestCase):
         BusinessInfo.objects.create(description="Studio", credentials_bg={})
         response = self.client.get(reverse('about_page'))
         self.assertNotContains(response, 'class="about-credentials"')
+
+
+class AboutPageFaqTest(TestCase):
+    def test_faq_entries_render(self):
+        BusinessInfo.objects.create(
+            description="Studio",
+            faq_bg=[
+                {"question": "Приемате ли без резервация?", "answer": "Не, само с предварителен час."},
+                {"question": "Какво да очаквам на първата сесия?", "answer": "Кратък разговор преди началото на масажа."},
+            ],
+        )
+        response = self.client.get(reverse('about_page'))
+        self.assertContains(response, "Приемате ли без резервация?")
+        self.assertContains(response, "Какво да очаквам на първата сесия?")
+
+    def test_empty_faq_hides_section(self):
+        BusinessInfo.objects.create(description="Studio", faq_bg=[])
+        response = self.client.get(reverse('about_page'))
+        self.assertNotContains(response, 'class="about-faq"')
