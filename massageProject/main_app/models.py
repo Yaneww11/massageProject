@@ -98,6 +98,9 @@ class BusinessInfo(models.Model):
     facebook_link = models.URLField(null=True, blank=True)
     instagram_link = models.URLField(null=True, blank=True)
     tik_tok_link = models.URLField(null=True, blank=True)
+    stats = JSONField(default=dict, blank=True)
+    credentials = JSONField(default=dict, blank=True)
+    faq = JSONField(default=list, blank=True)
 
     class Meta:
         verbose_name = _('Студио')

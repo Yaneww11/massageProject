@@ -22,7 +22,7 @@ class HomePageTranslationOptions(TranslationOptions):
 
 @register(BusinessInfo)
 class BusinessInfoTranslationOptions(TranslationOptions):
-    fields = ('name', 'description', 'address')
+    fields = ('name', 'description', 'address', 'credentials', 'faq')
 
 
 @register(BusinessWorkingHours)
