@@ -8,8 +8,16 @@ from django.utils.translation import gettext_lazy as _
 from datetime import datetime, timedelta
 
 class ServiceGroup(models.Model):
-    name = models.CharField(max_length=100, verbose_name=_('Наименование'))
-    order = models.PositiveSmallIntegerField(default=0, verbose_name=_('Ред'))
+    name = models.CharField(
+        max_length=100,
+        verbose_name=_('Наименование'),
+        help_text=_('Показва се като таб-категория на страницата с услуги.'),
+    )
+    order = models.PositiveSmallIntegerField(
+        default=0,
+        verbose_name=_('Ред'),
+        help_text=_('Определя реда, в който категориите се показват на страницата с услуги.'),
+    )
 
     class Meta:
         ordering = ['order']
@@ -21,16 +29,53 @@ class ServiceGroup(models.Model):
 
 
 class Service(models.Model):
-    name = models.CharField(max_length=80)
-    description = models.TextField()
+    name = models.CharField(
+        max_length=80,
+        help_text=_(
+            'Показва се в предпочитаните услуги на началната страница, на страницата с '
+            'услуги, на страницата с детайли за услугата и навсякъде в процеса на резервация.'
+        ),
+    )
+    description = models.TextField(
+        help_text=_('Показва се на страницата с детайли за услугата.'),
+    )
     price = models.DecimalField(
         max_digits=10,
-        decimal_places=2
+        decimal_places=2,
+        help_text=_(
+            'Показва се на страницата с услуги, страницата с детайли за услугата и '
+            'предпочитаните услуги на началната страница.'
+        ),
     )
-    duration_in_minutes = models.IntegerField()
-    short_description = models.CharField(max_length=255)
-    image = models.ImageField(upload_to='services/')
-    home_page = models.BooleanField(default=False)
+    duration_in_minutes = models.IntegerField(
+        help_text=_(
+            'Показва се на страницата с услуги, страницата с детайли за услугата и '
+            'предпочитаните услуги на началната страница; използва се и за изчисляване на '
+            'свободните часове за резервация.'
+        ),
+    )
+    short_description = models.CharField(
+        max_length=255,
+        help_text=_(
+            'Кратък текст, показван в предпочитаните услуги на началната страница и '
+            'във всяка карта на страницата с услуги.'
+        ),
+    )
+    image = models.ImageField(
+        upload_to='services/',
+        help_text=_(
+            'Показва се на картата в страницата с услуги, в предпочитаните услуги на '
+            'началната страница и на страницата с детайли за услугата. Ако е празно, се '
+            'показва градиентен placeholder.'
+        ),
+    )
+    home_page = models.BooleanField(
+        default=False,
+        help_text=_(
+            'Когато е отметнато, услугата се показва в секция "Предпочитани услуги" на '
+            'началната страница (максимум 3).'
+        ),
+    )
     group = models.ForeignKey(
         'ServiceGroup',
         on_delete=models.SET_NULL,
@@ -38,6 +83,7 @@ class Service(models.Model):
         blank=True,
         related_name='services',
         verbose_name=_('Група'),
+        help_text=_('Определя под кой таб-категория е класирана услугата на страницата с услуги.'),
     )
 
     class Meta:
@@ -58,8 +104,16 @@ class Service(models.Model):
         return self.name
 
 class Specialist(models.Model):
-    name = models.CharField(max_length=255)
-    description = models.TextField()
+    name = models.CharField(
+        max_length=255,
+        help_text=_(
+            'Показва се в селектора на терапевти на страницата за резервация и в '
+            'профила на клиента (предстоящи/минали резервации).'
+        ),
+    )
+    description = models.TextField(
+        help_text=_('Показва се като кратко био в селектора на терапевти на страницата за резервация.'),
+    )
     image = models.ImageField(upload_to='specialists/')
     phone_number = models.CharField(max_length=20)
     email = models.EmailField()
@@ -78,8 +132,18 @@ class WorkingHours(models.Model):
     ]
     specialist = models.ForeignKey(Specialist, on_delete=models.CASCADE, related_name='working_hours')
     day_of_week = models.IntegerField(choices=DAYS_OF_WEEK)
-    start_time = models.TimeField()
-    end_time = models.TimeField()
+    start_time = models.TimeField(
+        help_text=_(
+            'Не се показва директно, но определя кои часове се предлагат на клиентите при '
+            'резервация с този терапевт в този ден.'
+        ),
+    )
+    end_time = models.TimeField(
+        help_text=_(
+            'Не се показва директно, но определя кои часове се предлагат на клиентите при '
+            'резервация с този терапевт в този ден.'
+        ),
+    )
 
     class Meta:
         unique_together = ('specialist', 'day_of_week')
@@ -92,29 +156,57 @@ class WorkingHours(models.Model):
 DESCRIPTION_LONG_THRESHOLD_CHARS = 500
 
 class BusinessInfo(models.Model):
-    name = models.CharField(max_length=255)
-    description = models.TextField()
+    name = models.CharField(
+        max_length=255,
+        help_text=_('Използва се като алтернативен текст (alt) на снимката на студиото в страница "За нас".'),
+    )
+    description = models.TextField(
+        help_text=_('Показва се като основен текст в страница "За нас".'),
+    )
     main_image = models.ImageField(
         upload_to='business/',
         help_text=_(
             'Снимката се показва в естествените си пропорции (без изрязване), с ограничена '
             'максимална ширина. За симетричен и професионален вид препоръчваме портретна или '
             'квадратна снимка (съотношение между 3:4 и 1:1), минимум 800px на по-късата страна. '
-            'Много издължени (панорамни или тесни) снимки могат да изглеждат непропорционално до текста.'
+            'Много издължени (панорамни или тесни) снимки могат да изглеждат непропорционално до текста. '
+            'Показва се като главна снимка в страница "За нас".'
         ),
     )
-    address = models.CharField(max_length=255)
-    phone = models.CharField(max_length=50, blank=True)
-    email_address = models.EmailField()
-    facebook_link = models.URLField(null=True, blank=True)
-    instagram_link = models.URLField(null=True, blank=True)
-    tik_tok_link = models.URLField(null=True, blank=True)
+    address = models.CharField(
+        max_length=255,
+        help_text=_('Показва се в контактната карта в профила на клиента и в долния колонтитул (footer) на сайта.'),
+    )
+    phone = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text=_(
+            'Показва се в профила на клиента и в долния колонтитул (footer) на сайта '
+            'като линк за обаждане.'
+        ),
+    )
+    email_address = models.EmailField(
+        help_text=_('Показва се в долния колонтитул (footer) на сайта като mailto линк.'),
+    )
+    facebook_link = models.URLField(
+        null=True, blank=True,
+        help_text=_('Показва се като социална икона в долния колонтитул (footer) на сайта.'),
+    )
+    instagram_link = models.URLField(
+        null=True, blank=True,
+        help_text=_('Показва се като социална икона в долния колонтитул (footer) на сайта.'),
+    )
+    tik_tok_link = models.URLField(
+        null=True, blank=True,
+        help_text=_('Показва се като социална икона в долния колонтитул (footer) на сайта.'),
+    )
     stats = JSONField(
         default=dict,
         blank=True,
         help_text=_(
             'JSON обект с показатели (изберете кои да покажете, останалите се скриват): '
-            '{"years_of_practice": "8+", "clients_served": "500+", "average_rating": "4.9", "certifications_count": "12"}'
+            '{"years_of_practice": "8+", "clients_served": "500+", "average_rating": "4.9", "certifications_count": "12"}. '
+            'years_of_practice, clients_served и certifications_count се показват като карти с показатели в страница "За нас".'
         ),
     )
     credentials = JSONField(
@@ -123,7 +215,8 @@ class BusinessInfo(models.Model):
         help_text=_(
             'JSON обект с два списъка — "training" и "recognition". Всеки елемент: title, subtitle, '
             'по избор year и description. Празен списък скрива съответната група. Пример: '
-            '{"training": [{"title": "Шведски масаж", "subtitle": "Виенски институт", "year": "2019", "description": "..."}], "recognition": []}'
+            '{"training": [{"title": "Шведски масаж", "subtitle": "Виенски институт", "year": "2019", "description": "..."}], "recognition": []}. '
+            'Показва се като секция "Обучения/Признания" в страница "За нас".'
         ),
     )
     faq = JSONField(
@@ -131,7 +224,8 @@ class BusinessInfo(models.Model):
         blank=True,
         help_text=_(
             'JSON списък от въпроси и отговори. Празен списък скрива секцията. Пример: '
-            '[{"question": "Приемате ли без резервация?", "answer": "Не, само с предварителна резервация."}]'
+            '[{"question": "Приемате ли без резервация?", "answer": "Не, само с предварителна резервация."}]. '
+            'Показва се като разгъващ се списък с въпроси и отговори в страница "За нас".'
         ),
     )
 
@@ -162,13 +256,15 @@ class Reservation(models.Model):
     service = models.ForeignKey(
         Service,
         on_delete=models.CASCADE,
-        related_name='reservations'
+        related_name='reservations',
+        help_text=_('Показва се в потвърждението на резервацията и в списъка с резервации в профила на клиента.'),
     )
 
     specialist = models.ForeignKey(
         Specialist,
         on_delete=models.CASCADE,
-        related_name='reservations'
+        related_name='reservations',
+        help_text=_('Показва се в потвърждението на резервацията и в списъка с резервации в профила на клиента.'),
     )
 
     user = models.ForeignKey(
@@ -177,13 +273,22 @@ class Reservation(models.Model):
         related_name='reservations'
     )
 
-    time = models.TimeField()
-    date = models.DateField(db_index=True)
+    time = models.TimeField(
+        help_text=_('Показва се в потвърждението на резервацията и в списъка с резервации в профила на клиента.'),
+    )
+    date = models.DateField(
+        db_index=True,
+        help_text=_('Показва се в потвърждението на резервацията и в списъка с резервации в профила на клиента.'),
+    )
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
         default=STATUS_ACTIVE,
         db_index=True,
+        help_text=_(
+            'Определя дали резервацията се показва като предстояща или минала в профила на '
+            'клиента (или изобщо не се показва, ако е отказана).'
+        ),
     )
     updated_at = models.DateTimeField(auto_now=True)
     status_updated_at = models.DateTimeField(null=True, blank=True)
@@ -194,7 +299,10 @@ class Reservation(models.Model):
         blank=True,
         related_name='status_updates'
     )
-    additional_text = models.TextField(default='', blank=True, max_length=500, validators=[MaxLengthValidator(500)])
+    additional_text = models.TextField(
+        default='', blank=True, max_length=500, validators=[MaxLengthValidator(500)],
+        help_text=_('Показва се на клиента при преглед, редакция или отказ на резервацията му.'),
+    )
 
     # Custom Managers
     class ReservationQuerySet(models.QuerySet):
@@ -333,9 +441,18 @@ class Reservation(models.Model):
         return f"{self.service.name} - {self.date} {self.time.strftime('%H:%M')}"
 
 class Gallery(models.Model):
-    images = models.ManyToManyField('Image', related_name='galleries', through='GalleryImage')
-    title = models.CharField(max_length=255, blank=True, verbose_name=_('Заглавие'))
-    short_description = models.TextField(blank=True, verbose_name=_('Кратко описание'))
+    images = models.ManyToManyField(
+        'Image', related_name='galleries', through='GalleryImage',
+        help_text=_('Първите 3 снимки се показват в секцията с галерия на началната страница.'),
+    )
+    title = models.CharField(
+        max_length=255, blank=True, verbose_name=_('Заглавие'),
+        help_text=_('Показва се като малък надпис над секцията с галерия на началната страница.'),
+    )
+    short_description = models.TextField(
+        blank=True, verbose_name=_('Кратко описание'),
+        help_text=_('Показва се като заглавие на секцията с галерия на началната страница.'),
+    )
 
     class Meta:
         verbose_name = _('Галерия')
@@ -347,8 +464,17 @@ class Gallery(models.Model):
         return self.title or f"{_('Галерия')} {self.id}"
 
 class Image(models.Model):
-    image = models.ImageField(upload_to='studios/gallery/')
-    alt_text = models.CharField(max_length=255)
+    image = models.ImageField(
+        upload_to='studios/gallery/',
+        help_text=_('Показва се в секцията с галерия на началната страница.'),
+    )
+    alt_text = models.CharField(
+        max_length=255,
+        help_text=_(
+            'Използва се като алтернативен текст (alt) за тази снимка в секцията с галерия '
+            'на началната страница.'
+        ),
+    )
 
     class Meta:
         verbose_name = _('Изображение')
@@ -371,10 +497,25 @@ class GalleryImage(models.Model):
 
 
 class GalleryAlbum(models.Model):
-    title = models.CharField(max_length=255, verbose_name=_('Заглавие'))
-    description = models.TextField(blank=True, verbose_name=_('Описание'))
-    slug = models.SlugField(unique=True, verbose_name=_('Slug'))
-    order = models.PositiveIntegerField(default=0, verbose_name=_('Ред'))
+    title = models.CharField(
+        max_length=255, verbose_name=_('Заглавие'),
+        help_text=_('Показва се като заглавие на албума на страницата с галерии и на собствената му страница.'),
+    )
+    description = models.TextField(
+        blank=True, verbose_name=_('Описание'),
+        help_text=_(
+            'Показва се на собствената страница на албума, а за първия по ред албум — и в '
+            'плочката му на страницата с галерии.'
+        ),
+    )
+    slug = models.SlugField(
+        unique=True, verbose_name=_('Slug'),
+        help_text=_('Използва се за изграждане на адреса (URL) на страницата на този албум.'),
+    )
+    order = models.PositiveIntegerField(
+        default=0, verbose_name=_('Ред'),
+        help_text=_('Определя реда, в който албумите се показват на страницата с галерии.'),
+    )
 
     class Meta:
         ordering = ['order']
@@ -395,9 +536,24 @@ class GalleryAlbum(models.Model):
 
 class AlbumPhoto(models.Model):
     album = models.ForeignKey(GalleryAlbum, on_delete=models.CASCADE, related_name='photos', verbose_name=_('Албум'))
-    image = models.ImageField(upload_to='gallery/albums/', verbose_name=_('Изображение'))
-    alt_text = models.CharField(max_length=255, blank=True, verbose_name=_('Алт текст'))
-    order = models.PositiveIntegerField(default=0, verbose_name=_('Ред'))
+    image = models.ImageField(
+        upload_to='gallery/albums/', verbose_name=_('Изображение'),
+        help_text=_(
+            'Показва се на страницата на албума, а ако е първата снимка в него — и като '
+            'корична снимка на албума на страницата с галерии.'
+        ),
+    )
+    alt_text = models.CharField(
+        max_length=255, blank=True, verbose_name=_('Алт текст'),
+        help_text=_('Използва се като алтернативен текст (alt) за тази снимка.'),
+    )
+    order = models.PositiveIntegerField(
+        default=0, verbose_name=_('Ред'),
+        help_text=_(
+            'Определя реда, в който снимките се показват в албума, и коя снимка се използва '
+            'като корична (първата по ред).'
+        ),
+    )
 
     class Meta:
         ordering = ['order']
@@ -409,16 +565,34 @@ class AlbumPhoto(models.Model):
 
 
 class HomePage(models.Model):
-    brand_name = models.CharField(max_length=255)
-    description = models.TextField()
-    logo = models.ImageField(upload_to='branding/', null=True, blank=True)
+    brand_name = models.CharField(
+        max_length=255,
+        help_text=_(
+            'Показва се като име на сайта в началния банер, в алтернативния текст (alt) на '
+            'логото в горния колонтитул, в реда за авторски права в долния колонтитул '
+            '(footer), както и в имейлите до клиентите (кодове за резервация, смяна на парола).'
+        ),
+    )
+    description = models.TextField(
+        help_text=_('Показва се като подзаглавие в началния банер на началната страница.'),
+    )
+    logo = models.ImageField(
+        upload_to='branding/', null=True, blank=True,
+        help_text=_('Показва се като лого в горния колонтитул на сайта и в имейлите до клиентите.'),
+    )
     gallery = models.OneToOneField(
         Gallery,
         on_delete=models.CASCADE,
         related_name='home_page'
     )
-    privacy_policy_content = models.TextField(null=True, blank=True)
-    footer_tagline = models.TextField(blank=True)
+    privacy_policy_content = models.TextField(
+        null=True, blank=True,
+        help_text=_('Показва се изцяло на страницата "Политика за поверителност".'),
+    )
+    footer_tagline = models.TextField(
+        blank=True,
+        help_text=_('Показва се като кратък текст (tagline) в долния колонтитул (footer) на сайта.'),
+    )
 
     class Meta:
         verbose_name = _('Начална страница')
@@ -454,15 +628,24 @@ class BusinessWorkingHours(models.Model):
     day_label = models.CharField(
         max_length=100,
         verbose_name=_('Ден / период'),
-        help_text=_('напр. "Понеделник до Петък"'),
+        help_text=_(
+            'напр. "Понеделник до Петък". Показва се в списъка "Работно време" на началната '
+            'страница и в профила на клиента.'
+        ),
     )
     hours = models.CharField(
         max_length=50,
         blank=True,
         verbose_name=_('Часове'),
-        help_text=_('напр. "9:00 - 18:00" — оставете празно за "Почивен ден"'),
+        help_text=_(
+            'напр. "9:00 - 18:00" — оставете празно за "Почивен ден". Показва се в списъка '
+            '"Работно време" на началната страница и в профила на клиента.'
+        ),
     )
-    order = models.PositiveSmallIntegerField(default=0, verbose_name=_('Ред'))
+    order = models.PositiveSmallIntegerField(
+        default=0, verbose_name=_('Ред'),
+        help_text=_('Определя реда, в който тези редове се показват.'),
+    )
 
     class Meta:
         ordering = ['order']
@@ -494,19 +677,31 @@ class Comment(models.Model):
         max_length=100,
         null=True,
         blank=True,
+        help_text=_('Показва се като име на автора в секцията с отзиви на началната страница и на страницата с всички отзиви.'),
     )
 
-    content = models.TextField(max_length=2000, validators=[MaxLengthValidator(2000)])
+    content = models.TextField(
+        max_length=2000, validators=[MaxLengthValidator(2000)],
+        help_text=_('Показва се като текст на отзива в секцията с отзиви на началната страница и на страницата с всички отзиви.'),
+    )
 
-    rating = models.IntegerField(default=5)
+    rating = models.IntegerField(
+        default=5,
+        help_text=_('Показва се като звезден рейтинг в секцията с отзиви на началната страница.'),
+    )
 
     created_at = models.DateTimeField(
         auto_now_add=True,
+        help_text=_('Показва се като дата на отзива на страницата с всички отзиви.'),
     )
 
     is_reviewed = models.BooleanField(
         default=False,
         db_index=True,
+        help_text=_(
+            'Трябва да е отметнато, за да се показва този отзив публично в секцията с отзиви '
+            'на началната страница и на страницата с всички отзиви.'
+        ),
     )
 
     class Meta:
@@ -555,65 +750,92 @@ class SiteConfiguration(models.Model):
     primary_color = models.CharField(
         max_length=7, default='#4A3728', validators=[_HEX_COLOR_VALIDATOR],
         verbose_name=_('Основен цвят'),
+        help_text=_('Цвят по цялата тема на сайта, използван на всички страници.'),
     )
     primary_light_color = models.CharField(
         max_length=7, default='#6D5442', validators=[_HEX_COLOR_VALIDATOR],
         verbose_name=_('Основен цвят (светъл)'),
+        help_text=_('Цвят по цялата тема на сайта, използван на всички страници.'),
     )
     secondary_color = models.CharField(
         max_length=7, default='#C2A38E', validators=[_HEX_COLOR_VALIDATOR],
         verbose_name=_('Вторичен цвят'),
+        help_text=_('Цвят по цялата тема на сайта, използван на всички страници.'),
     )
     accent_color = models.CharField(
         max_length=7, default='#8E735B', validators=[_HEX_COLOR_VALIDATOR],
         verbose_name=_('Акцентен цвят'),
+        help_text=_('Цвят по цялата тема на сайта, използван на всички страници.'),
     )
     background_color = models.CharField(
         max_length=7, default='#FAF7F2', validators=[_HEX_COLOR_VALIDATOR],
         verbose_name=_('Фон'),
+        help_text=_('Цвят по цялата тема на сайта, използван на всички страници.'),
     )
     text_color = models.CharField(
         max_length=7, default='#2D241E', validators=[_HEX_COLOR_VALIDATOR],
         verbose_name=_('Текст'),
+        help_text=_('Цвят по цялата тема на сайта, използван на всички страници.'),
     )
     text_muted_color = models.CharField(
         max_length=7, default='#6B5E55', validators=[_HEX_COLOR_VALIDATOR],
         verbose_name=_('Текст (приглушен)'),
+        help_text=_('Цвят по цялата тема на сайта, използван на всички страници.'),
     )
     border_color = models.CharField(
         max_length=7, default='#4A3728', validators=[_HEX_COLOR_VALIDATOR],
         verbose_name=_('Цвят на рамки'),
+        help_text=_('Цвят по цялата тема на сайта, използван на всички страници.'),
     )
 
     font_pair = models.CharField(
         max_length=30, choices=FONT_PAIR_CHOICES, default='playfair_montserrat',
         verbose_name=_('Двойка шрифтове'),
+        help_text=_('Шрифт по цялата тема на сайта, използван на всички страници.'),
     )
     style_preset = models.CharField(
         max_length=10, choices=STYLE_PRESET_CHOICES, default='soft',
         verbose_name=_('Стил (форми и сенки)'),
+        help_text=_('Стил на форми и сенки (заобляне на ъгли, бутони, карти) по цялата тема на сайта.'),
     )
     hero_variant = models.CharField(
         max_length=10, choices=HERO_VARIANT_CHOICES, default='split',
         verbose_name=_('Начален банер'),
+        help_text=_('Определя кой изглед на банера се използва на началната страница.'),
     )
 
     service_singular = models.CharField(
         max_length=50, default='услуга', verbose_name=_('Услуга (ед. число)'),
+        help_text=_('Използва се навсякъде, където сайтът се обръща към "услуга" — напр. страницата за резервация и профила на клиента.'),
     )
     service_plural = models.CharField(
         max_length=50, default='услуги', verbose_name=_('Услуги (мн. число)'),
+        help_text=_('Използва се навсякъде, където сайтът се обръща към "услуги" — напр. страницата за резервация и профила на клиента.'),
     )
     specialist_singular = models.CharField(
         max_length=50, default='специалист', verbose_name=_('Специалист (ед. число)'),
+        help_text=_('Използва се навсякъде, където сайтът се обръща към "специалист" — напр. страницата за резервация и профила на клиента.'),
     )
     specialist_plural = models.CharField(
         max_length=50, default='специалисти', verbose_name=_('Специалисти (мн. число)'),
+        help_text=_('Използва се навсякъде, където сайтът се обръща към "специалисти" — напр. страницата за резервация и профила на клиента.'),
     )
 
-    booking_enabled = models.BooleanField(default=True, verbose_name=_('Резервации активни'))
-    comments_enabled = models.BooleanField(default=True, verbose_name=_('Коментари активни'))
-    google_login_enabled = models.BooleanField(default=True, verbose_name=_('Вход с Google активен'))
+    booking_enabled = models.BooleanField(
+        default=True, verbose_name=_('Резервации активни'),
+        help_text=_(
+            'Когато е изключено, скрива всички бутони/линкове за резервация по целия сайт '
+            '(горно меню, начална страница, страница с услуги, детайли за услуга, профил на клиента).'
+        ),
+    )
+    comments_enabled = models.BooleanField(
+        default=True, verbose_name=_('Коментари активни'),
+        help_text=_('Когато е изключено, скрива секцията с отзиви на началната страница.'),
+    )
+    google_login_enabled = models.BooleanField(
+        default=True, verbose_name=_('Вход с Google активен'),
+        help_text=_('Когато е изключено, скрива опцията "Вход с Google" в модала за вход.'),
+    )
 
     class Meta:
         verbose_name = _('Настройки на сайта')
