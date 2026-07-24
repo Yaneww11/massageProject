@@ -841,7 +841,7 @@
         text-align: left;
         line-height: 1.4;
     }
-    .action-cell {
+    .bookings-table td.action-cell {
         padding-left: 0.5rem;
         text-align: right;
         display: flex;
