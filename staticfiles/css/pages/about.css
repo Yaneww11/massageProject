@@ -30,6 +30,7 @@
 
 /* Info Section (photo + business_info.description) */
 .about-info {
+    margin-top: var(--space-lg);
     margin-bottom: var(--space-xl);
 }
 
@@ -37,42 +38,60 @@
 .photo-info-container {
     display: flex;
     align-items: center;
-    gap: 2rem;
-    margin-bottom: 2rem;
+    gap: var(--space-xl);
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
     flex-wrap: wrap;
 }
 
 /* Photo Section */
 .photo-wrapper {
-    flex: 1;
-    text-align: center;
+    flex: 0 0 420px;
 }
 
 .photo-wrapper img {
-    max-width: 350px;
-    border-radius: 50%;
-    border: 5px solid var(--border-color);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .photo-wrapper img:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    transform: scale(1.02);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Long-description tier: pin the photo in view while the longer text scrolls past,
+   instead of leaving dead space below a short fixed-height photo. */
+.photo-info-container.is-long-description {
+    align-items: flex-start;
+}
+
+.photo-info-container.is-long-description .photo-wrapper {
+    position: sticky;
+    top: 96px;
+    align-self: flex-start;
 }
 
 /* Info Section */
 .info-section {
-    flex: 2;
-    text-align: justify;
-    font-size: 1.2rem;
+    flex: 1 1 320px;
+    min-width: 280px;
+    font-size: var(--fs-lg);
     line-height: 1.8;
-    color: #5c3d2e;
-    font-family: 'Open Sans', sans-serif;
+    color: var(--text-muted);
 }
 
 .info-section p {
-    margin-bottom: 1rem;
+    margin-bottom: var(--space-md);
+}
+
+.info-section p:last-child {
+    margin-bottom: 0;
 }
 
 /* Certificate Section */
@@ -289,34 +308,37 @@
 
 /* Stats Section */
 .about-stats {
-    max-width: 1000px;
-    margin: 0 auto var(--space-xl);
-    padding: 0 var(--space-lg);
+    width: 100%;
+    background: var(--primary-color);
+    padding: var(--space-xl) 0;
+    margin-bottom: var(--space-xl);
 }
 
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: var(--space-lg);
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
 }
 
-.stat-card {
+.about-stats .stat-card {
     text-align: center;
-    padding: var(--space-lg);
-    background: var(--bg-light);
-    border-radius: var(--radius-md);
 }
 
-.stat-value {
+.about-stats .stat-value {
     font-family: var(--font-heading);
-    font-size: var(--fs-3xl);
-    color: var(--primary-color);
+    font-size: var(--fs-4xl);
+    color: var(--white);
     margin-bottom: var(--space-xs);
 }
 
-.stat-label {
-    font-size: var(--fs-sm);
-    color: var(--text-muted);
+.about-stats .stat-label {
+    font-size: var(--fs-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.75);
 }
 
 /* Credentials Section */

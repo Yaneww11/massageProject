@@ -64,6 +64,7 @@ if not DEBUG:
 
 INSTALLED_APPS = [
     'unfold',
+    'unfold.contrib.forms',
     'modeltranslation',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -94,8 +95,8 @@ ROSETTA_ACCESS_CONTROL_FUNCTION = 'massageProject.settings._rosetta_staff_only'
 # admin (e.g. HomePage.privacy_policy_content). Strips scripts and event
 # handlers while keeping the formatting markup the content actually uses.
 BLEACH_ALLOWED_TAGS = [
-    'p', 'br', 'strong', 'em', 'b', 'i', 'ul', 'ol', 'li',
-    'h2', 'h3', 'h4', 'a', 'span', 'div',
+    'p', 'br', 'strong', 'em', 'b', 'i', 'u', 'del', 'ul', 'ol', 'li',
+    'h1', 'h2', 'h3', 'h4', 'blockquote', 'pre', 'a', 'span', 'div',
 ]
 BLEACH_ALLOWED_ATTRIBUTES = {'a': ['href', 'title', 'rel'], '*': ['style']}
 BLEACH_ALLOWED_STYLES = [

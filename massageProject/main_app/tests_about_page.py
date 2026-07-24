@@ -166,3 +166,30 @@ class AboutPageEnglishLocaleTest(TestCase):
         with override_settings(LANGUAGE_CODE='en'):
             response = self.client.get(reverse('about_page'), HTTP_ACCEPT_LANGUAGE='en')
         self.assertContains(response, "The story behind the studio")
+
+
+class BusinessInfoDescriptionLengthTest(TestCase):
+    def test_short_description_is_not_long(self):
+        info = BusinessInfo.objects.create(description="A short bio.")
+        self.assertFalse(info.is_description_long)
+
+    def test_long_description_is_long(self):
+        info = BusinessInfo.objects.create(description="Word " * 200)
+        self.assertTrue(info.is_description_long)
+
+    def test_html_tags_are_stripped_before_counting(self):
+        padded_markup = "<div><p><strong>Hi</strong></p></div>" * 30
+        info = BusinessInfo.objects.create(description=padded_markup)
+        self.assertFalse(info.is_description_long)
+
+
+class AboutPageDescriptionLayoutTest(TestCase):
+    def test_short_description_has_no_long_class(self):
+        BusinessInfo.objects.create(description="A short bio.")
+        response = self.client.get(reverse('about_page'))
+        self.assertNotContains(response, "is-long-description")
+
+    def test_long_description_gets_long_class(self):
+        BusinessInfo.objects.create(description="Word " * 200)
+        response = self.client.get(reverse('about_page'))
+        self.assertContains(response, "is-long-description")

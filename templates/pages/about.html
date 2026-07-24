@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n %}
+{% load static i18n bleach_tags %}
 
 {% block content %}
 <section class="about-hero">
@@ -9,19 +9,19 @@
 </section>
 
 <section class="about-info">
-    <div class="photo-info-container">
+    <div class="photo-info-container{% if business_info.is_description_long %} is-long-description{% endif %}">
         <div class="photo-wrapper">
             {% if business_info.main_image %}
             <img src="{{ business_info.main_image.url }}" alt="{{ business_info.name }}">
             {% endif %}
         </div>
         <div class="info-section">
-            <p>{{ business_info.description }}</p>
+            {{ business_info.description|bleach }}
         </div>
     </div>
 </section>
 
-{% if business_info.stats.years_of_practice or business_info.stats.clients_served or business_info.stats.average_rating or business_info.stats.certifications_count %}
+{% if business_info.stats.years_of_practice or business_info.stats.clients_served or business_info.stats.certifications_count %}
 <section class="about-stats">
     <div class="stats-grid">
         {% if business_info.stats.years_of_practice %}
@@ -29,9 +29,6 @@
         {% endif %}
         {% if business_info.stats.clients_served %}
         <div class="stat-card"><div class="stat-value">{{ business_info.stats.clients_served }}</div><div class="stat-label">{% trans "Обслужени клиенти" %}</div></div>
-        {% endif %}
-        {% if business_info.stats.average_rating %}
-        <div class="stat-card"><div class="stat-value">{{ business_info.stats.average_rating }}</div><div class="stat-label">{% trans "Среден рейтинг" %}</div></div>
         {% endif %}
         {% if business_info.stats.certifications_count %}
         <div class="stat-card"><div class="stat-value">{{ business_info.stats.certifications_count }}</div><div class="stat-label">{% trans "Сертификати" %}</div></div>
@@ -79,73 +76,6 @@
         <p class="faq-answer">{{ item.answer }}</p>
     </details>
     {% endfor %}
-</section>
-{% endif %}
-
-{% if site_config.comments_enabled %}
-<section class="comments" id="reviews">
-    <div class="description">
-        <h2>{% trans "Коментари" %}</h2>
-        <div class="comment-carousel">
-            <div class="carousel-wrapper">
-                {% for comment in comments %}
-                <div class="carousel-item">
-                    <strong>{{ comment.author }}</strong>
-                    <p>{{ comment.content }}</p>
-                </div>
-                {% empty %}
-                <div class="carousel-item">
-                    <strong>{% trans "Няма коментари" %}</strong>
-                    <p>{% trans "Бъди първенец и остави твоето мнение" %}</p>
-                </div>
-                {% endfor %}
-            </div>
-            <button class="carousel-btn prev-btn">&#10094;</button>
-            <button class="carousel-btn next-btn">&#10095;</button>
-        </div>
-
-        {% if total_comments_count > 15 %}
-        <div style="margin-bottom: 2rem;">
-            <a href="{% url 'all_comments' %}" class="btn-secondary" style="color: #7a5e4d; text-decoration: underline; font-weight: bold;">
-                {% blocktrans with count=total_comments_count %}Виж всички коментари ({{ count }}){% endblocktrans %}
-            </a>
-        </div>
-        {% endif %}
-
-        {% if perms.main_app.add_comment or user.is_authenticated %}
-            <form class="comment-form" method="post">
-                {% csrf_token %}
-                <h3>{% trans "Остави коментар" %}</h3>
-                {% if user.is_authenticated %}
-                    {% if name_form %}
-                    <p style="margin-bottom: 1rem; color: #7a5e4d;">{% trans "Моля, въведете своите имена, за да публикувате коментар:" %}</p>
-                    <div class="name-form-fields" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
-                        <div class="form-group" style="flex: 1;">
-                            {{ name_form.first_name.label_tag }}
-                            {{ name_form.first_name }}
-                            {{ name_form.first_name.errors }}
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            {{ name_form.last_name.label_tag }}
-                            {{ name_form.last_name }}
-                            {{ name_form.last_name.errors }}
-                        </div>
-                    </div>
-                    {% else %}
-                    <p style="margin-bottom: 1rem; color: #7a5e4d;">{% trans "Публикуваш като:" %} <strong>{{ user.get_full_name|default:user.phone_number }}</strong></p>
-                    {% endif %}
-                <div class="form-group">
-                    {{ form.content }}
-                </div>
-                <button type="submit" class="btn-primary">{% trans "Качи коментара" %}</button>
-                 {% else %}
-                    <p>{% trans "Влезте в профила си, за да оставите коментар." %}<b><a href="{% url 'login' %}">{% trans "Кликнете тук" %}</a></b></p>
-                {% endif %}
-            </form>
-        {% else %}
-            <p>{% trans "Вие нямате разрешение да оставяте коментари." %}</p>
-        {% endif %}
-    </div>
 </section>
 {% endif %}
 

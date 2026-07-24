@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from datetime import date
 
 from unfold.admin import ModelAdmin, TabularInline
+from unfold.contrib.forms.widgets import WysiwygWidget
 from modeltranslation.admin import TabbedTranslationAdmin
 
 from massageProject.main_app.models import (
@@ -240,12 +241,19 @@ class HomePageAdmin(ModelAdmin, TabbedTranslationAdmin):
 class BusinessInfosAdmin(ModelAdmin, TabbedTranslationAdmin):
     list_display = ('display_image', 'name', 'address', 'phone')
     list_filter_sheet = True
+    DESCRIPTION_FIELDS = ('description', 'description_bg', 'description_en')
 
     def display_image(self, obj):
         if obj.main_image:
             return format_html('<img src="{}" style="width: 80px; height: 50px; object-fit: cover;" />', obj.main_image.url)
         return _("Няма изображение")
     display_image.short_description = _('Основна снимка')
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        if db_field.name in self.DESCRIPTION_FIELDS:
+            formfield.widget = WysiwygWidget()
+        return formfield
 
 @admin.register(SiteConfiguration)
 class SiteConfigurationAdmin(ModelAdmin, TabbedTranslationAdmin):

@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxLengthValidator, RegexValidator
 from django.db.models import JSONField
 from django.utils import timezone
+from django.utils.html import strip_tags
 from django.utils.translation import gettext_lazy as _
 from datetime import datetime, timedelta
 
@@ -88,19 +89,51 @@ class WorkingHours(models.Model):
     def __str__(self):
         return f"{self.specialist.name} - {self.get_day_of_week_display()}"
 
+DESCRIPTION_LONG_THRESHOLD_CHARS = 500
+
 class BusinessInfo(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
-    main_image = models.ImageField(upload_to='business/')
+    main_image = models.ImageField(
+        upload_to='business/',
+        help_text=_(
+            'Снимката се показва в естествените си пропорции (без изрязване), с ограничена '
+            'максимална ширина. За симетричен и професионален вид препоръчваме портретна или '
+            'квадратна снимка (съотношение между 3:4 и 1:1), минимум 800px на по-късата страна. '
+            'Много издължени (панорамни или тесни) снимки могат да изглеждат непропорционално до текста.'
+        ),
+    )
     address = models.CharField(max_length=255)
     phone = models.CharField(max_length=50, blank=True)
     email_address = models.EmailField()
     facebook_link = models.URLField(null=True, blank=True)
     instagram_link = models.URLField(null=True, blank=True)
     tik_tok_link = models.URLField(null=True, blank=True)
-    stats = JSONField(default=dict, blank=True)
-    credentials = JSONField(default=dict, blank=True)
-    faq = JSONField(default=list, blank=True)
+    stats = JSONField(
+        default=dict,
+        blank=True,
+        help_text=_(
+            'JSON обект с показатели (изберете кои да покажете, останалите се скриват): '
+            '{"years_of_practice": "8+", "clients_served": "500+", "average_rating": "4.9", "certifications_count": "12"}'
+        ),
+    )
+    credentials = JSONField(
+        default=dict,
+        blank=True,
+        help_text=_(
+            'JSON обект с два списъка — "training" и "recognition". Всеки елемент: title, subtitle, '
+            'по избор year и description. Празен списък скрива съответната група. Пример: '
+            '{"training": [{"title": "Шведски масаж", "subtitle": "Виенски институт", "year": "2019", "description": "..."}], "recognition": []}'
+        ),
+    )
+    faq = JSONField(
+        default=list,
+        blank=True,
+        help_text=_(
+            'JSON списък от въпроси и отговори. Празен списък скрива секцията. Пример: '
+            '[{"question": "Приемате ли без резервация?", "answer": "Не, само с предварителна резервация."}]'
+        ),
+    )
 
     class Meta:
         verbose_name = _('Студио')
@@ -108,6 +141,10 @@ class BusinessInfo(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def is_description_long(self):
+        return len(strip_tags(self.description or '')) > DESCRIPTION_LONG_THRESHOLD_CHARS
 
 class Reservation(models.Model):
     STATUS_ACTIVE = 'active'

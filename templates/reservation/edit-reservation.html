@@ -4,7 +4,7 @@
 {% block content %}
 <section class="reservation-section">
     <div class="description">
-        <h1>{% trans "Промени своята резервация" %}</h1>
+        <h2>{% trans "Промени своята резервация" %}</h2>
         <form class="form-container" action="{% url 'edit_reservation' reservation.pk %}" method="post">
             {% csrf_token %}
 
