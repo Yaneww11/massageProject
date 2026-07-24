@@ -15,27 +15,27 @@
         gap: 1.5rem;
     }
     .comment-card {
-        background: #fff;
+        background: var(--bg-paper);
         padding: 1.5rem;
         border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        border-left: 5px solid #7a5e4d;
+        box-shadow: var(--shadow-sm);
+        border-left: 5px solid var(--accent-color);
         text-align: left;
     }
     .comment-card strong {
         display: block;
-        font-family: 'Playfair Display', serif;
+        font-family: var(--font-heading);
         font-size: 1.2rem;
-        color: #7a5e4d;
+        color: var(--accent-color);
         margin-bottom: 0.5rem;
     }
     .comment-card .date {
         font-size: 0.85rem;
-        color: #999;
+        color: var(--text-muted);
         margin-bottom: 0.5rem;
     }
     .comment-card p {
-        color: #5c3d2e;
+        color: var(--text-main);
         line-height: 1.6;
     }
     .pagination {
@@ -48,23 +48,23 @@
     }
     .pagination a, .pagination span {
         padding: 0.5rem 1rem;
-        border: 1px solid #7a5e4d;
+        border: 1px solid var(--accent-color);
         border-radius: 4px;
-        color: #7a5e4d;
+        color: var(--accent-color);
         text-decoration: none;
         transition: all 0.3s ease;
     }
     .pagination a:hover {
-        background: #f9f5f0;
+        background: var(--bg-light);
     }
     .pagination .current {
-        background: #7a5e4d;
-        color: #fff;
+        background: var(--accent-color);
+        color: var(--white);
     }
 </style>
 
 <div class="all-comments-section">
-    <h2 style="text-align: center; color: #5c3d2e; margin-bottom: 2rem; font-family: 'Playfair Display', serif; font-size: 2.5rem;">{% trans "Всички коментари" %}</h2>
+    <h2 style="text-align: center; color: var(--text-main); margin-bottom: 2rem; font-family: var(--font-heading); font-size: 2.5rem;">{% trans "Всички коментари" %}</h2>
 
     <div class="comment-list">
         {% for comment in comments %}
@@ -97,7 +97,7 @@
     {% endif %}
 
     <div style="margin-top: 3rem; text-align: center;">
-        <a href="{% url 'about_page' %}" style="color: #7a5e4d; text-decoration: none; font-weight: bold;">&larr; {% trans "Обратно към За нас" %}</a>
+        <a href="{% url 'about_page' %}" style="color: var(--accent-color); text-decoration: none; font-weight: bold;">&larr; {% trans "Обратно към За нас" %}</a>
     </div>
 </div>
 {% endblock %}

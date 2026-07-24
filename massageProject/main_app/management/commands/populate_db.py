@@ -1,4 +1,3 @@
-import os
 from datetime import date, time, timedelta
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
@@ -6,7 +5,6 @@ from massageProject.main_app.models import (
     Service, Specialist, BusinessInfo, HomePage, Gallery, Image, GalleryImage,
     Reservation, Comment
 )
-from django.utils import timezone
 
 User = get_user_model()
 

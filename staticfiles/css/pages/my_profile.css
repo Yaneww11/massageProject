@@ -166,7 +166,7 @@
     gap: 0.35rem;
     padding: 0.2rem 0.75rem;
     border-radius: 20px;
-    background: #F5EDE4;
+    background: var(--bg-light);
     color: var(--accent-color);
     font-size: var(--fs-xs);
     font-weight: 600;
@@ -298,7 +298,7 @@
 }
 
 .btn-outline-profile:hover {
-    background: #F5EDE4;
+    background: var(--bg-light);
     border-color: var(--accent-color);
     color: var(--primary-color);
 }
@@ -376,7 +376,7 @@
 
 .bookings-table th {
     padding: 0.75rem 1rem;
-    background: #F9F5F0;
+    background: var(--bg-light);
     color: var(--accent-color);
     font-family: var(--font-main);
     font-size: var(--fs-xs);
@@ -400,7 +400,7 @@
 }
 
 .bookings-table tbody tr:hover td {
-    background: #FAF5EF;
+    background: var(--bg-light);
 }
 
 .date-main {
@@ -471,7 +471,7 @@
 }
 
 .btn-action-edit:hover {
-    background: #F5EDE4;
+    background: var(--bg-light);
     border-color: var(--accent-color);
     color: var(--primary-color);
 }
@@ -492,7 +492,7 @@
 }
 
 .btn-action-cancel:hover {
-    background: #FEF2F2;
+    background: var(--error-light);
     border-color: var(--error);
     color: var(--error);
 }
@@ -530,7 +530,7 @@
 }
 
 .history-row:hover {
-    background: #FAF5EF;
+    background: var(--bg-light);
 }
 
 .history-date {
@@ -554,7 +554,7 @@
 }
 
 .star {
-    color: #E7DDD1;
+    color: var(--secondary-color);
     font-size: 0.9rem;
 }
 
@@ -569,8 +569,8 @@
     display: inline-block;
     padding: 0.25rem 0.75rem;
     border-radius: 20px;
-    background: #ECFDF5;
-    color: #065F46;
+    background: var(--success-light);
+    color: var(--success);
     font-size: var(--fs-xs);
     font-weight: 600;
     text-transform: uppercase;
@@ -597,7 +597,7 @@
 }
 
 .btn-outline-sm:hover {
-    background: #F5EDE4;
+    background: var(--bg-light);
     border-color: var(--accent-color);
     color: var(--primary-color);
 }
@@ -749,7 +749,7 @@
 .star-btn {
     font-size: 1.75rem;
     cursor: pointer;
-    color: #E7DDD1;
+    color: var(--secondary-color);
     transition: color 0.15s;
     user-select: none;
 }
@@ -820,7 +820,7 @@
     }
     .bookings-table tr:last-child { margin-bottom: 0; }
     .bookings-table tbody tr:hover td { background: none; }
-    .bookings-table tr:hover { background: #FAF5EF; }
+    .bookings-table tr:hover { background: var(--bg-light); }
     .bookings-table td {
         border-bottom: none;
         padding: 0.5rem 0.5rem 0.5rem 45%;

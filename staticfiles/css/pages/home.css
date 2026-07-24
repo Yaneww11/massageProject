@@ -11,7 +11,6 @@
 /* --- Layout containers --- */
 .hp-container        { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
 .hp-container-narrow { max-width: 900px;  margin: 0 auto; padding: 0 2rem; }
-.hp-container-prose  { max-width: 700px;  margin: 0 auto; padding: 0 2rem; }
 
 /* --- Eyebrow label --- */
 .hp-eyebrow {
@@ -566,7 +565,6 @@
     margin-bottom: 0.5rem;
 }
 
-.hp-modal-input,
 .hp-modal-textarea {
     width: 100%;
     padding: 0.75rem 1rem;
@@ -581,7 +579,6 @@
     outline: none;
 }
 
-.hp-modal-input:focus,
 .hp-modal-textarea:focus { border-color: var(--accent-color); }
 
 .hp-modal-textarea {
@@ -790,84 +787,6 @@
 /* ================================================================
    LEGACY — kept for other pages that share styles.css
    ================================================================ */
-
-/* reservation.html uses .hero-section */
-.hero-section {
-    background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('../../images/home_background.jpg');
-    background-size: cover;
-    background-position: center;
-    color: var(--white);
-    text-align: center;
-    padding: var(--space-xl) var(--space-lg);
-    min-height: 60vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.hero-content { max-width: 800px; }
-
-.hero-content h1 {
-    font-size: var(--fs-4xl);
-    margin-bottom: var(--space-md);
-    color: var(--white);
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
-.hero-content p {
-    font-size: var(--fs-xl);
-    margin-bottom: var(--space-lg);
-    color: var(--bg-light);
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-}
-
-/* about.html uses .carousel-btn (in addition to about.css) */
-.carousel-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: var(--primary-color);
-    color: var(--white);
-    border: none;
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: var(--transition);
-    z-index: 10;
-    font-size: var(--fs-lg);
-    box-shadow: var(--shadow-md);
-}
-
-.carousel-btn:hover {
-    background: var(--primary-light);
-    transform: translateY(-50%);
-}
-
-.carousel-btn.prev { left: var(--space-md); }
-.carousel-btn.next { right: var(--space-md); }
-
-@media (max-width: 768px) {
-    .hero-section {
-        min-height: 40vh;
-        padding: var(--space-xl) var(--space-md);
-    }
-    .hero-content h1 { font-size: var(--fs-3xl); }
-    .hero-content p  { font-size: var(--fs-lg); }
-    .carousel-btn { width: 35px; height: 35px; font-size: var(--fs-base); }
-}
-
-@media (max-width: 480px) {
-    .hero-section {
-        min-height: 30vh;
-        padding: var(--space-xl) var(--space-sm);
-    }
-    .hero-content h1 { font-size: var(--fs-2xl); }
-    .carousel-btn { width: 30px; height: 30px; }
-}
 
 /* home.html cards (no longer rendered, kept for safety) */
 .hours-list { list-style: none; padding: 0; margin: 0; }

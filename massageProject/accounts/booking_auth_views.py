@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.contrib.auth import get_user_model, login
+from django.db import IntegrityError, transaction
 from django.http import JsonResponse
 from django.urls import reverse
 from django.utils import timezone
@@ -144,12 +145,24 @@ def register_via_modal(request):
     if not verify_turnstile_token(request.POST.get('turnstile_token', ''), remote_ip=request.META.get('REMOTE_ADDR')):
         return JsonResponse({'success': False, 'error': _('Проверката за робот не е успешна. Опитайте отново.')}, status=400)
 
-    form = BookingRegistrationForm(data=request.POST, email=email)
-    if not form.is_valid():
-        errors = {field: [str(e) for e in errs] for field, errs in form.errors.items()}
-        return JsonResponse({'success': False, 'errors': errors}, status=400)
+    try:
+        with transaction.atomic():
+            # Holding the transaction across is_valid() (which locks any
+            # claimed passwordless user row) through save() closes the gap
+            # where a concurrent request could claim/register the same
+            # phone number or email in between.
+            form = BookingRegistrationForm(data=request.POST, email=email)
+            if not form.is_valid():
+                errors = {field: [str(e) for e in errs] for field, errs in form.errors.items()}
+                return JsonResponse({'success': False, 'errors': errors}, status=400)
 
-    user = form.save()
+            user = form.save()
+    except IntegrityError:
+        return JsonResponse({
+            'success': False,
+            'error': str(_('Този имейл или телефонен номер вече е регистриран. Моля, влезте в профила си.')),
+        }, status=409)
+
     del request.session[SIGNUP_EMAIL_SESSION_KEY]
     del request.session[SIGNUP_EMAIL_SESSION_KEY + '_expires']
     login(request, user, backend='massageProject.accounts.backends.VerificationAwareBackend')

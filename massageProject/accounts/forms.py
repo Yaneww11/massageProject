@@ -1,9 +1,10 @@
 from allauth.socialaccount.forms import SignupForm as SocialSignupFormBase
 from django import forms
-from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 
 
@@ -44,7 +45,10 @@ class PhoneClaimFormMixin:
         normalized_phone = User.objects.normalize_phone_number(phone_number)
 
         try:
-            existing_user = User.objects.get(phone_number__iexact=normalized_phone)
+            # Locked here and held through the caller's save() (both run
+            # inside one transaction.atomic() block) so a concurrent claim
+            # of the same passwordless record can't race this one.
+            existing_user = User.objects.select_for_update().get(phone_number__iexact=normalized_phone)
             if existing_user.has_usable_password():
                 raise ValidationError(self.error_messages['already_registered'])
             self.instance = existing_user
@@ -148,15 +152,24 @@ class SocialCompleteProfileForm(SocialSignupFormBase):
             # A passwordless (staff-created) record owns this phone number:
             # claim it instead of creating a duplicate. The verified Google
             # email wins, mirroring BookingRegistrationForm.save().
-            user = self._claimed_user
-            user.first_name = self.cleaned_data['first_name']
-            user.last_name = self.cleaned_data['last_name']
-            user.phone_number = self.cleaned_data['phone_number']
-            if self.cleaned_data.get('date_of_birth'):
-                user.date_of_birth = self.cleaned_data['date_of_birth']
-            user.email = self.sociallogin.user.email or user.email
-            user.is_active = True
-            user.save()
+            with transaction.atomic():
+                # Re-fetch and lock, then re-check has_usable_password():
+                # clean_phone_number() ran this same check earlier but
+                # unlocked, so a concurrent claim could have set a password
+                # in between. Failing loudly here beats silently
+                # overwriting that user's data.
+                User = get_user_model()
+                user = User.objects.select_for_update().get(pk=self._claimed_user.pk)
+                if user.has_usable_password():
+                    raise ValidationError(PhoneClaimFormMixin.error_messages['already_registered'])
+                user.first_name = self.cleaned_data['first_name']
+                user.last_name = self.cleaned_data['last_name']
+                user.phone_number = self.cleaned_data['phone_number']
+                if self.cleaned_data.get('date_of_birth'):
+                    user.date_of_birth = self.cleaned_data['date_of_birth']
+                user.email = self.sociallogin.user.email or user.email
+                user.is_active = True
+                user.save()
             self.sociallogin.connect(request, user)
             return user
 

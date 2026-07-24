@@ -1,6 +1,6 @@
 import csv
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.http import HttpResponse
 from django.utils.html import format_html
 from django.utils import timezone
@@ -27,25 +27,40 @@ def export_reservations_csv(modeladmin, request, queryset):
     
     writer = csv.writer(response)
     writer.writerow(['ID', 'User', 'Service', 'Specialist', 'Date', 'Time', 'Additional Text'])
-    
-    for obj in queryset:
+
+    for obj in queryset.select_related('user', 'service', 'specialist'):
         writer.writerow([obj.id, obj.user.get_full_name(), obj.service.name, obj.specialist.name, obj.date, obj.time, obj.additional_text])
-    
+
     return response
 
 @admin.action(description=_('Mark selected comments as reviewed'))
 def mark_as_reviewed(modeladmin, request, queryset):
     queryset.update(is_reviewed=True)
 
+def _bulk_change_status(modeladmin, request, queryset, new_status):
+    skipped = queryset.filter(status=Reservation.STATUS_DELETED).count()
+    # A single UPDATE instead of per-row change_status()/full_clean(): safe
+    # here because the target status is never 'active', so clean() would
+    # only ever hit its early-return branch anyway.
+    queryset.exclude(status=Reservation.STATUS_DELETED).update(
+        status=new_status,
+        status_updated_at=timezone.now(),
+        status_updated_by=request.user,
+    )
+    if skipped:
+        modeladmin.message_user(
+            request,
+            _('Пропуснати %(count)d отказани резервации (не могат да бъдат маркирани).') % {'count': skipped},
+            level=messages.WARNING,
+        )
+
 @admin.action(description=_('Маркирай като Завършена'))
 def mark_as_completed(modeladmin, request, queryset):
-    for obj in queryset:
-        obj.change_status(Reservation.STATUS_COMPLETED, user=request.user)
+    _bulk_change_status(modeladmin, request, queryset, Reservation.STATUS_COMPLETED)
 
 @admin.action(description=_('Маркирай като Не се е явил'))
 def mark_as_noshow(modeladmin, request, queryset):
-    for obj in queryset:
-        obj.change_status(Reservation.STATUS_NOSHOW, user=request.user)
+    _bulk_change_status(modeladmin, request, queryset, Reservation.STATUS_NOSHOW)
 
 # --- Filters ---
 
@@ -146,9 +161,11 @@ class ReservationAdmin(ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         if 'status' in form.changed_data:
-            obj.status_updated_at = timezone.now()
-            obj.status_updated_by = request.user
-        super().save_model(request, obj, form, change)
+            # Route through the model's own change_status() so audit
+            # stamping stays in one place instead of being reimplemented here.
+            obj.change_status(obj.status, user=request.user)
+        else:
+            super().save_model(request, obj, form, change)
 
 @admin.register(Comment)
 class CommentAdmin(ModelAdmin):

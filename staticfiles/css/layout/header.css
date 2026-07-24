@@ -27,17 +27,9 @@
     object-fit: contain;
 }
 
-.logo-svg--light {
-    filter: brightness(0) invert(1);
-}
-
 .logo-text {
     color: var(--primary-color);
     margin: 0;
-}
-
-.logo-text--light {
-    color: var(--white);
 }
 
 /* Navigation Links */
@@ -315,6 +307,11 @@
     .navbar-cta i {
         margin: 0;
         font-size: 1.1rem;
+    }
+
+    /* Booking CTA is redundant on the reservation page itself */
+    .page-reservation .navbar-cta {
+        display: none;
     }
 
     .mobile-menu-toggle {

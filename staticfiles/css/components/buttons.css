@@ -53,24 +53,7 @@
     box-shadow: var(--shadow-md);
 }
 
-.btn-accent {
-    background-color: var(--accent-color);
-    color: var(--white);
-}
-
-.btn-accent:hover {
-    background-color: var(--primary-color);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-    color: var(--white);
-}
-
 /* Button Sizes */
-.btn-sm {
-    padding: 0.5rem 1rem;
-    font-size: var(--fs-sm);
-}
-
 .btn-lg {
     padding: 1rem 2rem;
     font-size: var(--fs-lg);

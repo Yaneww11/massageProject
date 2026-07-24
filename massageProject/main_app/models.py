@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxLengthValidator, RegexValidator
 from django.db.models import JSONField
@@ -178,11 +178,12 @@ class Reservation(models.Model):
     )
 
     time = models.TimeField()
-    date = models.DateField()
+    date = models.DateField(db_index=True)
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
-        default=STATUS_ACTIVE
+        default=STATUS_ACTIVE,
+        db_index=True,
     )
     updated_at = models.DateTimeField(auto_now=True)
     status_updated_at = models.DateTimeField(null=True, blank=True)
@@ -198,9 +199,9 @@ class Reservation(models.Model):
     # Custom Managers
     class ReservationQuerySet(models.QuerySet):
         def active(self):
-            return self.filter(status='active')
+            return self.filter(status='active').select_related('service', 'specialist')
         def past(self):
-            return self.filter(status__in=['completed', 'no_show'])
+            return self.filter(status__in=['completed', 'no_show']).select_related('service', 'specialist')
         def deleted(self):
             return self.filter(status='deleted')
 
@@ -214,6 +215,16 @@ class Reservation(models.Model):
 
     objects = ReservationManager()
     all_objects = models.Manager()
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Snapshot of the as-loaded values (set from DB via from_db(), or left
+        # as the field defaults for a brand-new instance) so clean() can tell
+        # a genuine reschedule/new booking apart from an edit to an unrelated
+        # field on an already-valid active reservation.
+        self._loaded_date = self.date
+        self._loaded_time = self.time
+        self._loaded_status = self.status
 
     @property
     def end_time(self):
@@ -230,10 +241,24 @@ class Reservation(models.Model):
         if self.status != self.STATUS_ACTIVE:
             return
 
-        # 1. Lead time check (2 hours)
-        reservation_datetime = timezone.make_aware(datetime.combine(self.date, self.time))
-        if reservation_datetime < timezone.now() + timedelta(hours=2):
-            raise ValidationError(_("Резервация трябва да се направи поне 2 часа предварително."))
+        start_dt = datetime.combine(self.date, self.time)
+        duration = timedelta(minutes=self.service.duration_in_minutes)
+        end_dt = start_dt + duration
+
+        # 1. Lead time check (2 hours) — only for a new booking, a reschedule
+        # (date/time changed), or a transition into active. Editing an
+        # unrelated field on an already-active, already-valid reservation
+        # shouldn't be blocked just because it's now within the lead time.
+        is_new_or_rescheduled = (
+            self.pk is None
+            or self.date != self._loaded_date
+            or self.time != self._loaded_time
+            or self._loaded_status != self.STATUS_ACTIVE
+        )
+        if is_new_or_rescheduled:
+            reservation_datetime = timezone.make_aware(start_dt)
+            if reservation_datetime < timezone.now() + timedelta(hours=2):
+                raise ValidationError(_("Резервация трябва да се направи поне 2 часа предварително."))
 
         # 2. Working hours check
         day = self.date.weekday()
@@ -241,10 +266,13 @@ class Reservation(models.Model):
         if not hours:
             raise ValidationError(_("%(name)s не работи в този ден.") % {'name': self.specialist.name})
 
-        duration = timedelta(minutes=self.service.duration_in_minutes)
-        end_time = (datetime.combine(self.date, self.time) + duration).time()
+        # Compare full datetimes (not bare .time()) so a duration that pushes
+        # the end past midnight is correctly detected as outside working
+        # hours, instead of wrapping around to an early clock time.
+        hours_start_dt = datetime.combine(self.date, hours.start_time)
+        hours_end_dt = datetime.combine(self.date, hours.end_time)
 
-        if self.time < hours.start_time or end_time > hours.end_time:
+        if start_dt < hours_start_dt or end_dt > hours_end_dt:
             raise ValidationError(
                 _("Избраният час е извън работното време на %(name)s (%(start)s - %(end)s).") % {
                     'name': self.specialist.name,
@@ -254,7 +282,7 @@ class Reservation(models.Model):
             )
 
         # 3. Overlap check
-        existing_reservations = Reservation.objects.filter(
+        existing_reservations = Reservation.objects.select_related('service').filter(
             specialist=self.specialist,
             date=self.date,
             status=self.STATUS_ACTIVE
@@ -262,10 +290,11 @@ class Reservation(models.Model):
 
         for res in existing_reservations:
             res_duration = timedelta(minutes=res.service.duration_in_minutes)
-            res_end = (datetime.combine(res.date, res.time) + res_duration).time()
+            res_start_dt = datetime.combine(res.date, res.time)
+            res_end_dt = res_start_dt + res_duration
 
             # (StartA < EndB) and (EndA > StartB)
-            if self.time < res_end and end_time > res.time:
+            if start_dt < res_end_dt and end_dt > res_start_dt:
                 raise ValidationError(
                     _("Часът се застъпва с друга резервация за %(name)s.") % {'name': self.specialist.name}
                 )
@@ -278,12 +307,27 @@ class Reservation(models.Model):
         self.save()
 
     def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
+        if self.status == self.STATUS_ACTIVE and self.specialist_id:
+            with transaction.atomic():
+                # Lock the specialist row so concurrent bookings for them serialize,
+                # closing the check-then-save race in clean()'s overlap check.
+                Specialist.objects.select_for_update().get(pk=self.specialist_id)
+                self.full_clean()
+                super().save(*args, **kwargs)
+        else:
+            self.full_clean()
+            super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = _('Резервация')
         verbose_name_plural = _('Резервации')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['specialist', 'date', 'time'],
+                condition=models.Q(status='active'),
+                name='unique_active_reservation_slot',
+            )
+        ]
 
     def __str__(self):
         return f"{self.service.name} - {self.date} {self.time.strftime('%H:%M')}"
@@ -462,6 +506,7 @@ class Comment(models.Model):
 
     is_reviewed = models.BooleanField(
         default=False,
+        db_index=True,
     )
 
     class Meta:

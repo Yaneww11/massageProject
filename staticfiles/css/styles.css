@@ -2,7 +2,6 @@
 @import url('base/reset.css');
 @import url('base/variables.css');
 @import url('base/typography.css');
-@import url('base/responsive.css');
 
 /* Layout styles */
 @import url('layout/header.css');
@@ -12,7 +11,6 @@
 /* Page-specific styles */
 @import url('pages/home.css');
 @import url('pages/about.css');
-@import url('pages/services.css');
 @import url('pages/reservation.css');
 @import url('pages/detail_page.css');
 @import url('pages/my_profile.css');
@@ -21,7 +19,6 @@
 
 /* Components styles */
 @import url('components/buttons.css');
-@import url('components/cards.css');
 @import url('components/form.css');
 @import url('components/auth-modal.css');
 @import url('components/hero-carousel.css');

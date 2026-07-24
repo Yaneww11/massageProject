@@ -1,4 +1,3 @@
-from django.apps import apps
 from django.contrib import auth
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.hashers import make_password
@@ -15,12 +14,6 @@ class AppUserManager(BaseUserManager):
             raise ValueError("The given phone number must be set")
         email = self.normalize_email(email)
         phone_number = self.normalize_phone_number(phone_number)
-        # Lookup the real model class from the global app registry so this
-        # manager method can be used in migrations. This is fine because
-        # managers are by definition working on the real model.
-        GlobalUserModel = apps.get_model(
-            self.model._meta.app_label, self.model._meta.object_name
-        )
         user = self.model(phone_number=phone_number,email=email, **extra_fields)
         user.password = make_password(password)
         user.save(using=self._db)

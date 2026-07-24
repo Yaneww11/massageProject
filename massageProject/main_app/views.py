@@ -6,17 +6,18 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 from django.utils.translation import gettext as _
-from datetime import datetime, timedelta, time, date
+from datetime import datetime, timedelta, date
 from django.db.models import Count
 from django.contrib import messages
 from django.core.cache import cache
 from django.http import JsonResponse, Http404
 
+from massageProject.main_app.context_processors import get_cached_homepage
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
     ReservationDeleteForm, CommentForm, UserNameForm
 from massageProject.main_app.mixins import BookingEnabledMixin, booking_enabled_required, \
     CommentsEnabledMixin, comments_enabled_required
-from massageProject.main_app.models import Service, HomePage, Specialist, BusinessInfo, Reservation, Comment, WorkingHours, ServiceGroup, GalleryAlbum
+from massageProject.main_app.models import Service, Specialist, Reservation, Comment, WorkingHours, ServiceGroup, GalleryAlbum
 
 
 @booking_enabled_required
@@ -54,7 +55,7 @@ def check_availability(request):
     duration = timedelta(minutes=service.duration_in_minutes)
 
     # 3. Get existing reservations for overlap check
-    existing_reservations = Reservation.objects.filter(
+    existing_reservations = Reservation.objects.select_related('service').filter(
         specialist=specialist,
         date=date_obj,
         status=Reservation.STATUS_ACTIVE
@@ -100,7 +101,7 @@ class Index(TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        context['page'] = HomePage.objects.first()
+        context['page'] = get_cached_homepage()
         services = list(Service.objects.filter(home_page=True)[:3])
         context['services'] = services
         context['featured_has_images'] = bool(services) and all(m.image for m in services)
@@ -116,7 +117,7 @@ class PrivacyPolicyView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['page'] = HomePage.objects.first()
+        context['page'] = get_cached_homepage()
         return context
 
 class ServicesDashboard(ListView):
@@ -347,9 +348,10 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
         context['favorite_service'] = fav['service__name'] if fav else None
         context['client_since'] = user.date_joined.year
 
-        # Studio info and working hours
-        context['business_info'] = BusinessInfo.objects.first()
-        homepage = HomePage.objects.first()
+        # Studio info and working hours -- business_info is already supplied
+        # globally by the admin_branding context processor, no need to
+        # re-fetch it here.
+        homepage = get_cached_homepage()
         context['working_hours'] = list(homepage.business_working_hours.order_by('order')) if homepage else []
 
         # Map of reviewed past reservations {reservation_id: comment}
@@ -366,20 +368,29 @@ class ServiceDetail(TemplateView):
         context['service'] = get_object_or_404(Service, pk=kwargs['pk'])
         return self.render_to_response(context)
 
+def _blocked_by_edit_window(request, reservation, error_message):
+    """Ownership + 24-hour rule shared by edit/delete reservation views.
+    Returns a redirect response if the change should be blocked, else None."""
+    if reservation.user != request.user:
+        raise PermissionDenied
+
+    reservation_datetime = timezone.make_aware(datetime.combine(reservation.date, reservation.time))
+    if reservation_datetime < timezone.now() + timedelta(hours=24):
+        messages.error(request, error_message)
+        return redirect('profile_page')
+    return None
+
 @booking_enabled_required
 @login_required
 def edit_reservation(request, pk: int):
     reservation = get_object_or_404(Reservation, pk=pk)
 
-    # Ownership check
-    if reservation.user != request.user:
-        raise PermissionDenied
-
-    # 24-hour rule
-    reservation_datetime = timezone.make_aware(datetime.combine(reservation.date, reservation.time))
-    if reservation_datetime < timezone.now() + timedelta(hours=24):
-        messages.error(request, _("Не можете да променяте резервация по-малко от 24 часа преди часа."))
-        return redirect('profile_page')
+    blocked = _blocked_by_edit_window(
+        request, reservation,
+        _("Не можете да променяте резервация по-малко от 24 часа преди часа."),
+    )
+    if blocked:
+        return blocked
 
     if request.method == 'POST':
         form = ReservationEditForm(request.POST, instance=reservation)
@@ -402,15 +413,12 @@ def edit_reservation(request, pk: int):
 def delete_reservation(request, pk: int):
     reservation = get_object_or_404(Reservation, pk=pk)
 
-    # Ownership check
-    if reservation.user != request.user:
-        raise PermissionDenied
-
-    # 24-hour rule
-    reservation_datetime = timezone.make_aware(datetime.combine(reservation.date, reservation.time))
-    if reservation_datetime < timezone.now() + timedelta(hours=24):
-        messages.error(request, _("Не можете да отменяте резервация по-малко от 24 часа преди часа."))
-        return redirect('profile_page')
+    blocked = _blocked_by_edit_window(
+        request, reservation,
+        _("Не можете да отменяте резервация по-малко от 24 часа преди часа."),
+    )
+    if blocked:
+        return blocked
 
     form = ReservationDeleteForm(instance=reservation)
 

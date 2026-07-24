@@ -2,7 +2,7 @@ import random
 
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.hashers import make_password, check_password
-from django.contrib.auth.models import PermissionsMixin, AbstractUser
+from django.contrib.auth.models import PermissionsMixin
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
@@ -55,7 +55,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         ),
     )
 
-    count_messages = models.IntegerField(default=0)
     date_joined = models.DateTimeField(default=timezone.now)
 
     objects = AppUserManager()

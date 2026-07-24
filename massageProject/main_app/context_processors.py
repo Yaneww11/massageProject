@@ -2,9 +2,30 @@ from django.core.cache import cache
 
 from massageProject.main_app.models import HomePage, BusinessInfo, SiteConfiguration
 
+HOMEPAGE_CACHE_KEY = 'homepage_singleton'
+BUSINESS_INFO_CACHE_KEY = 'business_info_singleton'
+
+
+def get_cached_homepage():
+    homepage = cache.get(HOMEPAGE_CACHE_KEY)
+    if homepage is None:
+        homepage = HomePage.get_solo()
+        # Same 60s cross-worker-staleness bound as site_configuration below.
+        cache.set(HOMEPAGE_CACHE_KEY, homepage, 60)
+    return homepage
+
+
+def get_cached_business_info():
+    business_info = cache.get(BUSINESS_INFO_CACHE_KEY)
+    if business_info is None:
+        business_info = BusinessInfo.objects.first()
+        cache.set(BUSINESS_INFO_CACHE_KEY, business_info, 60)
+    return business_info
+
+
 def admin_branding(request):
     try:
-        homepage = HomePage.get_solo()
+        homepage = get_cached_homepage()
         brand_name = homepage.brand_name
         brand_logo = homepage.logo.url if homepage.logo else None
         footer_tagline = homepage.footer_tagline
@@ -17,7 +38,7 @@ def admin_branding(request):
     request.brand_logo = brand_logo
 
     try:
-        business_info = BusinessInfo.objects.first()
+        business_info = get_cached_business_info()
     except Exception:
         business_info = None
 

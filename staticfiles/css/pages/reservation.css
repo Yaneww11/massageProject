@@ -552,34 +552,6 @@
     flex-wrap: wrap;
 }
 
-/* ── Unauthenticated prompt ──────────────────────────────── */
-.bn-unauth {
-    min-height: 420px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-xl) var(--space-lg);
-    text-align: center;
-}
-
-.bn-unauth h2 {
-    font-family: var(--font-heading);
-    color: var(--primary-color);
-    font-size: var(--fs-3xl);
-    margin-bottom: var(--space-md);
-}
-
-.bn-unauth p {
-    font-size: var(--fs-lg);
-    color: var(--text-muted);
-}
-
-.bn-unauth a {
-    color: var(--accent-color);
-    font-weight: 600;
-}
-
 /* ── Toast ───────────────────────────────────────────────── */
 .toast-container {
     position: fixed;

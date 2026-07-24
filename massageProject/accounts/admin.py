@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
+from django.db.models import Count, Q
 from django.utils.html import format_html
 
 UserModel = get_user_model()
@@ -29,7 +30,7 @@ class AppUserAdmin(UserAdmin):
                 "classes": ("collapse",),
             },
         ),
-        ("Statistics & Dates", {"fields": ("count_messages", "last_login", "date_joined")}),
+        ("Statistics & Dates", {"fields": ("last_login", "date_joined")}),
     )
 
     add_fieldsets = (
@@ -46,12 +47,18 @@ class AppUserAdmin(UserAdmin):
         return f"{obj.first_name} {obj.last_name}"
     full_name_display.short_description = 'Full Name'
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(
+            _reservations_count=Count('reservations', filter=~Q(reservations__status='deleted'))
+        )
+
     def reservations_count(self, obj):
-        count = obj.reservations.count()
+        count = obj._reservations_count
         if count > 0:
             return format_html('<b>{}</b>', count)
         return count
     reservations_count.short_description = 'Reservations'
+    reservations_count.admin_order_field = '_reservations_count'
 
     # Add a custom detail view title
     def get_form(self, request, obj=None, **kwargs):

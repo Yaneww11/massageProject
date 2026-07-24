@@ -13,7 +13,9 @@
     
     /* Semantic Colors */
     --success: #6B7A5E;         /* Muted Sage Green */
+    --success-light: #ECFDF5;   /* Light tint for success badges/hover states */
     --error: #A35D5D;           /* Muted Terracotta */
+    --error-light: #FEF2F2;     /* Light tint for error/cancel hover states */
 
     /* Typography */
     --font-main: 'Montserrat', sans-serif;

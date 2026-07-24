@@ -3,23 +3,23 @@
 
 {% block content %}
 <style>
-  /* ── Variables ── */
+  /* ── Variables (aliased to the site theme, see theme_overrides.html) ── */
   :root {
-    --svc-primary:      #4A3728;
-    --svc-primary-h:    #6D5442;
-    --svc-accent:       #8E735B;
-    --svc-page-bg:      #FAF7F2;
-    --svc-card-bg:      #FFFFFF;
-    --svc-border:       #EAE0D4;
-    --svc-text-head:    #2C1F14;
-    --svc-text-body:    #4A3728;
-    --svc-text-muted:   #7D6A5A;
-    --svc-radius-lg:    16px;
-    --svc-radius-md:    10px;
+    --svc-primary:      var(--primary-color);
+    --svc-primary-h:    var(--primary-light);
+    --svc-accent:       var(--accent-color);
+    --svc-page-bg:      var(--bg-light);
+    --svc-card-bg:      var(--bg-paper);
+    --svc-border:       var(--border-color);
+    --svc-text-head:    var(--text-main);
+    --svc-text-body:    var(--text-main);
+    --svc-text-muted:   var(--text-muted);
+    --svc-radius-lg:    var(--radius-lg);
+    --svc-radius-md:    var(--radius-md);
     --svc-radius-pill:  999px;
-    --svc-shadow-sm:    0 2px 8px rgba(74,55,40,.08);
-    --svc-shadow-lg:    0 12px 32px rgba(74,55,40,.18);
-    --svc-transition:   0.25s ease;
+    --svc-shadow-sm:    var(--shadow-sm);
+    --svc-shadow-lg:    var(--shadow-lg);
+    --svc-transition:   var(--transition);
   }
 
   /* ── Page wrapper ── */
@@ -40,19 +40,19 @@
   }
   .svc-breadcrumb:hover { color: var(--svc-primary); }
   .svc-eyebrow {
-    display: block; font-family: 'Montserrat', sans-serif;
+    display: block; font-family: var(--font-main);
     font-size: 12px; font-weight: 600; letter-spacing: .12em;
     text-transform: uppercase; color: var(--svc-accent);
     margin-bottom: 10px;
   }
   .svc-hero__title {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: var(--font-heading);
     font-size: clamp(1.9rem, 4vw, 2.75rem);
     font-weight: 600; color: var(--svc-text-head);
     line-height: 1.18; margin: 0 0 14px;
   }
   .svc-hero__sub {
-    font-family: 'Montserrat', sans-serif;
+    font-family: var(--font-main);
     font-size: 16px; color: var(--svc-text-muted);
     line-height: 1.6; max-width: 520px; margin: 0;
   }
@@ -75,7 +75,7 @@
     border: 1.5px solid var(--svc-border);
     background: transparent;
     color: var(--svc-text-body);
-    font-family: 'Montserrat', sans-serif;
+    font-family: var(--font-main);
     font-size: 14px; font-weight: 400;
     cursor: pointer;
     transition: all var(--svc-transition);
@@ -85,7 +85,7 @@
   .svc-tab.is-active {
     background: var(--svc-primary);
     border-color: var(--svc-primary);
-    color: #fff;
+    color: var(--white);
     font-weight: 600;
   }
 
@@ -142,7 +142,7 @@
     background: rgba(255,255,255,.96);
     border-radius: var(--svc-radius-pill);
     padding: 5px 16px;
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: var(--font-heading);
     font-size: 17px; font-weight: 600;
     color: var(--svc-primary);
     box-shadow: var(--svc-shadow-sm);
@@ -161,7 +161,7 @@
   }
   .svc-card__name {
     margin: 0;
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: var(--font-heading);
     font-size: 20px; font-weight: 600;
     color: var(--svc-text-head);
     line-height: 1.25;
@@ -170,16 +170,16 @@
     flex-shrink: 0;
     display: inline-flex; align-items: center;
     padding: 4px 12px;
-    background: #F3EDE5;
+    background: var(--svc-page-bg);
     border-radius: var(--svc-radius-pill);
-    font-family: 'Montserrat', sans-serif;
+    font-family: var(--font-main);
     font-size: 12px; font-weight: 500;
     color: var(--svc-accent);
     white-space: nowrap;
   }
   .svc-card__desc {
     margin: 0;
-    font-family: 'Montserrat', sans-serif;
+    font-family: var(--font-main);
     font-size: 14px; color: var(--svc-text-muted);
     line-height: 1.6;
   }
@@ -200,7 +200,7 @@
   }
   .svc-accordion p {
     margin: 0;
-    font-family: 'Montserrat', sans-serif;
+    font-family: var(--font-main);
     font-size: 14px; color: var(--svc-text-body);
     line-height: 1.7;
   }
@@ -215,7 +215,7 @@
     flex: 1;
     padding: 10px 12px;
     border-radius: var(--svc-radius-md);
-    font-family: 'Montserrat', sans-serif;
+    font-family: var(--font-main);
     font-size: 14px; font-weight: 500;
     cursor: pointer; text-align: center;
     text-decoration: none; display: inline-block;
@@ -230,12 +230,12 @@
   }
   .svc-btn--outline:hover {
     background: var(--svc-primary);
-    color: #fff;
+    color: var(--white);
   }
   .svc-btn--primary {
     background: var(--svc-primary);
     border-color: var(--svc-primary);
-    color: #fff;
+    color: var(--white);
   }
   .svc-btn--primary:hover {
     background: var(--svc-primary-h);
@@ -247,7 +247,7 @@
     display: none;
     text-align: center;
     padding: 80px 24px;
-    font-family: 'Montserrat', sans-serif;
+    font-family: var(--font-main);
     font-size: 16px;
     color: var(--svc-text-muted);
   }
