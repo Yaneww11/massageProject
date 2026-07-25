@@ -20,7 +20,7 @@
         <!-- First 4 albums: mosaic grid -->
         <div class="gal-mosaic">
           {% for album in mosaic_albums %}
-            {% with cover=album.photos.all.0 %}
+            {% with cover=album.images.all.0 %}
             <a href="{% url 'gallery_album' album.slug %}" class="gal-tile">
               <div class="gal-tile__bg"
                    {% if cover %}style="background-image: url('{{ cover.image.url }}')"{% endif %}>
@@ -48,7 +48,7 @@
         {% if overflow_albums %}
           <div class="gal-overflow-grid">
             {% for album in overflow_albums %}
-              {% with cover=album.photos.all.0 %}
+              {% with cover=album.images.all.0 %}
               <a href="{% url 'gallery_album' album.slug %}" class="gal-tile">
                 <div class="gal-tile__bg"
                      {% if cover %}style="background-image: url('{{ cover.image.url }}')"{% endif %}>

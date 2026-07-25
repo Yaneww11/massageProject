@@ -12,9 +12,9 @@ from unfold.contrib.forms.widgets import WysiwygWidget
 from modeltranslation.admin import TabbedTranslationAdmin
 
 from massageProject.main_app.models import (
-    Service, Image, Gallery, HomePage, GalleryImage,
+    Service, Image, Gallery, HomePage,
     BusinessInfo, Specialist, WorkingHours, Reservation, Comment,
-    BusinessWorkingHours, ServiceGroup, GalleryAlbum, AlbumPhoto,
+    BusinessWorkingHours, ServiceGroup,
     SiteConfiguration,
 )
 
@@ -184,7 +184,9 @@ class CommentAdmin(ModelAdmin):
 
 @admin.register(Image)
 class ImageAdmin(ModelAdmin, TabbedTranslationAdmin):
-    list_display = ('display_image', 'alt_text')
+    list_display = ('display_image', 'gallery', 'alt_text', 'order')
+    list_editable = ('order',)
+    list_filter = ('gallery',)
     search_fields = ('alt_text',)
 
     def display_image(self, obj):
@@ -193,53 +195,26 @@ class ImageAdmin(ModelAdmin, TabbedTranslationAdmin):
         return _("Няма изображение")
     display_image.short_description = _('Преглед')
 
-class GalleryImageInline(TabularInline):
-    model = GalleryImage
+
+class ImageInline(TabularInline):
+    model = Image
     extra = 1
+    fields = ('image', 'alt_text', 'order')
+
 
 @admin.register(Gallery)
 class GalleryAdmin(ModelAdmin, TabbedTranslationAdmin):
-    inlines = [GalleryImageInline]
-    fields = ('title', 'short_description')
-
-
-class AlbumPhotoInline(TabularInline):
-    model = AlbumPhoto
-    extra = 1
-    fields = ('display_image', 'image', 'alt_text', 'order')
-    readonly_fields = ('display_image',)
-
-    def display_image(self, obj):
-        if obj.image:
-            return format_html('<img src="{}" style="width:80px;height:50px;object-fit:cover;" />', obj.image.url)
-        return _('Няма изображение')
-    display_image.short_description = _('Преглед')
-
-
-@admin.register(GalleryAlbum)
-class GalleryAlbumAdmin(ModelAdmin, TabbedTranslationAdmin):
-    list_display = ('title', 'order', 'photo_count')
+    list_display = ('__str__', 'gallery_type', 'order', 'photo_count')
     list_editable = ('order',)
+    list_filter = ('gallery_type',)
     prepopulated_fields = {'slug': ('title_bg',)}
-    inlines = [AlbumPhotoInline]
+    inlines = [ImageInline]
+    fields = ('gallery_type', 'title', 'slug', 'description', 'order')
 
     def photo_count(self, obj):
-        return obj.photos.count()
+        return obj.photo_count
     photo_count.short_description = _('Брой снимки')
 
-
-@admin.register(AlbumPhoto)
-class AlbumPhotoAdmin(ModelAdmin, TabbedTranslationAdmin):
-    list_display = ('display_image', 'album', 'alt_text', 'order')
-    list_editable = ('order',)
-    list_filter = ('album',)
-    search_fields = ('alt_text',)
-
-    def display_image(self, obj):
-        if obj.image:
-            return format_html('<img src="{}" style="width: 80px; height: 50px; object-fit: cover;" />', obj.image.url)
-        return _("Няма изображение")
-    display_image.short_description = _('Преглед')
 
 class BusinessWorkingHoursInline(TabularInline):
     model = BusinessWorkingHours

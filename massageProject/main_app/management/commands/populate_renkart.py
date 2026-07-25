@@ -7,7 +7,7 @@ from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand, CommandError
 
 from massageProject.main_app.models import (
-    BusinessInfo, BusinessWorkingHours, Comment, Gallery, GalleryImage, HomePage,
+    BusinessInfo, BusinessWorkingHours, Comment, Gallery, HomePage,
     Image, Reservation, Service, ServiceGroup, Specialist, SiteConfiguration,
     WorkingHours,
 )
@@ -263,7 +263,9 @@ class Command(BaseCommand):
     def _populate_home_page(self, logo_bytes, reneta_bytes):
         home_page = HomePage.objects.filter(pk=1).first()
         if home_page is None:
-            gallery = Gallery.objects.create(title_bg='RenkArt', title_en='RenkArt')
+            gallery = Gallery.objects.create(
+                gallery_type=Gallery.TYPE_HOMEPAGE, title_bg='RenkArt', title_en='RenkArt',
+            )
             home_page = HomePage.objects.create(
                 pk=1,
                 brand_name_bg='RenkArt — Портретна и Арт Фотография',
@@ -286,11 +288,11 @@ class Command(BaseCommand):
 
         if not home_page.gallery.images.exists():
             image = Image.objects.create(
+                gallery=home_page.gallery,
                 alt_text_bg='Ренета Кирилова с фотоапарат',
                 alt_text_en='Reneta Kirilova with a camera',
             )
             image.image.save('reneta.jpg', ContentFile(reneta_bytes), save=True)
-            GalleryImage.objects.create(gallery=home_page.gallery, image=image)
             self.stdout.write("Added hero image to gallery")
 
         return home_page

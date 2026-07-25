@@ -324,14 +324,14 @@ UNFOLD = {
                 "separator": True,
                 "items": [
                     {
-                        "title": _("Албуми"),
+                        "title": _("Галерии"),
                         "icon": "photo_library",
-                        "link": reverse_lazy("admin:main_app_galleryalbum_changelist"),
+                        "link": reverse_lazy("admin:main_app_gallery_changelist"),
                     },
                     {
-                        "title": _("Снимки в албум"),
+                        "title": _("Снимки"),
                         "icon": "image",
-                        "link": reverse_lazy("admin:main_app_albumphoto_changelist"),
+                        "link": reverse_lazy("admin:main_app_image_changelist"),
                     },
                 ],
             },

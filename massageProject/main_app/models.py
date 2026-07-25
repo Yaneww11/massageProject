@@ -33,24 +33,27 @@ class Service(models.Model):
         max_length=80,
         help_text=_(
             'Показва се в предпочитаните услуги на началната страница, на страницата с '
-            'услуги, на страницата с детайли за услугата и навсякъде в процеса на резервация.'
+            'услуги и навсякъде в процеса на резервация.'
         ),
     )
     description = models.TextField(
-        help_text=_('Показва се на страницата с детайли за услугата.'),
+        help_text=_(
+            'Показва се разгънат (при клик "Научете повече" / върху картата) в '
+            'предпочитаните услуги на началната страница.'
+        ),
     )
     price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         help_text=_(
-            'Показва се на страницата с услуги, страницата с детайли за услугата и '
-            'предпочитаните услуги на началната страница.'
+            'Показва се на страницата с услуги и в предпочитаните услуги на '
+            'началната страница.'
         ),
     )
     duration_in_minutes = models.IntegerField(
         help_text=_(
-            'Показва се на страницата с услуги, страницата с детайли за услугата и '
-            'предпочитаните услуги на началната страница; използва се и за изчисляване на '
+            'Показва се на страницата с услуги и в предпочитаните услуги на '
+            'началната страница; използва се и за изчисляване на '
             'свободните часове за резервация.'
         ),
     )
@@ -64,8 +67,8 @@ class Service(models.Model):
     image = models.ImageField(
         upload_to='services/',
         help_text=_(
-            'Показва се на картата в страницата с услуги, в предпочитаните услуги на '
-            'началната страница и на страницата с детайли за услугата. Ако е празно, се '
+            'Показва се на картата в страницата с услуги и в предпочитаните услуги на '
+            'началната страница. Ако е празно, се '
             'показва градиентен placeholder.'
         ),
         blank=True,
@@ -456,76 +459,47 @@ class Reservation(models.Model):
         return f"{self.service.name} - {self.date} {self.time.strftime('%H:%M')}"
 
 class Gallery(models.Model):
-    images = models.ManyToManyField(
-        'Image', related_name='galleries', through='GalleryImage',
-        help_text=_('Първите 3 снимки се показват в секцията с галерия на началната страница.'),
+    TYPE_HOMEPAGE = 'homepage'
+    TYPE_RESERVATION = 'reservation'
+    TYPE_ALBUM = 'album'
+    TYPE_CHOICES = [
+        (TYPE_HOMEPAGE, _('Начална страница')),
+        (TYPE_RESERVATION, _('Резервация')),
+        (TYPE_ALBUM, _('Албум')),
+    ]
+
+    gallery_type = models.CharField(
+        max_length=20, choices=TYPE_CHOICES, default=TYPE_ALBUM,
+        verbose_name=_('Тип галерия'),
+        help_text=_(
+            'Определя къде се показва тази галерия: "Начална страница" — секцията с '
+            'галерия на началната страница (може да има само една); "Резервация" — '
+            'снимки, свързани с конкретна резервация; "Албум" — показва се като '
+            'самостоятелен албум на страницата с галерии.'
+        ),
     )
     title = models.CharField(
         max_length=255, blank=True, verbose_name=_('Заглавие'),
-        help_text=_('Показва се като малък надпис над секцията с галерия на началната страница.'),
-    )
-    short_description = models.TextField(
-        blank=True, verbose_name=_('Кратко описание'),
-        help_text=_('Показва се като заглавие на секцията с галерия на началната страница.'),
-    )
-
-    class Meta:
-        verbose_name = _('Галерия')
-        verbose_name_plural = _('Галерии')
-
-    def __str__(self):
-        if hasattr(self, 'h'):
-            return f"{_('Галерия')} - {self.home_page.brand_name}"
-        return self.title or f"{_('Галерия')} {self.id}"
-
-class Image(models.Model):
-    image = models.ImageField(
-        upload_to='studios/gallery/',
-        help_text=_('Показва се в секцията с галерия на началната страница.'),
-    )
-    alt_text = models.CharField(
-        max_length=255,
         help_text=_(
-            'Използва се като алтернативен текст (alt) за тази снимка в секцията с галерия '
-            'на началната страница.'
+            'За албуми: показва се като заглавие на албума на страницата с галерии и на '
+            'собствената му страница (задължително за албуми). За началната страница: '
+            'показва се като малък надпис над секцията с галерия.'
         ),
-    )
-
-    class Meta:
-        verbose_name = _('Изображение')
-        verbose_name_plural = _('Изображения')
-
-    def __str__(self):
-        return self.alt_text
-
-class GalleryImage(models.Model):
-    gallery = models.ForeignKey(Gallery, on_delete=models.CASCADE)
-    image = models.ForeignKey(Image, on_delete=models.CASCADE)
-
-    class Meta:
-        unique_together = ('gallery', 'image')
-        verbose_name = _('Изображение в галерия')
-        verbose_name_plural = _('Изображения в галерия')
-
-    def __str__(self):
-        return f"{self.gallery} - {self.image.alt_text}"
-
-
-class GalleryAlbum(models.Model):
-    title = models.CharField(
-        max_length=255, verbose_name=_('Заглавие'),
-        help_text=_('Показва се като заглавие на албума на страницата с галерии и на собствената му страница.'),
     )
     description = models.TextField(
         blank=True, verbose_name=_('Описание'),
         help_text=_(
-            'Показва се на собствената страница на албума, а за първия по ред албум — и в '
-            'плочката му на страницата с галерии.'
+            'За албуми: показва се на собствената страница на албума, а за първия по ред '
+            'албум — и в плочката му на страницата с галерии. За началната страница: '
+            'показва се като заглавие на секцията с галерия.'
         ),
     )
     slug = models.SlugField(
-        unique=True, verbose_name=_('Slug'),
-        help_text=_('Използва се за изграждане на адреса (URL) на страницата на този албум.'),
+        unique=True, null=True, blank=True, verbose_name=_('Slug'),
+        help_text=_(
+            'Използва се за изграждане на адреса (URL) на страницата на албума. '
+            'Не се използва за другите типове галерии.'
+        ),
     )
     order = models.PositiveIntegerField(
         default=0, verbose_name=_('Ред'),
@@ -534,46 +508,64 @@ class GalleryAlbum(models.Model):
 
     class Meta:
         ordering = ['order']
-        verbose_name = _('Албум')
-        verbose_name_plural = _('Албуми')
+        verbose_name = _('Галерия')
+        verbose_name_plural = _('Галерии')
+
+    def clean(self):
+        if self.gallery_type == self.TYPE_HOMEPAGE:
+            qs = Gallery.objects.filter(gallery_type=self.TYPE_HOMEPAGE)
+            if self.pk:
+                qs = qs.exclude(pk=self.pk)
+            if qs.exists():
+                raise ValidationError({
+                    'gallery_type': _('Може да има само една галерия от тип "Начална страница".')
+                })
+        if self.gallery_type == self.TYPE_ALBUM and not self.title:
+            raise ValidationError({'title': _('Заглавието е задължително за галерии от тип "Албум".')})
 
     def __str__(self):
-        return self.title
+        if self.gallery_type == self.TYPE_HOMEPAGE and hasattr(self, 'home_page'):
+            return f"{_('Галерия')} - {self.home_page.brand_name}"
+        return self.title or f"{_('Галерия')} {self.id}"
 
     @property
     def cover(self):
-        return self.photos.order_by('order').first()
+        return self.images.order_by('order').first()
 
     @property
     def photo_count(self):
-        return self.photos.count()
+        return self.images.count()
 
 
-class AlbumPhoto(models.Model):
-    album = models.ForeignKey(GalleryAlbum, on_delete=models.CASCADE, related_name='photos', verbose_name=_('Албум'))
+class Image(models.Model):
+    gallery = models.ForeignKey(
+        'Gallery', on_delete=models.CASCADE, related_name='images',
+        verbose_name=_('Галерия'),
+    )
     image = models.ImageField(
-        upload_to='gallery/albums/', verbose_name=_('Изображение'),
+        upload_to='gallery/photos/',
         help_text=_(
-            'Показва се на страницата на албума, а ако е първата снимка в него — и като '
-            'корична снимка на албума на страницата с галерии.'
+            'Показва се в секцията с галерия на началната страница, или на страницата на '
+            'албума (и като корична снимка на албума на страницата с галерии, ако е '
+            'първата по ред).'
         ),
     )
     alt_text = models.CharField(
-        max_length=255, blank=True, verbose_name=_('Алт текст'),
+        max_length=255, blank=True,
         help_text=_('Използва се като алтернативен текст (alt) за тази снимка.'),
     )
     order = models.PositiveIntegerField(
         default=0, verbose_name=_('Ред'),
         help_text=_(
-            'Определя реда, в който снимките се показват в албума, и коя снимка се използва '
-            'като корична (първата по ред).'
+            'Определя реда, в който снимките се показват в галерията/албума, и коя се '
+            'използва като корична (първата по ред).'
         ),
     )
 
     class Meta:
         ordering = ['order']
-        verbose_name = _('Снимка в албум')
-        verbose_name_plural = _('Снимки в албум')
+        verbose_name = _('Изображение')
+        verbose_name_plural = _('Изображения')
 
     def __str__(self):
         return self.alt_text or f"Снимка {self.order}"
@@ -840,7 +832,7 @@ class SiteConfiguration(models.Model):
         default=True, verbose_name=_('Резервации активни'),
         help_text=_(
             'Когато е изключено, скрива всички бутони/линкове за резервация по целия сайт '
-            '(горно меню, начална страница, страница с услуги, детайли за услуга, профил на клиента).'
+            '(горно меню, начална страница, страница с услуги, профил на клиента).'
         ),
     )
     comments_enabled = models.BooleanField(

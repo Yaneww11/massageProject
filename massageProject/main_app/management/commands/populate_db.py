@@ -2,7 +2,7 @@ from datetime import date, time, timedelta
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from massageProject.main_app.models import (
-    Service, Specialist, BusinessInfo, HomePage, Gallery, Image, GalleryImage,
+    Service, Specialist, BusinessInfo, HomePage, Gallery, Image,
     Reservation, Comment
 )
 
@@ -105,24 +105,15 @@ class Command(BaseCommand):
             self.stdout.write(f"Created studio: {business_info.name}")
 
         # 5. Create Gallery and Home Page
-        gallery, created = Gallery.objects.get_or_create()
-        if created:
-            # Create some images for the gallery
+        gallery, created = Gallery.objects.get_or_create(gallery_type=Gallery.TYPE_HOMEPAGE)
+        if created or not gallery.images.exists():
             for i in range(3):
-                img = Image.objects.create(
+                Image.objects.create(
+                    gallery=gallery, order=i,
                     image='business/gallery/massage_studio.jpg',
                     alt_text=f'Studio Interior {i+1}'
                 )
-                GalleryImage.objects.create(gallery=gallery, image=img)
             self.stdout.write("Created gallery with 3 images")
-        elif not gallery.images.exists():
-             for i in range(3):
-                img = Image.objects.create(
-                    image='business/gallery/massage_studio.jpg',
-                    alt_text=f'Studio Interior {i+1}'
-                )
-                GalleryImage.objects.create(gallery=gallery, image=img)
-             self.stdout.write("Added images to existing empty gallery")
 
         home_page, created = HomePage.objects.get_or_create(
             pk=1,
