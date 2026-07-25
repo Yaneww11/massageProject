@@ -20,6 +20,19 @@
       </div>
     </div>
 
+    <!-- Photo proofing entry point -->
+  {% if is_photographer_website %}
+    <a href="{% url 'photo_proofing' %}" class="proof-teaser-card">
+      <div class="proof-teaser-icon"><i class="fas fa-images"></i></div>
+      <div class="proof-teaser-text">
+        <span class="profile-eyebrow">{% trans "СНИМКИ ОТ ВАШАТА СЕСИЯ" %}</span>
+        <h2 class="proof-teaser-title">{% trans "Прегледайте и отбележете любимите си кадри" %}</h2>
+        <p class="proof-teaser-subtitle">{% trans "Маркирайте фаворити, сравнете кадри и завършете избора си." %}</p>
+      </div>
+      <span class="proof-teaser-arrow" aria-hidden="true">&rarr;</span>
+    </a>
+  {% endif %}
+
     <!-- Stats bar -->
     <div class="profile-stats">
       <div class="stat-card">

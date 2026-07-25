@@ -1,5 +1,6 @@
 import base64
 
+from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, ListView, CreateView
@@ -327,12 +328,14 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
+        context['is_photographer_website'] = settings.IS_PHOTOGRAPHER_WEBSITE
 
         if user.has_perm('main_app.view_all_reservations'):
             active_reservations = list(Reservation.objects.active().order_by('date', 'time')[:15])
             past_reservations = list(Reservation.objects.past().order_by('-date', '-time')[:15])
             context['title'] = _('Управление на резервации')
         else:
+            context['is_photographer_website'] = settings.IS_PHOTOGRAPHER_WEBSITE
             user_qs = Reservation.objects.filter(user=user)
             active_reservations = list(user_qs.active().order_by('date', 'time'))
             past_reservations = list(user_qs.past().order_by('-date', '-time')[:5])

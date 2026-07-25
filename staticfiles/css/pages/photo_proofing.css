@@ -1,0 +1,789 @@
+/* Photo Proofing Gallery — session photo review & finalize */
+
+.proof-page {
+    background: var(--bg-light);
+    min-height: 60vh;
+    padding-bottom: 110px;
+}
+
+/* The native `hidden` attribute loses to any author rule that sets
+   `display` on the same element (e.g. .btn) since both are author-origin
+   styles; this restores it wherever the attribute is used on this page. */
+.proof-page [hidden] {
+    display: none !important;
+}
+
+.proof-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* ── Sticky orientation header ──────────────────────────── */
+.proof-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: color-mix(in srgb, var(--bg-paper) 92%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.proof-header-info {
+    min-width: 0;
+}
+
+.proof-eyebrow {
+    display: block;
+    font-family: var(--font-main);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--accent-color);
+    margin-bottom: 0.3rem;
+}
+
+.proof-title {
+    font-family: var(--font-heading);
+    font-size: var(--fs-2xl);
+    color: var(--primary-color);
+    margin: 0 0 0.25rem;
+    line-height: 1.15;
+}
+
+.proof-meta {
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.proof-filter-bar {
+    display: flex;
+    background: var(--bg-light);
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    padding: 3px;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.proof-filter-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: var(--font-main);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    padding: 0.5em 1.1em;
+    border-radius: 999px;
+    color: var(--text-main);
+    transition: var(--transition);
+}
+
+.proof-filter-btn.is-active {
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+.proof-filter-count {
+    font-weight: 400;
+    opacity: 0.75;
+}
+
+/* ── Protection notice ───────────────────────────────────── */
+.proof-protection-note {
+    max-width: 1200px;
+    margin: 1rem auto 0;
+    padding: 0 1.5rem;
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.proof-protection-note i {
+    color: var(--accent-color);
+}
+
+/* ── Keyboard hint ────────────────────────────────────────  */
+.proof-kbd-hint {
+    max-width: 1200px;
+    margin: 0.35rem auto 0;
+    padding: 0 1.5rem;
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+}
+
+.proof-kbd-hint kbd {
+    font-family: var(--font-main);
+    background: var(--bg-paper);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 0.05em 0.4em;
+    font-size: 0.85em;
+}
+
+@media (max-width: 720px) {
+    .proof-kbd-hint { display: none; }
+}
+
+/* ── Grid & proof-sleeve tiles ───────────────────────────── */
+.proof-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 1.75rem;
+}
+
+.proof-tile {
+    outline: none;
+    animation: proof-tile-in 0.5s ease both;
+    animation-delay: calc(var(--proof-i, 0) * 40ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .proof-tile { animation: none; }
+}
+
+@keyframes proof-tile-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+}
+
+.proof-tile[hidden] { display: none; }
+
+.proof-tile:focus-visible .proof-tile-frame {
+    box-shadow: 0 0 0 3px var(--accent-color), var(--shadow-md);
+}
+
+.proof-tile-frame {
+    position: relative;
+    background: var(--bg-paper);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 8px 8px 0;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+/* Perforated proof-sheet edge */
+.proof-tile-frame::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: 12px;
+    right: 12px;
+    height: 1px;
+    background-image: repeating-linear-gradient(
+        to right,
+        var(--border-color) 0 6px,
+        transparent 6px 12px
+    );
+}
+
+.proof-tile.is-marked .proof-tile-frame {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.proof-tile.is-finalized .proof-tile-frame {
+    border-color: var(--success);
+}
+
+.proof-photo-wrap {
+    position: relative;
+    border-radius: calc(var(--radius-md) - 3px) calc(var(--radius-md) - 3px) 0 0;
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    cursor: pointer;
+}
+
+.proof-tile-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none;
+}
+
+/* Repeating traceable watermark */
+.proof-watermark {
+    position: absolute;
+    inset: -20%;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: space-around;
+    justify-content: space-around;
+    transform: rotate(-18deg);
+    pointer-events: none;
+    user-select: none;
+    overflow: hidden;
+}
+
+.proof-watermark span {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.55);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+
+/* Grease-pencil circle annotation, drawn on when marked */
+.proof-grease-circle {
+    position: absolute;
+    inset: 6%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.proof-tile.is-marked .proof-grease-circle { opacity: 1; }
+
+.proof-grease-circle path {
+    fill: none;
+    stroke: var(--accent-color);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-dasharray: 340;
+    stroke-dashoffset: 340;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25));
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+.proof-tile.is-marked .proof-grease-circle path { stroke-dashoffset: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+    .proof-grease-circle path { transition: none; }
+}
+
+/* Mark / compare / comment controls */
+.proof-mark-btn,
+.proof-compare-btn,
+.proof-comment-btn {
+    position: absolute;
+    z-index: 3;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    background: color-mix(in srgb, var(--text-main) 45%, transparent);
+    transition: var(--transition);
+}
+
+.proof-mark-btn {
+    top: 8px;
+    right: 8px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--white);
+}
+
+.proof-mark-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.proof-mark-btn circle {
+    fill: none;
+    stroke: var(--white);
+    stroke-width: 3;
+    stroke-dasharray: 44;
+    stroke-dashoffset: 44;
+    transition: stroke-dashoffset 0.35s ease;
+}
+
+.proof-tile.is-marked .proof-mark-btn {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.proof-tile.is-marked .proof-mark-btn circle { stroke-dashoffset: 0; }
+
+.proof-compare-btn {
+    top: 8px;
+    left: 8px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 12px;
+}
+
+.proof-tile.is-comparing .proof-compare-btn {
+    background: var(--primary-color);
+}
+
+.proof-compare-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--white);
+    color: var(--primary-color);
+    font-size: 9px;
+    font-weight: 700;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.proof-tile.is-comparing .proof-compare-badge { display: flex; }
+
+.proof-comment-btn {
+    bottom: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 12px;
+}
+
+.proof-tile.has-comment .proof-comment-btn {
+    background: var(--primary-color);
+}
+
+.proof-tile.has-comment .proof-comment-btn::after {
+    content: "";
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    border: 1px solid var(--white);
+}
+
+.proof-finalized-ribbon {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 3;
+    background: var(--success);
+    color: var(--white);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    padding: 0.2em 0.6em;
+    border-radius: var(--radius-sm);
+    display: none;
+    align-items: center;
+    gap: 0.3em;
+}
+
+.proof-tile.is-finalized .proof-finalized-ribbon { display: flex; }
+.proof-tile.is-finalized .proof-compare-btn { display: none; }
+
+/* Footer: filename + labels */
+.proof-tile-footer {
+    padding: 0.6rem 0.35rem 0.75rem;
+}
+
+.proof-filename {
+    display: block;
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+}
+
+.proof-label-row {
+    display: none;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.proof-tile.is-marked .proof-label-row { display: flex; }
+
+.proof-label-chip {
+    font-family: var(--font-main);
+    font-size: var(--fs-xs);
+    padding: 0.25em 0.65em;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-light);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.proof-label-chip.is-active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--white);
+}
+
+.proof-label-chip:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.proof-empty,
+.proof-empty-filtered {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-muted);
+    font-size: var(--fs-base);
+}
+
+/* ── Sticky review & finalize bar ────────────────────────── */
+.proof-sticky-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    background: color-mix(in srgb, var(--bg-paper) 96%, transparent);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid var(--border-color);
+    box-shadow: 0 -6px 18px color-mix(in srgb, var(--text-main) 10%, transparent);
+    padding: 0.85rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.proof-sticky-counts {
+    font-size: var(--fs-base);
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.proof-sticky-counts strong {
+    font-family: var(--font-heading);
+    color: var(--primary-color);
+    font-size: var(--fs-lg);
+}
+
+.proof-link-btn {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: var(--fs-sm);
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+}
+
+.proof-sticky-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.proof-sticky-actions .btn {
+    padding: 0.65rem 1.4rem;
+}
+
+.proof-sticky-actions .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ── Modals (finalize + compare) ─────────────────────────── */
+.proof-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    background: color-mix(in srgb, var(--text-main) 55%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.proof-modal-overlay[hidden] { display: none; }
+
+.proof-modal {
+    background: var(--bg-paper);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    max-width: 540px;
+    width: 100%;
+    max-height: 82vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.proof-modal-head {
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.proof-modal-title {
+    font-family: var(--font-heading);
+    font-size: var(--fs-2xl);
+    color: var(--primary-color);
+    margin: 0 0 0.3rem;
+}
+
+.proof-modal-sub {
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.proof-modal-body {
+    padding: 1rem 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.proof-modal-body img {
+    max-width: 100%;
+    height: 100%;
+}
+
+.proof-summary-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.6rem;
+    background: var(--bg-light);
+    border-radius: var(--radius-md);
+}
+
+.proof-summary-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.proof-summary-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.proof-summary-labels {
+    font-size: var(--fs-xs);
+    color: var(--accent-color);
+}
+
+.proof-modal-note {
+    padding: 0.85rem 1.5rem;
+    background: var(--bg-light);
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+    border-top: 1px solid var(--border-color);
+}
+
+.proof-modal-actions {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+/* Compare-two view */
+.proof-compare-modal .proof-modal { max-width: 920px; }
+
+.proof-compare-panes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+}
+
+@media (max-width: 640px) {
+    .proof-compare-panes { grid-template-columns: 1fr; }
+}
+
+.proof-compare-pane {
+    background: var(--bg-light);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.proof-compare-pane img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+    user-select: none;
+}
+
+.proof-compare-pane-footer {
+    padding: 0.6rem 0.75rem;
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+}
+
+/* ── Comment drawer ───────────────────────────────────────  */
+.proof-comment-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1210;
+    width: min(360px, 100vw);
+    background: var(--bg-paper);
+    box-shadow: var(--shadow-lg);
+    border-left: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+}
+
+.proof-comment-drawer.is-open { transform: translateX(0); }
+
+@media (prefers-reduced-motion: reduce) {
+    .proof-comment-drawer { transition: none; }
+}
+
+.proof-drawer-head {
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.proof-drawer-title {
+    font-family: var(--font-heading);
+    font-size: var(--fs-xl);
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.proof-drawer-close {
+    background: none;
+    border: none;
+    font-size: var(--fs-xl);
+    line-height: 1;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.proof-drawer-body {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.proof-drawer-thumb {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    pointer-events: none;
+    user-select: none;
+}
+
+.proof-drawer-body textarea {
+    width: 100%;
+    resize: vertical;
+    font-family: var(--font-main);
+    font-size: var(--fs-sm);
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-main);
+    background: var(--bg-light);
+}
+
+.proof-drawer-body textarea:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 35%, transparent);
+}
+
+.proof-drawer-actions {
+    padding: 1rem 1.5rem 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+/* ── Teaser card on my_profile.html ──────────────────────── */
+.proof-teaser-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    background: var(--bg-paper);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2.5rem;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.proof-teaser-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.proof-teaser-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--bg-light);
+    color: var(--accent-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.proof-teaser-text { flex: 1; min-width: 0; }
+
+.proof-teaser-title {
+    font-family: var(--font-heading);
+    font-size: var(--fs-xl);
+    color: var(--primary-color);
+    margin: 0 0 0.2rem;
+}
+
+.proof-teaser-subtitle {
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.proof-teaser-arrow {
+    font-size: var(--fs-xl);
+    color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+@media (max-width: 560px) {
+    .proof-teaser-card { flex-wrap: wrap; }
+}

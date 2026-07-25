@@ -1,0 +1,517 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<section class="proof-page">
+
+  <header class="proof-header">
+    <div class="proof-header-info">
+      <span class="proof-eyebrow">{% trans "ПРОВЕРКА НА СНИМКИ" %}</span>
+      <h1 class="proof-title">
+        {% if reservation %}{{ reservation.service.name }}{% else %}{% trans "Вашата сесия" %}{% endif %}
+      </h1>
+      <p class="proof-meta" aria-live="polite">
+        {% if reservation %}
+          {{ reservation.date|date:"d.m.Y" }} &middot; {{ reservation.specialist.name }} &middot;
+        {% else %}
+          {% trans "Демонстрационна галерия" %} &middot;
+        {% endif %}
+        <span id="proof-header-count">0</span> / {{ photos|length }} {% trans "маркирани" %}
+      </p>
+    </div>
+    <div class="proof-filter-bar" role="tablist" aria-label="{% trans 'Филтър на снимки' %}">
+      <button type="button" class="proof-filter-btn is-active" data-filter="all" role="tab" aria-selected="true">
+        {% trans "Всички" %} <span class="proof-filter-count" data-count-for="all">{{ photos|length }}</span>
+      </button>
+      <button type="button" class="proof-filter-btn" data-filter="marked" role="tab" aria-selected="false">
+        {% trans "Маркирани" %} <span class="proof-filter-count" data-count-for="marked">0</span>
+      </button>
+      <button type="button" class="proof-filter-btn" data-filter="finalized" role="tab" aria-selected="false">
+        {% trans "Финализирани" %} <span class="proof-filter-count" data-count-for="finalized">0</span>
+      </button>
+    </div>
+  </header>
+
+  <p class="proof-protection-note">
+    <i class="fas fa-shield-alt" aria-hidden="true"></i>
+    {% trans "Тези изображения са с намалена резолюция, воден знак и уникален за вас код за проследяване — предназначени са само за личен преглед." %}
+  </p>
+  <p class="proof-kbd-hint">
+    {% trans "Клавиатура:" %} <kbd>Enter</kbd>/<kbd>Space</kbd> {% trans "маркирай" %} &middot;
+    <kbd>&larr;&rarr;&uarr;&darr;</kbd> {% trans "навигация" %} &middot;
+    <kbd>C</kbd> {% trans "сравни" %} &middot; <kbd>N</kbd> {% trans "бележка" %}
+  </p>
+
+  <div class="proof-grid" id="proof-grid" role="grid" aria-label="{% trans 'Снимки за преглед' %}">
+    {% for photo in photos %}
+    <div class="proof-tile"
+         data-photo-id="{{ photo.id }}"
+         data-caption="{% trans 'Кадър' %} {{ forloop.counter }}"
+         tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
+         role="gridcell">
+      <div class="proof-tile-frame">
+        <div class="proof-photo-wrap">
+          <img src="{{ photo.url }}" alt="{{ photo.alt }}" class="proof-tile-img" draggable="false">
+          <div class="proof-watermark" aria-hidden="true">
+            {% for i in "123456" %}<span>{{ watermark_identifier }}</span>{% endfor %}
+          </div>
+          <svg class="proof-grease-circle" viewBox="0 0 100 100" aria-hidden="true">
+            <path d="M 12,52 C 10,25 30,8 52,9 C 76,10 92,28 90,50 C 91,74 70,92 49,91 C 26,93 9,76 12,52 Z"></path>
+          </svg>
+          <button type="button" class="proof-compare-btn" aria-pressed="false" aria-label="{% trans 'Добави за сравнение' %}">
+            <i class="far fa-clone" aria-hidden="true"></i>
+            <span class="proof-compare-badge"></span>
+          </button>
+          <button type="button" class="proof-mark-btn" aria-pressed="false" aria-label="{% trans 'Маркирай като любима' %}">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"></circle></svg>
+          </button>
+          <div class="proof-finalized-ribbon"><i class="fas fa-check" aria-hidden="true"></i> {% trans "Финализирана" %}</div>
+          <button type="button" class="proof-comment-btn" aria-label="{% trans 'Бележка към снимката' %}" aria-haspopup="dialog">
+            <i class="far fa-comment" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div class="proof-tile-footer">
+          <span class="proof-filename">{% trans "Кадър" %} {{ forloop.counter }}</span>
+          <div class="proof-label-row">
+            {% for label in labels_config %}
+            <button type="button" class="proof-label-chip" data-label="{{ label.key }}" data-cap="{{ label.cap }}">{{ label.name }}</button>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <p class="proof-empty">{% trans "Все още няма качени снимки от тази сесия." %}</p>
+    {% endfor %}
+  </div>
+  <p class="proof-empty-filtered" hidden>{% trans "Няма снимки, отговарящи на този филтър." %}</p>
+
+  <div class="proof-sticky-bar">
+    <div class="proof-sticky-counts">
+      <span><strong id="proof-marked-count">0</strong> / {{ photos|length }} {% trans "маркирани" %}</span>
+      <span class="proof-compare-indicator" id="proof-compare-indicator" hidden>
+        &middot; <button type="button" id="proof-compare-open" class="proof-link-btn" disabled>{% trans "Сравни избраните" %} (<span id="proof-compare-count">0</span>/2)</button>
+      </span>
+    </div>
+    <div class="proof-sticky-actions">
+      <button type="button" id="proof-request-changes" class="btn btn-outline" hidden>{% trans "Отключи за промени" %}</button>
+      <button type="button" id="proof-finalize-open" class="btn btn-primary" disabled>{% trans "Прегледай и завърши" %}</button>
+    </div>
+  </div>
+
+  <!-- Finalize modal -->
+  <div class="proof-modal-overlay" id="proof-finalize-modal" hidden>
+    <div class="proof-modal" role="dialog" aria-modal="true" aria-labelledby="proof-finalize-title">
+      <div class="proof-modal-head">
+        <h2 class="proof-modal-title" id="proof-finalize-title">{% trans "Потвърдете избора си" %}</h2>
+        <p class="proof-modal-sub">
+          {% trans "Избрахте" %} <strong id="proof-finalize-summary-count">0</strong> {% trans "от" %} {{ photos|length }} {% trans "снимки за професионална обработка." %}
+        </p>
+      </div>
+      <div class="proof-modal-body" id="proof-finalize-list"></div>
+      <div class="proof-modal-note">
+        {% trans "След финализиране изборът ви се заключва за обработка. Промени след този момент изискват съгласието на вашия специалист." %}
+      </div>
+      <div class="proof-modal-actions">
+        <button type="button" id="proof-finalize-cancel" class="btn btn-outline">{% trans "Откажи" %}</button>
+        <button type="button" id="proof-finalize-confirm" class="btn btn-primary">{% trans "Финализирай избора" %}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Compare-two modal -->
+  <div class="proof-modal-overlay proof-compare-modal" id="proof-compare-modal" hidden>
+    <div class="proof-modal" role="dialog" aria-modal="true" aria-labelledby="proof-compare-title">
+      <div class="proof-modal-head">
+        <h2 class="proof-modal-title" id="proof-compare-title">{% trans "Сравнение на кадри" %}</h2>
+        <p class="proof-modal-sub">{% trans "Разгледайте двата кадъра един до друг, преди да решите кой да маркирате." %}</p>
+      </div>
+      <div class="proof-compare-panes" id="proof-compare-panes"></div>
+      <div class="proof-modal-actions">
+        <button type="button" id="proof-compare-close" class="btn btn-outline">{% trans "Затвори" %}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Per-photo comment drawer -->
+  <aside class="proof-comment-drawer" id="proof-comment-drawer" aria-hidden="true">
+    <div class="proof-drawer-head">
+      <h2 class="proof-drawer-title">{% trans "Бележка към фотографа" %}</h2>
+      <button type="button" class="proof-drawer-close" id="proof-drawer-close" aria-label="{% trans 'Затвори' %}">&times;</button>
+    </div>
+    <div class="proof-drawer-body">
+      <img id="proof-drawer-thumb" class="proof-drawer-thumb" src="" alt="" draggable="false">
+      <label for="proof-drawer-textarea">{% trans "Какво искате да промените или запазите на този кадър?" %}</label>
+      <textarea id="proof-drawer-textarea" rows="5" placeholder="{% trans 'Напр. изрежете отдясно, по-топъл тон...' %}"></textarea>
+    </div>
+    <div class="proof-drawer-actions">
+      <button type="button" id="proof-drawer-cancel" class="btn btn-outline">{% trans "Откажи" %}</button>
+      <button type="button" id="proof-drawer-save" class="btn btn-primary">{% trans "Запази бележката" %}</button>
+    </div>
+  </aside>
+
+</section>
+
+<script>
+(function () {
+  const NOTE_INDICATOR = "{% trans 'Има бележка' %}";
+
+  const grid = document.getElementById('proof-grid');
+  if (!grid) return;
+  const tiles = Array.from(grid.querySelectorAll('.proof-tile'));
+  const totalCount = tiles.length;
+
+  let finalized = false;
+  let currentFilter = 'all';
+  const compareSet = [];
+  const comments = new Map();
+
+  const headerCountEl = document.getElementById('proof-header-count');
+  const markedCountEl = document.getElementById('proof-marked-count');
+  const countAllEl = document.querySelector('[data-count-for="all"]');
+  const countMarkedEl = document.querySelector('[data-count-for="marked"]');
+  const countFinalizedEl = document.querySelector('[data-count-for="finalized"]');
+  const filterButtons = Array.from(document.querySelectorAll('.proof-filter-btn'));
+  const emptyFilteredEl = document.querySelector('.proof-empty-filtered');
+
+  const finalizeOpenBtn = document.getElementById('proof-finalize-open');
+  const requestChangesBtn = document.getElementById('proof-request-changes');
+  const finalizeModal = document.getElementById('proof-finalize-modal');
+  const finalizeList = document.getElementById('proof-finalize-list');
+  const finalizeSummaryCount = document.getElementById('proof-finalize-summary-count');
+  const finalizeCancelBtn = document.getElementById('proof-finalize-cancel');
+  const finalizeConfirmBtn = document.getElementById('proof-finalize-confirm');
+
+  const compareIndicator = document.getElementById('proof-compare-indicator');
+  const compareCountEl = document.getElementById('proof-compare-count');
+  const compareOpenBtn = document.getElementById('proof-compare-open');
+  const compareModal = document.getElementById('proof-compare-modal');
+  const comparePanes = document.getElementById('proof-compare-panes');
+  const compareCloseBtn = document.getElementById('proof-compare-close');
+
+  const drawer = document.getElementById('proof-comment-drawer');
+  const drawerThumb = document.getElementById('proof-drawer-thumb');
+  const drawerTextarea = document.getElementById('proof-drawer-textarea');
+  const drawerCloseBtn = document.getElementById('proof-drawer-close');
+  const drawerCancelBtn = document.getElementById('proof-drawer-cancel');
+  const drawerSaveBtn = document.getElementById('proof-drawer-save');
+  let drawerPhotoId = null;
+
+  const labelCaps = {};
+  const labelCounts = {};
+  document.querySelectorAll('.proof-label-chip').forEach((chip) => {
+    const key = chip.dataset.label;
+    if (!(key in labelCaps)) {
+      labelCaps[key] = parseInt(chip.dataset.cap, 10);
+      labelCounts[key] = 0;
+    }
+  });
+
+  function isMarked(tile) { return tile.classList.contains('is-marked'); }
+  function findTile(id) { return tiles.find((t) => t.dataset.photoId === id); }
+
+  function refreshCounts() {
+    const markedTiles = tiles.filter(isMarked);
+    const markedNum = finalized ? 0 : markedTiles.length;
+    const finalizedNum = finalized ? markedTiles.length : 0;
+
+    headerCountEl.textContent = markedTiles.length;
+    markedCountEl.textContent = markedTiles.length;
+    countAllEl.textContent = totalCount;
+    countMarkedEl.textContent = markedNum;
+    countFinalizedEl.textContent = finalizedNum;
+    finalizeOpenBtn.disabled = markedTiles.length === 0 || finalized;
+  }
+
+  function refreshLabelChips() {
+    document.querySelectorAll('.proof-label-chip').forEach((chip) => {
+      const key = chip.dataset.label;
+      const active = chip.classList.contains('is-active');
+      chip.disabled = finalized || (!active && labelCounts[key] >= labelCaps[key]);
+    });
+  }
+
+  function applyFilter() {
+    tiles.forEach((tile) => {
+      const marked = isMarked(tile);
+      let visible = true;
+      if (currentFilter === 'marked') visible = marked && !finalized;
+      else if (currentFilter === 'finalized') visible = marked && finalized;
+      tile.hidden = !visible;
+    });
+    const anyVisible = tiles.some((t) => !t.hidden);
+    emptyFilteredEl.hidden = anyVisible || totalCount === 0;
+    resetRovingTabindex();
+  }
+
+  function toggleMark(tile) {
+    if (finalized) return;
+    tile.classList.toggle('is-marked');
+    tile.querySelector('.proof-mark-btn').setAttribute('aria-pressed', String(isMarked(tile)));
+    refreshCounts();
+    refreshLabelChips();
+    applyFilter();
+  }
+
+  function toggleLabel(tile, chip) {
+    if (finalized || !isMarked(tile)) return;
+    const key = chip.dataset.label;
+    const active = chip.classList.contains('is-active');
+    if (!active && labelCounts[key] >= labelCaps[key]) return;
+    chip.classList.toggle('is-active');
+    labelCounts[key] += active ? -1 : 1;
+    refreshLabelChips();
+  }
+
+  function toggleCompare(tile) {
+    if (finalized) return;
+    const id = tile.dataset.photoId;
+    const idx = compareSet.indexOf(id);
+    const btn = tile.querySelector('.proof-compare-btn');
+    if (idx > -1) {
+      compareSet.splice(idx, 1);
+      tile.classList.remove('is-comparing');
+      btn.setAttribute('aria-pressed', 'false');
+    } else {
+      if (compareSet.length >= 2) {
+        const removedId = compareSet.shift();
+        const removedTile = findTile(removedId);
+        if (removedTile) {
+          removedTile.classList.remove('is-comparing');
+          removedTile.querySelector('.proof-compare-btn').setAttribute('aria-pressed', 'false');
+        }
+      }
+      compareSet.push(id);
+      tile.classList.add('is-comparing');
+      btn.setAttribute('aria-pressed', 'true');
+    }
+    compareCountEl.textContent = compareSet.length;
+    compareIndicator.hidden = compareSet.length === 0;
+    compareOpenBtn.disabled = compareSet.length !== 2;
+  }
+
+  function openDrawer(tile) {
+    drawerPhotoId = tile.dataset.photoId;
+    const img = tile.querySelector('img');
+    drawerThumb.src = img.src;
+    drawerThumb.alt = img.alt;
+    drawerTextarea.value = comments.get(drawerPhotoId) || '';
+    drawerTextarea.disabled = finalized;
+    drawer.classList.add('is-open');
+    drawer.setAttribute('aria-hidden', 'false');
+    window.setTimeout(() => drawerTextarea.focus(), 50);
+  }
+
+  function closeDrawer() {
+    drawer.classList.remove('is-open');
+    drawer.setAttribute('aria-hidden', 'true');
+    drawerPhotoId = null;
+  }
+
+  tiles.forEach((tile, i) => {
+    tile.style.setProperty('--proof-i', i);
+    const markBtn = tile.querySelector('.proof-mark-btn');
+    const compareBtn = tile.querySelector('.proof-compare-btn');
+    const commentBtn = tile.querySelector('.proof-comment-btn');
+    const photoWrap = tile.querySelector('.proof-photo-wrap');
+
+    photoWrap.addEventListener('click', () => toggleMark(tile));
+    photoWrap.addEventListener('contextmenu', (e) => e.preventDefault());
+    photoWrap.querySelector('img').addEventListener('dragstart', (e) => e.preventDefault());
+
+    markBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleMark(tile); });
+    compareBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleCompare(tile); });
+    commentBtn.addEventListener('click', (e) => { e.stopPropagation(); openDrawer(tile); });
+
+    tile.querySelectorAll('.proof-label-chip').forEach((chip) => {
+      chip.addEventListener('click', (e) => { e.stopPropagation(); toggleLabel(tile, chip); });
+    });
+
+    tile.addEventListener('keydown', (e) => onTileKeydown(e, tile));
+  });
+
+  compareOpenBtn.addEventListener('click', () => {
+    if (compareSet.length !== 2) return;
+    comparePanes.innerHTML = '';
+    compareSet.forEach((id) => {
+      const tile = findTile(id);
+      const img = tile.querySelector('img');
+      const pane = document.createElement('div');
+      pane.className = 'proof-compare-pane';
+      const paneImg = document.createElement('img');
+      paneImg.src = img.src;
+      paneImg.alt = img.alt;
+      paneImg.draggable = false;
+      paneImg.addEventListener('contextmenu', (e) => e.preventDefault());
+      paneImg.addEventListener('dragstart', (e) => e.preventDefault());
+      const footer = document.createElement('div');
+      footer.className = 'proof-compare-pane-footer';
+      footer.textContent = tile.dataset.caption;
+      pane.appendChild(paneImg);
+      pane.appendChild(footer);
+      comparePanes.appendChild(pane);
+    });
+    compareModal.hidden = false;
+  });
+  compareCloseBtn.addEventListener('click', () => { compareModal.hidden = true; });
+  compareModal.addEventListener('click', (e) => { if (e.target === compareModal) compareModal.hidden = true; });
+
+  drawerCloseBtn.addEventListener('click', closeDrawer);
+  drawerCancelBtn.addEventListener('click', closeDrawer);
+  drawerSaveBtn.addEventListener('click', () => {
+    if (!drawerPhotoId) return;
+    const tile = findTile(drawerPhotoId);
+    const text = drawerTextarea.value.trim();
+    if (text) {
+      comments.set(drawerPhotoId, text);
+      tile.classList.add('has-comment');
+    } else {
+      comments.delete(drawerPhotoId);
+      tile.classList.remove('has-comment');
+    }
+    closeDrawer();
+  });
+
+  filterButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      filterButtons.forEach((b) => { b.classList.remove('is-active'); b.setAttribute('aria-selected', 'false'); });
+      btn.classList.add('is-active');
+      btn.setAttribute('aria-selected', 'true');
+      currentFilter = btn.dataset.filter;
+      applyFilter();
+    });
+  });
+
+  finalizeOpenBtn.addEventListener('click', () => {
+    const marked = tiles.filter(isMarked);
+    finalizeSummaryCount.textContent = marked.length;
+    finalizeList.innerHTML = '';
+    marked.forEach((tile) => {
+      const img = tile.querySelector('img');
+      const id = tile.dataset.photoId;
+      const activeLabels = Array.from(tile.querySelectorAll('.proof-label-chip.is-active')).map((c) => c.textContent.trim());
+      const row = document.createElement('div');
+      row.className = 'proof-summary-row';
+      const thumb = document.createElement('img');
+      thumb.className = 'proof-summary-thumb';
+      thumb.src = img.src;
+      thumb.alt = img.alt;
+      const meta = document.createElement('div');
+      meta.className = 'proof-summary-meta';
+      const caption = document.createElement('span');
+      caption.textContent = tile.dataset.caption;
+      meta.appendChild(caption);
+      if (activeLabels.length) {
+        const labelsEl = document.createElement('span');
+        labelsEl.className = 'proof-summary-labels';
+        labelsEl.textContent = activeLabels.join(' · ');
+        meta.appendChild(labelsEl);
+      }
+      if (comments.has(id)) {
+        const noteEl = document.createElement('span');
+        noteEl.className = 'proof-summary-labels';
+        noteEl.textContent = NOTE_INDICATOR;
+        meta.appendChild(noteEl);
+      }
+      row.appendChild(thumb);
+      row.appendChild(meta);
+      finalizeList.appendChild(row);
+    });
+    finalizeModal.hidden = false;
+  });
+  finalizeCancelBtn.addEventListener('click', () => { finalizeModal.hidden = true; });
+  finalizeModal.addEventListener('click', (e) => { if (e.target === finalizeModal) finalizeModal.hidden = true; });
+
+  finalizeConfirmBtn.addEventListener('click', () => {
+    finalized = true;
+    tiles.forEach((tile) => {
+      if (isMarked(tile)) tile.classList.add('is-finalized');
+      tile.querySelector('.proof-mark-btn').disabled = true;
+      tile.querySelector('.proof-compare-btn').disabled = true;
+    });
+    finalizeModal.hidden = true;
+    finalizeOpenBtn.hidden = true;
+    requestChangesBtn.hidden = false;
+    refreshLabelChips();
+    refreshCounts();
+    applyFilter();
+  });
+
+  requestChangesBtn.addEventListener('click', () => {
+    finalized = false;
+    tiles.forEach((tile) => {
+      tile.classList.remove('is-finalized');
+      tile.querySelector('.proof-mark-btn').disabled = false;
+      tile.querySelector('.proof-compare-btn').disabled = false;
+    });
+    finalizeOpenBtn.hidden = false;
+    requestChangesBtn.hidden = true;
+    refreshLabelChips();
+    refreshCounts();
+    applyFilter();
+  });
+
+  function getColumnCount() {
+    const style = window.getComputedStyle(grid);
+    return style.gridTemplateColumns.split(' ').filter(Boolean).length || 1;
+  }
+
+  function visibleTiles() { return tiles.filter((t) => !t.hidden); }
+
+  function setFocusIndex(list, index) {
+    if (!list.length) return;
+    list.forEach((t) => t.setAttribute('tabindex', '-1'));
+    const clamped = Math.max(0, Math.min(index, list.length - 1));
+    list[clamped].setAttribute('tabindex', '0');
+    list[clamped].focus();
+  }
+
+  function resetRovingTabindex() {
+    const list = visibleTiles();
+    tiles.forEach((t) => t.setAttribute('tabindex', '-1'));
+    if (list.length) list[0].setAttribute('tabindex', '0');
+  }
+
+  function onTileKeydown(e, tile) {
+    if (e.target !== tile) return;
+    const list = visibleTiles();
+    const idx = list.indexOf(tile);
+    const cols = getColumnCount();
+
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleMark(tile);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      setFocusIndex(list, idx + 1);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setFocusIndex(list, idx - 1);
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setFocusIndex(list, idx + cols);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setFocusIndex(list, idx - cols);
+    } else if (e.key.toLowerCase() === 'c') {
+      e.preventDefault();
+      toggleCompare(tile);
+    } else if (e.key.toLowerCase() === 'n') {
+      e.preventDefault();
+      openDrawer(tile);
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (!finalizeModal.hidden) finalizeModal.hidden = true;
+      if (!compareModal.hidden) compareModal.hidden = true;
+      if (drawer.classList.contains('is-open')) closeDrawer();
+    }
+  });
+
+  refreshCounts();
+  applyFilter();
+})();
+</script>
+{% endblock %}

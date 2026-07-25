@@ -213,6 +213,7 @@ AUTHENTICATION_BACKENDS = [
 
 LOGIN_REDIRECT_URL = reverse_lazy('reservation_page')
 LOGOUT_REDIRECT_URL = reverse_lazy('index')
+IS_PHOTOGRAPHER_WEBSITE = env.bool('IS_PHOTOGRAPHER_WEBSITE', default=False)
 
 # Email Configuration
 EMAIL_BACKEND = env('EMAIL_BACKEND', default='massageProject.accounts.email_backend.GmailBackend')
