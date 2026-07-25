@@ -11,7 +11,7 @@ def get_cached_homepage():
     if homepage is None:
         homepage = HomePage.get_solo()
         # Same 60s cross-worker-staleness bound as site_configuration below.
-        cache.set(HOMEPAGE_CACHE_KEY, homepage, 60)
+        cache.set(HOMEPAGE_CACHE_KEY, homepage, 86400)
     return homepage
 
 
@@ -19,7 +19,7 @@ def get_cached_business_info():
     business_info = cache.get(BUSINESS_INFO_CACHE_KEY)
     if business_info is None:
         business_info = BusinessInfo.objects.first()
-        cache.set(BUSINESS_INFO_CACHE_KEY, business_info, 60)
+        cache.set(BUSINESS_INFO_CACHE_KEY, business_info, 86400)
     return business_info
 
 

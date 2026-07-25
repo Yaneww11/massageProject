@@ -10,7 +10,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
     <script>window.IS_AUTHENTICATED = {{ user.is_authenticated|yesno:"true,false" }};</script>
     {% include 'partials/header.html' %}
     <main>

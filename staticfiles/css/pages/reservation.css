@@ -495,11 +495,16 @@
 }
 
 /* Confirm button disabled state */
-#confirm-btn:disabled {
+.js-confirm-btn:disabled {
     opacity: 0.45;
     cursor: not-allowed;
     transform: none !important;
     box-shadow: none !important;
+}
+
+/* ── Mobile: sticky expandable summary bar ───────────────── */
+.bn-mobile-bar {
+    display: none;
 }
 
 /* ── Inline confirmation panel ───────────────────────────── */
@@ -595,11 +600,119 @@
     }
 
     .bn-aside {
-        position: static;
+        display: none;
     }
 
     .book-title {
         font-size: var(--fs-3xl);
+    }
+
+    /* Summary sidebar is replaced by the sticky bar below */
+    .book-page {
+        padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .bn-mobile-bar {
+        display: block;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 900;
+        background: var(--bg-paper);
+        border-top: 1px solid var(--border-color);
+        box-shadow: var(--shadow-lg);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .bn-mobile-handle {
+        position: absolute;
+        top: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 34px;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--border-color);
+    }
+
+    .bn-mobile-sheet {
+        max-height: 0;
+        overflow: hidden;
+        padding: 0 var(--space-md);
+        transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+
+    .bn-mobile-bar.open .bn-mobile-sheet {
+        max-height: 320px;
+        padding: var(--space-md) var(--space-md) 0;
+    }
+
+    .bn-mobile-row {
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+        padding: 14px var(--space-md) var(--space-sm);
+    }
+
+    .bn-mobile-toggle {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        text-align: left;
+        font-family: var(--font-main);
+    }
+
+    .bn-mobile-info {
+        min-width: 0;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .bn-mobile-info strong {
+        font-size: var(--fs-sm);
+        font-weight: 700;
+        color: var(--text-main);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .bn-mobile-info span {
+        font-size: var(--fs-xs);
+        color: var(--text-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-top: 1px;
+    }
+
+    .bn-mobile-chevron {
+        flex: none;
+        color: var(--text-muted);
+        transition: transform 0.3s ease;
+    }
+
+    .bn-mobile-bar.open .bn-mobile-chevron {
+        transform: rotate(180deg);
+    }
+
+    .bn-mobile-confirm {
+        flex: none;
+        border-radius: 999px;
+        padding: 0.65rem 1.15rem;
+        font-size: var(--fs-sm);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
     }
 }
 

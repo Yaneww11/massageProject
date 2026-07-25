@@ -150,6 +150,7 @@ class ReservationAdmin(ModelAdmin):
         (_('Информация за услугата'), {'fields': ('service', 'specialist')}),
         (_('Допълнителни бележки'), {'fields': ('additional_text',)}),
         (_('Системен одит'), {'fields': ('updated_at', 'status_updated_at', 'status_updated_by'), 'classes': ('collapse',)}),
+        (_('Галерия'), {'fields': ('gallery',)}),
     )
 
     def get_client_name(self, obj):

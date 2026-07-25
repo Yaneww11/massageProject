@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load static i18n %}
 
+{% block body_class %}page-reservation{% endblock %}
+
 {% block content %}
 
 <div class="book-page">
@@ -160,23 +162,23 @@
         <span class="bn-eyebrow">{% trans "Вашата резервация" %}</span>
         <div class="bn-summary">
           <div class="bn-summary-row">
-            <span>{{ site_config.service_singular|capfirst }}</span><span id="s-svc">—</span>
+            <span>{{ site_config.service_singular|capfirst }}</span><span data-summary="svc">—</span>
           </div>
           <div class="bn-summary-row">
-            <span>{{ site_config.specialist_singular|capfirst }}</span><span id="s-thp">—</span>
+            <span>{{ site_config.specialist_singular|capfirst }}</span><span data-summary="thp">—</span>
           </div>
           <div class="bn-summary-row">
-            <span>{% trans "Дата" %}</span><span id="s-date">—</span>
+            <span>{% trans "Дата" %}</span><span data-summary="date">—</span>
           </div>
           <div class="bn-summary-row">
-            <span>{% trans "Час" %}</span><span id="s-time">—</span>
+            <span>{% trans "Час" %}</span><span data-summary="time">—</span>
           </div>
           <div class="bn-summary-row">
-            <span>{% trans "Продължителност" %}</span><span id="s-dur">—</span>
+            <span>{% trans "Продължителност" %}</span><span data-summary="dur">—</span>
           </div>
         </div>
         <hr class="bn-divider">
-        <button type="submit" class="btn btn-primary btn-block" id="confirm-btn" disabled>
+        <button type="submit" class="btn btn-primary btn-block js-confirm-btn" id="confirm-btn" disabled>
           {% trans "Потвърдете резервацията" %}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -194,6 +196,60 @@
       </aside>
 
     </div><!-- /bn-grid -->
+
+    <!-- ── Mobile: sticky expandable summary bar ─────────── -->
+    <div class="bn-mobile-bar" id="bn-mobile-bar">
+      <span class="bn-mobile-handle" aria-hidden="true"></span>
+      <div class="bn-mobile-sheet" id="bn-mobile-sheet">
+        <div class="bn-summary">
+          <div class="bn-summary-row">
+            <span>{{ site_config.service_singular|capfirst }}</span><span data-summary="svc">—</span>
+          </div>
+          <div class="bn-summary-row">
+            <span>{{ site_config.specialist_singular|capfirst }}</span><span data-summary="thp">—</span>
+          </div>
+          <div class="bn-summary-row">
+            <span>{% trans "Дата" %}</span><span data-summary="date">—</span>
+          </div>
+          <div class="bn-summary-row">
+            <span>{% trans "Час" %}</span><span data-summary="time">—</span>
+          </div>
+          <div class="bn-summary-row">
+            <span>{% trans "Продължителност" %}</span><span data-summary="dur">—</span>
+          </div>
+        </div>
+        <p class="bn-reassure">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/>
+          </svg>
+          {% trans "Безплатно анулиране до 24 часа преди процедурата." %}
+        </p>
+      </div>
+      <div class="bn-mobile-row">
+        <button type="button" class="bn-mobile-toggle" id="bn-mobile-toggle"
+                aria-expanded="false" aria-controls="bn-mobile-sheet">
+          <span class="bn-mobile-info">
+            <strong id="bn-mobile-title">{% trans "Изберете процедура" %}</strong>
+            <span id="bn-mobile-sub">{% trans "Докоснете за обобщение" %}</span>
+          </span>
+          <svg class="bn-mobile-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               aria-hidden="true">
+            <path d="M6 15l6-6 6 6"/>
+          </svg>
+        </button>
+        <button type="submit" class="btn btn-primary js-confirm-btn bn-mobile-confirm"
+                id="confirm-btn-mobile" disabled>
+          {% trans "Потвърдете" %}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12h14M13 6l6 6-6 6"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
   </form>
 
   <!-- ── Confirmation panel (shown after successful submit) ── -->
@@ -241,18 +297,41 @@ document.addEventListener('DOMContentLoaded', function () {
   const specialistValue  = document.getElementById('specialist-value');
   const dateValue     = document.getElementById('date-value');
   const timeValue     = document.getElementById('time-value');
-  const confirmBtn    = document.getElementById('confirm-btn');
+  const confirmBtns   = Array.from(document.querySelectorAll('.js-confirm-btn'));
   const svcDesc       = document.getElementById('svc-desc');
-  const sSvc          = document.getElementById('s-svc');
-  const sThp          = document.getElementById('s-thp');
-  const sDate         = document.getElementById('s-date');
-  const sTime         = document.getElementById('s-time');
-  const sDur          = document.getElementById('s-dur');
   const slotsEl       = document.getElementById('time-slots');
   const form          = document.getElementById('book-form');
   const calEl         = document.getElementById('bn-calendar');
   const toastCont     = document.getElementById('toast-container');
   const AVAIL_URL     = slotsEl.dataset.availabilityUrl;
+
+  /* ── Mobile sticky summary bar ────────────────────────── */
+  const mobileBar     = document.getElementById('bn-mobile-bar');
+  const mobileToggle  = document.getElementById('bn-mobile-toggle');
+  const mobileTitle   = document.getElementById('bn-mobile-title');
+  const mobileSub     = document.getElementById('bn-mobile-sub');
+  const MSG_CHOOSE_TITLE = "{% trans 'Изберете процедура' %}";
+  const MSG_CHOOSE_SUB   = "{% trans 'Докоснете за обобщение' %}";
+
+  function renderMobileBarLine() {
+    const svc  = document.querySelector('[data-summary="svc"]').textContent;
+    const thp  = document.querySelector('[data-summary="thp"]').textContent;
+    const date = document.querySelector('[data-summary="date"]').textContent;
+    const time = document.querySelector('[data-summary="time"]').textContent;
+    const parts = [date, time, thp].filter(v => v && v !== '—');
+    mobileTitle.textContent = svc !== '—' ? svc : MSG_CHOOSE_TITLE;
+    mobileSub.textContent   = parts.length ? parts.join(' · ') : MSG_CHOOSE_SUB;
+  }
+
+  function setSummary(key, value) {
+    document.querySelectorAll(`[data-summary="${key}"]`).forEach(el => { el.textContent = value; });
+    renderMobileBarLine();
+  }
+
+  mobileToggle.addEventListener('click', () => {
+    const isOpen = mobileBar.classList.toggle('open');
+    mobileToggle.setAttribute('aria-expanded', isOpen);
+  });
 
   /* ── i18n strings ─────────────────────────────────────── */
   const MSG_SELECT_FIRST   = "{% trans 'Моля, попълнете всички полета по-горе, преди да продължите.' %}";
@@ -265,7 +344,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const MSG_AFTERNOON      = "{% trans 'Следобед' %}";
   const MSG_EVENING        = "{% trans 'Вечер' %}";
   const MSG_SENDING        = "{% trans 'Изпращане...' %}";
-  const CONFIRM_INNER      = confirmBtn.innerHTML;
+  const CONFIRM_INNERS     = confirmBtns.map(b => b.innerHTML);
 
   /* ── Toast ────────────────────────────────────────────── */
   function showToast(msg) {
@@ -287,7 +366,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const fn = document.getElementById('first_name');
     const ln = document.getElementById('last_name');
     if (fn && ln) ok = ok && fn.value.trim() && ln.value.trim();
-    confirmBtn.disabled = !ok;
+    confirmBtns.forEach(b => { b.disabled = !ok; });
   }
 
   /* ── A: Service select ────────────────────────────────── */
@@ -295,14 +374,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const m = SERVICES.find(x => x.id == serviceSelect.value);
     if (!m) return;
     svcDesc.textContent = m.desc;
-    sSvc.textContent    = m.name;
-    sDur.textContent    = m.duration + ' мин';
+    setSummary('svc', m.name);
+    setSummary('dur', m.duration + ' мин');
   }
 
   serviceSelect.addEventListener('change', () => {
     if (timeValue.value) {
       timeValue.value = '';
-      sTime.textContent = '—';
+      setSummary('time', '—');
       showToast(MSG_SERVICE_CHANGED);
     }
     applyService();
@@ -318,7 +397,7 @@ document.addEventListener('DOMContentLoaded', function () {
       document.querySelectorAll('.bn-therapist-tile').forEach(t => t.classList.remove('selected'));
       tile.classList.add('selected');
       specialistValue.value = tile.dataset.id;
-      sThp.textContent   = tile.dataset.name;
+      setSummary('thp', tile.dataset.name);
       debouncedFetch();
       updateConfirmBtn();
     });
@@ -329,7 +408,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (tile) {
       tile.classList.add('selected');
       specialistValue.value = INITIAL_SPECIALIST;
-      sThp.textContent   = tile.dataset.name;
+      setSummary('thp', tile.dataset.name);
     }
   }
 
@@ -450,7 +529,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (timeValue.value) {
       timeValue.value = '';
-      sTime.textContent = '—';
+      setSummary('time', '—');
     }
     fetchAvailability();
     updateConfirmBtn();
@@ -461,7 +540,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const dayFmt  = new Intl.DateTimeFormat(LANG, { weekday: 'long' });
     const dayName = dayFmt.format(dt);
     const cap     = dayName.charAt(0).toUpperCase() + dayName.slice(1);
-    sDate.textContent = `${cap}, ${dt.getDate()} ${MONTHS[dt.getMonth()].toLowerCase()}`;
+    setSummary('date', `${cap}, ${dt.getDate()} ${MONTHS[dt.getMonth()].toLowerCase()}`);
   }
 
   renderCalendar();
@@ -537,7 +616,7 @@ document.addEventListener('DOMContentLoaded', function () {
                       .forEach(b => b.classList.remove('selected'));
               btn.classList.add('selected');
               timeValue.value = slot.time;
-              sTime.textContent = slot.time;
+              setSummary('time', slot.time);
               updateConfirmBtn();
             });
             if (INITIAL_TIME && timeValue.value === slot.time) {
@@ -575,8 +654,7 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    confirmBtn.disabled = true;
-    confirmBtn.textContent = MSG_SENDING;
+    confirmBtns.forEach(b => { b.disabled = true; b.textContent = MSG_SENDING; });
 
     try {
       const res  = await fetch(form.action || window.location.href, {
@@ -604,14 +682,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const allErrors = data.errors || {};
         const firstMsg  = Object.values(allErrors).flat()[0];
         if (firstMsg) showToast(firstMsg);
-        confirmBtn.disabled = false;
-        confirmBtn.innerHTML = CONFIRM_INNER;
+        confirmBtns.forEach((b, i) => { b.disabled = false; b.innerHTML = CONFIRM_INNERS[i]; });
       }
     } catch (err) {
       console.error('Form submit error:', err);
       showToast(MSG_ERROR);
-      confirmBtn.disabled = false;
-      confirmBtn.innerHTML = CONFIRM_INNER;
+      confirmBtns.forEach((b, i) => { b.disabled = false; b.innerHTML = CONFIRM_INNERS[i]; });
     }
   });
 

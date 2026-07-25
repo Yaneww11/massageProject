@@ -68,6 +68,8 @@ class Service(models.Model):
             'началната страница и на страницата с детайли за услугата. Ако е празно, се '
             'показва градиентен placeholder.'
         ),
+        blank=True,
+        null=True,
     )
     home_page = models.BooleanField(
         default=False,
@@ -304,6 +306,19 @@ class Reservation(models.Model):
         help_text=_('Показва се на клиента при преглед, редакция или отказ на резервацията му.'),
     )
 
+    gallery = models.OneToOneField(
+        "Gallery",
+        on_delete=models.CASCADE,
+        related_name='reservations',
+        null=True,
+        blank=True,
+    )
+
+    send_user_notification_on_gallery_creation = models.BooleanField(
+        default=False,
+        help_text=_('Да бъде ли изпратено уведомление до клиента при създаване на галерия?')
+    )
+
     # Custom Managers
     class ReservationQuerySet(models.QuerySet):
         def active(self):
@@ -459,7 +474,7 @@ class Gallery(models.Model):
         verbose_name_plural = _('Галерии')
 
     def __str__(self):
-        if hasattr(self, 'home_page'):
+        if hasattr(self, 'h'):
             return f"{_('Галерия')} - {self.home_page.brand_name}"
         return self.title or f"{_('Галерия')} {self.id}"
 
