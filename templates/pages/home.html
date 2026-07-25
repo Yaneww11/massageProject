@@ -32,7 +32,7 @@
     <div class="hp-container">
         <div class="hp-reveal hp-centered-text">
             <span class="hp-eyebrow">{{ gallery.title }}</span>
-            <h2 class="hp-section-title">{{ gallery.short_description }}</h2>
+            <h2 class="hp-section-title">{{ gallery.description }}</h2>
         </div>
         <div class="hp-gallery-grid hp-reveal">
             {% for image in gallery_images %}
@@ -259,6 +259,37 @@
         slide(0);
     }());
     {% endif %}
+
+    // Featured services — no-image variant: whole row toggles inline description
+    (function () {
+        document.querySelectorAll('[data-svc-toggle]').forEach(function (row) {
+            var acc = document.getElementById('svc-acc-' + row.dataset.svcToggle);
+            if (!acc) return;
+
+            function toggle() {
+                var open = acc.classList.toggle('is-open');
+                row.setAttribute('aria-expanded', open ? 'true' : 'false');
+            }
+
+            row.addEventListener('click', toggle);
+            row.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+            });
+            acc.querySelectorAll('a, button').forEach(function (el) {
+                el.addEventListener('click', function (e) { e.stopPropagation(); });
+            });
+        });
+    }());
+
+    // Featured services — image variant: "Learn more" toggles inline description
+    document.querySelectorAll('[data-acc]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var acc = document.getElementById('acc-' + btn.dataset.acc);
+            if (!acc) return;
+            var open = acc.classList.toggle('is-open');
+            btn.textContent = open ? btn.dataset.labelLess : btn.dataset.labelMore;
+        });
+    });
 
     // Review modal
     (function () {

@@ -1,7 +1,7 @@
 {% load i18n %}
 <div class="hp-svc-list">
     {% for m in services %}
-    <a href="{% url 'service_detail' pk=m.pk %}" class="hp-svc-row hp-reveal">
+    <div class="hp-svc-row hp-reveal" data-svc-toggle="{{ m.pk }}" role="button" tabindex="0" aria-expanded="false" aria-controls="svc-acc-{{ m.pk }}">
         <span class="hp-svc-num">0{{ forloop.counter }}</span>
         <div class="hp-svc-info">
             <h3 class="hp-svc-name">{{ m.name }}</h3>
@@ -11,6 +11,12 @@
             <span class="hp-svc-price">{{ m.price }} {% trans "€" %}</span>
             <span class="hp-svc-dur">{{ m.duration_in_minutes }} {% trans "мин" %}</span>
         </div>
-    </a>
+        <div class="hp-svc-accordion" id="svc-acc-{{ m.pk }}">
+            <p>{{ m.description }}</p>
+            {% if site_config.booking_enabled %}
+            <a href="{% url 'reservation_page' %}?service={{ m.pk }}" class="btn btn-primary hp-svc-book" data-auth-modal-link>{% trans "Запазете час" %}</a>
+            {% endif %}
+        </div>
+    </div>
     {% endfor %}
 </div>

@@ -1,8 +1,8 @@
 from django.urls import path, include
 
 from massageProject.main_app.views import Index, ServicesDashboard, ReservationPage, AboutPage, ProfilePage, \
-    ServiceDetail, edit_reservation, delete_reservation, PrivacyPolicyView, check_availability, AllCommentsView, \
-    submit_comment, GalleryView, GalleryAlbumView
+    edit_reservation, delete_reservation, PrivacyPolicyView, check_availability, AllCommentsView, \
+    submit_comment, GalleryView, GalleryAlbumView, PhotoProofingGallery
 
 urlpatterns = [
     path('', Index.as_view(), name='index'),
@@ -14,7 +14,7 @@ urlpatterns = [
     path('comments/', AllCommentsView.as_view(), name='all_comments'),
     path('submit-comment/', submit_comment, name='submit_comment'),
     path('profile/', ProfilePage.as_view(), name='profile_page'),
-    path('service/<int:pk>/', ServiceDetail.as_view(), name='service_detail'),
+    path('profile/photos/', PhotoProofingGallery.as_view(), name='photo_proofing'),
     path('gallery/', GalleryView.as_view(), name='gallery'),
     path('gallery/<slug:slug>/', GalleryAlbumView.as_view(), name='gallery_album'),
 

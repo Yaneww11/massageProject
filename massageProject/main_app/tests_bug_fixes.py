@@ -74,10 +74,6 @@ class AvailabilityAuthTest(BugFixTestBase):
 class Missing404HandlerTest(BugFixTestBase):
     """B08 — nonexistent PKs must return 404, not 500."""
 
-    def test_service_detail_unknown_pk_returns_404(self):
-        response = self.client.get(reverse('service_detail', kwargs={'pk': 99999}))
-        self.assertEqual(response.status_code, 404)
-
     def test_edit_reservation_unknown_pk_returns_404(self):
         self.login()
         response = self.client.get(reverse('edit_reservation', kwargs={'pk': 99999}))
@@ -192,7 +188,7 @@ class PrivacyPolicySanitizationTest(TestCase):
     """B03 — privacy policy content is sanitised, not rendered raw."""
 
     def test_script_is_stripped_and_formatting_kept(self):
-        gallery = Gallery.objects.create(title='g')
+        gallery = Gallery.objects.create(gallery_type=Gallery.TYPE_HOMEPAGE, title='g')
         HomePage.objects.create(
             brand_name='Studio',
             description='desc',

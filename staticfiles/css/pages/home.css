@@ -192,6 +192,22 @@
     margin-top: 0.2rem;
 }
 
+.hp-svc-accordion {
+    grid-column: 1 / -1;
+    display: none;
+    padding-top: 1.5rem;
+}
+
+.hp-svc-accordion.is-open { display: block; }
+
+.hp-svc-accordion p {
+    margin: 0 0 1rem;
+    color: var(--text-muted);
+    max-width: 640px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
 /* ================================================================
    SERVICES — featured editorial (image variant)
    ================================================================ */
@@ -299,7 +315,28 @@
     color: var(--primary-color);
 }
 
-.hp-feat-book { margin-top: 0.5rem; }
+.hp-feat-accordion {
+    display: none;
+    margin: 0.5rem 0 0;
+}
+
+.hp-feat-accordion.is-open { display: block; }
+
+.hp-feat-accordion p {
+    margin: 0;
+    color: var(--text-muted);
+    max-width: 420px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.hp-feat-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.hp-feat-book { margin: 0; }
 
 @media (max-width: 768px) {
     .hp-feat-row {

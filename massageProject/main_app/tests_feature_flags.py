@@ -110,12 +110,6 @@ class BookingEnabledUIHidingTest(TestCase):
         # target) — only the visible hero CTA link itself must be hidden.
         self.assertNotIn('class="btn btn-primary btn-lg" data-auth-modal-link', content)
 
-    def test_service_detail_booking_button_hidden_when_disabled(self):
-        self._disable_booking()
-        response = self.client.get(f'/bg/service/{self.service.pk}/')
-        content = response.content.decode()
-        self.assertNotIn('Направи резервация', content)
-
     def test_profile_reservation_actions_hidden_when_disabled(self):
         self._disable_booking()
         response = self.client.get('/bg/profile/')

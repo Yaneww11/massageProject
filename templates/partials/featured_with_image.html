@@ -2,9 +2,9 @@
 <div class="hp-feat-list">
     {% for m in services %}
     <article class="hp-feat-row hp-reveal">
-        <a href="{% url 'service_detail' pk=m.pk %}" class="hp-feat-img">
+        <div class="hp-feat-img">
             <img src="{{ m.image.url }}" alt="{{ m.name }}">
-        </a>
+        </div>
         <div class="hp-feat-body">
             <span class="hp-feat-num">0{{ forloop.counter }}</span>
             <h3 class="hp-feat-name">{{ m.name }}</h3>
@@ -13,9 +13,21 @@
                 <span class="hp-feat-badge">{{ m.duration_in_minutes }} {% trans "мин" %}</span>
                 <span class="hp-feat-price">{{ m.price }} {% trans "€" %}</span>
             </div>
-            {% if site_config.booking_enabled %}
-            <a href="{% url 'reservation_page' %}?service={{ m.pk }}" class="btn btn-primary hp-feat-book" data-auth-modal-link>{% trans "Запазете час" %}</a>
-            {% endif %}
+            <div class="hp-feat-accordion" id="acc-{{ m.pk }}">
+                <p>{{ m.description }}</p>
+            </div>
+            <div class="hp-feat-actions">
+                <button
+                    type="button"
+                    class="btn btn-outline hp-feat-learn"
+                    data-acc="{{ m.pk }}"
+                    data-label-more="{% trans 'Научете повече' %}"
+                    data-label-less="{% trans 'Покажи по-малко' %}"
+                >{% trans "Научете повече" %}</button>
+                {% if site_config.booking_enabled %}
+                <a href="{% url 'reservation_page' %}?service={{ m.pk }}" class="btn btn-primary hp-feat-book" data-auth-modal-link>{% trans "Запазете час" %}</a>
+                {% endif %}
+            </div>
         </div>
     </article>
     {% endfor %}

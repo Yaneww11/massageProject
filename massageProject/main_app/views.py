@@ -1,3 +1,5 @@
+import base64
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView, ListView, CreateView
@@ -17,7 +19,8 @@ from massageProject.main_app.forms import ReservationCreateForm, ReservationEdit
     ReservationDeleteForm, CommentForm, UserNameForm
 from massageProject.main_app.mixins import BookingEnabledMixin, booking_enabled_required, \
     CommentsEnabledMixin, comments_enabled_required
-from massageProject.main_app.models import Service, Specialist, Reservation, Comment, WorkingHours, ServiceGroup, GalleryAlbum
+from massageProject.main_app.models import Service, Specialist, Reservation, Comment, WorkingHours, ServiceGroup, \
+    Gallery, SiteConfiguration
 
 
 @booking_enabled_required
@@ -360,13 +363,71 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
 
         return context
 
-class ServiceDetail(TemplateView):
-    template_name = 'pages/service_detail.html'
 
-    def get(self, request, *args, **kwargs):
-        context = self.get_context_data(**kwargs)
-        context['service'] = get_object_or_404(Service, pk=kwargs['pk'])
-        return self.render_to_response(context)
+# Placeholder photos shown only when the signed-in user has no reservation
+# with an attached gallery yet (the admin-side gallery workflow is new and
+# most existing reservations predate it). Generated as gradients from the
+# live SiteConfiguration palette so the demo never depends on stray media
+# files and always matches the current theme. Remove once real galleries
+# are the norm.
+def _demo_proofing_photos(site_config):
+    palette = [
+        site_config.primary_color, site_config.primary_light_color,
+        site_config.secondary_color, site_config.accent_color,
+    ]
+    photos = []
+    for i in range(10):
+        color_start, color_end = palette[i % len(palette)], palette[(i + 1) % len(palette)]
+        svg = (
+            '<svg xmlns="http://www.w3.org/2000/svg" width="480" height="600">'
+            '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">'
+            f'<stop offset="0" stop-color="{color_start}"/>'
+            f'<stop offset="1" stop-color="{color_end}"/>'
+            '</linearGradient></defs>'
+            '<rect width="480" height="600" fill="url(#g)"/></svg>'
+        )
+        data_url = 'data:image/svg+xml;base64,' + base64.b64encode(svg.encode('utf-8')).decode('ascii')
+        photos.append({'id': f'demo-{i + 1}', 'url': data_url, 'alt': _('Примерна снимка от сесия')})
+    return photos
+
+
+class PhotoProofingGallery(LoginRequiredMixin, TemplateView):
+    template_name = 'pages/photo_proofing.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        reservation = (
+            Reservation.objects.filter(user=user, gallery__isnull=False)
+            .select_related('gallery', 'service', 'specialist')
+            .order_by('-date', '-time')
+            .first()
+        )
+
+        if reservation:
+            photos = [
+                {'id': img.pk, 'url': img.image.url, 'alt': img.alt_text}
+                for img in reservation.gallery.images.all()
+            ]
+            is_demo = False
+        else:
+            photos = _demo_proofing_photos(SiteConfiguration.get_solo())
+            is_demo = True
+
+        context['title'] = _('Проверка на снимки')
+        context['reservation'] = reservation
+        context['is_demo'] = is_demo
+        context['photos'] = photos
+        session_tag = f'#{reservation.pk}' if reservation else _('ДЕМО ПРЕГЛЕД')
+        context['watermark_identifier'] = f'{user.get_full_name() or user.phone_number} · {session_tag}'
+        context['labels_config'] = [
+            {'key': 'print', 'name': _('За печат'), 'cap': 5},
+            {'key': 'album', 'name': _('Албум'), 'cap': 10},
+            {'key': 'social', 'name': _('Социални мрежи'), 'cap': 3},
+        ]
+        return context
+
 
 def _blocked_by_edit_window(request, reservation, error_message):
     """Ownership + 24-hour rule shared by edit/delete reservation views.
@@ -440,7 +501,10 @@ class GalleryView(TemplateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx['albums'] = list(GalleryAlbum.objects.order_by('order').prefetch_related('photos'))
+        ctx['albums'] = list(
+            Gallery.objects.filter(gallery_type=Gallery.TYPE_ALBUM)
+            .order_by('order').prefetch_related('images')
+        )
         return ctx
 
 
@@ -449,8 +513,8 @@ class GalleryAlbumView(TemplateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        album = get_object_or_404(GalleryAlbum, slug=kwargs['slug'])
+        album = get_object_or_404(Gallery, slug=kwargs['slug'], gallery_type=Gallery.TYPE_ALBUM)
         ctx['album'] = album
-        ctx['photos'] = album.photos.order_by('order')
+        ctx['photos'] = album.images.order_by('order')
         return ctx
 
