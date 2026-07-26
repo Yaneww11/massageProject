@@ -4,7 +4,7 @@
     <div>
       <span class="profile-eyebrow">{% trans "СЕДМИЧЕН ГРАФИК" %}</span>
       <h2 class="section-title">
-        {% if role == 'staff' %}{{ calendar_specialist.name|default:_("Няма избран специалист") }}{% else %}{% trans "Вашият график" %}{% endif %}
+        {% if role == 'staff' %}{% if calendar_specialist %}{{ calendar_specialist.name }}{% else %}{% blocktrans with s=site_config.specialist_singular %}Няма избран {{ s }}{% endblocktrans %}{% endif %}{% else %}{% trans "Вашият график" %}{% endif %}
       </h2>
     </div>
     {% if role == 'staff' and specialists %}
@@ -79,7 +79,7 @@
     </div>
   </div>
   {% else %}
-  <p class="empty-state-msg">{% trans "Няма избран специалист" %}</p>
+  <p class="empty-state-msg">{% blocktrans with s=site_config.specialist_singular %}Няма избран {{ s }}{% endblocktrans %}</p>
   {% endif %}
 </div>
 
