@@ -322,6 +322,76 @@ class AllCommentsView(CommentsEnabledMixin, ListView):
     def get_queryset(self):
         return Comment.objects.filter(is_reviewed=True).order_by('-created_at')
 
+
+def _time_to_minutes(t):
+    return t.hour * 60 + t.minute
+
+
+def _build_week_calendar(specialist, week_start):
+    week_days = [week_start + timedelta(days=i) for i in range(7)]
+
+    working_hours_by_day = {
+        wh.day_of_week: wh
+        for wh in WorkingHours.objects.filter(specialist=specialist)
+    }
+
+    reservations = list(
+        Reservation.objects.active()
+        .filter(specialist=specialist, date__range=(week_days[0], week_days[-1]))
+        .select_related('user')
+        .order_by('time')
+    )
+    reservations_by_date = {}
+    for r in reservations:
+        reservations_by_date.setdefault(r.date, []).append(r)
+
+    user_ids = {r.user_id for r in reservations}
+    visit_counts = {}
+    if user_ids:
+        visit_counts = {
+            row['user_id']: row['c']
+            for row in Reservation.all_objects.filter(
+                specialist=specialist, user_id__in=user_ids, status=Reservation.STATUS_COMPLETED,
+            ).values('user_id').annotate(c=Count('id'))
+        }
+
+    if working_hours_by_day:
+        window_start = min(_time_to_minutes(wh.start_time) for wh in working_hours_by_day.values())
+        window_end = max(_time_to_minutes(wh.end_time) for wh in working_hours_by_day.values())
+    else:
+        window_start, window_end = 8 * 60, 20 * 60
+    window_span = (window_end - window_start) or 1
+
+    days = []
+    for day_date in week_days:
+        wh = working_hours_by_day.get(day_date.weekday())
+        day_entries = []
+        for r in reservations_by_date.get(day_date, []):
+            start_minutes = _time_to_minutes(r.time)
+            end_minutes = _time_to_minutes(r.end_time)
+            day_entries.append({
+                'reservation': r,
+                'top_pct': round(max(0.0, (start_minutes - window_start) / window_span * 100), 2),
+                'height_pct': round(max(0.0, (end_minutes - start_minutes) / window_span * 100), 2),
+                'visit_count': visit_counts.get(r.user_id, 0),
+            })
+        days.append({'date': day_date, 'working_hours': wh, 'reservations': day_entries})
+
+    hour_marks = []
+    first_hour = window_start // 60
+    last_hour = -(-window_end // 60)
+    for h in range(first_hour, last_hour + 1):
+        minute = h * 60
+        if minute < window_start or minute > window_end:
+            continue
+        hour_marks.append({
+            'label': '%02d:00' % h,
+            'top_pct': round((minute - window_start) / window_span * 100, 2),
+        })
+
+    return {'days': days, 'hour_marks': hour_marks}
+
+
 class ProfilePage(LoginRequiredMixin, TemplateView):
     template_name = 'pages/my_profile.html'
 
