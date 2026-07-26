@@ -114,9 +114,10 @@ class ServiceAdmin(ModelAdmin, TabbedTranslationAdmin):
 
 @admin.register(Specialist)
 class SpecialistAdmin(ModelAdmin, TabbedTranslationAdmin):
-    list_display = ('display_image', 'name', 'phone_number', 'email')
+    list_display = ('display_image', 'name', 'phone_number', 'email', 'user')
     search_fields = ('name', 'email', 'phone_number')
-    
+    autocomplete_fields = ('user',)
+
     def display_image(self, obj):
         if obj.image:
             return format_html('<img src="{}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;" />', obj.image.url)

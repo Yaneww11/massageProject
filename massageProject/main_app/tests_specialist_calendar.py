@@ -1,8 +1,10 @@
 from django.test import TestCase
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
+from django.contrib import admin as django_admin
 
 from massageProject.main_app.models import Specialist, Reservation
+from massageProject.main_app.admin import SpecialistAdmin
 
 
 class SpecialistUserLinkAndPermissionsTest(TestCase):
@@ -18,3 +20,10 @@ class SpecialistUserLinkAndPermissionsTest(TestCase):
         )
         self.assertIn('view_all_reservations', codenames)
         self.assertIn('view_specialist_reservations', codenames)
+
+
+class SpecialistAdminUserLinkTest(TestCase):
+    def test_specialist_admin_exposes_user_field(self):
+        admin_instance = SpecialistAdmin(Specialist, django_admin.site)
+        self.assertIn('user', admin_instance.list_display)
+        self.assertIn('user', admin_instance.autocomplete_fields)
