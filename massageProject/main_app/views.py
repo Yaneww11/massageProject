@@ -371,8 +371,8 @@ def _build_week_calendar(specialist, week_start):
             end_minutes = _time_to_minutes(r.end_time)
             day_entries.append({
                 'reservation': r,
-                'top_pct': round(max(0.0, (start_minutes - window_start) / window_span * 100), 2),
-                'height_pct': round(max(0.0, (end_minutes - start_minutes) / window_span * 100), 2),
+                'top_pct': round(min(100.0, max(0.0, (start_minutes - window_start) / window_span * 100)), 2),
+                'height_pct': round(min(100.0, max(0.0, (end_minutes - start_minutes) / window_span * 100)), 2),
                 'visit_count': visit_counts.get(r.user_id, 0),
             })
         days.append({'date': day_date, 'working_hours': wh, 'reservations': day_entries})

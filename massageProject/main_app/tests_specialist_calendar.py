@@ -98,3 +98,31 @@ class BuildWeekCalendarTest(TestCase):
         calendar = _build_week_calendar(self.specialist, self.monday)
         entry = calendar['days'][0]['reservations'][0]
         self.assertEqual(entry['visit_count'], 1)
+
+    def test_percentages_clamped_when_working_hours_shrink(self):
+        # Create initial working hours: 14:00-20:00
+        WorkingHours.objects.create(
+            specialist=self.specialist, day_of_week=0, start_time=time_cls(14, 0), end_time=time_cls(20, 0),
+        )
+
+        # Create a reservation at 19:00 (with 60-min service, ends at 20:00)
+        # This is valid within the 14:00-20:00 window
+        r = Reservation.objects.create(
+            user=self.client_user, service=self.service, specialist=self.specialist,
+            date=self.monday, time=time_cls(19, 0),
+        )
+
+        # Now shrink the working hours to 14:00-18:00
+        wh = WorkingHours.objects.get(specialist=self.specialist, day_of_week=0)
+        wh.end_time = time_cls(18, 0)
+        wh.save()
+
+        # Build the calendar
+        # Window is now 14:00-18:00 (240 minutes)
+        # Reservation is 19:00-20:00 (outside the window)
+        calendar = _build_week_calendar(self.specialist, self.monday)
+        entry = calendar['days'][0]['reservations'][0]
+
+        # Percentages should be clamped to [0, 100]
+        self.assertLessEqual(entry['top_pct'], 100.0, f"top_pct {entry['top_pct']} exceeds 100")
+        self.assertLessEqual(entry['height_pct'], 100.0, f"height_pct {entry['height_pct']} exceeds 100")
