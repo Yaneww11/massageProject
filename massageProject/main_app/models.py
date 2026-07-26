@@ -122,6 +122,13 @@ class Specialist(models.Model):
     image = models.ImageField(upload_to='specialists/')
     phone_number = models.CharField(max_length=20)
     email = models.EmailField()
+    user = models.OneToOneField(
+        'accounts.CustomUser',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='specialist_profile',
+    )
 
     class Meta:
         verbose_name = _('Терапевт')
@@ -453,6 +460,10 @@ class Reservation(models.Model):
                 condition=models.Q(status='active'),
                 name='unique_active_reservation_slot',
             )
+        ]
+        permissions = [
+            ('view_all_reservations', 'Can view all reservations across all specialists'),
+            ('view_specialist_reservations', 'Can view own specialist reservations'),
         ]
 
     def __str__(self):
