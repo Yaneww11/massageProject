@@ -126,3 +126,74 @@ class BuildWeekCalendarTest(TestCase):
         # Percentages should be clamped to [0, 100]
         self.assertLessEqual(entry['top_pct'], 100.0, f"top_pct {entry['top_pct']} exceeds 100")
         self.assertLessEqual(entry['height_pct'], 100.0, f"height_pct {entry['height_pct']} exceeds 100")
+
+
+from django.test import Client
+from django.urls import reverse
+
+
+class ProfilePageRoleResolutionTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        ct = ContentType.objects.get_for_model(Reservation)
+        self.view_all_perm = Permission.objects.get(content_type=ct, codename='view_all_reservations')
+        self.view_specialist_perm = Permission.objects.get(content_type=ct, codename='view_specialist_reservations')
+
+        self.plain_user = CustomUser.objects.create_user(
+            phone_number='0888100001', email='plain@example.com', password='pass12345',
+        )
+        self.specialist_user = CustomUser.objects.create_user(
+            phone_number='0888100002', email='specialist@example.com', password='pass12345',
+        )
+        self.staff_user = CustomUser.objects.create_user(
+            phone_number='0888100003', email='staff@example.com', password='pass12345',
+        )
+        self.specialist = Specialist.objects.create(
+            name='Ivan', description='d', phone_number='0888100004', email='ivan@example.com',
+            user=self.specialist_user,
+        )
+
+    def test_plain_client_sees_client_role(self):
+        self.client.force_login(self.plain_user)
+        response = self.client.get(reverse('profile_page'))
+        self.assertEqual(response.context['role'], 'client')
+
+    def test_specialist_link_without_permission_falls_back_to_client(self):
+        self.client.force_login(self.specialist_user)
+        response = self.client.get(reverse('profile_page'))
+        self.assertEqual(response.context['role'], 'client')
+
+    def test_permission_without_specialist_link_falls_back_to_client(self):
+        self.plain_user.user_permissions.add(self.view_specialist_perm)
+        self.client.force_login(self.plain_user)
+        response = self.client.get(reverse('profile_page'))
+        self.assertEqual(response.context['role'], 'client')
+
+    def test_specialist_with_link_and_permission_sees_specialist_role(self):
+        self.specialist_user.user_permissions.add(self.view_specialist_perm)
+        self.client.force_login(self.specialist_user)
+        response = self.client.get(reverse('profile_page'))
+        self.assertEqual(response.context['role'], 'specialist')
+        self.assertEqual(response.context['calendar_specialist'], self.specialist)
+
+    def test_staff_with_view_all_reservations_sees_staff_role(self):
+        self.staff_user.user_permissions.add(self.view_all_perm)
+        self.client.force_login(self.staff_user)
+        response = self.client.get(reverse('profile_page'))
+        self.assertEqual(response.context['role'], 'staff')
+        self.assertIn(self.specialist, response.context['specialists'])
+
+    def test_staff_takes_precedence_over_specialist_when_both_apply(self):
+        self.specialist_user.user_permissions.add(self.view_specialist_perm, self.view_all_perm)
+        self.client.force_login(self.specialist_user)
+        response = self.client.get(reverse('profile_page'))
+        self.assertEqual(response.context['role'], 'staff')
+
+    def test_staff_can_select_specialist_via_get_param(self):
+        other_specialist = Specialist.objects.create(
+            name='Zora', description='d', phone_number='0888100006', email='zora@example.com',
+        )
+        self.staff_user.user_permissions.add(self.view_all_perm)
+        self.client.force_login(self.staff_user)
+        response = self.client.get(reverse('profile_page'), {'specialist_id': other_specialist.pk})
+        self.assertEqual(response.context['calendar_specialist'], other_specialist)

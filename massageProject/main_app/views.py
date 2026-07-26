@@ -400,41 +400,92 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
         user = self.request.user
         context['is_photographer_website'] = settings.IS_PHOTOGRAPHER_WEBSITE
 
+        specialist_link = getattr(user, 'specialist_profile', None)
+
         if user.has_perm('main_app.view_all_reservations'):
-            active_reservations = list(Reservation.objects.active().order_by('date', 'time')[:15])
-            past_reservations = list(Reservation.objects.past().order_by('-date', '-time')[:15])
+            context['role'] = 'staff'
             context['title'] = _('Управление на резервации')
+            specialists = list(Specialist.objects.order_by('name'))
+            context['specialists'] = specialists
+            selected_id = self.request.GET.get('specialist_id')
+            selected = None
+            if selected_id:
+                selected = next((s for s in specialists if str(s.pk) == selected_id), None)
+            if selected is None and specialists:
+                selected = specialists[0]
+            self._add_calendar_context(context, selected)
+        elif specialist_link and user.has_perm('main_app.view_specialist_reservations'):
+            context['role'] = 'specialist'
+            context['title'] = f'{user.get_full_name()} - {_("график")}'
+            self._add_calendar_context(context, specialist_link)
         else:
-            context['is_photographer_website'] = settings.IS_PHOTOGRAPHER_WEBSITE
+            context['role'] = 'client'
             user_qs = Reservation.objects.filter(user=user)
             active_reservations = list(user_qs.active().order_by('date', 'time'))
             past_reservations = list(user_qs.past().order_by('-date', '-time')[:5])
             context['title'] = f'{user.get_full_name()} - {_("резервации")}'
 
-        context['active_reservations'] = active_reservations
-        context['past_reservations'] = past_reservations
-        context['next_reservation'] = active_reservations[0] if active_reservations else None
-        context['today'] = date.today()
+            context['active_reservations'] = active_reservations
+            context['past_reservations'] = past_reservations
+            context['next_reservation'] = active_reservations[0] if active_reservations else None
+            context['today'] = date.today()
 
-        # Metrics
-        context['total_visits'] = Reservation.all_objects.filter(user=user, status='completed').count()
-        context['upcoming_count'] = len(active_reservations)
-        fav = (Reservation.objects.filter(user=user)
-               .values('service__name').annotate(c=Count('id')).order_by('-c').first())
-        context['favorite_service'] = fav['service__name'] if fav else None
-        context['client_since'] = user.date_joined.year
+            # Metrics
+            context['total_visits'] = Reservation.all_objects.filter(user=user, status='completed').count()
+            context['upcoming_count'] = len(active_reservations)
+            fav = (Reservation.objects.filter(user=user)
+                   .values('service__name').annotate(c=Count('id')).order_by('-c').first())
+            context['favorite_service'] = fav['service__name'] if fav else None
+            context['client_since'] = user.date_joined.year
 
-        # Studio info and working hours -- business_info is already supplied
-        # globally by the admin_branding context processor, no need to
-        # re-fetch it here.
-        homepage = get_cached_homepage()
-        context['working_hours'] = list(homepage.business_working_hours.order_by('order')) if homepage else []
+            # Studio info and working hours -- business_info is already supplied
+            # globally by the admin_branding context processor, no need to
+            # re-fetch it here.
+            homepage = get_cached_homepage()
+            context['working_hours'] = list(homepage.business_working_hours.order_by('order')) if homepage else []
 
-        # Map of reviewed past reservations {reservation_id: comment}
-        reviewed = Comment.objects.filter(reservation__in=past_reservations).select_related('reservation')
-        context['reviewed_map'] = {c.reservation_id: c for c in reviewed}
+            # Map of reviewed past reservations {reservation_id: comment}
+            reviewed = Comment.objects.filter(reservation__in=past_reservations).select_related('reservation')
+            context['reviewed_map'] = {c.reservation_id: c for c in reviewed}
 
         return context
+
+    def _add_calendar_context(self, context, specialist):
+        today = date.today()
+        context['today'] = today
+
+        week_param = self.request.GET.get('week')
+        requested = today
+        if week_param:
+            try:
+                requested = datetime.strptime(week_param, '%Y-%m-%d').date()
+            except ValueError:
+                requested = today
+        week_start = requested - timedelta(days=requested.weekday())
+
+        context['calendar_specialist'] = specialist
+        context['week_start'] = week_start
+        context['prev_week'] = week_start - timedelta(days=7)
+        context['next_week'] = week_start + timedelta(days=7)
+
+        if specialist is None:
+            context['calendar'] = None
+            context['bookings_today'] = 0
+            context['bookings_this_week'] = 0
+            context['next_client_reservation'] = None
+            return
+
+        context['calendar'] = _build_week_calendar(specialist, week_start)
+
+        week_end = week_start + timedelta(days=6)
+        week_reservations = Reservation.objects.active().filter(
+            specialist=specialist, date__range=(week_start, week_end),
+        )
+        context['bookings_this_week'] = week_reservations.count()
+        context['bookings_today'] = week_reservations.filter(date=today).count()
+        context['next_client_reservation'] = (
+            week_reservations.filter(date__gte=today).order_by('date', 'time').first()
+        )
 
 
 # Placeholder photos shown only when the signed-in user has no reservation
