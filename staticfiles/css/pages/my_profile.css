@@ -1020,6 +1020,7 @@
     justify-content: center;
 }
 
+/* Fixed height is required: percentage-based absolute positioning of .calendar-booking needs a definite height on this ancestor. Do not make this fluid without reworking the positioning scheme. */
 .calendar-day-body {
     position: relative;
     height: 640px;

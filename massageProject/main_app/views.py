@@ -416,6 +416,7 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
             self._add_calendar_context(context, selected)
         elif specialist_link and user.has_perm('main_app.view_specialist_reservations'):
             context['role'] = 'specialist'
+            # _("график") is nested in an f-string; makemessages can't extract it — the .po/.mo entries for it are maintained by hand.
             context['title'] = f'{user.get_full_name()} - {_("график")}'
             self._add_calendar_context(context, specialist_link)
         else:
@@ -478,14 +479,15 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
         context['calendar'] = _build_week_calendar(specialist, week_start)
 
         week_end = week_start + timedelta(days=6)
+        context['week_end'] = week_end
         week_reservations = Reservation.objects.active().filter(
             specialist=specialist, date__range=(week_start, week_end),
         )
         context['bookings_this_week'] = week_reservations.count()
-        context['bookings_today'] = week_reservations.filter(date=today).count()
-        context['next_client_reservation'] = (
-            week_reservations.filter(date__gte=today).order_by('date', 'time').first()
-        )
+
+        today_and_future = Reservation.objects.active().filter(specialist=specialist, date__gte=today)
+        context['bookings_today'] = today_and_future.filter(date=today).count()
+        context['next_client_reservation'] = today_and_future.order_by('date', 'time').first()
 
 
 # Placeholder photos shown only when the signed-in user has no reservation

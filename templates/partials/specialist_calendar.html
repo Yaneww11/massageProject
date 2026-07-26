@@ -29,7 +29,7 @@
       <span class="stat-label">{% trans "ТАЗИ СЕДМИЦА" %}</span>
     </div>
     <div class="stat-card">
-      <span class="stat-value">{% if next_client_reservation %}{{ next_client_reservation.time|time:"H:i" }}{% else %}&mdash;{% endif %}</span>
+      <span class="stat-value">{% if next_client_reservation %}{{ next_client_reservation.user.get_full_name }} &middot; {{ next_client_reservation.time|time:"H:i" }}{% else %}&mdash;{% endif %}</span>
       <span class="stat-label">{% trans "СЛЕДВАЩ КЛИЕНТ" %}</span>
     </div>
   </div>
@@ -37,7 +37,7 @@
   {% if calendar %}
   <div class="calendar-nav">
     <a href="?week={{ prev_week|date:'Y-m-d' }}{% if calendar_specialist %}&specialist_id={{ calendar_specialist.pk }}{% endif %}" class="btn-outline-profile">&larr; {% trans "Предишна седмица" %}</a>
-    <span class="calendar-week-label">{{ week_start|date:"d.m" }} &ndash; {{ next_week|date:"d.m.Y" }}</span>
+    <span class="calendar-week-label">{{ week_start|date:"d.m" }} &ndash; {{ week_end|date:"d.m.Y" }}</span>
     <a href="?week={{ next_week|date:'Y-m-d' }}{% if calendar_specialist %}&specialist_id={{ calendar_specialist.pk }}{% endif %}" class="btn-outline-profile">{% trans "Следваща седмица" %} &rarr;</a>
   </div>
 
@@ -66,9 +66,7 @@
                   data-service="{{ entry.reservation.service.name }}"
                   data-time="{{ entry.reservation.time|time:'H:i' }} &ndash; {{ entry.reservation.end_time|time:'H:i' }}"
                   data-notes="{{ entry.reservation.additional_text }}"
-                  data-visits="{{ entry.visit_count }}"
-                  data-edit-url="{% url 'edit_reservation' entry.reservation.pk %}"
-                  data-delete-url="{% url 'delete_reservation' entry.reservation.pk %}">
+                  data-visits="{{ entry.visit_count }}">
             <span class="calendar-booking-time">{{ entry.reservation.time|time:"H:i" }}</span>
             <span class="calendar-booking-service">{{ entry.reservation.service.name }}</span>
           </button>
@@ -95,10 +93,6 @@
       <div class="calendar-modal-row"><strong>{% trans "Бележка" %}:</strong> <span id="calendar-modal-notes"></span></div>
       <div class="calendar-modal-row"><strong>{% trans "Предишни посещения" %}:</strong> <span id="calendar-modal-visits"></span></div>
     </div>
-    <div class="calendar-modal-actions">
-      <a href="#" id="calendar-modal-edit" class="btn-outline-profile">{% trans "Промени" %}</a>
-      <a href="#" id="calendar-modal-delete" class="btn-action-cancel">{% trans "Отмени" %}</a>
-    </div>
   </div>
 </div>
 
@@ -114,8 +108,6 @@
       document.getElementById('calendar-modal-phone').textContent = btn.dataset.phone || '';
       document.getElementById('calendar-modal-notes').textContent = btn.dataset.notes || '{% trans "Няма" %}';
       document.getElementById('calendar-modal-visits').textContent = btn.dataset.visits || '0';
-      document.getElementById('calendar-modal-edit').href = btn.dataset.editUrl;
-      document.getElementById('calendar-modal-delete').href = btn.dataset.deleteUrl;
       modal.style.display = 'flex';
     });
   });

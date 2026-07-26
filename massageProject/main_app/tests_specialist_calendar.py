@@ -238,3 +238,33 @@ class ProfilePageTemplateRenderingTest(TestCase):
         self.client.force_login(self.staff_user)
         response = self.client.get(reverse('profile_page'))
         self.assertContains(response, 'specialist-picker-form')
+
+    def test_today_stats_independent_of_browsed_week(self):
+        specialist = Specialist.objects.get(user=self.specialist_user)
+        service = Service.objects.create(
+            name='Massage', description='d', price=50, duration_in_minutes=60, short_description='s',
+        )
+        client_user = CustomUser.objects.create_user(
+            phone_number='0888200005', email='client2@example.com', password='pass12345',
+        )
+        today = timezone.localdate()
+        # Bypass Reservation.save()'s full_clean() (2-hour lead time / working
+        # hours checks) via bulk_create, since this test only needs a row that
+        # exists "today" regardless of the current wall-clock time.
+        today_reservation = Reservation(
+            user=client_user, service=service, specialist=specialist,
+            date=today, time=time_cls(10, 0),
+        )
+        Reservation.objects.bulk_create([today_reservation])
+
+        # Browse to a different week (next Monday) via the ?week= param.
+        other_monday = today + timedelta(days=7)
+        while other_monday.weekday() != 0:
+            other_monday += timedelta(days=1)
+
+        self.client.force_login(self.specialist_user)
+        response = self.client.get(
+            reverse('profile_page'), {'week': other_monday.strftime('%Y-%m-%d')},
+        )
+        self.assertEqual(response.context['bookings_today'], 1)
+        self.assertEqual(response.context['next_client_reservation'], today_reservation)
