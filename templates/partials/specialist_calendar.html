@@ -1,0 +1,125 @@
+{% load i18n %}
+<div class="specialist-calendar">
+  <div class="section-header-row">
+    <div>
+      <span class="profile-eyebrow">{% trans "СЕДМИЧЕН ГРАФИК" %}</span>
+      <h2 class="section-title">
+        {% if role == 'staff' %}{{ calendar_specialist.name|default:_("Няма избран специалист") }}{% else %}{% trans "Вашият график" %}{% endif %}
+      </h2>
+    </div>
+    {% if role == 'staff' and specialists %}
+    <form method="get" class="specialist-picker-form">
+      <label class="form-label" for="specialist-picker">{{ site_config.specialist_singular|capfirst }}</label>
+      <select id="specialist-picker" name="specialist_id" onchange="this.form.submit()">
+        {% for s in specialists %}
+        <option value="{{ s.pk }}" {% if calendar_specialist.pk == s.pk %}selected{% endif %}>{{ s.name }}</option>
+        {% endfor %}
+      </select>
+    </form>
+    {% endif %}
+  </div>
+
+  <div class="profile-stats stats-cols-3">
+    <div class="stat-card">
+      <span class="stat-value">{{ bookings_today }}</span>
+      <span class="stat-label">{% trans "ДНЕС" %}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{{ bookings_this_week }}</span>
+      <span class="stat-label">{% trans "ТАЗИ СЕДМИЦА" %}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value">{% if next_client_reservation %}{{ next_client_reservation.time|time:"H:i" }}{% else %}&mdash;{% endif %}</span>
+      <span class="stat-label">{% trans "СЛЕДВАЩ КЛИЕНТ" %}</span>
+    </div>
+  </div>
+
+  {% if calendar %}
+  <div class="calendar-nav">
+    <a href="?week={{ prev_week|date:'Y-m-d' }}{% if calendar_specialist %}&specialist_id={{ calendar_specialist.pk }}{% endif %}" class="btn-outline-profile">&larr; {% trans "Предишна седмица" %}</a>
+    <span class="calendar-week-label">{{ week_start|date:"d.m" }} &ndash; {{ next_week|date:"d.m.Y" }}</span>
+    <a href="?week={{ next_week|date:'Y-m-d' }}{% if calendar_specialist %}&specialist_id={{ calendar_specialist.pk }}{% endif %}" class="btn-outline-profile">{% trans "Следваща седмица" %} &rarr;</a>
+  </div>
+
+  <div class="calendar-grid-wrap">
+    <div class="calendar-grid">
+      <div class="calendar-time-axis">
+        {% for mark in calendar.hour_marks %}
+        <span class="calendar-hour-mark" style="top: {{ mark.top_pct }}%;">{{ mark.label }}</span>
+        {% endfor %}
+      </div>
+      {% for day in calendar.days %}
+      <div class="calendar-day-column">
+        <div class="calendar-day-heading">
+          <span class="calendar-day-name">{{ day.date|date:"D" }}</span>
+          <span class="calendar-day-num{% if day.date == today %} is-today{% endif %}">{{ day.date|date:"d" }}</span>
+        </div>
+        <div class="calendar-day-body">
+          {% if not day.working_hours %}
+          <span class="calendar-day-off">{% trans "Почивен ден" %}</span>
+          {% endif %}
+          {% for entry in day.reservations %}
+          <button type="button" class="calendar-booking"
+                  style="top: {{ entry.top_pct }}%; height: {{ entry.height_pct }}%;"
+                  data-client="{{ entry.reservation.user.get_full_name }}"
+                  data-phone="{{ entry.reservation.user.phone_number }}"
+                  data-service="{{ entry.reservation.service.name }}"
+                  data-time="{{ entry.reservation.time|time:'H:i' }} &ndash; {{ entry.reservation.end_time|time:'H:i' }}"
+                  data-notes="{{ entry.reservation.additional_text }}"
+                  data-visits="{{ entry.visit_count }}"
+                  data-edit-url="{% url 'edit_reservation' entry.reservation.pk %}"
+                  data-delete-url="{% url 'delete_reservation' entry.reservation.pk %}">
+            <span class="calendar-booking-time">{{ entry.reservation.time|time:"H:i" }}</span>
+            <span class="calendar-booking-service">{{ entry.reservation.service.name }}</span>
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% else %}
+  <p class="empty-state-msg">{% trans "Няма избран специалист" %}</p>
+  {% endif %}
+</div>
+
+<!-- Booking detail modal -->
+<div id="calendar-booking-modal" class="review-modal-overlay" style="display:none;" aria-modal="true" role="dialog">
+  <div class="review-modal-content">
+    <button class="modal-close" id="calendar-modal-close" aria-label="{% trans 'Затвори' %}">&times;</button>
+    <h3 class="modal-title" id="calendar-modal-service"></h3>
+    <p class="modal-service-name" id="calendar-modal-time"></p>
+    <div class="calendar-modal-body">
+      <div class="calendar-modal-row"><strong>{% trans "Клиент" %}:</strong> <span id="calendar-modal-client"></span></div>
+      <div class="calendar-modal-row"><strong>{% trans "Телефон" %}:</strong> <span id="calendar-modal-phone"></span></div>
+      <div class="calendar-modal-row"><strong>{% trans "Бележка" %}:</strong> <span id="calendar-modal-notes"></span></div>
+      <div class="calendar-modal-row"><strong>{% trans "Предишни посещения" %}:</strong> <span id="calendar-modal-visits"></span></div>
+    </div>
+    <div class="calendar-modal-actions">
+      <a href="#" id="calendar-modal-edit" class="btn-outline-profile">{% trans "Промени" %}</a>
+      <a href="#" id="calendar-modal-delete" class="btn-action-cancel">{% trans "Отмени" %}</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var modal = document.getElementById('calendar-booking-modal');
+  var closeBtn = document.getElementById('calendar-modal-close');
+  document.querySelectorAll('.calendar-booking').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.getElementById('calendar-modal-service').textContent = btn.dataset.service || '';
+      document.getElementById('calendar-modal-time').textContent = btn.dataset.time || '';
+      document.getElementById('calendar-modal-client').textContent = btn.dataset.client || '';
+      document.getElementById('calendar-modal-phone').textContent = btn.dataset.phone || '';
+      document.getElementById('calendar-modal-notes').textContent = btn.dataset.notes || '{% trans "Няма" %}';
+      document.getElementById('calendar-modal-visits').textContent = btn.dataset.visits || '0';
+      document.getElementById('calendar-modal-edit').href = btn.dataset.editUrl;
+      document.getElementById('calendar-modal-delete').href = btn.dataset.deleteUrl;
+      modal.style.display = 'flex';
+    });
+  });
+  closeBtn.addEventListener('click', function () { modal.style.display = 'none'; });
+  modal.addEventListener('click', function (e) { if (e.target === modal) modal.style.display = 'none'; });
+})();
+</script>

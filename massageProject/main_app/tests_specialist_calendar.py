@@ -197,3 +197,44 @@ class ProfilePageRoleResolutionTest(TestCase):
         self.client.force_login(self.staff_user)
         response = self.client.get(reverse('profile_page'), {'specialist_id': other_specialist.pk})
         self.assertEqual(response.context['calendar_specialist'], other_specialist)
+
+
+class ProfilePageTemplateRenderingTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        ct = ContentType.objects.get_for_model(Reservation)
+        view_all_perm = Permission.objects.get(content_type=ct, codename='view_all_reservations')
+        view_specialist_perm = Permission.objects.get(content_type=ct, codename='view_specialist_reservations')
+
+        self.plain_user = CustomUser.objects.create_user(
+            phone_number='0888200001', email='plain2@example.com', password='pass12345',
+        )
+        self.specialist_user = CustomUser.objects.create_user(
+            phone_number='0888200002', email='specialist2@example.com', password='pass12345',
+        )
+        self.staff_user = CustomUser.objects.create_user(
+            phone_number='0888200003', email='staff2@example.com', password='pass12345',
+        )
+        Specialist.objects.create(
+            name='Petya', description='d', phone_number='0888200004', email='petya@example.com',
+            user=self.specialist_user,
+        )
+        self.specialist_user.user_permissions.add(view_specialist_perm)
+        self.staff_user.user_permissions.add(view_all_perm)
+
+    def test_client_role_renders_existing_sections_not_calendar(self):
+        self.client.force_login(self.plain_user)
+        response = self.client.get(reverse('profile_page'))
+        self.assertContains(response, 'proof-teaser-card')
+        self.assertNotContains(response, 'specialist-calendar')
+
+    def test_specialist_role_renders_calendar_not_client_sections(self):
+        self.client.force_login(self.specialist_user)
+        response = self.client.get(reverse('profile_page'))
+        self.assertContains(response, 'specialist-calendar')
+        self.assertNotContains(response, 'proof-teaser-card')
+
+    def test_staff_role_renders_specialist_picker(self):
+        self.client.force_login(self.staff_user)
+        response = self.client.get(reverse('profile_page'))
+        self.assertContains(response, 'specialist-picker-form')

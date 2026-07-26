@@ -20,6 +20,7 @@
       </div>
     </div>
 
+    {% if role == 'client' %}
     <!-- Photo proofing entry point -->
   {% if is_photographer_website %}
     <a href="{% url 'photo_proofing' %}" class="proof-teaser-card">
@@ -250,9 +251,14 @@
     </div>
     {% endif %}
 
+    {% else %}
+    {% include "partials/specialist_calendar.html" %}
+    {% endif %}
+
   </div>
 </section>
 
+{% if role == 'client' %}
 <!-- Review modal -->
 <div id="profile-review-modal" class="review-modal-overlay" style="display:none;" aria-modal="true" role="dialog">
   <div class="review-modal-content">
@@ -342,5 +348,6 @@
   });
 })();
 </script>
+{% endif %}
 
 {% endblock %}
