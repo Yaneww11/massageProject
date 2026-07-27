@@ -1,4 +1,6 @@
 import base64
+import hashlib
+import logging
 from io import BytesIO
 
 from django.conf import settings
@@ -11,6 +13,7 @@ from django.core import signing
 from django.core.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+from django.http.request import validate_host
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from datetime import datetime, timedelta, date
@@ -18,7 +21,7 @@ from django.db.models import Count
 from django.contrib import messages
 from django.core.cache import cache
 from django.http import JsonResponse, Http404
-from PIL import Image as PILImage, ImageDraw
+from PIL import Image as PILImage, ImageDraw, ImageFont
 
 from massageProject.main_app.context_processors import get_cached_homepage
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
@@ -27,6 +30,8 @@ from massageProject.main_app.mixins import BookingEnabledMixin, booking_enabled_
     CommentsEnabledMixin, comments_enabled_required
 from massageProject.main_app.models import Service, Specialist, Reservation, Comment, WorkingHours, ServiceGroup, \
     Gallery, SiteConfiguration, Image, ImageProof, PhotoLabel
+
+logger = logging.getLogger(__name__)
 
 
 @booking_enabled_required
@@ -524,7 +529,8 @@ def _proof_image_token(image_id, user_id):
 
 
 def _proof_derivative_path(image_id, user_id):
-    return f'proof_derivatives/{image_id}/{user_id}.jpg'
+    digest = hashlib.sha256(f'{image_id}:{user_id}:{settings.SECRET_KEY}'.encode()).hexdigest()[:32]
+    return f'proof_derivatives/{image_id}/{digest}.jpg'
 
 
 def _generate_proof_derivative(image, user, watermark_identifier):
@@ -540,12 +546,16 @@ def _generate_proof_derivative(image, user, watermark_identifier):
     width, height = original.size
 
     layer = PILImage.new('RGBA', (width * 2, height * 2), (0, 0, 0, 0))
+    try:
+        font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', size=max(width // 40, 14))
+    except OSError:
+        font = ImageFont.load_default()
     draw = ImageDraw.Draw(layer)
     step_x, step_y = 320, 160
     for y in range(0, layer.height, step_y):
         for x in range(0, layer.width, step_x):
-            draw.text((x, y), watermark_identifier, fill=(255, 255, 255, 90))
-    layer = layer.rotate(-30, expand=False)
+            draw.text((x, y), watermark_identifier, fill=(255, 255, 255, 90), font=font)
+    layer = layer.rotate(-30, expand=False, resample=PILImage.BICUBIC)
     layer = layer.crop((width // 2, height // 2, width // 2 + width, height // 2 + height))
 
     watermarked = PILImage.alpha_composite(original.convert('RGBA'), layer).convert('RGB')
@@ -568,8 +578,8 @@ def serve_proof_image(request, token):
 
     referer = request.META.get('HTTP_REFERER')
     if referer:
-        referer_host = referer.split('//', 1)[-1].split('/', 1)[0].split(':', 1)[0]
-        if referer_host not in settings.ALLOWED_HOSTS:
+        referer_host = referer.split('//', 1)[-1].split('/', 1)[0].split(':', 1)[0].lower()
+        if not validate_host(referer_host, settings.ALLOWED_HOSTS):
             raise PermissionDenied
 
     image, reservation = _get_owned_proofing_image(request, data['image_id'])
@@ -580,6 +590,7 @@ def serve_proof_image(request, token):
     except TypeError:
         # The active storage backend (e.g. local FileSystemStorage in dev) doesn't
         # support signed/expiring URLs — fall back to its plain url().
+        logger.warning('Storage backend does not support expiring URLs; serving a non-expiring URL for %s', path)
         image_url = default_storage.url(path)
     return redirect(image_url)
 

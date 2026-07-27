@@ -221,9 +221,10 @@ class ProofingEndpointsTest(ProofingModelsBase):
 
 import shutil
 import tempfile
+import time
 from io import BytesIO
+from unittest import mock
 
-from django.core import signing
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import override_settings
@@ -260,37 +261,53 @@ class ProofImageServingViewTest(ProofingModelsBase):
         return _proof_image_token(image_id or self.image.pk, user_id or self.user.pk)
 
     def test_valid_token_redirects_to_derivative(self):
+        from massageProject.main_app.views import _proof_derivative_path
         response = self.client.get(reverse('photo_proofing_image', args=[self._token()]))
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(default_storage.exists(f'proof_derivatives/{self.image.pk}/{self.user.pk}.jpg'))
+        self.assertTrue(default_storage.exists(_proof_derivative_path(self.image.pk, self.user.pk)))
 
     def test_derivative_is_only_generated_once(self):
+        from massageProject.main_app.views import _proof_derivative_path
         url = reverse('photo_proofing_image', args=[self._token()])
         self.client.get(url)
-        path = f'proof_derivatives/{self.image.pk}/{self.user.pk}.jpg'
+        path = _proof_derivative_path(self.image.pk, self.user.pk)
         first_mtime = default_storage.get_modified_time(path)
         self.client.get(url)
         second_mtime = default_storage.get_modified_time(path)
         self.assertEqual(first_mtime, second_mtime)
 
     def test_expired_token_is_rejected(self):
-        from massageProject.main_app.views import PROOF_IMAGE_SALT
-        stale_token = signing.dumps({'image_id': self.image.pk, 'user_id': self.user.pk}, salt=PROOF_IMAGE_SALT)
-        with override_settings(USE_TZ=True):
-            response = self.client.get(
-                reverse('photo_proofing_image', args=[stale_token]) + '?_max_age_override=0'
-            )
-        # Token was just issued, so it's still valid — this test instead checks a tampered token is rejected below.
-        self.assertIn(response.status_code, (200, 302, 404))
+        from massageProject.main_app.views import PROOF_IMAGE_MAX_AGE
+        token = self._token()
+        future = time.time() + PROOF_IMAGE_MAX_AGE + 1
+        with mock.patch('time.time', return_value=future):
+            response = self.client.get(reverse('photo_proofing_image', args=[token]))
+        self.assertEqual(response.status_code, 403)
 
     def test_tampered_token_is_rejected(self):
         response = self.client.get(reverse('photo_proofing_image', args=[self._token() + 'x']))
         self.assertEqual(response.status_code, 403)
 
     def test_token_for_a_different_user_is_rejected(self):
-        token = self._token(user_id=self.other_user.pk if hasattr(self, 'other_user') else self._make_other_user().pk)
+        token = self._token(user_id=self._make_other_user().pk)
         response = self.client.get(reverse('photo_proofing_image', args=[token]))
         self.assertEqual(response.status_code, 403)
+
+    def test_token_for_image_owned_by_another_user_is_rejected(self):
+        other_user = self._make_other_user()
+        other_gallery = Gallery.objects.create(gallery_type=Gallery.TYPE_RESERVATION)
+        other_image = Image.objects.create(
+            gallery=other_gallery, order=0, alt_text='Other photo', image='gallery/other.jpg',
+        )
+        Reservation.objects.create(
+            user=other_user, service=self.service, specialist=self.specialist,
+            date=self.future_monday, time=time_cls(11, 0), gallery=other_gallery,
+        )
+        # Token is validly signed for self.user (the logged-in requester), but points at an
+        # image that belongs to a different user's reservation.
+        token = self._token(image_id=other_image.pk, user_id=self.user.pk)
+        response = self.client.get(reverse('photo_proofing_image', args=[token]))
+        self.assertEqual(response.status_code, 404)
 
     def _make_other_user(self):
         return CustomUser.objects.create_user(
@@ -306,4 +323,11 @@ class ProofImageServingViewTest(ProofingModelsBase):
 
     def test_missing_referer_is_allowed(self):
         response = self.client.get(reverse('photo_proofing_image', args=[self._token()]))
+        self.assertEqual(response.status_code, 302)
+
+    def test_matching_referer_is_allowed(self):
+        response = self.client.get(
+            reverse('photo_proofing_image', args=[self._token()]),
+            HTTP_REFERER='http://testserver/profile/photos/',
+        )
         self.assertEqual(response.status_code, 302)
