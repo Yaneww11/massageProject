@@ -631,7 +631,13 @@ class PhotoLabel(models.Model):
             'преглед на снимките от своята резервация.'
         ),
     )
-    order = models.PositiveIntegerField(default=0, verbose_name=_('Ред'))
+    order = models.PositiveIntegerField(
+        default=0, verbose_name=_('Ред'),
+        help_text=_(
+            'Определя реда, в който етикетите се показват на клиента при преглед на '
+            'снимките от своята резервация.'
+        ),
+    )
 
     class Meta:
         ordering = ['order']
@@ -644,9 +650,27 @@ class PhotoLabel(models.Model):
 
 class ImageProof(models.Model):
     image = models.OneToOneField(Image, on_delete=models.CASCADE, related_name='proof')
-    is_marked = models.BooleanField(default=False)
-    comment = models.TextField(blank=True, default='', validators=[MaxLengthValidator(2000)])
-    labels = models.ManyToManyField(PhotoLabel, blank=True, related_name='images')
+    is_marked = models.BooleanField(
+        default=False,
+        help_text=_(
+            'Дали клиентът е маркирал тази снимка като любима при преглед на '
+            'снимките от своята резервация.'
+        ),
+    )
+    comment = models.TextField(
+        blank=True, default='', validators=[MaxLengthValidator(2000)],
+        help_text=_(
+            'Забележка или коментар, което клиентът е написал за тази снимка при преглед на '
+            'снимките от своята резервация.'
+        ),
+    )
+    labels = models.ManyToManyField(
+        PhotoLabel, blank=True, related_name='images',
+        help_text=_(
+            'Етикетите, които клиентът е избрал за тази снимка при преглед на '
+            'снимките от своята резервация.'
+        ),
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
