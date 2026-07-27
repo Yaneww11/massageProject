@@ -499,6 +499,17 @@ def _get_current_proofing_reservation(user):
     )
 
 
+def _get_owned_proofing_image(request, image_id):
+    image = get_object_or_404(Image, pk=image_id)
+    try:
+        reservation = image.gallery.reservations
+    except Reservation.DoesNotExist:
+        raise Http404
+    if reservation.user_id != request.user.id:
+        raise Http404
+    return image, reservation
+
+
 # Placeholder photos shown only when the signed-in user has no reservation
 # with an attached gallery yet (the admin-side gallery workflow is new and
 # most existing reservations predate it). Generated as gradients from the
@@ -574,6 +585,67 @@ class PhotoProofingGallery(LoginRequiredMixin, TemplateView):
         context['watermark_identifier'] = f'{user.get_full_name() or user.phone_number} · {session_tag}'
         context['labels_config'] = labels_config
         return context
+
+
+@login_required
+@require_POST
+def mark_photo(request, image_id):
+    image, reservation = _get_owned_proofing_image(request, image_id)
+    if reservation.is_proofing_finalized:
+        return JsonResponse({'success': False, 'error': _('Прегледът е финализиран.')}, status=403)
+    proof, _created = ImageProof.objects.get_or_create(image=image)
+    proof.is_marked = not proof.is_marked
+    proof.save(update_fields=['is_marked', 'updated_at'])
+    return JsonResponse({'success': True, 'is_marked': proof.is_marked})
+
+
+@login_required
+@require_POST
+def toggle_photo_label(request, image_id, label_id):
+    image, reservation = _get_owned_proofing_image(request, image_id)
+    if reservation.is_proofing_finalized:
+        return JsonResponse({'success': False, 'error': _('Прегледът е финализиран.')}, status=403)
+    label = get_object_or_404(PhotoLabel, pk=label_id, gallery=reservation.gallery)
+    proof, _created = ImageProof.objects.get_or_create(image=image)
+    is_active = label in proof.labels.all()
+    if not is_active:
+        current_count = ImageProof.objects.filter(image__gallery=reservation.gallery, labels=label).count()
+        if current_count >= label.cap:
+            return JsonResponse({'success': False, 'error': _('Достигнат е максималният брой за този етикет.')}, status=400)
+        proof.labels.add(label)
+    else:
+        proof.labels.remove(label)
+    return JsonResponse({'success': True, 'is_active': not is_active})
+
+
+@login_required
+@require_POST
+def save_photo_comment(request, image_id):
+    image, reservation = _get_owned_proofing_image(request, image_id)
+    if reservation.is_proofing_finalized:
+        return JsonResponse({'success': False, 'error': _('Прегледът е финализиран.')}, status=403)
+    content = request.POST.get('content', '').strip()
+    if len(content) > 2000:
+        return JsonResponse({'success': False, 'error': _('Бележката не може да надвишава 2000 символа.')}, status=400)
+    proof, _created = ImageProof.objects.get_or_create(image=image)
+    proof.comment = content
+    proof.save(update_fields=['comment', 'updated_at'])
+    return JsonResponse({'success': True})
+
+
+@login_required
+@require_POST
+def finalize_photo_proofing(request):
+    reservation = _get_current_proofing_reservation(request.user)
+    if not reservation:
+        raise Http404
+    if reservation.is_proofing_finalized:
+        return JsonResponse({'success': False, 'error': _('Прегледът вече е финализиран.')}, status=403)
+    marked_count = ImageProof.objects.filter(image__gallery=reservation.gallery, is_marked=True).count()
+    if marked_count == 0:
+        return JsonResponse({'success': False, 'error': _('Маркирайте поне една снимка.')}, status=400)
+    reservation.finalize_proofing(request.user)
+    return JsonResponse({'success': True})
 
 
 def _blocked_by_edit_window(request, reservation, error_message):

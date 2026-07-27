@@ -154,3 +154,60 @@ class PhotoProofingGalleryContextTest(ProofingModelsBase):
         self.assertTrue(photo['is_marked'])
         self.assertEqual(photo['comment'], 'crop tighter')
         self.assertEqual(photo['label_keys'], [self.label.pk])
+
+
+class ProofingEndpointsTest(ProofingModelsBase):
+    def setUp(self):
+        super().setUp()
+        self.client = Client()
+        self.client.force_login(self.user)
+        self.label = PhotoLabel.objects.create(gallery=self.gallery, name='За печат', cap=1, order=0)
+        self.other_user = CustomUser.objects.create_user(
+            phone_number='0888111113', email='other@example.com', password='pass12345',
+        )
+
+    def test_mark_toggles_on_then_off(self):
+        url = reverse('photo_proofing_mark', args=[self.image.pk])
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(ImageProof.objects.get(image=self.image).is_marked)
+        response = self.client.post(url)
+        self.assertFalse(ImageProof.objects.get(image=self.image).is_marked)
+
+    def test_mark_rejects_non_owner(self):
+        self.client.force_login(self.other_user)
+        response = self.client.post(reverse('photo_proofing_mark', args=[self.image.pk]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_mark_rejects_when_finalized(self):
+        self.reservation.finalize_proofing(self.user)
+        response = self.client.post(reverse('photo_proofing_mark', args=[self.image.pk]))
+        self.assertEqual(response.status_code, 403)
+
+    def test_label_toggle_respects_cap(self):
+        second_image = Image.objects.create(gallery=self.gallery, order=1, alt_text='Photo 2', image='gallery/test2.jpg')
+        url_1 = reverse('photo_proofing_label', args=[self.image.pk, self.label.pk])
+        url_2 = reverse('photo_proofing_label', args=[second_image.pk, self.label.pk])
+        self.client.post(reverse('photo_proofing_mark', args=[self.image.pk]))
+        self.client.post(reverse('photo_proofing_mark', args=[second_image.pk]))
+        self.assertEqual(self.client.post(url_1).status_code, 200)
+        response = self.client.post(url_2)
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(self.label in ImageProof.objects.get(image=second_image).labels.all())
+
+    def test_comment_save_overwrites(self):
+        url = reverse('photo_proofing_comment', args=[self.image.pk])
+        self.client.post(url, {'content': 'first note'})
+        self.client.post(url, {'content': 'second note'})
+        self.assertEqual(ImageProof.objects.get(image=self.image).comment, 'second note')
+
+    def test_finalize_requires_at_least_one_mark(self):
+        response = self.client.post(reverse('photo_proofing_finalize'))
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(Reservation.objects.get(pk=self.reservation.pk).is_proofing_finalized)
+
+    def test_finalize_succeeds_with_a_mark(self):
+        self.client.post(reverse('photo_proofing_mark', args=[self.image.pk]))
+        response = self.client.post(reverse('photo_proofing_finalize'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(Reservation.objects.get(pk=self.reservation.pk).is_proofing_finalized)
