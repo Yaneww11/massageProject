@@ -201,6 +201,12 @@ class ProofingEndpointsTest(ProofingModelsBase):
         self.client.post(url, {'content': 'second note'})
         self.assertEqual(ImageProof.objects.get(image=self.image).comment, 'second note')
 
+    def test_comment_over_2000_chars_is_rejected(self):
+        url = reverse('photo_proofing_comment', args=[self.image.pk])
+        response = self.client.post(url, {'content': 'x' * 2001})
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()['success'])
+
     def test_finalize_requires_at_least_one_mark(self):
         response = self.client.post(reverse('photo_proofing_finalize'))
         self.assertEqual(response.status_code, 400)

@@ -510,6 +510,12 @@ def _get_owned_proofing_image(request, image_id):
     return image, reservation
 
 
+def _reject_if_finalized(reservation):
+    if reservation.is_proofing_finalized:
+        return JsonResponse({'success': False, 'error': _('Прегледът е финализиран.')}, status=403)
+    return None
+
+
 # Placeholder photos shown only when the signed-in user has no reservation
 # with an attached gallery yet (the admin-side gallery workflow is new and
 # most existing reservations predate it). Generated as gradients from the
@@ -591,8 +597,9 @@ class PhotoProofingGallery(LoginRequiredMixin, TemplateView):
 @require_POST
 def mark_photo(request, image_id):
     image, reservation = _get_owned_proofing_image(request, image_id)
-    if reservation.is_proofing_finalized:
-        return JsonResponse({'success': False, 'error': _('Прегледът е финализиран.')}, status=403)
+    blocked = _reject_if_finalized(reservation)
+    if blocked:
+        return blocked
     proof, _created = ImageProof.objects.get_or_create(image=image)
     proof.is_marked = not proof.is_marked
     proof.save(update_fields=['is_marked', 'updated_at'])
@@ -603,8 +610,9 @@ def mark_photo(request, image_id):
 @require_POST
 def toggle_photo_label(request, image_id, label_id):
     image, reservation = _get_owned_proofing_image(request, image_id)
-    if reservation.is_proofing_finalized:
-        return JsonResponse({'success': False, 'error': _('Прегледът е финализиран.')}, status=403)
+    blocked = _reject_if_finalized(reservation)
+    if blocked:
+        return blocked
     label = get_object_or_404(PhotoLabel, pk=label_id, gallery=reservation.gallery)
     proof, _created = ImageProof.objects.get_or_create(image=image)
     is_active = label in proof.labels.all()
@@ -622,8 +630,9 @@ def toggle_photo_label(request, image_id, label_id):
 @require_POST
 def save_photo_comment(request, image_id):
     image, reservation = _get_owned_proofing_image(request, image_id)
-    if reservation.is_proofing_finalized:
-        return JsonResponse({'success': False, 'error': _('Прегледът е финализиран.')}, status=403)
+    blocked = _reject_if_finalized(reservation)
+    if blocked:
+        return blocked
     content = request.POST.get('content', '').strip()
     if len(content) > 2000:
         return JsonResponse({'success': False, 'error': _('Бележката не може да надвишава 2000 символа.')}, status=400)
