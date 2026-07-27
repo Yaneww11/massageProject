@@ -1,6 +1,6 @@
 from django.db import models, transaction
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxLengthValidator, RegexValidator
+from django.core.validators import MaxLengthValidator, MinValueValidator, RegexValidator
 from django.db.models import JSONField
 from django.utils import timezone
 from django.utils.html import strip_tags
@@ -329,6 +329,21 @@ class Reservation(models.Model):
         help_text=_('Да бъде ли изпратено уведомление до клиента при създаване на галерия?')
     )
 
+    proofing_finalized_at = models.DateTimeField(
+        null=True, blank=True,
+        help_text=_(
+            'Кога клиентът е финализирал избора на снимки от страницата за преглед на '
+            'снимки от резервацията си. Докато е попълнено, клиентът вижда страницата '
+            'като заключена за преглед.'
+        ),
+    )
+    proofing_finalized_by = models.ForeignKey(
+        'accounts.CustomUser',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='proofing_finalizations',
+    )
+
     # Custom Managers
     class ReservationQuerySet(models.QuerySet):
         def active(self):
@@ -438,6 +453,20 @@ class Reservation(models.Model):
         if user:
             self.status_updated_by = user
         self.save()
+
+    @property
+    def is_proofing_finalized(self):
+        return self.proofing_finalized_at is not None
+
+    def finalize_proofing(self, user):
+        self.proofing_finalized_at = timezone.now()
+        self.proofing_finalized_by = user
+        self.save(update_fields=['proofing_finalized_at', 'proofing_finalized_by'])
+
+    def unlock_proofing(self):
+        self.proofing_finalized_at = None
+        self.proofing_finalized_by = None
+        self.save(update_fields=['proofing_finalized_at', 'proofing_finalized_by'])
 
     def save(self, *args, **kwargs):
         if self.status == self.STATUS_ACTIVE and self.specialist_id:
@@ -580,6 +609,52 @@ class Image(models.Model):
 
     def __str__(self):
         return self.alt_text or f"Снимка {self.order}"
+
+
+class PhotoLabel(models.Model):
+    gallery = models.ForeignKey(
+        Gallery, on_delete=models.CASCADE, related_name='photo_labels',
+        verbose_name=_('Галерия'),
+    )
+    name = models.CharField(
+        max_length=100, verbose_name=_('Име'),
+        help_text=_(
+            'Името на етикета, който клиентът вижда и може да прикачи към снимки при '
+            'преглед на снимките от своята резервация.'
+        ),
+    )
+    cap = models.PositiveIntegerField(
+        validators=[MinValueValidator(1)],
+        verbose_name=_('Максимален брой'),
+        help_text=_(
+            'Максимален брой снимки, които клиентът може да маркира с този етикет при '
+            'преглед на снимките от своята резервация.'
+        ),
+    )
+    order = models.PositiveIntegerField(default=0, verbose_name=_('Ред'))
+
+    class Meta:
+        ordering = ['order']
+        verbose_name = _('Етикет за преглед на снимки')
+        verbose_name_plural = _('Етикети за преглед на снимки')
+
+    def __str__(self):
+        return self.name
+
+
+class ImageProof(models.Model):
+    image = models.OneToOneField(Image, on_delete=models.CASCADE, related_name='proof')
+    is_marked = models.BooleanField(default=False)
+    comment = models.TextField(blank=True, default='', validators=[MaxLengthValidator(2000)])
+    labels = models.ManyToManyField(PhotoLabel, blank=True, related_name='images')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Избор на клиент за снимка')
+        verbose_name_plural = _('Избори на клиенти за снимки')
+
+    def __str__(self):
+        return f'ImageProof({self.image_id})'
 
 
 class HomePage(models.Model):
