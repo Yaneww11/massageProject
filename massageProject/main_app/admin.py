@@ -15,7 +15,7 @@ from massageProject.main_app.models import (
     Service, Image, Gallery, HomePage,
     BusinessInfo, Specialist, WorkingHours, Reservation, Comment,
     BusinessWorkingHours, ServiceGroup,
-    SiteConfiguration,
+    SiteConfiguration, PhotoLabel,
 )
 
 # --- Actions ---
@@ -61,6 +61,12 @@ def mark_as_completed(modeladmin, request, queryset):
 @admin.action(description=_('Маркирай като Не се е явил'))
 def mark_as_noshow(modeladmin, request, queryset):
     _bulk_change_status(modeladmin, request, queryset, Reservation.STATUS_NOSHOW)
+
+@admin.action(description=_('Отключи прегледа на снимки'))
+def unlock_photo_proofing(modeladmin, request, queryset):
+    for reservation in queryset:
+        if reservation.is_proofing_finalized:
+            reservation.unlock_proofing()
 
 # --- Filters ---
 
@@ -142,15 +148,15 @@ class ReservationAdmin(ModelAdmin):
     list_filter = ('status', ReservationDateFilter, 'specialist', 'service', 'date')
     search_fields = ('user__phone_number', 'user__first_name', 'user__last_name', 'service__name')
     date_hierarchy = 'date'
-    actions = [export_reservations_csv, mark_as_completed, mark_as_noshow]
-    readonly_fields = ('updated_at', 'status_updated_at', 'status_updated_by')
+    actions = [export_reservations_csv, mark_as_completed, mark_as_noshow, unlock_photo_proofing]
+    readonly_fields = ('updated_at', 'status_updated_at', 'status_updated_by', 'proofing_finalized_at', 'proofing_finalized_by')
     list_filter_sheet = True
-    
+
     fieldsets = (
         (_('Детайли за резервацията'), {'fields': ('date', 'time', 'user', 'status')}),
         (_('Информация за услугата'), {'fields': ('service', 'specialist')}),
         (_('Допълнителни бележки'), {'fields': ('additional_text',)}),
-        (_('Системен одит'), {'fields': ('updated_at', 'status_updated_at', 'status_updated_by'), 'classes': ('collapse',)}),
+        (_('Системен одит'), {'fields': ('updated_at', 'status_updated_at', 'status_updated_by', 'proofing_finalized_at', 'proofing_finalized_by'), 'classes': ('collapse',)}),
         (_('Галерия'), {'fields': ('gallery',)}),
     )
 
@@ -203,13 +209,19 @@ class ImageInline(TabularInline):
     fields = ('image', 'alt_text', 'order')
 
 
+class PhotoLabelInline(TabularInline):
+    model = PhotoLabel
+    extra = 1
+    fields = ('name', 'cap', 'order')
+
+
 @admin.register(Gallery)
 class GalleryAdmin(ModelAdmin, TabbedTranslationAdmin):
     list_display = ('__str__', 'gallery_type', 'order', 'photo_count')
     list_editable = ('order',)
     list_filter = ('gallery_type',)
     prepopulated_fields = {'slug': ('title_bg',)}
-    inlines = [ImageInline]
+    inlines = [ImageInline, PhotoLabelInline]
     fields = ('gallery_type', 'title', 'slug', 'description', 'order')
 
     def photo_count(self, obj):

@@ -85,3 +85,41 @@ class ImageProofModelTest(ProofingModelsBase):
         proof = ImageProof.objects.create(image=self.image, is_marked=True)
         proof.labels.add(label_a, label_b)
         self.assertEqual(set(proof.labels.all()), {label_a, label_b})
+
+
+from django.contrib import admin as django_admin
+from django.contrib.auth.models import AnonymousUser
+from django.test import RequestFactory
+
+from massageProject.main_app.admin import GalleryAdmin, ReservationAdmin, unlock_photo_proofing
+
+
+class ReservationAdminUnlockActionTest(ProofingModelsBase):
+    def setUp(self):
+        super().setUp()
+        self.admin_instance = ReservationAdmin(Reservation, django_admin.site)
+        self.factory = RequestFactory()
+
+    def test_unlock_action_clears_finalized_reservation(self):
+        self.reservation.finalize_proofing(self.user)
+        request = self.factory.post('/admin/main_app/reservation/')
+        unlock_photo_proofing(self.admin_instance, request, Reservation.objects.filter(pk=self.reservation.pk))
+        self.reservation.refresh_from_db()
+        self.assertFalse(self.reservation.is_proofing_finalized)
+
+    def test_unlock_action_skips_non_finalized_reservation(self):
+        request = self.factory.post('/admin/main_app/reservation/')
+        unlock_photo_proofing(self.admin_instance, request, Reservation.objects.filter(pk=self.reservation.pk))
+        self.reservation.refresh_from_db()
+        self.assertFalse(self.reservation.is_proofing_finalized)
+
+    def test_reservation_admin_exposes_proofing_audit_fields(self):
+        self.assertIn('proofing_finalized_at', self.admin_instance.readonly_fields)
+        self.assertIn('proofing_finalized_by', self.admin_instance.readonly_fields)
+
+
+class GalleryAdminPhotoLabelInlineTest(ProofingModelsBase):
+    def test_gallery_admin_has_photo_label_inline(self):
+        admin_instance = GalleryAdmin(Gallery, django_admin.site)
+        inline_models = [inline.model for inline in admin_instance.inlines]
+        self.assertIn(PhotoLabel, inline_models)
