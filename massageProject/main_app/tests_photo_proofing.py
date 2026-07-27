@@ -123,3 +123,34 @@ class GalleryAdminPhotoLabelInlineTest(ProofingModelsBase):
         admin_instance = GalleryAdmin(Gallery, django_admin.site)
         inline_models = [inline.model for inline in admin_instance.inlines]
         self.assertIn(PhotoLabel, inline_models)
+
+
+from django.test import Client
+from django.urls import reverse
+
+
+class PhotoProofingGalleryContextTest(ProofingModelsBase):
+    def setUp(self):
+        super().setUp()
+        self.client = Client()
+        self.client.force_login(self.user)
+        self.label = PhotoLabel.objects.create(gallery=self.gallery, name='За печат', cap=5, order=0)
+
+    def test_unfinalized_reservation_context(self):
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertFalse(response.context['is_finalized'])
+        photo = response.context['photos'][0]
+        self.assertFalse(photo['is_marked'])
+        self.assertEqual(photo['comment'], '')
+        self.assertEqual(response.context['labels_config'][0]['key'], self.label.pk)
+
+    def test_finalized_reservation_context_reflects_marks_and_labels(self):
+        proof = ImageProof.objects.create(image=self.image, is_marked=True, comment='crop tighter')
+        proof.labels.add(self.label)
+        self.reservation.finalize_proofing(self.user)
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertTrue(response.context['is_finalized'])
+        photo = response.context['photos'][0]
+        self.assertTrue(photo['is_marked'])
+        self.assertEqual(photo['comment'], 'crop tighter')
+        self.assertEqual(photo['label_keys'], [self.label.pk])

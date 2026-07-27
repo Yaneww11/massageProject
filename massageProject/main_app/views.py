@@ -21,7 +21,7 @@ from massageProject.main_app.forms import ReservationCreateForm, ReservationEdit
 from massageProject.main_app.mixins import BookingEnabledMixin, booking_enabled_required, \
     CommentsEnabledMixin, comments_enabled_required
 from massageProject.main_app.models import Service, Specialist, Reservation, Comment, WorkingHours, ServiceGroup, \
-    Gallery, SiteConfiguration
+    Gallery, SiteConfiguration, Image, ImageProof, PhotoLabel
 
 
 @booking_enabled_required
@@ -490,6 +490,15 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
         context['next_client_reservation'] = today_and_future.order_by('date', 'time').first()
 
 
+def _get_current_proofing_reservation(user):
+    return (
+        Reservation.objects.filter(user=user, gallery__isnull=False)
+        .select_related('gallery', 'service', 'specialist')
+        .order_by('-date', '-time')
+        .first()
+    )
+
+
 # Placeholder photos shown only when the signed-in user has no reservation
 # with an attached gallery yet (the admin-side gallery workflow is new and
 # most existing reservations predate it). Generated as gradients from the
@@ -524,34 +533,46 @@ class PhotoProofingGallery(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
-        reservation = (
-            Reservation.objects.filter(user=user, gallery__isnull=False)
-            .select_related('gallery', 'service', 'specialist')
-            .order_by('-date', '-time')
-            .first()
-        )
+        reservation = _get_current_proofing_reservation(user)
 
         if reservation:
-            photos = [
-                {'id': img.pk, 'url': img.image.url, 'alt': img.alt_text}
-                for img in reservation.gallery.images.all()
-            ]
+            proofs = {
+                p.image_id: p for p in
+                ImageProof.objects.filter(image__gallery=reservation.gallery).prefetch_related('labels')
+            }
+            photos = []
+            for img in reservation.gallery.images.all():
+                proof = proofs.get(img.pk)
+                photos.append({
+                    'id': img.pk,
+                    'url': img.image.url,
+                    'alt': img.alt_text,
+                    'is_marked': proof.is_marked if proof else False,
+                    'comment': proof.comment if proof else '',
+                    'label_keys': [label.pk for label in proof.labels.all()] if proof else [],
+                })
             is_demo = False
+            labels_config = [
+                {'key': label.pk, 'name': label.name, 'cap': label.cap}
+                for label in reservation.gallery.photo_labels.all()
+            ]
         else:
             photos = _demo_proofing_photos(SiteConfiguration.get_solo())
             is_demo = True
+            labels_config = [
+                {'key': 'print', 'name': _('За печат'), 'cap': 5},
+                {'key': 'album', 'name': _('Албум'), 'cap': 10},
+                {'key': 'social', 'name': _('Социални мрежи'), 'cap': 3},
+            ]
 
         context['title'] = _('Проверка на снимки')
         context['reservation'] = reservation
         context['is_demo'] = is_demo
+        context['is_finalized'] = reservation.is_proofing_finalized if reservation else False
         context['photos'] = photos
         session_tag = f'#{reservation.pk}' if reservation else _('ДЕМО ПРЕГЛЕД')
         context['watermark_identifier'] = f'{user.get_full_name() or user.phone_number} · {session_tag}'
-        context['labels_config'] = [
-            {'key': 'print', 'name': _('За печат'), 'cap': 5},
-            {'key': 'album', 'name': _('Албум'), 'cap': 10},
-            {'key': 'social', 'name': _('Социални мрежи'), 'cap': 3},
-        ]
+        context['labels_config'] = labels_config
         return context
 
 
