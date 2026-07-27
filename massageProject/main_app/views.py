@@ -1,4 +1,5 @@
 import base64
+from io import BytesIO
 
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
@@ -6,7 +7,10 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView, ListView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from django.core import signing
 from django.core.exceptions import PermissionDenied
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from datetime import datetime, timedelta, date
@@ -14,6 +18,7 @@ from django.db.models import Count
 from django.contrib import messages
 from django.core.cache import cache
 from django.http import JsonResponse, Http404
+from PIL import Image as PILImage, ImageDraw
 
 from massageProject.main_app.context_processors import get_cached_homepage
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
@@ -508,6 +513,75 @@ def _get_owned_proofing_image(request, image_id):
     if reservation.user_id != request.user.id:
         raise Http404
     return image, reservation
+
+
+PROOF_IMAGE_SALT = 'photo_proofing_image'
+PROOF_IMAGE_MAX_AGE = 60 * 60 * 6  # 6 hours — one browsing session's worth
+
+
+def _proof_image_token(image_id, user_id):
+    return signing.dumps({'image_id': image_id, 'user_id': user_id}, salt=PROOF_IMAGE_SALT)
+
+
+def _proof_derivative_path(image_id, user_id):
+    return f'proof_derivatives/{image_id}/{user_id}.jpg'
+
+
+def _generate_proof_derivative(image, user, watermark_identifier):
+    path = _proof_derivative_path(image.pk, user.pk)
+    if default_storage.exists(path):
+        return path
+
+    with image.image.open('rb') as source:
+        original = PILImage.open(source).convert('RGB')
+        original.load()
+
+    original.thumbnail((1600, 1600), PILImage.LANCZOS)
+    width, height = original.size
+
+    layer = PILImage.new('RGBA', (width * 2, height * 2), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(layer)
+    step_x, step_y = 320, 160
+    for y in range(0, layer.height, step_y):
+        for x in range(0, layer.width, step_x):
+            draw.text((x, y), watermark_identifier, fill=(255, 255, 255, 90))
+    layer = layer.rotate(-30, expand=False)
+    layer = layer.crop((width // 2, height // 2, width // 2 + width, height // 2 + height))
+
+    watermarked = PILImage.alpha_composite(original.convert('RGBA'), layer).convert('RGB')
+    buffer = BytesIO()
+    watermarked.save(buffer, format='JPEG', quality=82)
+    buffer.seek(0)
+    default_storage.save(path, ContentFile(buffer.read()))
+    return path
+
+
+@login_required
+def serve_proof_image(request, token):
+    try:
+        data = signing.loads(token, salt=PROOF_IMAGE_SALT, max_age=PROOF_IMAGE_MAX_AGE)
+    except signing.BadSignature:
+        raise PermissionDenied
+
+    if data['user_id'] != request.user.id:
+        raise PermissionDenied
+
+    referer = request.META.get('HTTP_REFERER')
+    if referer:
+        referer_host = referer.split('//', 1)[-1].split('/', 1)[0].split(':', 1)[0]
+        if referer_host not in settings.ALLOWED_HOSTS:
+            raise PermissionDenied
+
+    image, reservation = _get_owned_proofing_image(request, data['image_id'])
+    watermark_identifier = f'{request.user.get_full_name() or request.user.phone_number} · #{reservation.pk}'
+    path = _generate_proof_derivative(image, request.user, watermark_identifier)
+    try:
+        image_url = default_storage.url(path, expire=300)
+    except TypeError:
+        # The active storage backend (e.g. local FileSystemStorage in dev) doesn't
+        # support signed/expiring URLs — fall back to its plain url().
+        image_url = default_storage.url(path)
+    return redirect(image_url)
 
 
 def _reject_if_finalized(reservation):

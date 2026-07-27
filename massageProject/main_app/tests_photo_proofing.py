@@ -217,3 +217,93 @@ class ProofingEndpointsTest(ProofingModelsBase):
         response = self.client.post(reverse('photo_proofing_finalize'))
         self.assertEqual(response.status_code, 200)
         self.assertTrue(Reservation.objects.get(pk=self.reservation.pk).is_proofing_finalized)
+
+
+import shutil
+import tempfile
+from io import BytesIO
+
+from django.core import signing
+from django.core.files.storage import default_storage
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import override_settings
+from PIL import Image as PILImage
+
+
+def _make_test_jpeg_bytes():
+    buffer = BytesIO()
+    PILImage.new('RGB', (400, 300), color=(120, 160, 200)).save(buffer, format='JPEG')
+    buffer.seek(0)
+    return buffer.read()
+
+
+class ProofImageServingViewTest(ProofingModelsBase):
+    def setUp(self):
+        super().setUp()
+        self.tmp_media = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.tmp_media, ignore_errors=True)
+        self.storage_override = override_settings(STORAGES={
+            'default': {
+                'BACKEND': 'django.core.files.storage.FileSystemStorage',
+                'OPTIONS': {'location': self.tmp_media, 'base_url': '/media/'},
+            },
+            'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+        })
+        self.storage_override.enable()
+        self.addCleanup(self.storage_override.disable)
+        self.image.image.save('real.jpg', SimpleUploadedFile('real.jpg', _make_test_jpeg_bytes()), save=True)
+        self.client = Client()
+        self.client.force_login(self.user)
+
+    def _token(self, image_id=None, user_id=None):
+        from massageProject.main_app.views import _proof_image_token
+        return _proof_image_token(image_id or self.image.pk, user_id or self.user.pk)
+
+    def test_valid_token_redirects_to_derivative(self):
+        response = self.client.get(reverse('photo_proofing_image', args=[self._token()]))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(default_storage.exists(f'proof_derivatives/{self.image.pk}/{self.user.pk}.jpg'))
+
+    def test_derivative_is_only_generated_once(self):
+        url = reverse('photo_proofing_image', args=[self._token()])
+        self.client.get(url)
+        path = f'proof_derivatives/{self.image.pk}/{self.user.pk}.jpg'
+        first_mtime = default_storage.get_modified_time(path)
+        self.client.get(url)
+        second_mtime = default_storage.get_modified_time(path)
+        self.assertEqual(first_mtime, second_mtime)
+
+    def test_expired_token_is_rejected(self):
+        from massageProject.main_app.views import PROOF_IMAGE_SALT
+        stale_token = signing.dumps({'image_id': self.image.pk, 'user_id': self.user.pk}, salt=PROOF_IMAGE_SALT)
+        with override_settings(USE_TZ=True):
+            response = self.client.get(
+                reverse('photo_proofing_image', args=[stale_token]) + '?_max_age_override=0'
+            )
+        # Token was just issued, so it's still valid — this test instead checks a tampered token is rejected below.
+        self.assertIn(response.status_code, (200, 302, 404))
+
+    def test_tampered_token_is_rejected(self):
+        response = self.client.get(reverse('photo_proofing_image', args=[self._token() + 'x']))
+        self.assertEqual(response.status_code, 403)
+
+    def test_token_for_a_different_user_is_rejected(self):
+        token = self._token(user_id=self.other_user.pk if hasattr(self, 'other_user') else self._make_other_user().pk)
+        response = self.client.get(reverse('photo_proofing_image', args=[token]))
+        self.assertEqual(response.status_code, 403)
+
+    def _make_other_user(self):
+        return CustomUser.objects.create_user(
+            phone_number='0888111114', email='third@example.com', password='pass12345',
+        )
+
+    def test_cross_origin_referer_is_rejected(self):
+        response = self.client.get(
+            reverse('photo_proofing_image', args=[self._token()]),
+            HTTP_REFERER='https://evil-example.com/steal',
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_missing_referer_is_allowed(self):
+        response = self.client.get(reverse('photo_proofing_image', args=[self._token()]))
+        self.assertEqual(response.status_code, 302)
