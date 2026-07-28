@@ -159,6 +159,8 @@
 
   const isDemo = {{ is_demo|yesno:"true,false" }};
   const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  {% get_current_language as CURRENT_LANGUAGE %}
+  const LANG_PREFIX = '/{{ CURRENT_LANGUAGE }}';
   function postJson(url, body) {
     return fetch(url, {
       method: 'POST',
@@ -265,7 +267,7 @@
     refreshLabelChips();
     applyFilter();
     if (isDemo) return;
-    postJson(`/profile/photos/${id}/mark/`).then(({ ok, data }) => {
+    postJson(`${LANG_PREFIX}/profile/photos/${id}/mark/`).then(({ ok, data }) => {
       if (ok && data.success) return;
       tile.classList.toggle('is-marked');
       tile.querySelector('.proof-mark-btn').setAttribute('aria-pressed', String(isMarked(tile)));
@@ -286,7 +288,7 @@
     refreshLabelChips();
     if (isDemo) return;
     const id = tile.dataset.photoId;
-    postJson(`/profile/photos/${id}/label/${key}/`).then(({ ok, data }) => {
+    postJson(`${LANG_PREFIX}/profile/photos/${id}/label/${key}/`).then(({ ok, data }) => {
       if (ok && data.success) return;
       chip.classList.toggle('is-active');
       labelCounts[key] += active ? 1 : -1;
@@ -406,7 +408,7 @@
     }
     if (isDemo) { applyLocally(); return; }
     const body = new URLSearchParams({ content: text });
-    postJson(`/profile/photos/${drawerPhotoId}/comment/`, body).then(({ ok, data }) => {
+    postJson(`${LANG_PREFIX}/profile/photos/${drawerPhotoId}/comment/`, body).then(({ ok, data }) => {
       if (!ok || !data.success) {
         window.alert((data && data.error) || "{% trans 'Възникна грешка. Опитайте отново.' %}");
         return;
@@ -480,7 +482,7 @@
       applyFilter();
     }
     if (isDemo) { applyLocally(); return; }
-    postJson('/profile/photos/finalize/').then(({ ok, data }) => {
+    postJson(`${LANG_PREFIX}/profile/photos/finalize/`).then(({ ok, data }) => {
       if (!ok || !data.success) {
         window.alert((data && data.error) || "{% trans 'Възникна грешка. Опитайте отново.' %}");
         return;
