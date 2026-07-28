@@ -164,7 +164,8 @@
       method: 'POST',
       headers: { 'X-CSRFToken': csrfToken },
       body: body || null,
-    }).then((r) => r.json().then((data) => ({ ok: r.ok, data })));
+    }).then((r) => r.json().then((data) => ({ ok: r.ok, data })))
+      .catch(() => ({ ok: false, data: { error: "{% trans 'Възникна грешка. Опитайте отново.' %}" } }));
   }
 
   const grid = document.getElementById('proof-grid');
