@@ -5,7 +5,7 @@ from io import BytesIO
 
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView, ListView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
@@ -647,7 +647,7 @@ class PhotoProofingGallery(LoginRequiredMixin, TemplateView):
                 proof = proofs.get(img.pk)
                 photos.append({
                     'id': img.pk,
-                    'url': img.image.url,
+                    'url': reverse('photo_proofing_image', args=[_proof_image_token(img.pk, user.pk)]),
                     'alt': img.alt_text,
                     'is_marked': proof.is_marked if proof else False,
                     'comment': proof.comment if proof else '',

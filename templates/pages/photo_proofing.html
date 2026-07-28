@@ -3,6 +3,7 @@
 
 {% block content %}
 <section class="proof-page">
+  {% csrf_token %}
 
   <header class="proof-header">
     <div class="proof-header-info">
@@ -44,9 +45,10 @@
 
   <div class="proof-grid" id="proof-grid" role="grid" aria-label="{% trans 'Снимки за преглед' %}">
     {% for photo in photos %}
-    <div class="proof-tile"
+    <div class="proof-tile{% if photo.is_marked %} is-marked{% endif %}{% if photo.comment %} has-comment{% endif %}{% if is_finalized and photo.is_marked %} is-finalized{% endif %}"
          data-photo-id="{{ photo.id }}"
          data-caption="{% trans 'Кадър' %} {{ forloop.counter }}"
+         data-comment="{{ photo.comment }}"
          tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
          role="gridcell">
       <div class="proof-tile-frame">
@@ -58,11 +60,11 @@
           <svg class="proof-grease-circle" viewBox="0 0 100 100" aria-hidden="true">
             <path d="M 12,52 C 10,25 30,8 52,9 C 76,10 92,28 90,50 C 91,74 70,92 49,91 C 26,93 9,76 12,52 Z"></path>
           </svg>
-          <button type="button" class="proof-compare-btn" aria-pressed="false" aria-label="{% trans 'Добави за сравнение' %}">
+          <button type="button" class="proof-compare-btn" aria-pressed="false" aria-label="{% trans 'Добави за сравнение' %}"{% if is_finalized %} disabled{% endif %}>
             <i class="far fa-clone" aria-hidden="true"></i>
             <span class="proof-compare-badge"></span>
           </button>
-          <button type="button" class="proof-mark-btn" aria-pressed="false" aria-label="{% trans 'Маркирай като любима' %}">
+          <button type="button" class="proof-mark-btn" aria-pressed="{% if photo.is_marked %}true{% else %}false{% endif %}" aria-label="{% trans 'Маркирай като любима' %}"{% if is_finalized %} disabled{% endif %}>
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"></circle></svg>
           </button>
           <div class="proof-finalized-ribbon"><i class="fas fa-check" aria-hidden="true"></i> {% trans "Финализирана" %}</div>
@@ -74,7 +76,7 @@
           <span class="proof-filename">{% trans "Кадър" %} {{ forloop.counter }}</span>
           <div class="proof-label-row">
             {% for label in labels_config %}
-            <button type="button" class="proof-label-chip" data-label="{{ label.key }}" data-cap="{{ label.cap }}">{{ label.name }}</button>
+            <button type="button" class="proof-label-chip{% if label.key in photo.label_keys %} is-active{% endif %}" data-label="{{ label.key }}" data-cap="{{ label.cap }}"{% if is_finalized %} disabled{% endif %}>{{ label.name }}</button>
             {% endfor %}
           </div>
         </div>
@@ -94,7 +96,6 @@
       </span>
     </div>
     <div class="proof-sticky-actions">
-      <button type="button" id="proof-request-changes" class="btn btn-outline" hidden>{% trans "Отключи за промени" %}</button>
       <button type="button" id="proof-finalize-open" class="btn btn-primary" disabled>{% trans "Прегледай и завърши" %}</button>
     </div>
   </div>
@@ -156,12 +157,22 @@
 (function () {
   const NOTE_INDICATOR = "{% trans 'Има бележка' %}";
 
+  const isDemo = {{ is_demo|yesno:"true,false" }};
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  function postJson(url, body) {
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': csrfToken },
+      body: body || null,
+    }).then((r) => r.json().then((data) => ({ ok: r.ok, data })));
+  }
+
   const grid = document.getElementById('proof-grid');
   if (!grid) return;
   const tiles = Array.from(grid.querySelectorAll('.proof-tile'));
   const totalCount = tiles.length;
 
-  let finalized = false;
+  let finalized = {{ is_finalized|yesno:"true,false" }};
   let currentFilter = 'all';
   const compareSet = [];
   const comments = new Map();
@@ -175,7 +186,6 @@
   const emptyFilteredEl = document.querySelector('.proof-empty-filtered');
 
   const finalizeOpenBtn = document.getElementById('proof-finalize-open');
-  const requestChangesBtn = document.getElementById('proof-request-changes');
   const finalizeModal = document.getElementById('proof-finalize-modal');
   const finalizeList = document.getElementById('proof-finalize-list');
   const finalizeSummaryCount = document.getElementById('proof-finalize-summary-count');
@@ -205,6 +215,7 @@
       labelCaps[key] = parseInt(chip.dataset.cap, 10);
       labelCounts[key] = 0;
     }
+    if (chip.classList.contains('is-active')) labelCounts[key] += 1;
   });
 
   function isMarked(tile) { return tile.classList.contains('is-marked'); }
@@ -246,11 +257,22 @@
 
   function toggleMark(tile) {
     if (finalized) return;
+    const id = tile.dataset.photoId;
     tile.classList.toggle('is-marked');
     tile.querySelector('.proof-mark-btn').setAttribute('aria-pressed', String(isMarked(tile)));
     refreshCounts();
     refreshLabelChips();
     applyFilter();
+    if (isDemo) return;
+    postJson(`/profile/photos/${id}/mark/`).then(({ ok, data }) => {
+      if (ok && data.success) return;
+      tile.classList.toggle('is-marked');
+      tile.querySelector('.proof-mark-btn').setAttribute('aria-pressed', String(isMarked(tile)));
+      refreshCounts();
+      refreshLabelChips();
+      applyFilter();
+      window.alert(data.error || "{% trans 'Възникна грешка. Опитайте отново.' %}");
+    });
   }
 
   function toggleLabel(tile, chip) {
@@ -261,6 +283,15 @@
     chip.classList.toggle('is-active');
     labelCounts[key] += active ? -1 : 1;
     refreshLabelChips();
+    if (isDemo) return;
+    const id = tile.dataset.photoId;
+    postJson(`/profile/photos/${id}/label/${key}/`).then(({ ok, data }) => {
+      if (ok && data.success) return;
+      chip.classList.toggle('is-active');
+      labelCounts[key] += active ? 1 : -1;
+      refreshLabelChips();
+      window.alert(data.error || "{% trans 'Възникна грешка. Опитайте отново.' %}");
+    });
   }
 
   function toggleCompare(tile) {
@@ -362,14 +393,25 @@
     if (!drawerPhotoId) return;
     const tile = findTile(drawerPhotoId);
     const text = drawerTextarea.value.trim();
-    if (text) {
-      comments.set(drawerPhotoId, text);
-      tile.classList.add('has-comment');
-    } else {
-      comments.delete(drawerPhotoId);
-      tile.classList.remove('has-comment');
+    function applyLocally() {
+      if (text) {
+        comments.set(drawerPhotoId, text);
+        tile.classList.add('has-comment');
+      } else {
+        comments.delete(drawerPhotoId);
+        tile.classList.remove('has-comment');
+      }
+      closeDrawer();
     }
-    closeDrawer();
+    if (isDemo) { applyLocally(); return; }
+    const body = new URLSearchParams({ content: text });
+    postJson(`/profile/photos/${drawerPhotoId}/comment/`, body).then(({ ok, data }) => {
+      if (!ok || !data.success) {
+        window.alert((data && data.error) || "{% trans 'Възникна грешка. Опитайте отново.' %}");
+        return;
+      }
+      applyLocally();
+    });
   });
 
   filterButtons.forEach((btn) => {
@@ -423,32 +465,27 @@
   finalizeModal.addEventListener('click', (e) => { if (e.target === finalizeModal) finalizeModal.hidden = true; });
 
   finalizeConfirmBtn.addEventListener('click', () => {
-    finalized = true;
-    tiles.forEach((tile) => {
-      if (isMarked(tile)) tile.classList.add('is-finalized');
-      tile.querySelector('.proof-mark-btn').disabled = true;
-      tile.querySelector('.proof-compare-btn').disabled = true;
+    function applyLocally() {
+      finalized = true;
+      tiles.forEach((tile) => {
+        if (isMarked(tile)) tile.classList.add('is-finalized');
+        tile.querySelector('.proof-mark-btn').disabled = true;
+        tile.querySelector('.proof-compare-btn').disabled = true;
+      });
+      finalizeModal.hidden = true;
+      finalizeOpenBtn.hidden = true;
+      refreshLabelChips();
+      refreshCounts();
+      applyFilter();
+    }
+    if (isDemo) { applyLocally(); return; }
+    postJson('/profile/photos/finalize/').then(({ ok, data }) => {
+      if (!ok || !data.success) {
+        window.alert((data && data.error) || "{% trans 'Възникна грешка. Опитайте отново.' %}");
+        return;
+      }
+      applyLocally();
     });
-    finalizeModal.hidden = true;
-    finalizeOpenBtn.hidden = true;
-    requestChangesBtn.hidden = false;
-    refreshLabelChips();
-    refreshCounts();
-    applyFilter();
-  });
-
-  requestChangesBtn.addEventListener('click', () => {
-    finalized = false;
-    tiles.forEach((tile) => {
-      tile.classList.remove('is-finalized');
-      tile.querySelector('.proof-mark-btn').disabled = false;
-      tile.querySelector('.proof-compare-btn').disabled = false;
-    });
-    finalizeOpenBtn.hidden = false;
-    requestChangesBtn.hidden = true;
-    refreshLabelChips();
-    refreshCounts();
-    applyFilter();
   });
 
   function getColumnCount() {
@@ -508,6 +545,14 @@
       if (!compareModal.hidden) compareModal.hidden = true;
       if (drawer.classList.contains('is-open')) closeDrawer();
     }
+  });
+
+  if (finalized) {
+    finalizeOpenBtn.hidden = true;
+  }
+  tiles.forEach((tile) => {
+    const comment = tile.dataset.comment;
+    if (comment) comments.set(tile.dataset.photoId, comment);
   });
 
   refreshCounts();
