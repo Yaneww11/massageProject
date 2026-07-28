@@ -225,6 +225,7 @@ import time
 from io import BytesIO
 from unittest import mock
 
+from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import override_settings
@@ -331,3 +332,25 @@ class ProofImageServingViewTest(ProofingModelsBase):
             HTTP_REFERER='http://testserver/profile/photos/',
         )
         self.assertEqual(response.status_code, 302)
+
+
+class DerivativeCacheInvalidationTest(ProofingModelsBase):
+    def setUp(self):
+        super().setUp()
+        self.tmp_media = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.tmp_media, ignore_errors=True)
+        self.storage_override = override_settings(STORAGES={
+            'default': {
+                'BACKEND': 'django.core.files.storage.FileSystemStorage',
+                'OPTIONS': {'location': self.tmp_media, 'base_url': '/media/'},
+            },
+            'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+        })
+        self.storage_override.enable()
+        self.addCleanup(self.storage_override.disable)
+
+    def test_replacing_image_file_clears_its_cached_derivatives(self):
+        stale_path = f'proof_derivatives/{self.image.pk}/{self.user.pk}.jpg'
+        default_storage.save(stale_path, ContentFile(b'stale-bytes'))
+        self.image.image.save('new.jpg', SimpleUploadedFile('new.jpg', _make_test_jpeg_bytes()), save=True)
+        self.assertFalse(default_storage.exists(stale_path))
