@@ -9,9 +9,11 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import json
+import os
 import environ
 from pathlib import Path
+from google.oauth2 import service_account
 
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
@@ -74,6 +76,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rosetta',
     'django_bleach',
+    'storages',
 
     'allauth',
     'allauth.account',
@@ -197,8 +200,24 @@ STATICFILES_DIRS = (
     BASE_DIR / 'staticfiles',
 )
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media/'
+GS_BUCKET_NAME = env('GS_BUCKET_NAME')
+GS_CREDENTIALS = service_account.Credentials.from_service_account_info(
+    json.loads(env('GS_CREDENTIALS_JSON'))
+)
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+        "OPTIONS": {
+            "bucket_name": GS_BUCKET_NAME,
+            "credentials": GS_CREDENTIALS,
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+MEDIA_URL = f"https://storage.googleapis.com/{GS_BUCKET_NAME}/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -244,6 +263,7 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*']
 ACCOUNT_EMAIL_VERIFICATION = 'none'
+
 # Every new Google user must pass through the complete-profile form (phone is required).
 SOCIALACCOUNT_AUTO_SIGNUP = False
 SOCIALACCOUNT_FORMS = {'signup': 'massageProject.accounts.forms.SocialCompleteProfileForm'}

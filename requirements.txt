@@ -11,12 +11,17 @@ django-environ==0.13.0
 django-modeltranslation==0.20.3
 django-ratelimit==4.1.0
 django-rosetta==0.10.3
+django-storages==1.14.6
 django-unfold==0.97.0
 google-api-core==2.31.0
 google-api-python-client==2.198.0
 google-auth==2.55.2
 google-auth-httplib2==0.4.0
 google-auth-oauthlib==1.4.0
+google-cloud-core==2.6.0
+google-cloud-storage==3.13.0
+google-crc32c==1.8.0
+google-resumable-media==2.10.0
 googleapis-common-protos==1.75.0
 httplib2==0.32.0
 idna==3.18
@@ -33,6 +38,7 @@ PyJWT==2.13.0
 pyparsing==3.3.2
 requests==2.34.2
 requests-oauthlib==2.0.0
+sentry-sdk==2.66.1
 six==1.17.0
 sqlparse==0.5.2
 tinycss2==1.1.1
