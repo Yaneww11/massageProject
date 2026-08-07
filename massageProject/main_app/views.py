@@ -1,4 +1,3 @@
-import base64
 import hashlib
 import logging
 from io import BytesIO
@@ -29,7 +28,7 @@ from massageProject.main_app.forms import ReservationCreateForm, ReservationEdit
 from massageProject.main_app.mixins import BookingEnabledMixin, booking_enabled_required, \
     CommentsEnabledMixin, comments_enabled_required
 from massageProject.main_app.models import Service, Specialist, Reservation, Comment, WorkingHours, ServiceGroup, \
-    Gallery, SiteConfiguration, Image, ImageProof, PhotoLabel
+    Gallery, Image, ImageProof, PhotoLabel
 
 logger = logging.getLogger(__name__)
 
@@ -502,7 +501,7 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
 
 def _get_current_proofing_reservation(user):
     return (
-        Reservation.objects.filter(user=user, gallery__isnull=False)
+        Reservation.objects.filter(user=user, need_client_review=True, gallery__isnull=False)
         .select_related('gallery', 'service', 'specialist')
         .order_by('-date', '-time')
         .first()
@@ -601,33 +600,6 @@ def _reject_if_finalized(reservation):
     return None
 
 
-# Placeholder photos shown only when the signed-in user has no reservation
-# with an attached gallery yet (the admin-side gallery workflow is new and
-# most existing reservations predate it). Generated as gradients from the
-# live SiteConfiguration palette so the demo never depends on stray media
-# files and always matches the current theme. Remove once real galleries
-# are the norm.
-def _demo_proofing_photos(site_config):
-    palette = [
-        site_config.primary_color, site_config.primary_light_color,
-        site_config.secondary_color, site_config.accent_color,
-    ]
-    photos = []
-    for i in range(10):
-        color_start, color_end = palette[i % len(palette)], palette[(i + 1) % len(palette)]
-        svg = (
-            '<svg xmlns="http://www.w3.org/2000/svg" width="480" height="600">'
-            '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">'
-            f'<stop offset="0" stop-color="{color_start}"/>'
-            f'<stop offset="1" stop-color="{color_end}"/>'
-            '</linearGradient></defs>'
-            '<rect width="480" height="600" fill="url(#g)"/></svg>'
-        )
-        data_url = 'data:image/svg+xml;base64,' + base64.b64encode(svg.encode('utf-8')).decode('ascii')
-        photos.append({'id': f'demo-{i + 1}', 'url': data_url, 'alt': _('Примерна снимка от сесия')})
-    return photos
-
-
 class PhotoProofingGallery(LoginRequiredMixin, TemplateView):
     template_name = 'pages/photo_proofing.html'
 
@@ -653,27 +625,21 @@ class PhotoProofingGallery(LoginRequiredMixin, TemplateView):
                     'comment': proof.comment if proof else '',
                     'label_keys': [label.pk for label in proof.labels.all()] if proof else [],
                 })
-            is_demo = False
             labels_config = [
                 {'key': label.pk, 'name': label.name, 'cap': label.cap}
                 for label in reservation.gallery.photo_labels.all()
             ]
+            watermark_identifier = f'{user.get_full_name() or user.phone_number} · #{reservation.pk}'
         else:
-            photos = _demo_proofing_photos(SiteConfiguration.get_solo())
-            is_demo = True
-            labels_config = [
-                {'key': 'print', 'name': _('За печат'), 'cap': 5},
-                {'key': 'album', 'name': _('Албум'), 'cap': 10},
-                {'key': 'social', 'name': _('Социални мрежи'), 'cap': 3},
-            ]
+            photos = []
+            labels_config = []
+            watermark_identifier = ''
 
         context['title'] = _('Проверка на снимки')
         context['reservation'] = reservation
-        context['is_demo'] = is_demo
         context['is_finalized'] = reservation.is_proofing_finalized if reservation else False
         context['photos'] = photos
-        session_tag = f'#{reservation.pk}' if reservation else _('ДЕМО ПРЕГЛЕД')
-        context['watermark_identifier'] = f'{user.get_full_name() or user.phone_number} · {session_tag}'
+        context['watermark_identifier'] = watermark_identifier
         context['labels_config'] = labels_config
         return context
 

@@ -144,8 +144,8 @@ class WorkingHoursAdmin(ModelAdmin):
 
 @admin.register(Reservation)
 class ReservationAdmin(ModelAdmin):
-    list_display = ('date', 'time', 'get_client_name', 'service', 'specialist', 'status', 'status_updated_at')
-    list_filter = ('status', ReservationDateFilter, 'specialist', 'service', 'date')
+    list_display = ('date', 'time', 'get_client_name', 'service', 'specialist', 'status', 'status_updated_at', 'need_client_review')
+    list_filter = ('status', ReservationDateFilter, 'specialist', 'service', 'date', 'need_client_review')
     search_fields = ('user__phone_number', 'user__first_name', 'user__last_name', 'service__name')
     date_hierarchy = 'date'
     actions = [export_reservations_csv, mark_as_completed, mark_as_noshow, unlock_photo_proofing]
@@ -157,7 +157,7 @@ class ReservationAdmin(ModelAdmin):
         (_('Информация за услугата'), {'fields': ('service', 'specialist')}),
         (_('Допълнителни бележки'), {'fields': ('additional_text',)}),
         (_('Системен одит'), {'fields': ('updated_at', 'status_updated_at', 'status_updated_by', 'proofing_finalized_at', 'proofing_finalized_by'), 'classes': ('collapse',)}),
-        (_('Галерия'), {'fields': ('gallery',)}),
+        (_('Галерия'), {'fields': ('gallery', 'need_client_review')}),
     )
 
     def get_client_name(self, obj):

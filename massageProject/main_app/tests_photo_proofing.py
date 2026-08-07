@@ -33,6 +33,7 @@ class ProofingModelsBase(TestCase):
         self.reservation = Reservation.objects.create(
             user=self.user, service=self.service, specialist=self.specialist,
             date=self.future_monday, time=time_cls(10, 0), gallery=self.gallery,
+            need_client_review=True,
         )
 
 
@@ -144,10 +145,29 @@ class PhotoProofingGalleryContextTest(ProofingModelsBase):
         self.assertEqual(photo['comment'], '')
         self.assertEqual(response.context['labels_config'][0]['key'], self.label.pk)
 
+    def test_reservation_not_flagged_for_review_shows_empty_state(self):
+        self.reservation.need_client_review = False
+        self.reservation.save(update_fields=['need_client_review'])
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertIsNone(response.context['reservation'])
+        self.assertEqual(response.context['photos'], [])
+
+    def test_finalizing_hides_reservation_from_next_visit(self):
+        self.client.post(reverse('photo_proofing_mark', args=[self.image.pk]))
+        self.client.post(reverse('photo_proofing_finalize'))
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertIsNone(response.context['reservation'])
+        self.assertEqual(response.context['photos'], [])
+
     def test_finalized_reservation_context_reflects_marks_and_labels(self):
         proof = ImageProof.objects.create(image=self.image, is_marked=True, comment='crop tighter')
         proof.labels.add(self.label)
         self.reservation.finalize_proofing(self.user)
+        # finalize_proofing() clears need_client_review, which would otherwise
+        # hide this reservation from the client entirely; re-open it here to
+        # check the context data itself still reflects the finalized state.
+        self.reservation.need_client_review = True
+        self.reservation.save(update_fields=['need_client_review'])
         response = self.client.get(reverse('photo_proofing'))
         self.assertTrue(response.context['is_finalized'])
         photo = response.context['photos'][0]

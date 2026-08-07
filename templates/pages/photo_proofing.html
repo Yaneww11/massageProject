@@ -157,7 +157,6 @@
 (function () {
   const NOTE_INDICATOR = "{% trans 'Има бележка' %}";
 
-  const isDemo = {{ is_demo|yesno:"true,false" }};
   const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
   {% get_current_language as CURRENT_LANGUAGE %}
   const LANG_PREFIX = '/{{ CURRENT_LANGUAGE }}';
@@ -266,7 +265,6 @@
     refreshCounts();
     refreshLabelChips();
     applyFilter();
-    if (isDemo) return;
     postJson(`${LANG_PREFIX}/profile/photos/${id}/mark/`).then(({ ok, data }) => {
       if (ok && data.success) return;
       tile.classList.toggle('is-marked');
@@ -286,7 +284,6 @@
     chip.classList.toggle('is-active');
     labelCounts[key] += active ? -1 : 1;
     refreshLabelChips();
-    if (isDemo) return;
     const id = tile.dataset.photoId;
     postJson(`${LANG_PREFIX}/profile/photos/${id}/label/${key}/`).then(({ ok, data }) => {
       if (ok && data.success) return;
@@ -406,7 +403,6 @@
       }
       closeDrawer();
     }
-    if (isDemo) { applyLocally(); return; }
     const body = new URLSearchParams({ content: text });
     postJson(`${LANG_PREFIX}/profile/photos/${drawerPhotoId}/comment/`, body).then(({ ok, data }) => {
       if (!ok || !data.success) {
@@ -481,7 +477,6 @@
       refreshCounts();
       applyFilter();
     }
-    if (isDemo) { applyLocally(); return; }
     postJson(`${LANG_PREFIX}/profile/photos/finalize/`).then(({ ok, data }) => {
       if (!ok || !data.success) {
         window.alert((data && data.error) || "{% trans 'Възникна грешка. Опитайте отново.' %}");

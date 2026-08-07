@@ -324,6 +324,16 @@ class Reservation(models.Model):
         blank=True,
     )
 
+    need_client_review = models.BooleanField(
+        default=False,
+        help_text=_(
+            'Отбележете, когато галерията е готова и клиентът трябва да прегледа и '
+            'маркира снимките си в профила си. Показва се на страницата за преглед на '
+            'снимки в профила на клиента, докато отметката е включена — автоматично '
+            'се изключва, след като клиентът финализира избора си.'
+        ),
+    )
+
     send_user_notification_on_gallery_creation = models.BooleanField(
         default=False,
         help_text=_('Да бъде ли изпратено уведомление до клиента при създаване на галерия?')
@@ -461,12 +471,14 @@ class Reservation(models.Model):
     def finalize_proofing(self, user):
         self.proofing_finalized_at = timezone.now()
         self.proofing_finalized_by = user
-        self.save(update_fields=['proofing_finalized_at', 'proofing_finalized_by'])
+        self.need_client_review = False
+        self.save(update_fields=['proofing_finalized_at', 'proofing_finalized_by', 'need_client_review'])
 
     def unlock_proofing(self):
         self.proofing_finalized_at = None
         self.proofing_finalized_by = None
-        self.save(update_fields=['proofing_finalized_at', 'proofing_finalized_by'])
+        self.need_client_review = True
+        self.save(update_fields=['proofing_finalized_at', 'proofing_finalized_by', 'need_client_review'])
 
     def save(self, *args, **kwargs):
         if self.status == self.STATUS_ACTIVE and self.specialist_id:
