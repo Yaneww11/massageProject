@@ -1,7 +1,10 @@
 import csv
 from django import forms
 from django.contrib import admin, messages
+from django.core.exceptions import ValidationError
+from django.db.models import Max
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.html import format_html
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -9,6 +12,7 @@ from datetime import date
 
 from unfold.admin import ModelAdmin, TabularInline
 from unfold.contrib.forms.widgets import WysiwygWidget
+from unfold.decorators import action
 from modeltranslation.admin import TabbedTranslationAdmin
 
 from massageProject.main_app.models import (
@@ -17,6 +21,35 @@ from massageProject.main_app.models import (
     BusinessWorkingHours, ServiceGroup,
     SiteConfiguration, PhotoLabel,
 )
+
+# --- Forms ---
+
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+
+class MultipleFileField(forms.FileField):
+    """FileField that accepts and cleans a list of files (Django's
+    documented recipe for native multi-file <input> support — Django has no
+    built-in multi-file form field)."""
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('widget', MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            result = [single_file_clean(d, initial) for d in data]
+        else:
+            result = single_file_clean(data, initial)
+        if self.required and not result:
+            raise ValidationError(self.error_messages['required'], code='required')
+        return result
+
+
+class GalleryBulkImageUploadForm(forms.Form):
+    images = MultipleFileField(label=_('Снимки'))
 
 # --- Actions ---
 
@@ -223,10 +256,54 @@ class GalleryAdmin(ModelAdmin, TabbedTranslationAdmin):
     prepopulated_fields = {'slug': ('title_bg',)}
     inlines = [ImageInline, PhotoLabelInline]
     fields = ('gallery_type', 'title', 'slug', 'description', 'order')
+    actions_detail = ['bulk_upload_images']
 
     def photo_count(self, obj):
         return obj.photo_count
     photo_count.short_description = _('Брой снимки')
+
+    @action(description=_('Качване на много снимки'), permissions=['change'])
+    def bulk_upload_images(self, request, object_id, *args, **kwargs):
+        gallery = get_object_or_404(Gallery, pk=object_id)
+        image_validator = forms.ImageField()
+
+        if request.method == 'POST':
+            form = GalleryBulkImageUploadForm(request.POST, request.FILES)
+            if form.is_valid():
+                max_order = gallery.images.aggregate(Max('order'))['order__max']
+                next_order = (max_order + 1) if max_order is not None else 0
+                uploaded = 0
+                for uploaded_file in form.cleaned_data['images']:
+                    try:
+                        image_validator.clean(uploaded_file)
+                        image = Image(gallery=gallery, image=uploaded_file, order=next_order)
+                        image.full_clean()
+                        image.save()
+                    except ValidationError as exc:
+                        messages.error(
+                            request,
+                            _('Пропусната %(name)s: %(error)s') % {
+                                'name': uploaded_file.name,
+                                'error': '; '.join(exc.messages),
+                            },
+                        )
+                        continue
+                    uploaded += 1
+                    next_order += 1
+                if uploaded:
+                    messages.success(request, _('Качени %(count)d снимки.') % {'count': uploaded})
+                return redirect('admin:main_app_gallery_change', gallery.pk)
+        else:
+            form = GalleryBulkImageUploadForm()
+
+        context = {
+            **self.admin_site.each_context(request),
+            'title': _('Качване на много снимки'),
+            'opts': self.model._meta,
+            'gallery': gallery,
+            'form': form,
+        }
+        return render(request, 'admin/main_app/gallery/bulk_upload_images.html', context)
 
 
 class BusinessWorkingHoursInline(TabularInline):

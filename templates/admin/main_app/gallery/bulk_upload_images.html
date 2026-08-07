@@ -1,0 +1,43 @@
+{% extends "unfold/layouts/base_simple.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/admin/gallery-bulk-upload.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+    <h1 class="text-xl font-semibold mb-4 dark:text-font-default-dark">{{ title }}</h1>
+
+    <form method="post"
+          enctype="multipart/form-data"
+          id="gallery-bulk-upload-form"
+          data-success-url="{% url 'admin:main_app_gallery_change' gallery.pk %}">
+        {% csrf_token %}
+
+        <div class="gallery-bulk-dropzone" id="gallery-bulk-dropzone">
+            <p>{% translate "Пуснете снимките тук, или" %}</p>
+            <label class="gallery-bulk-choose-btn" for="{{ form.images.id_for_label }}">
+                {% translate "Изберете файлове" %}
+            </label>
+            {{ form.images }}
+        </div>
+        {% if form.images.errors %}
+            <p class="gallery-bulk-error">{{ form.images.errors.0 }}</p>
+        {% endif %}
+
+        <div class="gallery-bulk-preview-grid" id="gallery-bulk-preview-grid"></div>
+
+        <div class="gallery-bulk-progress" id="gallery-bulk-progress" hidden>
+            <div class="gallery-bulk-progress-bar" id="gallery-bulk-progress-bar"></div>
+            <p class="gallery-bulk-progress-label" id="gallery-bulk-progress-label"></p>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="gallery-bulk-submit">
+            {% translate "Качване" %}
+        </button>
+    </form>
+</div>
+<script src="{% static 'js/admin/gallery-bulk-upload.js' %}"></script>
+{% endblock %}
