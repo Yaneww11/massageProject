@@ -1,0 +1,95 @@
+.gallery-bulk-dropzone {
+    border: 2px dashed #9a9a9a;
+    border-radius: 10px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+
+.gallery-bulk-dropzone.is-dragover {
+    border-color: #2563eb;
+    background-color: rgba(37, 99, 235, 0.06);
+}
+
+.gallery-bulk-dropzone p { margin: 0 0 0.75rem; color: #6b6b6b; }
+
+.gallery-bulk-choose-btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border: 1px solid #9a9a9a;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.gallery-bulk-dropzone input[type="file"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    overflow: hidden;
+}
+
+.gallery-bulk-error { color: #b3261e; font-size: 0.85rem; margin: 0 0 1rem; }
+
+.gallery-bulk-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.gallery-bulk-thumb {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    aspect-ratio: 1;
+    background: #e5e5e5;
+}
+
+.gallery-bulk-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.gallery-bulk-thumb-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.65);
+    color: #fff;
+    cursor: pointer;
+    line-height: 1;
+    font-size: 0.9rem;
+}
+
+.gallery-bulk-progress { margin-bottom: 1rem; }
+
+.gallery-bulk-progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    background: #2563eb;
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+.gallery-bulk-progress.is-indeterminate .gallery-bulk-progress-bar {
+    width: 40% !important;
+    animation: gallery-bulk-indeterminate 1.1s ease-in-out infinite;
+}
+
+@keyframes gallery-bulk-indeterminate {
+    0% { margin-left: 0%; }
+    50% { margin-left: 60%; }
+    100% { margin-left: 0%; }
+}
+
+.gallery-bulk-progress-label { font-size: 0.8rem; color: #6b6b6b; margin: 0.4rem 0 0; }
+
+html.dark .gallery-bulk-dropzone { border-color: #4b4b4b; }
+html.dark .gallery-bulk-dropzone p { color: #b0b0b0; }
+html.dark .gallery-bulk-choose-btn { border-color: #4b4b4b; color: #e5e5e5; }
+html.dark .gallery-bulk-thumb { background: #2a2a2a; }
+html.dark .gallery-bulk-progress-label { color: #b0b0b0; }
