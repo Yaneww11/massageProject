@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-07 17:28+0000\n"
+"POT-Creation-Date: 2026-08-07 18:23+0000\n"
 "PO-Revision-Date: 2026-07-25 13:00+0000\n"
 "Last-Translator: Yane Yanev <admin@admin.com>\n"
 "Language-Team: English\n"
@@ -56,9 +56,11 @@ msgstr "The email hasn't been verified, or verification has expired."
 
 #: massageProject/accounts/booking_auth_views.py:163
 #, fuzzy
-#| msgid "Този телефонен номер вече е регистриран. Моля, влезте в профила си."
+#| msgid ""
+#| "Този телефонен номер вече е регистриран. Моля, влезте в профила си."
 msgid ""
-"Този имейл или телефонен номер вече е регистриран. Моля, влезте в профила си."
+"Този имейл или телефонен номер вече е регистриран. Моля, влезте в профила "
+"си."
 msgstr ""
 "This phone number is already registered. Please log in to your account."
 
@@ -69,8 +71,8 @@ msgstr ""
 #: massageProject/accounts/forms.py:15
 #: templates/account/account_inactive.html:7
 msgid ""
-"Моля, потвърдете имейла си, преди да влезете. Проверете пощата си за линк за "
-"потвърждение, или поискайте нов по-долу."
+"Моля, потвърдете имейла си, преди да влезете. Проверете пощата си за линк за"
+" потвърждение, или поискайте нов по-долу."
 msgstr ""
 "Please verify your email before logging in. Check your inbox for the "
 "confirmation link, or request a new one below."
@@ -164,143 +166,162 @@ msgstr "Signup"
 msgid "Login"
 msgstr "Login"
 
-#: massageProject/main_app/admin.py:23
+#: massageProject/main_app/admin.py:52 massageProject/settings.py:352
+msgid "Снимки"
+msgstr "Photos"
+
+#: massageProject/main_app/admin.py:56
 msgid "Export selected reservations to CSV"
 msgstr ""
 
-#: massageProject/main_app/admin.py:36
+#: massageProject/main_app/admin.py:69
 msgid "Mark selected comments as reviewed"
 msgstr ""
 
-#: massageProject/main_app/admin.py:53
+#: massageProject/main_app/admin.py:86
 #, python-format
-msgid "Пропуснати %(count)d отказани резервации (не могат да бъдат маркирани)."
+msgid ""
+"Пропуснати %(count)d отказани резервации (не могат да бъдат маркирани)."
 msgstr "Skipped %(count)d cancelled reservations (cannot be marked)."
 
 # admin.py
-#: massageProject/main_app/admin.py:57
+#: massageProject/main_app/admin.py:90
 msgid "Маркирай като Завършена"
 msgstr "Mark as Completed"
 
-#: massageProject/main_app/admin.py:61
+#: massageProject/main_app/admin.py:94
 msgid "Маркирай като Не се е явил"
 msgstr "Mark as No Show"
 
-#: massageProject/main_app/admin.py:65
+#: massageProject/main_app/admin.py:98
 msgid "Отключи прегледа на снимки"
 msgstr "Unlock photo review"
 
 # models.py - StudioWorkingHours
-#: massageProject/main_app/admin.py:74
+#: massageProject/main_app/admin.py:107
 msgid "Времеви период"
 msgstr "Day / Period"
 
-#: massageProject/main_app/admin.py:79 templates/pages/my_profile.html:69
+#: massageProject/main_app/admin.py:112 templates/pages/my_profile.html:69
 msgid "Днес"
 msgstr "Today"
 
 # models.py - MessageReservation STATUS_CHOICES
-#: massageProject/main_app/admin.py:80
+#: massageProject/main_app/admin.py:113
 msgid "Предстоящи"
 msgstr "Upcoming"
 
-#: massageProject/main_app/admin.py:81
+#: massageProject/main_app/admin.py:114
 msgid "Минали"
 msgstr ""
 
 # Templates - delete-reservation
-#: massageProject/main_app/admin.py:110
+#: massageProject/main_app/admin.py:143
 msgid "Основна информация"
 msgstr "Cancel Reservation"
 
-#: massageProject/main_app/admin.py:111
+#: massageProject/main_app/admin.py:144
 msgid "Цена и Продължителност"
 msgstr "Duration:"
 
-#: massageProject/main_app/admin.py:112
+#: massageProject/main_app/admin.py:145
 msgid "Медия и Видимост"
 msgstr ""
 
-#: massageProject/main_app/admin.py:118 massageProject/main_app/admin.py:130
+#: massageProject/main_app/admin.py:151 massageProject/main_app/admin.py:163
 msgid "Няма снимка"
 msgstr "No comments yet"
 
-#: massageProject/main_app/admin.py:119 massageProject/main_app/admin.py:203
+#: massageProject/main_app/admin.py:152 massageProject/main_app/admin.py:236
 msgid "Преглед"
 msgstr ""
 
-#: massageProject/main_app/admin.py:131
+#: massageProject/main_app/admin.py:164
 msgid "Снимка"
 msgstr ""
 
-#: massageProject/main_app/admin.py:143
+#: massageProject/main_app/admin.py:176
 msgid "Ден"
 msgstr "Order"
 
-#: massageProject/main_app/admin.py:156
+#: massageProject/main_app/admin.py:189
 msgid "Детайли за резервацията"
 msgstr "Reservation Management"
 
-#: massageProject/main_app/admin.py:157
+#: massageProject/main_app/admin.py:190
 msgid "Информация за услугата"
 msgstr ""
 
-#: massageProject/main_app/admin.py:158 templates/pages/reservation.html:146
+#: massageProject/main_app/admin.py:191 templates/pages/reservation.html:146
 #: templates/reservation/delete-reservation.html:37
 #: templates/reservation/edit-reservation.html:69
 msgid "Допълнителни бележки"
 msgstr "Additional Notes"
 
-#: massageProject/main_app/admin.py:159
+#: massageProject/main_app/admin.py:192
 msgid "Системен одит"
 msgstr ""
 
-#: massageProject/main_app/admin.py:160 massageProject/main_app/models.py:563
+#: massageProject/main_app/admin.py:193 massageProject/main_app/models.py:563
 #: massageProject/main_app/models.py:595 massageProject/main_app/models.py:629
 #: massageProject/settings.py:343 templates/pages/gallery.html:9
 #: templates/partials/header.html:12
 msgid "Галерия"
 msgstr "Gallery"
 
-#: massageProject/main_app/admin.py:165
+#: massageProject/main_app/admin.py:198
 #: templates/partials/specialist_calendar.html:91
 msgid "Клиент"
 msgstr "Client"
 
-#: massageProject/main_app/admin.py:190
+#: massageProject/main_app/admin.py:223
 msgid "Съдържание"
 msgstr ""
 
-#: massageProject/main_app/admin.py:202 massageProject/main_app/admin.py:255
+#: massageProject/main_app/admin.py:235 massageProject/main_app/admin.py:332
 msgid "Няма изображение"
 msgstr "No comments yet"
 
-#: massageProject/main_app/admin.py:229
+#: massageProject/main_app/admin.py:263
 msgid "Брой снимки"
 msgstr "Photo count"
 
-#: massageProject/main_app/admin.py:243 templates/pages/privacy_policy.html:6
+#: massageProject/main_app/admin.py:265 massageProject/main_app/admin.py:301
+msgid "Качване на много снимки"
+msgstr "Bulk upload images"
+
+#: massageProject/main_app/admin.py:285
+#, python-format
+msgid "Пропусната %(name)s: %(error)s"
+msgstr "Skipped %(name)s: %(error)s"
+
+#: massageProject/main_app/admin.py:294
+#, python-format
+msgid "Качени %(count)d снимки."
+msgstr "Uploaded %(count)d photos."
+
+#: massageProject/main_app/admin.py:320 templates/pages/privacy_policy.html:6
 #: templates/partials/footer.html:54
 msgid "Политика за поверителност"
 msgstr "Privacy Policy"
 
-#: massageProject/main_app/admin.py:256
+#: massageProject/main_app/admin.py:333
 msgid "Основна снимка"
 msgstr ""
 
-#: massageProject/main_app/admin.py:273
+#: massageProject/main_app/admin.py:350
 msgid "Тема — цветове"
 msgstr "Theme — colors"
 
-#: massageProject/main_app/admin.py:278
+#: massageProject/main_app/admin.py:355
 msgid "Типография и стил"
 msgstr "Typography and style"
 
-#: massageProject/main_app/admin.py:279
+#: massageProject/main_app/admin.py:356
 msgid "Терминология"
 msgstr "Terminology"
 
-#: massageProject/main_app/admin.py:283
+#: massageProject/main_app/admin.py:360
 msgid "Функционалности"
 msgstr "Features"
 
@@ -375,8 +396,8 @@ msgid ""
 "Показва се в предпочитаните услуги на началната страница, на страницата с "
 "услуги и навсякъде в процеса на резервация."
 msgstr ""
-"Shown in the homepage's featured services, the services page, and throughout "
-"the booking flow."
+"Shown in the homepage's featured services, the services page, and throughout"
+" the booking flow."
 
 #: massageProject/main_app/models.py:41
 msgid ""
@@ -471,11 +492,11 @@ msgstr ""
 
 #: massageProject/main_app/models.py:149 massageProject/main_app/models.py:155
 msgid ""
-"Не се показва директно, но определя кои часове се предлагат на клиентите при "
-"резервация с този терапевт в този ден."
+"Не се показва директно, но определя кои часове се предлагат на клиентите при"
+" резервация с този терапевт в този ден."
 msgstr ""
-"Not shown directly, but determines which time slots are offered to customers "
-"booking with this specialist on this day."
+"Not shown directly, but determines which time slots are offered to customers"
+" booking with this specialist on this day."
 
 # Templates - working_hours
 #: massageProject/main_app/models.py:162 massageProject/main_app/models.py:163
@@ -485,8 +506,8 @@ msgstr "Working Hours"
 
 #: massageProject/main_app/models.py:173
 msgid ""
-"Използва се като алтернативен текст (alt) на снимката на студиото в страница "
-"\"За нас\"."
+"Използва се като алтернативен текст (alt) на снимката на студиото в страница"
+" \"За нас\"."
 msgstr "Used as the alt text for the studio photo on the About page."
 
 #: massageProject/main_app/models.py:176
@@ -497,15 +518,15 @@ msgstr "Shown as the main body text on the About page."
 #, fuzzy
 #| msgid ""
 #| "Снимката се показва в естествените си пропорции (без изрязване), с "
-#| "ограничена максимална ширина. За симетричен и професионален вид "
-#| "препоръчваме портретна или квадратна снимка (съотношение между 3:4 и "
-#| "1:1), минимум 800px на по-късата страна. Много издължени (панорамни или "
-#| "тесни) снимки могат да изглеждат непропорционално до текста."
+#| "ограничена максимална ширина. За симетричен и професионален вид препоръчваме"
+#| " портретна или квадратна снимка (съотношение между 3:4 и 1:1), минимум 800px"
+#| " на по-късата страна. Много издължени (панорамни или тесни) снимки могат да "
+#| "изглеждат непропорционално до текста."
 msgid ""
 "Снимката се показва в естествените си пропорции (без изрязване), с "
-"ограничена максимална ширина. За симетричен и професионален вид препоръчваме "
-"портретна или квадратна снимка (съотношение между 3:4 и 1:1), минимум 800px "
-"на по-късата страна. Много издължени (панорамни или тесни) снимки могат да "
+"ограничена максимална ширина. За симетричен и професионален вид препоръчваме"
+" портретна или квадратна снимка (съотношение между 3:4 и 1:1), минимум 800px"
+" на по-късата страна. Много издължени (панорамни или тесни) снимки могат да "
 "изглеждат непропорционално до текста. Показва се като главна снимка в "
 "страница \"За нас\"."
 msgstr ""
@@ -519,12 +540,13 @@ msgstr ""
 msgid ""
 "Показва се в контактната карта в профила на клиента и в долния колонтитул "
 "(footer) на сайта."
-msgstr "Shown on the customer profile page's contact card and the site footer."
+msgstr ""
+"Shown on the customer profile page's contact card and the site footer."
 
 #: massageProject/main_app/models.py:196
 msgid ""
-"Показва се в профила на клиента и в долния колонтитул (footer) на сайта като "
-"линк за обаждане."
+"Показва се в профила на клиента и в долния колонтитул (footer) на сайта като"
+" линк за обаждане."
 msgstr ""
 "Shown on the customer profile page and the site footer (as a tap-to-call "
 "link)."
@@ -541,8 +563,8 @@ msgstr "Shown as a social icon link in the site footer."
 #: massageProject/main_app/models.py:219
 #, fuzzy
 #| msgid ""
-#| "JSON обект с показатели (изберете кои да покажете, останалите се "
-#| "скриват): {\"years_of_practice\": \"8+\", \"clients_served\": \"500+\", "
+#| "JSON обект с показатели (изберете кои да покажете, останалите се скриват): "
+#| "{\"years_of_practice\": \"8+\", \"clients_served\": \"500+\", "
 #| "\"average_rating\": \"4.9\", \"certifications_count\": \"12\"}"
 msgid ""
 "JSON обект с показатели (изберете кои да покажете, останалите се скриват): "
@@ -568,8 +590,8 @@ msgid ""
 "title, subtitle, по избор year и description. Празен списък скрива "
 "съответната група. Пример: {\"training\": [{\"title\": \"Шведски масаж\", "
 "\"subtitle\": \"Виенски институт\", \"year\": \"2019\", \"description\": "
-"\"...\"}], \"recognition\": []}. Показва се като секция \"Обучения/"
-"Признания\" в страница \"За нас\"."
+"\"...\"}], \"recognition\": []}. Показва се като секция "
+"\"Обучения/Признания\" в страница \"За нас\"."
 msgstr ""
 "JSON object with two lists — \"training\" and \"recognition\". Each item: "
 "title, subtitle, optional year and description. An empty list hides that "
@@ -650,10 +672,10 @@ msgid ""
 "снимки в профила на клиента, докато отметката е включена — автоматично се "
 "изключва, след като клиентът финализира избора си."
 msgstr ""
-"Check this when the gallery is ready and the customer should review and "
-"mark their photos in their profile. Shown on the customer's photo review "
-"page while checked — automatically unchecked once the customer finalizes "
-"their selection."
+"Check this when the gallery is ready and the customer should review and mark"
+" their photos in their profile. Shown on the customer's photo review page "
+"while checked — automatically unchecked once the customer finalizes their "
+"selection."
 
 #: massageProject/main_app/models.py:339
 msgid "Да бъде ли изпратено уведомление до клиента при създаване на галерия?"
@@ -736,8 +758,8 @@ msgid ""
 "показва се като малък надпис над секцията с галерия."
 msgstr ""
 "For albums: shown as the album's title on the gallery page and on its own "
-"page (required for albums). For the homepage: shown as a small caption above "
-"the gallery section."
+"page (required for albums). For the homepage: shown as a small caption above"
+" the gallery section."
 
 #: massageProject/main_app/models.py:542
 msgid "Описание"
@@ -787,8 +809,8 @@ msgid ""
 "албума (и като корична снимка на албума на страницата с галерии, ако е "
 "първата по ред)."
 msgstr ""
-"Shown in the gallery section on the homepage, or on the album's page (and as "
-"the album's cover photo on the gallery page, if it's first in order)."
+"Shown in the gallery section on the homepage, or on the album's page (and as"
+" the album's cover photo on the gallery page, if it's first in order)."
 
 #: massageProject/main_app/models.py:607
 msgid "Използва се като алтернативен текст (alt) за тази снимка."
@@ -864,8 +886,8 @@ msgstr ""
 
 #: massageProject/main_app/models.py:682
 msgid ""
-"Етикетите, които клиентът е избрал за тази снимка при преглед на снимките от "
-"своята резервация."
+"Етикетите, които клиентът е избрал за тази снимка при преглед на снимките от"
+" своята резервация."
 msgstr ""
 "The labels the client has selected for this photo when proofing photos from "
 "their reservation."
@@ -885,8 +907,8 @@ msgid ""
 "(footer), както и в имейлите до клиентите (кодове за резервация, смяна на "
 "парола)."
 msgstr ""
-"Shown as the site name in the homepage hero, the header logo's alt text, the "
-"footer copyright line, and in emails sent to customers (booking codes, "
+"Shown as the site name in the homepage hero, the header logo's alt text, the"
+" footer copyright line, and in emails sent to customers (booking codes, "
 "password resets)."
 
 #: massageProject/main_app/models.py:706
@@ -906,7 +928,8 @@ msgstr "Privacy Policy"
 
 #: massageProject/main_app/models.py:723
 msgid ""
-"Показва се като кратък текст (tagline) в долния колонтитул (footer) на сайта."
+"Показва се като кратък текст (tagline) в долния колонтитул (footer) на "
+"сайта."
 msgstr "Shown as the tagline text in the site footer."
 
 # Templates - register
@@ -953,8 +976,8 @@ msgstr "Reservations"
 
 #: massageProject/main_app/models.py:809
 msgid ""
-"Показва се като име на автора в секцията с отзиви на началната страница и на "
-"страницата с всички отзиви."
+"Показва се като име на автора в секцията с отзиви на началната страница и на"
+" страницата с всички отзиви."
 msgstr ""
 "Shown as the reviewer's name on the homepage reviews section and the full "
 "reviews page."
@@ -1150,8 +1173,8 @@ msgid ""
 "Използва се навсякъде, където сайтът се обръща към \"специалисти\" — напр. "
 "страницата за резервация и профила на клиента."
 msgstr ""
-"Used wherever the site refers to \"specialists\" — e.g. the booking page and "
-"profile page."
+"Used wherever the site refers to \"specialists\" — e.g. the booking page and"
+" profile page."
 
 #: massageProject/main_app/models.py:954
 msgid "Резервации активни"
@@ -1159,11 +1182,11 @@ msgstr "Booking enabled"
 
 #: massageProject/main_app/models.py:956
 msgid ""
-"Когато е изключено, скрива всички бутони/линкове за резервация по целия сайт "
-"(горно меню, начална страница, страница с услуги, профил на клиента)."
+"Когато е изключено, скрива всички бутони/линкове за резервация по целия сайт"
+" (горно меню, начална страница, страница с услуги, профил на клиента)."
 msgstr ""
-"When unchecked, hides all booking buttons/links site-wide (header, homepage, "
-"services page, profile page)."
+"When unchecked, hides all booking buttons/links site-wide (header, homepage,"
+" services page, profile page)."
 
 #: massageProject/main_app/models.py:961
 msgid "Коментари активни"
@@ -1268,12 +1291,6 @@ msgstr ""
 msgid "Всички резервации"
 msgstr "Upcoming bookings"
 
-#: massageProject/settings.py:352
-#, fuzzy
-#| msgid "снимки"
-msgid "Снимки"
-msgstr "photos"
-
 #: massageProject/settings.py:360
 msgid "Потребители и Отзиви"
 msgstr "Additional Notes"
@@ -1288,6 +1305,18 @@ msgstr "This account is inactive."
 #: templates/socialaccount/login_cancelled.html:9
 msgid "Към началната страница"
 msgstr "Back to the home page"
+
+#: templates/admin/main_app/gallery/bulk_upload_images.html:20
+msgid "Пуснете снимките тук, или"
+msgstr "Drop photos here, or"
+
+#: templates/admin/main_app/gallery/bulk_upload_images.html:22
+msgid "Изберете файлове"
+msgstr "Choose files"
+
+#: templates/admin/main_app/gallery/bulk_upload_images.html:38
+msgid "Качване"
+msgstr "Upload"
 
 #: templates/emails/otp_email.html:3 templates/emails/otp_email_subject.txt:1
 msgid "Ваш код за потвърждение"
@@ -1324,7 +1353,8 @@ msgstr "Hello, %(name)s,"
 
 #: templates/emails/password_reset_email.html:6
 #: templates/emails/password_reset_email.txt:3
-msgid "Получихте този имейл, защото поискахте смяна на паролата за акаунта си."
+msgid ""
+"Получихте този имейл, защото поискахте смяна на паролата за акаунта си."
 msgstr ""
 "You're receiving this email because you requested a password reset for your "
 "account."
@@ -1342,7 +1372,8 @@ msgstr "This link is valid for 3 days."
 
 #: templates/emails/password_reset_email.html:11
 #: templates/emails/password_reset_email.txt:7
-msgid "Ако не сте поискали смяна на паролата, можете да игнорирате този имейл."
+msgid ""
+"Ако не сте поискали смяна на паролата, можете да игнорирате този имейл."
 msgstr ""
 "If you didn't request a password reset, you can safely ignore this email."
 
@@ -1376,8 +1407,8 @@ msgid ""
 "Лична практика, изградена върху обучение, внимание и години усъвършенстване "
 "на занаята — това е кратката версия."
 msgstr ""
-"A personal practice built on training, attention, and years spent refining a "
-"craft — here is the short version."
+"A personal practice built on training, attention, and years spent refining a"
+" craft — here is the short version."
 
 #: templates/pages/about.html:28
 msgid "Години опит"
@@ -1474,7 +1505,8 @@ msgstr "Enlarged photo"
 
 #: templates/pages/gallery_album.html:57 templates/pages/my_profile.html:265
 #: templates/pages/photo_proofing.html:132
-#: templates/pages/photo_proofing.html:141 templates/partials/auth_modal.html:7
+#: templates/pages/photo_proofing.html:141
+#: templates/partials/auth_modal.html:7
 #: templates/partials/specialist_calendar.html:87
 msgid "Затвори"
 msgstr "Close"
@@ -1537,7 +1569,8 @@ msgstr "Your Review"
 msgid "Споделете Вашето преживяване..."
 msgstr "Share your experience..."
 
-#: templates/pages/home.html:128 templates/reservation/edit-reservation.html:78
+#: templates/pages/home.html:128
+#: templates/reservation/edit-reservation.html:78
 msgid "Отказ"
 msgstr "Cancel"
 
@@ -1905,7 +1938,8 @@ msgstr "Has a note"
 #: templates/pages/photo_proofing.html:275
 #: templates/pages/photo_proofing.html:293
 #: templates/pages/photo_proofing.html:409
-#: templates/pages/photo_proofing.html:482 templates/partials/auth_modal.html:3
+#: templates/pages/photo_proofing.html:482
+#: templates/partials/auth_modal.html:3
 msgid "Възникна грешка. Опитайте отново."
 msgstr "Something went wrong. Please try again."
 
@@ -1944,7 +1978,8 @@ msgstr "Letters only (Cyrillic or Latin), spaces and hyphens"
 #: templates/pages/reservation.html:127
 msgid ""
 "Моля, въведете Вашите имена. Те ще бъдат запазени и използвани автоматично "
-"при бъдещи резервации. След запазване имената ви не могат да бъдат променени."
+"при бъдещи резервации. След запазване имената ви не могат да бъдат "
+"променени."
 msgstr ""
 "Please enter your name. It will be saved and used automatically for future "
 "reservations. Once saved, your name cannot be changed."
@@ -2307,7 +2342,8 @@ msgstr "New password"
 msgid ""
 "Въведете новата си парола два пъти, за да сме сигурни, че е въведена "
 "правилно."
-msgstr "Enter your new password twice so we can verify you typed it correctly."
+msgstr ""
+"Enter your new password twice so we can verify you typed it correctly."
 
 #: templates/registration/password_reset_confirm.html:29
 msgid "Невалиден линк"
@@ -2347,7 +2383,8 @@ msgstr "Forgot password"
 
 #: templates/registration/password_reset_form.html:8
 msgid ""
-"Въведете имейла си и ще Ви изпратим инструкции за възстановяване на паролата."
+"Въведете имейла си и ще Ви изпратим инструкции за възстановяване на "
+"паролата."
 msgstr ""
 "Enter your email and we'll send you instructions to reset your password."
 
@@ -2520,8 +2557,8 @@ msgstr ""
 
 #: venv/lib/python3.12/site-packages/django/core/validators.py:297
 msgid ""
-"Enter a valid “slug” consisting of Unicode letters, numbers, underscores, or "
-"hyphens."
+"Enter a valid “slug” consisting of Unicode letters, numbers, underscores, or"
+" hyphens."
 msgstr ""
 
 #: venv/lib/python3.12/site-packages/django/core/validators.py:309
@@ -2734,15 +2771,15 @@ msgstr ""
 #: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1561
 #, python-format
 msgid ""
-"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD HH:MM[:ss[."
-"uuuuuu]][TZ] format."
+"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD "
+"HH:MM[:ss[.uuuuuu]][TZ] format."
 msgstr ""
 
 #: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1569
 #, python-format
 msgid ""
-"“%(value)s” value has the correct format (YYYY-MM-DD HH:MM[:ss[.uuuuuu]]"
-"[TZ]) but it is an invalid date/time."
+"“%(value)s” value has the correct format (YYYY-MM-DD "
+"HH:MM[:ss[.uuuuuu]][TZ]) but it is an invalid date/time."
 msgstr ""
 
 #: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1574
@@ -2761,8 +2798,8 @@ msgstr ""
 #: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1864
 #, python-format
 msgid ""
-"“%(value)s” value has an invalid format. It must be in [DD] [[HH:]MM:]ss[."
-"uuuuuu] format."
+"“%(value)s” value has an invalid format. It must be in [DD] "
+"[[HH:]MM:]ss[.uuuuuu] format."
 msgstr ""
 
 #: venv/lib/python3.12/site-packages/django/db/models/fields/__init__.py:1868
@@ -2976,7 +3013,8 @@ msgstr ""
 
 #: venv/lib/python3.12/site-packages/django/forms/fields.py:642
 #, python-format
-msgid "Ensure this filename has at most %(max)d character (it has %(length)d)."
+msgid ""
+"Ensure this filename has at most %(max)d character (it has %(length)d)."
 msgid_plural ""
 "Ensure this filename has at most %(max)d characters (it has %(length)d)."
 msgstr[0] ""
@@ -3085,7 +3123,8 @@ msgid "The inline value did not match the parent instance."
 msgstr ""
 
 #: venv/lib/python3.12/site-packages/django/forms/models.py:1474
-msgid "Select a valid choice. That choice is not one of the available choices."
+msgid ""
+"Select a valid choice. That choice is not one of the available choices."
 msgstr ""
 
 #: venv/lib/python3.12/site-packages/django/forms/models.py:1623
@@ -3571,10 +3610,10 @@ msgstr ""
 
 #: venv/lib/python3.12/site-packages/django/views/csrf.py:45
 msgid ""
-"If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or "
-"including the “Referrer-Policy: no-referrer” header, please remove them. The "
-"CSRF protection requires the “Referer” header to do strict referer checking. "
-"If you’re concerned about privacy, use alternatives like <a "
+"If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or"
+" including the “Referrer-Policy: no-referrer” header, please remove them. "
+"The CSRF protection requires the “Referer” header to do strict referer "
+"checking. If you’re concerned about privacy, use alternatives like <a "
 "rel=\"noreferrer\" …> for links to third-party sites."
 msgstr ""
 
@@ -3626,8 +3665,8 @@ msgstr ""
 #: venv/lib/python3.12/site-packages/django/views/generic/dates.py:680
 #, python-format
 msgid ""
-"Future %(verbose_name_plural)s not available because %(class_name)s."
-"allow_future is False."
+"Future %(verbose_name_plural)s not available because "
+"%(class_name)s.allow_future is False."
 msgstr ""
 
 #: venv/lib/python3.12/site-packages/django/views/generic/dates.py:720
@@ -3685,10 +3724,10 @@ msgstr ""
 #: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:208
 #, python-format
 msgid ""
-"You are seeing this page because <a href=\"https://docs.djangoproject.com/en/"
-"%(version)s/ref/settings/#debug\" target=\"_blank\" "
-"rel=\"noopener\">DEBUG=True</a> is in your settings file and you have not "
-"configured any URLs."
+"You are seeing this page because <a "
+"href=\"https://docs.djangoproject.com/en/%(version)s/ref/settings/#debug\" "
+"target=\"_blank\" rel=\"noopener\">DEBUG=True</a> is in your settings file "
+"and you have not configured any URLs."
 msgstr ""
 
 #: venv/lib/python3.12/site-packages/django/views/templates/default_urlconf.html:217
@@ -4342,8 +4381,8 @@ msgstr ""
 #: venv/lib/python3.12/site-packages/unfold/templates/admin/delete_confirmation.html:32
 #, python-format
 msgid ""
-"Deleting the %(object_name)s '%(escaped_object)s' would require deleting the "
-"following protected related objects:"
+"Deleting the %(object_name)s '%(escaped_object)s' would require deleting the"
+" following protected related objects:"
 msgstr ""
 
 #: venv/lib/python3.12/site-packages/unfold/templates/admin/delete_confirmation.html:48
@@ -4391,8 +4430,8 @@ msgstr ""
 #: venv/lib/python3.12/site-packages/unfold/templates/admin/login.html:26
 #, python-format
 msgid ""
-"You are authenticated as %(username)s, but are not authorized to access this "
-"page. Would you like to login to a different account?"
+"You are authenticated as %(username)s, but are not authorized to access this"
+" page. Would you like to login to a different account?"
 msgstr ""
 
 #: venv/lib/python3.12/site-packages/unfold/templates/admin/login.html:47
@@ -4405,8 +4444,8 @@ msgstr ""
 
 #: venv/lib/python3.12/site-packages/unfold/templates/admin/object_history.html:60
 msgid ""
-"This object doesn’t have a change history. It probably wasn’t added via this "
-"admin site."
+"This object doesn’t have a change history. It probably wasn’t added via this"
+" admin site."
 msgstr ""
 
 #: venv/lib/python3.12/site-packages/unfold/templates/admin/pagination.html:12
@@ -4453,8 +4492,8 @@ msgstr ""
 
 #: venv/lib/python3.12/site-packages/unfold/templates/registration/password_change_form.html:19
 msgid ""
-"Please enter your old password, for security’s sake, and then enter your new "
-"password twice so we can verify you typed it in correctly."
+"Please enter your old password, for security’s sake, and then enter your new"
+" password twice so we can verify you typed it in correctly."
 msgstr ""
 
 #: venv/lib/python3.12/site-packages/unfold/templates/unfold/components/table.html:93
@@ -4558,13 +4597,11 @@ msgstr ""
 #, python-format
 msgid ""
 "\n"
-"            Found <span class=\"font-medium text-important\">%(counter)s</"
-"span> result in %(time)s seconds\n"
+"            Found <span class=\"font-medium text-important\">%(counter)s</span> result in %(time)s seconds\n"
 "        "
 msgid_plural ""
 "\n"
-"            Found <span class=\"font-medium text-important\">%(counter)s</"
-"span> results in %(time)s seconds\n"
+"            Found <span class=\"font-medium text-important\">%(counter)s</span> results in %(time)s seconds\n"
 "        "
 msgstr[0] ""
 msgstr[1] ""
@@ -4767,21 +4804,14 @@ msgstr ""
 #~ msgid "Качи снимки (масово)"
 #~ msgstr "Bulk upload images"
 
-#, fuzzy, python-format
-#~| msgid "Увеличена снимка"
-#~ msgid "Качени %(count)d снимки."
-#~ msgstr "Enlarged photo"
-
 #~ msgid "Премести съществуващи снимки тук"
 #~ msgstr "Move existing images here"
 
 #, fuzzy, python-format
-#~| msgid "Проверка на снимки"
 #~ msgid "Преместени %(count)d снимки."
 #~ msgstr "Photo review"
 
 #, fuzzy
-#~| msgid "Време"
 #~ msgid "Премести"
 #~ msgstr "Time"
 
@@ -4796,8 +4826,7 @@ msgstr ""
 #~ msgid "Кратко описание"
 #~ msgstr "Short description"
 
-#~ msgid ""
-#~ "Показва се като заглавие на секцията с галерия на началната страница."
+#~ msgid "Показва се като заглавие на секцията с галерия на началната страница."
 #~ msgstr "Shown as the heading of the homepage gallery section."
 
 #~ msgid ""
@@ -4845,11 +4874,11 @@ msgstr ""
 #~ msgstr "e.g. \"9:00 - 18:00\" — leave empty for \"Day Off\""
 
 #~ msgid ""
-#~ "Благодарим Ви, че се регистрирахте. Моля, потвърдете имейл адреса си, "
-#~ "като натиснете бутона по-долу:"
+#~ "Благодарим Ви, че се регистрирахте. Моля, потвърдете имейл адреса си, като "
+#~ "натиснете бутона по-долу:"
 #~ msgstr ""
-#~ "Thank you for registering. Please confirm your email address by clicking "
-#~ "the button below:"
+#~ "Thank you for registering. Please confirm your email address by clicking the"
+#~ " button below:"
 
 #~ msgid ""
 #~ "Ако бутонът не работи, копирайте и поставете следния линк в браузъра си:"
@@ -4946,8 +4975,7 @@ msgstr ""
 #~ msgstr "Register here"
 
 #~ msgid ""
-#~ "Създайте нов акаунт, за да започнете да планирате своите моменти на "
-#~ "релакс."
+#~ "Създайте нов акаунт, за да започнете да планирате своите моменти на релакс."
 #~ msgstr "Create a new account to start planning your relaxation moments."
 
 #~ msgid "Регистрирай се"
@@ -4960,8 +4988,8 @@ msgstr ""
 #~ msgstr "Resend verification link"
 
 #~ msgid ""
-#~ "Въведете имейла, с който сте се регистрирали, и ще Ви изпратим нов линк "
-#~ "за потвърждение."
+#~ "Въведете имейла, с който сте се регистрирали, и ще Ви изпратим нов линк за "
+#~ "потвърждение."
 #~ msgstr ""
 #~ "Enter the email you registered with and we'll send you a new confirmation "
 #~ "link."
