@@ -13,6 +13,7 @@
     const submitBtn = document.getElementById('gallery-bulk-submit');
 
     let selectedFiles = [];
+    let previewUrls = [];
 
     function syncNativeInput() {
         const dt = new DataTransfer();
@@ -21,13 +22,17 @@
     }
 
     function renderGrid() {
+        previewUrls.forEach((url) => URL.revokeObjectURL(url));
+        previewUrls = [];
         grid.innerHTML = '';
         selectedFiles.forEach((file, index) => {
             const thumb = document.createElement('div');
             thumb.className = 'gallery-bulk-thumb';
 
+            const url = URL.createObjectURL(file);
+            previewUrls.push(url);
             const img = document.createElement('img');
-            img.src = URL.createObjectURL(file);
+            img.src = url;
             img.alt = file.name;
             thumb.appendChild(img);
 
@@ -100,7 +105,8 @@
             if (!event.lengthComputable) return;
             const percent = Math.round((event.loaded / event.total) * 100);
             progressBar.style.width = percent + '%';
-            progressLabel.textContent = 'Uploading ' + selectedFiles.length + ' photos (' + percent + '%)';
+            const label = form.dataset.uploadingText.replace('{count}', selectedFiles.length);
+            progressLabel.textContent = label + ' (' + percent + '%)';
         });
 
         xhr.upload.addEventListener('load', () => {
@@ -109,22 +115,29 @@
             // synchronously before the response comes back, so switch to an
             // indeterminate state rather than leaving the bar frozen at 100%.
             progress.classList.add('is-indeterminate');
-            progressLabel.textContent = 'Saving photos...';
+            progressLabel.textContent = form.dataset.savingText;
         });
 
-        xhr.addEventListener('load', () => {
-            // The server responds with a redirect, but XHR follows redirects
-            // transparently instead of navigating the browser there — send
-            // the browser to the gallery change page ourselves.
-            window.location.href = form.dataset.successUrl;
-        });
-
-        xhr.addEventListener('error', () => {
+        function fail() {
             submitBtn.disabled = false;
             progress.hidden = true;
             progressLabel.textContent = '';
-            window.alert('Upload failed — check your connection and try again.');
+            window.alert(form.dataset.uploadFailedText);
+        }
+
+        xhr.addEventListener('load', () => {
+            if (xhr.status >= 200 && xhr.status < 400) {
+                // The server responds with a redirect, but XHR follows
+                // redirects transparently instead of navigating the browser
+                // there — send the browser to the gallery change page
+                // ourselves.
+                window.location.href = form.dataset.successUrl;
+            } else {
+                fail();
+            }
         });
+
+        xhr.addEventListener('error', fail);
 
         xhr.send(formData);
     });

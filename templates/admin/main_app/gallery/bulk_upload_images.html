@@ -13,7 +13,10 @@
     <form method="post"
           enctype="multipart/form-data"
           id="gallery-bulk-upload-form"
-          data-success-url="{% url 'admin:main_app_gallery_change' gallery.pk %}">
+          data-success-url="{% url 'admin:main_app_gallery_change' gallery.pk %}"
+          data-uploading-text="{% translate 'Uploading {count} photos' %}"
+          data-saving-text="{% translate 'Saving photos...' %}"
+          data-upload-failed-text="{% translate 'Upload failed — check your connection and try again.' %}">
         {% csrf_token %}
 
         <div class="gallery-bulk-dropzone" id="gallery-bulk-dropzone">

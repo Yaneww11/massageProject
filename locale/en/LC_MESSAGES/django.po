@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-07 18:23+0000\n"
+"POT-Creation-Date: 2026-08-07 18:32+0000\n"
 "PO-Revision-Date: 2026-07-25 13:00+0000\n"
 "Last-Translator: Yane Yanev <admin@admin.com>\n"
 "Language-Team: English\n"
@@ -1306,15 +1306,28 @@ msgstr "This account is inactive."
 msgid "Към началната страница"
 msgstr "Back to the home page"
 
-#: templates/admin/main_app/gallery/bulk_upload_images.html:20
+#: templates/admin/main_app/gallery/bulk_upload_images.html:17
+#, python-brace-format
+msgid "Uploading {count} photos"
+msgstr "Uploading {count} photos"
+
+#: templates/admin/main_app/gallery/bulk_upload_images.html:18
+msgid "Saving photos..."
+msgstr "Saving photos..."
+
+#: templates/admin/main_app/gallery/bulk_upload_images.html:19
+msgid "Upload failed — check your connection and try again."
+msgstr "Upload failed — check your connection and try again."
+
+#: templates/admin/main_app/gallery/bulk_upload_images.html:23
 msgid "Пуснете снимките тук, или"
 msgstr "Drop photos here, or"
 
-#: templates/admin/main_app/gallery/bulk_upload_images.html:22
+#: templates/admin/main_app/gallery/bulk_upload_images.html:25
 msgid "Изберете файлове"
 msgstr "Choose files"
 
-#: templates/admin/main_app/gallery/bulk_upload_images.html:38
+#: templates/admin/main_app/gallery/bulk_upload_images.html:41
 msgid "Качване"
 msgstr "Upload"
 
