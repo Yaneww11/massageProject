@@ -104,11 +104,23 @@
 .auth-modal-error {
     color: #B3261E;
     font-size: 0.85rem;
+}
+
+.auth-modal-error:empty { display: none; }
+
+/* JS-driven step errors: a single <p> sibling after the field div, always
+   present in the DOM. Pull it up to tighten the gap under the field's own
+   margin-bottom. */
+.auth-modal-field + .auth-modal-error {
     margin: -0.5rem 0 1rem;
     min-height: 1.2em;
 }
 
-.auth-modal-error:empty { display: none; }
+/* Django form field errors: rendered inside the field div, right after the
+   input, only when that field has an error. */
+.auth-modal-field .auth-modal-error {
+    margin: 0.35rem 0 0;
+}
 
 .auth-modal-submit { width: 100%; margin-bottom: 0.75rem; }
 
