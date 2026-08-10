@@ -3,11 +3,17 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.db.models import Count, Q
 from django.utils.html import format_html
+from unfold.admin import ModelAdmin
+from unfold.forms import AdminPasswordChangeForm, UserChangeForm, UserCreationForm
 
 UserModel = get_user_model()
 
 @admin.register(UserModel)
-class AppUserAdmin(UserAdmin):
+class AppUserAdmin(ModelAdmin, UserAdmin):
+    form = UserChangeForm
+    add_form = UserCreationForm
+    change_password_form = AdminPasswordChangeForm
+
     list_display = ('email', 'full_name_display', 'phone_number', 'reservations_count', 'is_staff', 'is_active')
     list_filter = ("is_staff", "is_superuser", "is_active", "groups")
     search_fields = ("phone_number", "first_name", "last_name", "email")

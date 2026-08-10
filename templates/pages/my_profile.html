@@ -22,7 +22,7 @@
 
     {% if role == 'client' %}
     <!-- Photo proofing entry point -->
-  {% if is_photographer_website %}
+  {% if is_photographer_website and active_reservations %}
     <a href="{% url 'photo_proofing' %}" class="proof-teaser-card">
       <div class="proof-teaser-icon"><i class="fas fa-images"></i></div>
       <div class="proof-teaser-text">

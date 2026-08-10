@@ -153,15 +153,9 @@ class ServiceAdmin(ModelAdmin, TabbedTranslationAdmin):
 
 @admin.register(Specialist)
 class SpecialistAdmin(ModelAdmin, TabbedTranslationAdmin):
-    list_display = ('display_image', 'name', 'phone_number', 'email', 'user')
+    list_display = ('name', 'phone_number', 'email', 'user')
     search_fields = ('name', 'email', 'phone_number')
     autocomplete_fields = ('user',)
-
-    def display_image(self, obj):
-        if obj.image:
-            return format_html('<img src="{}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;" />', obj.image.url)
-        return _("Няма снимка")
-    display_image.short_description = _('Снимка')
 
 @admin.register(WorkingHours)
 class WorkingHoursAdmin(ModelAdmin):
@@ -178,7 +172,7 @@ class WorkingHoursAdmin(ModelAdmin):
 @admin.register(Reservation)
 class ReservationAdmin(ModelAdmin):
     list_display = ('date', 'time', 'get_client_name', 'service', 'specialist', 'status', 'status_updated_at', 'need_client_review')
-    list_filter = ('status', ReservationDateFilter, 'specialist', 'service', 'date', 'need_client_review')
+    list_filter = ('status', ReservationDateFilter, 'specialist', 'service', 'date', 'need_client_review', 'proofing_finalized_at')
     search_fields = ('user__phone_number', 'user__first_name', 'user__last_name', 'service__name')
     date_hierarchy = 'date'
     actions = [export_reservations_csv, mark_as_completed, mark_as_noshow, unlock_photo_proofing]

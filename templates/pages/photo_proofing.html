@@ -88,17 +88,19 @@
   </div>
   <p class="proof-empty-filtered" hidden>{% trans "Няма снимки, отговарящи на този филтър." %}</p>
 
-  <div class="proof-sticky-bar">
-    <div class="proof-sticky-counts">
-      <span><strong id="proof-marked-count">0</strong> / {{ photos|length }} {% trans "маркирани" %}</span>
-      <span class="proof-compare-indicator" id="proof-compare-indicator" hidden>
-        &middot; <button type="button" id="proof-compare-open" class="proof-link-btn" disabled>{% trans "Сравни избраните" %} (<span id="proof-compare-count">0</span>/2)</button>
-      </span>
-    </div>
-    <div class="proof-sticky-actions">
-      <button type="button" id="proof-finalize-open" class="btn btn-primary" disabled>{% trans "Прегледай и завърши" %}</button>
-    </div>
-  </div>
+  {% if photos %}
+      <div class="proof-sticky-bar">
+        <div class="proof-sticky-counts">
+          <span><strong id="proof-marked-count">0</strong> / {{ photos|length }} {% trans "маркирани" %}</span>
+          <span class="proof-compare-indicator" id="proof-compare-indicator" hidden>
+            &middot; <button type="button" id="proof-compare-open" class="proof-link-btn" disabled>{% trans "Сравни избраните" %} (<span id="proof-compare-count">0</span>/2)</button>
+          </span>
+        </div>
+        <div class="proof-sticky-actions">
+          <button type="button" id="proof-finalize-open" class="btn btn-primary" disabled>{% trans "Прегледай и завърши" %}</button>
+        </div>
+      </div>
+  {% endif %}
 
   <!-- Finalize modal -->
   <div class="proof-modal-overlay" id="proof-finalize-modal" hidden>
