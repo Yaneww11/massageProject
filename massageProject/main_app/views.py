@@ -704,7 +704,7 @@ def finalize_photo_proofing(request):
     marked_count = ImageProof.objects.filter(image__gallery=reservation.gallery, is_marked=True).count()
     if marked_count == 0:
         return JsonResponse({'success': False, 'error': _('Маркирайте поне една снимка.')}, status=400)
-    reservation.finalize_proofing(request.user)
+    reservation.finalize_proofing()
     return JsonResponse({'success': True})
 
 

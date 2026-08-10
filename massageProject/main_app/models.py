@@ -347,13 +347,6 @@ class Reservation(models.Model):
             'като заключена за преглед.'
         ),
     )
-    proofing_finalized_by = models.ForeignKey(
-        'accounts.CustomUser',
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        related_name='proofing_finalizations',
-    )
-
     # Custom Managers
     class ReservationQuerySet(models.QuerySet):
         def active(self):
@@ -468,17 +461,15 @@ class Reservation(models.Model):
     def is_proofing_finalized(self):
         return self.proofing_finalized_at is not None
 
-    def finalize_proofing(self, user):
+    def finalize_proofing(self):
         self.proofing_finalized_at = timezone.now()
-        self.proofing_finalized_by = user
         self.need_client_review = False
-        self.save(update_fields=['proofing_finalized_at', 'proofing_finalized_by', 'need_client_review'])
+        self.save(update_fields=['proofing_finalized_at', 'need_client_review'])
 
     def unlock_proofing(self):
         self.proofing_finalized_at = None
-        self.proofing_finalized_by = None
         self.need_client_review = True
-        self.save(update_fields=['proofing_finalized_at', 'proofing_finalized_by', 'need_client_review'])
+        self.save(update_fields=['proofing_finalized_at', 'need_client_review'])
 
     def save(self, *args, **kwargs):
         if self.status == self.STATUS_ACTIVE and self.specialist_id:

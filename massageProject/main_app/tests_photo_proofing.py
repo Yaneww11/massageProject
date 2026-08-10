@@ -41,22 +41,19 @@ class ReservationProofingFieldsTest(ProofingModelsBase):
     def test_new_reservation_is_not_finalized(self):
         self.assertFalse(self.reservation.is_proofing_finalized)
         self.assertIsNone(self.reservation.proofing_finalized_at)
-        self.assertIsNone(self.reservation.proofing_finalized_by)
 
     def test_finalize_proofing_stamps_audit_fields(self):
-        self.reservation.finalize_proofing(self.user)
+        self.reservation.finalize_proofing()
         self.reservation.refresh_from_db()
         self.assertTrue(self.reservation.is_proofing_finalized)
         self.assertIsNotNone(self.reservation.proofing_finalized_at)
-        self.assertEqual(self.reservation.proofing_finalized_by, self.user)
 
     def test_unlock_proofing_clears_audit_fields_only(self):
         image_proof = ImageProof.objects.create(image=self.image, is_marked=True, comment='keep this')
-        self.reservation.finalize_proofing(self.user)
+        self.reservation.finalize_proofing()
         self.reservation.unlock_proofing()
         self.reservation.refresh_from_db()
         self.assertFalse(self.reservation.is_proofing_finalized)
-        self.assertIsNone(self.reservation.proofing_finalized_by)
         image_proof.refresh_from_db()
         self.assertTrue(image_proof.is_marked)
         self.assertEqual(image_proof.comment, 'keep this')
@@ -102,7 +99,7 @@ class ReservationAdminUnlockActionTest(ProofingModelsBase):
         self.factory = RequestFactory()
 
     def test_unlock_action_clears_finalized_reservation(self):
-        self.reservation.finalize_proofing(self.user)
+        self.reservation.finalize_proofing()
         request = self.factory.post('/admin/main_app/reservation/')
         unlock_photo_proofing(self.admin_instance, request, Reservation.objects.filter(pk=self.reservation.pk))
         self.reservation.refresh_from_db()
@@ -116,7 +113,6 @@ class ReservationAdminUnlockActionTest(ProofingModelsBase):
 
     def test_reservation_admin_exposes_proofing_audit_fields(self):
         self.assertIn('proofing_finalized_at', self.admin_instance.readonly_fields)
-        self.assertIn('proofing_finalized_by', self.admin_instance.readonly_fields)
 
 
 class GalleryAdminPhotoLabelInlineTest(ProofingModelsBase):
@@ -162,7 +158,7 @@ class PhotoProofingGalleryContextTest(ProofingModelsBase):
     def test_finalized_reservation_context_reflects_marks_and_labels(self):
         proof = ImageProof.objects.create(image=self.image, is_marked=True, comment='crop tighter')
         proof.labels.add(self.label)
-        self.reservation.finalize_proofing(self.user)
+        self.reservation.finalize_proofing()
         # finalize_proofing() clears need_client_review, which would otherwise
         # hide this reservation from the client entirely; re-open it here to
         # check the context data itself still reflects the finalized state.
@@ -200,7 +196,7 @@ class ProofingEndpointsTest(ProofingModelsBase):
         self.assertEqual(response.status_code, 404)
 
     def test_mark_rejects_when_finalized(self):
-        self.reservation.finalize_proofing(self.user)
+        self.reservation.finalize_proofing()
         response = self.client.post(reverse('photo_proofing_mark', args=[self.image.pk]))
         self.assertEqual(response.status_code, 403)
 

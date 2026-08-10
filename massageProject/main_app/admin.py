@@ -182,14 +182,14 @@ class ReservationAdmin(ModelAdmin):
     search_fields = ('user__phone_number', 'user__first_name', 'user__last_name', 'service__name')
     date_hierarchy = 'date'
     actions = [export_reservations_csv, mark_as_completed, mark_as_noshow, unlock_photo_proofing]
-    readonly_fields = ('updated_at', 'status_updated_at', 'status_updated_by', 'proofing_finalized_at', 'proofing_finalized_by')
+    readonly_fields = ('updated_at', 'status_updated_at', 'status_updated_by', 'proofing_finalized_at')
     list_filter_sheet = True
 
     fieldsets = (
         (_('Детайли за резервацията'), {'fields': ('date', 'time', 'user', 'status')}),
         (_('Информация за услугата'), {'fields': ('service', 'specialist')}),
         (_('Допълнителни бележки'), {'fields': ('additional_text',)}),
-        (_('Системен одит'), {'fields': ('updated_at', 'status_updated_at', 'status_updated_by', 'proofing_finalized_at', 'proofing_finalized_by'), 'classes': ('collapse',)}),
+        (_('Системен одит'), {'fields': ('updated_at', 'status_updated_at', 'status_updated_by', 'proofing_finalized_at'), 'classes': ('collapse',)}),
         (_('Галерия'), {'fields': ('gallery', 'need_client_review')}),
     )
 
