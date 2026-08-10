@@ -200,6 +200,17 @@ class ReservationAdmin(ModelAdmin):
     def get_queryset(self, request):
         return Reservation.all_objects.all()
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'gallery':
+            unused = Gallery.objects.filter(home_page__isnull=True, reservations__isnull=True)
+            object_id = request.resolver_match.kwargs.get('object_id')
+            if object_id:
+                current_gallery_id = Reservation.all_objects.filter(pk=object_id).values_list('gallery_id', flat=True).first()
+                if current_gallery_id:
+                    unused = Gallery.objects.filter(pk=current_gallery_id) | unused
+            kwargs['queryset'] = unused.distinct()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     def save_model(self, request, obj, form, change):
         if 'status' in form.changed_data:
             # Route through the model's own change_status() so audit
