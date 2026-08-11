@@ -90,9 +90,9 @@
         </div>
         {% endif %}
         <div class="next-booking-actions">
-          <button class="btn-calendar" disabled>
+          <a href="{% url 'reservation_calendar_ics' next_reservation.id %}" class="btn-calendar">
             <i class="fas fa-calendar-plus"></i> {% trans "Добави в календар" %}
-          </button>
+          </a>
           {% if business_info %}
           <a href="https://www.google.com/maps/search/?api=1&query={{ business_info.address|urlencode }}"
              target="_blank" rel="noopener noreferrer" class="btn-outline-profile">
