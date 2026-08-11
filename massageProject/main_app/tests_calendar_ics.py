@@ -93,3 +93,26 @@ class BuildReservationIcsTest(TestCase):
         self.assertNotIn('\r\n\n', content)
         self.assertTrue(content.endswith('\r\n'))
         self.assertIn('BEGIN:VCALENDAR\r\n', content)
+
+    def test_additional_text_with_crlf_is_escaped(self):
+        # Browsers normalize textarea submissions to CRLF, not bare LF.
+        # This test verifies that CRLF in additional_text is correctly escaped.
+        self.reservation.additional_text = 'Bring towel, please.\r\nAnd water.'
+        self.reservation.save()
+        content = build_reservation_ics(self.request, self.reservation)
+        description_line = next(
+            line for line in content.split('\r\n') if line.startswith('DESCRIPTION:')
+        )
+        # Both CRLF and bare LF should result in escaped \n in output
+        self.assertIn('Bring towel\\, please.\\nAnd water.', description_line)
+
+    def test_additional_text_with_bare_cr_is_escaped(self):
+        # Verify that even a bare carriage return (not part of CRLF) is normalized and escaped.
+        self.reservation.additional_text = 'Bring towel, please.\rAnd water.'
+        self.reservation.save()
+        content = build_reservation_ics(self.request, self.reservation)
+        description_line = next(
+            line for line in content.split('\r\n') if line.startswith('DESCRIPTION:')
+        )
+        # Bare \r should also be escaped as \n
+        self.assertIn('Bring towel\\, please.\\nAnd water.', description_line)

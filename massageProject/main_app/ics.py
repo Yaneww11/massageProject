@@ -8,8 +8,11 @@ UTC = ZoneInfo('UTC')
 
 
 def _escape_ics_text(value):
+    # Normalize line endings: CRLF and bare CR both become LF, then escape.
+    # Browsers normalize textarea submissions to CRLF, so we must handle that.
+    normalized = value.replace('\r\n', '\n').replace('\r', '\n')
     return (
-        value.replace('\\', '\\\\')
+        normalized.replace('\\', '\\\\')
         .replace(',', '\\,')
         .replace(';', '\\;')
         .replace('\n', '\\n')
