@@ -1,7 +1,8 @@
 from datetime import time as time_cls, timedelta, datetime
 from zoneinfo import ZoneInfo
 
-from django.test import TestCase, RequestFactory
+from django.test import TestCase, RequestFactory, Client
+from django.urls import reverse
 from django.utils import timezone
 
 from massageProject.accounts.models import CustomUser
@@ -116,3 +117,52 @@ class BuildReservationIcsTest(TestCase):
         )
         # Bare \r should also be escaped as \n
         self.assertIn('Bring towel\\, please.\\nAnd water.', description_line)
+
+
+class ReservationCalendarViewTest(TestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user(
+            phone_number='0888111111', email='client@example.com', password='pass12345',
+        )
+        self.other_user = CustomUser.objects.create_user(
+            phone_number='0888111113', email='other@example.com', password='pass12345',
+        )
+        self.service = Service.objects.create(
+            name='Massage', description='d', price=50, duration_in_minutes=60, short_description='s',
+        )
+        self.specialist = Specialist.objects.create(
+            name='Maria', description='d', phone_number='0888111112', email='maria@example.com',
+        )
+        candidate = timezone.localdate() + timedelta(days=7)
+        while candidate.weekday() != 0:
+            candidate += timedelta(days=1)
+        WorkingHours.objects.create(
+            specialist=self.specialist, day_of_week=0, start_time=time_cls(9, 0), end_time=time_cls(17, 0),
+        )
+        self.reservation = Reservation.objects.create(
+            user=self.user, service=self.service, specialist=self.specialist,
+            date=candidate, time=time_cls(10, 0),
+        )
+        self.client = Client()
+
+    def test_owner_downloads_ics(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('reservation_calendar_ics', args=[self.reservation.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response['Content-Type'], 'text/calendar; charset=utf-8')
+        self.assertIn(f'reservation-{self.reservation.pk}.ics', response['Content-Disposition'])
+        self.assertIn('attachment', response['Content-Disposition'])
+
+    def test_non_owner_forbidden(self):
+        self.client.force_login(self.other_user)
+        response = self.client.get(reverse('reservation_calendar_ics', args=[self.reservation.pk]))
+        self.assertEqual(response.status_code, 403)
+
+    def test_anonymous_redirected_to_login(self):
+        response = self.client.get(reverse('reservation_calendar_ics', args=[self.reservation.pk]))
+        self.assertEqual(response.status_code, 302)
+
+    def test_missing_reservation_404s(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('reservation_calendar_ics', args=[999999]))
+        self.assertEqual(response.status_code, 404)

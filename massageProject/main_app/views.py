@@ -19,10 +19,11 @@ from datetime import datetime, timedelta, date
 from django.db.models import Count
 from django.contrib import messages
 from django.core.cache import cache
-from django.http import JsonResponse, Http404
+from django.http import HttpResponse, JsonResponse, Http404
 from PIL import Image as PILImage, ImageDraw, ImageFont
 
 from massageProject.main_app.context_processors import get_cached_homepage
+from massageProject.main_app.ics import build_reservation_ics
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
     ReservationDeleteForm, CommentForm, UserNameForm
 from massageProject.main_app.mixins import BookingEnabledMixin, booking_enabled_required, \
@@ -497,6 +498,17 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
         today_and_future = Reservation.objects.active().filter(specialist=specialist, date__gte=today)
         context['bookings_today'] = today_and_future.filter(date=today).count()
         context['next_client_reservation'] = today_and_future.order_by('date', 'time').first()
+
+
+@login_required
+def download_reservation_ics(request, reservation_id):
+    reservation = get_object_or_404(Reservation, pk=reservation_id)
+    if reservation.user != request.user:
+        raise PermissionDenied
+    ics_content = build_reservation_ics(request, reservation)
+    response = HttpResponse(ics_content, content_type='text/calendar; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="reservation-{reservation.pk}.ics"'
+    return response
 
 
 def _get_current_proofing_reservation(user):
