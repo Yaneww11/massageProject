@@ -63,7 +63,21 @@
     flex-wrap: wrap;
 }
 
+.hp-hero-carousel-content--minimal {
+    max-width: none;
+    margin: 0;
+    left: 1.5rem;
+    right: auto;
+    bottom: 1.5rem;
+    padding: 0;
+}
+
+.hp-hero-carousel-content--minimal .hp-hero-carousel-title {
+    font-size: clamp(1.25rem, 2vw, 1.75rem);
+}
+
 @media (max-width: 600px) {
     .hp-hero-carousel { height: 420px; }
     .hp-hero-carousel-content { padding: 2rem 1rem; }
+    .hp-hero-carousel-content--minimal { padding: 0; left: 1rem; bottom: 1rem; }
 }

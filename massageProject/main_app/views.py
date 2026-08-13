@@ -115,6 +115,7 @@ class Index(TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
+        context['is_photographer_website'] = settings.IS_PHOTOGRAPHER_WEBSITE
         context['page'] = get_cached_homepage()
         services = list(Service.objects.filter(home_page=True)[:3])
         context['services'] = services

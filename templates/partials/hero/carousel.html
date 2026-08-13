@@ -8,17 +8,21 @@
         {% endfor %}
     </div>
     <div class="hp-hero-carousel-scrim"></div>
-    <div class="hp-hero-carousel-content">
+    <div class="hp-hero-carousel-content{% if is_photographer_website %} hp-hero-carousel-content--minimal{% endif %}">
         {% if page %}
             <h1 class="hp-hero-carousel-title">{{ page.brand_name }}</h1>
+            {% if not is_photographer_website %}
             <p class="hp-hero-carousel-sub">{{ page.description }}</p>
+            {% endif %}
         {% endif %}
+        {% if not is_photographer_website %}
         <div class="hp-hero-carousel-btns">
             {% if site_config.booking_enabled %}
             <a href="{% url 'reservation_page' %}" class="btn btn-primary btn-lg" data-auth-modal-link>{% trans "Запазете час" %}</a>
             {% endif %}
             <a href="{% url 'services_dashboard' %}" class="btn btn-outline btn-lg">{% trans "Вижте услугите" %}</a>
         </div>
+        {% endif %}
     </div>
 </section>
 <script>
