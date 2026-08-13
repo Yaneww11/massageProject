@@ -23,7 +23,7 @@
             {% with cover=album.images.all.0 %}
             <a href="{% url 'gallery_album' album.slug %}" class="gal-tile">
               <div class="gal-tile__bg"
-                   {% if cover %}style="background-image: url('{{ cover.image.url }}')"{% endif %}>
+                   {% if cover %}style="background-image: url('{{ cover.image.url }}'); background-position: center {{ cover.crop_position }};"{% endif %}>
               </div>
               <div class="gal-tile__overlay"></div>
               <div class="gal-tile__body">

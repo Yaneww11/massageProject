@@ -2,7 +2,7 @@
 <section class="hp-hero-fullbleed">
 {% with first_image=gallery_images.0 %}
     {% if first_image %}
-        <img src="{{ first_image.image.url }}" alt="{{ first_image.alt_text }}" class="hp-hero-fullbleed-image">
+        <img src="{{ first_image.image.url }}" alt="{{ first_image.alt_text }}" class="hp-hero-fullbleed-image" style="object-position: center {{ first_image.crop_position }};">
     {% endif %}
     {% endwith %}
     <div class="hp-hero-fullbleed-scrim"></div>

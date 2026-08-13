@@ -37,7 +37,7 @@
         <div class="hp-gallery-grid hp-reveal">
             {% for image in gallery_images %}
             <div class="hp-gallery-cell {% if forloop.first %}hp-gallery-cell--big{% endif %}">
-                <img src="{{ image.image.url }}" alt="{{ image.alt_text }}">
+                <img src="{{ image.image.url }}" alt="{{ image.alt_text }}" style="object-position: center {{ image.crop_position }};">
             </div>
             {% endfor %}
         </div>

@@ -63,9 +63,19 @@ class GalleryViewsTest(TestCase):
         self.assertEqual(response.status_code, 404)
 
 
-def _make_uploaded_image(name='photo.jpg'):
+def _make_uploaded_image(name='photo.jpg', size=(800, 800)):
     buffer = BytesIO()
-    PILImage.new('RGB', (10, 10), color='red').save(buffer, format='JPEG')
+    PILImage.new('RGB', size, color='red').save(buffer, format='JPEG')
+    buffer.seek(0)
+    return SimpleUploadedFile(name, buffer.read(), content_type='image/jpeg')
+
+
+def _make_uploaded_image_with_orientation(name, size, orientation):
+    buffer = BytesIO()
+    img = PILImage.new('RGB', size, color='blue')
+    exif = img.getexif()
+    exif[0x0112] = orientation
+    img.save(buffer, format='JPEG', exif=exif.tobytes())
     buffer.seek(0)
     return SimpleUploadedFile(name, buffer.read(), content_type='image/jpeg')
 
@@ -146,3 +156,55 @@ class GalleryBulkUploadAdminTest(TestCase):
         self.client.force_login(no_perm_user)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 403)
+
+
+class ImageProcessingTest(TestCase):
+    def setUp(self):
+        self.tmp_media = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.tmp_media, ignore_errors=True)
+        self.storage_override = override_settings(STORAGES={
+            'default': {
+                'BACKEND': 'django.core.files.storage.FileSystemStorage',
+                'OPTIONS': {'location': self.tmp_media, 'base_url': '/media/'},
+            },
+            'staticfiles': {'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage'},
+        })
+        self.storage_override.enable()
+        self.addCleanup(self.storage_override.disable)
+        self.gallery = Gallery.objects.create(gallery_type=Gallery.TYPE_ALBUM, title='Studio', slug='studio')
+
+    def test_large_image_is_downscaled_to_max_dimension(self):
+        upload = _make_uploaded_image('big.jpg', size=(4000, 3000))
+        image = Image.objects.create(gallery=self.gallery, image=upload)
+        with PILImage.open(image.image.path) as saved:
+            self.assertEqual(max(saved.size), 2560)
+
+    def test_image_within_limits_is_not_upscaled(self):
+        upload = _make_uploaded_image('small_ok.jpg', size=(800, 800))
+        image = Image.objects.create(gallery=self.gallery, image=upload)
+        with PILImage.open(image.image.path) as saved:
+            self.assertEqual(saved.size, (800, 800))
+
+    def test_uploaded_image_is_converted_to_webp(self):
+        upload = _make_uploaded_image('photo.jpg', size=(800, 800))
+        image = Image.objects.create(gallery=self.gallery, image=upload)
+        self.assertTrue(image.image.name.endswith('.webp'))
+        with PILImage.open(image.image.path) as saved:
+            self.assertEqual(saved.format, 'WEBP')
+
+    def test_exif_orientation_is_applied_before_saving(self):
+        upload = _make_uploaded_image_with_orientation('rotated.jpg', size=(1200, 800), orientation=6)
+        image = Image.objects.create(gallery=self.gallery, image=upload)
+        with PILImage.open(image.image.path) as saved:
+            self.assertEqual(saved.size, (800, 1200))
+
+    def test_image_below_minimum_dimension_is_rejected(self):
+        upload = _make_uploaded_image('tiny.jpg', size=(300, 300))
+        image = Image(gallery=self.gallery, image=upload)
+        with self.assertRaises(ValidationError):
+            image.full_clean()
+
+    def test_crop_position_defaults_to_center(self):
+        upload = _make_uploaded_image('photo.jpg')
+        image = Image.objects.create(gallery=self.gallery, image=upload)
+        self.assertEqual(image.crop_position, Image.CROP_CENTER)

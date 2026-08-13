@@ -3,7 +3,7 @@
     <div class="hp-hero-carousel-track" id="hp-hero-carousel-track">
         {% for image in gallery_images %}
         <div class="hp-hero-carousel-slide{% if forloop.first %} hp-hero-carousel-slide--active{% endif %}">
-            <img src="{{ image.image.url }}" alt="{{ image.alt_text }}">
+            <img src="{{ image.image.url }}" alt="{{ image.alt_text }}" style="object-position: center {{ image.crop_position }};">
         </div>
         {% endfor %}
     </div>

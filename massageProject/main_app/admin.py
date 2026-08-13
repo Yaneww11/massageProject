@@ -244,7 +244,7 @@ class ImageAdmin(ModelAdmin, TabbedTranslationAdmin):
 class ImageInline(TabularInline):
     model = Image
     extra = 1
-    fields = ('image', 'alt_text', 'order')
+    fields = ('image', 'crop_position', 'alt_text', 'order')
 
 
 class PhotoLabelInline(TabularInline):

@@ -1,3 +1,8 @@
+import os
+from io import BytesIO
+
+from PIL import Image as PILImage, ImageOps
+from django.core.files.base import ContentFile
 from django.db import models, transaction
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxLengthValidator, MinValueValidator, RegexValidator
@@ -581,6 +586,19 @@ class Gallery(models.Model):
 
 
 class Image(models.Model):
+    CROP_TOP = 'top'
+    CROP_CENTER = 'center'
+    CROP_BOTTOM = 'bottom'
+    CROP_CHOICES = [
+        (CROP_TOP, _('Горе')),
+        (CROP_CENTER, _('В центъра')),
+        (CROP_BOTTOM, _('Долу')),
+    ]
+
+    MIN_DIMENSION = 600
+    MAX_DIMENSION = 2560
+    WEBP_QUALITY = 80
+
     gallery = models.ForeignKey(
         'Gallery', on_delete=models.CASCADE, related_name='images',
         verbose_name=_('Галерия'),
@@ -590,7 +608,18 @@ class Image(models.Model):
         help_text=_(
             'Показва се в секцията с галерия на началната страница, или на страницата на '
             'албума (и като корична снимка на албума на страницата с галерии, ако е '
-            'първата по ред).'
+            'първата по ред). Оразмерява се и се компресира автоматично при качване — '
+            'няма нужда снимката да бъде обработена предварително.'
+        ),
+    )
+    crop_position = models.CharField(
+        max_length=10, choices=CROP_CHOICES, default=CROP_CENTER,
+        verbose_name=_('Позиция при изрязване'),
+        help_text=_(
+            'Определя коя част от снимката да остане видима, когато тя бъде изрязана да '
+            'пасне на рамка — в секцията с галерия и началния банер на началната страница, '
+            'и в плочките на страницата с галерии. Използвайте, ако важната част от '
+            'снимката е отрязана при показването й.'
         ),
     )
     alt_text = models.CharField(
@@ -612,6 +641,46 @@ class Image(models.Model):
 
     def __str__(self):
         return self.alt_text or f"Снимка {self.order}"
+
+    def clean(self):
+        super().clean()
+        if self.image and not self.image._committed:
+            self.image.seek(0)
+            with PILImage.open(self.image) as img:
+                width, height = img.size
+            self.image.seek(0)
+            if min(width, height) < self.MIN_DIMENSION:
+                raise ValidationError({
+                    'image': _(
+                        'Снимката е твърде малка (%(width)dx%(height)d px). '
+                        'Минималният размер е %(min)dpx от по-късата страна.'
+                    ) % {'width': width, 'height': height, 'min': self.MIN_DIMENSION}
+                })
+
+    def save(self, *args, **kwargs):
+        # _committed is False only for a freshly assigned upload, never for a FieldFile
+        # loaded from an existing row — this keeps re-saves of unrelated fields cheap.
+        if self.image and not self.image._committed:
+            self._process_image()
+        super().save(*args, **kwargs)
+
+    def _process_image(self):
+        self.image.seek(0)
+        with PILImage.open(self.image) as img:
+            img = ImageOps.exif_transpose(img)
+            if img.mode not in ('RGB', 'RGBA'):
+                img = img.convert('RGB')
+            width, height = img.size
+            longest = max(width, height)
+            if longest > self.MAX_DIMENSION:
+                scale = self.MAX_DIMENSION / longest
+                img = img.resize(
+                    (round(width * scale), round(height * scale)), PILImage.Resampling.LANCZOS,
+                )
+            buffer = BytesIO()
+            img.save(buffer, format='WEBP', quality=self.WEBP_QUALITY)
+        new_name = os.path.splitext(self.image.name)[0] + '.webp'
+        self.image = ContentFile(buffer.getvalue(), name=new_name)
 
 
 class PhotoLabel(models.Model):
