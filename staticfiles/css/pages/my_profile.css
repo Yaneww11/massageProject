@@ -24,7 +24,7 @@
     height: 72px;
     border-radius: 50%;
     background: var(--primary-color);
-    color: var(--white);
+    color: var(--on-primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -120,7 +120,7 @@
     justify-content: center;
     padding: 2.25rem 1.75rem;
     background: var(--primary-color);
-    color: var(--white);
+    color: var(--on-primary);
     min-width: 105px;
     text-align: center;
     gap: 0.2rem;
@@ -205,7 +205,7 @@
     height: 40px;
     border-radius: 50%;
     background: var(--secondary-color);
-    color: var(--white);
+    color: var(--on-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -221,7 +221,7 @@
     height: 32px;
     border-radius: 50%;
     background: var(--secondary-color);
-    color: var(--white);
+    color: var(--on-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -271,7 +271,7 @@
     gap: 0.4rem;
     padding: 0.55rem 1.25rem;
     background: var(--primary-color);
-    color: var(--white);
+    color: var(--on-primary);
     border: none;
     border-radius: var(--radius-md);
     font-family: var(--font-main);
@@ -335,7 +335,7 @@
     gap: 0.4rem;
     padding: 0.6rem 1.5rem;
     background: var(--primary-color);
-    color: var(--white);
+    color: var(--on-primary);
     border-radius: var(--radius-md);
     font-family: var(--font-main);
     font-size: var(--fs-sm);
@@ -349,7 +349,7 @@
 
 .btn-primary-profile:hover {
     background: var(--primary-light);
-    color: var(--white);
+    color: var(--on-primary-light);
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
 }
@@ -748,14 +748,14 @@
 .star-btn {
     font-size: 1.75rem;
     cursor: pointer;
-    color: var(--secondary-color);
+    color: var(--border-color);
     transition: color 0.15s;
     user-select: none;
 }
 
 .star-btn.active,
 .star-btn.hover {
-    color: var(--secondary-color);
+    color: var(--accent-color);
 }
 
 /* ── Responsive ──────────────────────────────────────── */
@@ -1009,7 +1009,7 @@
 }
 
 .calendar-day-num.is-today {
-    color: var(--white);
+    color: var(--on-primary);
     background: var(--primary-color);
     border-radius: 50%;
     width: 1.8rem;
@@ -1042,7 +1042,7 @@
     right: 4px;
     min-height: 28px;
     background: var(--secondary-color);
-    color: var(--white);
+    color: var(--on-secondary);
     border: none;
     border-radius: var(--radius-sm);
     padding: 0.25rem 0.4rem;
@@ -1058,6 +1058,7 @@
 
 .calendar-booking:hover {
     background: var(--accent-color);
+    color: var(--on-accent);
 }
 
 .calendar-booking-time {

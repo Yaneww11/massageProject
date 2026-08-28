@@ -89,7 +89,7 @@
 
 .proof-filter-btn.is-active {
     background: var(--primary-color);
-    color: var(--white);
+    color: var(--on-primary);
 }
 
 .proof-filter-count {
@@ -311,6 +311,7 @@
 .proof-tile.is-marked .proof-mark-btn {
     background: var(--accent-color);
     border-color: var(--accent-color);
+    color: var(--on-accent);
 }
 
 .proof-tile.is-marked .proof-mark-btn circle { stroke-dashoffset: 0; }
@@ -326,6 +327,7 @@
 
 .proof-tile.is-comparing .proof-compare-btn {
     background: var(--primary-color);
+    color: var(--on-primary);
 }
 
 .proof-compare-badge {
@@ -357,6 +359,7 @@
 
 .proof-tile.has-comment .proof-comment-btn {
     background: var(--primary-color);
+    color: var(--on-primary);
 }
 
 .proof-tile.has-comment .proof-comment-btn::after {
@@ -426,7 +429,7 @@
 .proof-label-chip.is-active {
     background: var(--primary-color);
     border-color: var(--primary-color);
-    color: var(--white);
+    color: var(--on-primary);
 }
 
 .proof-label-chip:disabled {

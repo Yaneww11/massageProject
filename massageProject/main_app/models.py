@@ -12,6 +12,8 @@ from django.utils.html import strip_tags
 from django.utils.translation import gettext_lazy as _
 from datetime import datetime, timedelta
 
+from massageProject.main_app.theme import COLOR_PRESETS
+
 class ServiceGroup(models.Model):
     name = models.CharField(
         max_length=100,
@@ -935,6 +937,19 @@ class SiteConfiguration(models.Model):
         ('carousel', _('Carousel — въртяща се галерия')),
         ('fullbleed', _('Fullbleed — снимка на цяла ширина')),
     ]
+
+    COLOR_PRESET_CHOICES = [('custom', _('Персонализирано'))] + [
+        (key, preset['label']) for key, preset in COLOR_PRESETS.items()
+    ]
+
+    color_preset = models.CharField(
+        max_length=30, choices=COLOR_PRESET_CHOICES, default='custom', blank=True,
+        verbose_name=_('Готова цветова комбинация'),
+        help_text=_(
+            'Изберете готова цветова комбинация, за да зададете наведнъж всички цветове по-долу. '
+            'Прилага се на всички страници на сайта.'
+        ),
+    )
 
     primary_color = models.CharField(
         max_length=7, default='#4A3728', validators=[_HEX_COLOR_VALIDATOR],

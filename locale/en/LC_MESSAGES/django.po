@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-13 14:44+0000\n"
+"POT-Creation-Date: 2026-08-13 17:18+0000\n"
 "PO-Revision-Date: 2026-07-25 13:00+0000\n"
 "Last-Translator: Yane Yanev <admin@admin.com>\n"
 "Language-Team: English\n"
@@ -94,7 +94,7 @@ msgstr "Password"
 msgid "Имейлът не е потвърден."
 msgstr "The email hasn't been verified."
 
-#: massageProject/accounts/forms.py:111 massageProject/main_app/models.py:692
+#: massageProject/accounts/forms.py:111 massageProject/main_app/models.py:694
 #: templates/partials/auth_modal.html:71
 msgid "Име"
 msgstr "Name"
@@ -164,159 +164,168 @@ msgstr "Signup"
 msgid "Login"
 msgstr "Login"
 
-#: massageProject/main_app/admin.py:52 massageProject/settings.py:352
+#: massageProject/main_app/admin.py:53 massageProject/settings.py:352
 msgid "Снимки"
 msgstr "Photos"
 
-#: massageProject/main_app/admin.py:56
+#: massageProject/main_app/admin.py:57
 msgid "Export selected reservations to CSV"
 msgstr ""
 
-#: massageProject/main_app/admin.py:69
+#: massageProject/main_app/admin.py:70
 msgid "Mark selected comments as reviewed"
 msgstr ""
 
-#: massageProject/main_app/admin.py:86
+#: massageProject/main_app/admin.py:87
 #, python-format
 msgid "Пропуснати %(count)d отказани резервации (не могат да бъдат маркирани)."
 msgstr "Skipped %(count)d cancelled reservations (cannot be marked)."
 
 # admin.py
-#: massageProject/main_app/admin.py:90
+#: massageProject/main_app/admin.py:91
 msgid "Маркирай като Завършена"
 msgstr "Mark as Completed"
 
-#: massageProject/main_app/admin.py:94
+#: massageProject/main_app/admin.py:95
 msgid "Маркирай като Не се е явил"
 msgstr "Mark as No Show"
 
-#: massageProject/main_app/admin.py:98
+#: massageProject/main_app/admin.py:99
 msgid "Отключи прегледа на снимки"
 msgstr "Unlock photo review"
 
 # models.py - StudioWorkingHours
-#: massageProject/main_app/admin.py:107
+#: massageProject/main_app/admin.py:108
 msgid "Времеви период"
 msgstr "Day / Period"
 
-#: massageProject/main_app/admin.py:112 templates/pages/my_profile.html:69
+#: massageProject/main_app/admin.py:113 templates/pages/my_profile.html:69
 msgid "Днес"
 msgstr "Today"
 
 # models.py - MessageReservation STATUS_CHOICES
-#: massageProject/main_app/admin.py:113
+#: massageProject/main_app/admin.py:114
 msgid "Предстоящи"
 msgstr "Upcoming"
 
-#: massageProject/main_app/admin.py:114
+#: massageProject/main_app/admin.py:115
 msgid "Минали"
 msgstr ""
 
 # Templates - delete-reservation
-#: massageProject/main_app/admin.py:143
+#: massageProject/main_app/admin.py:144
 msgid "Основна информация"
 msgstr "Cancel Reservation"
 
-#: massageProject/main_app/admin.py:144
+#: massageProject/main_app/admin.py:145
 msgid "Цена и Продължителност"
 msgstr "Duration:"
 
-#: massageProject/main_app/admin.py:145
+#: massageProject/main_app/admin.py:146
 msgid "Медия и Видимост"
 msgstr ""
 
-#: massageProject/main_app/admin.py:151
+#: massageProject/main_app/admin.py:152
 msgid "Няма снимка"
 msgstr "No comments yet"
 
-#: massageProject/main_app/admin.py:152 massageProject/main_app/admin.py:241
+#: massageProject/main_app/admin.py:153 massageProject/main_app/admin.py:242
 msgid "Преглед"
 msgstr ""
 
-#: massageProject/main_app/admin.py:170
+#: massageProject/main_app/admin.py:171
 msgid "Ден"
 msgstr "Order"
 
-#: massageProject/main_app/admin.py:183
+#: massageProject/main_app/admin.py:184
 msgid "Детайли за резервацията"
 msgstr "Reservation Management"
 
-#: massageProject/main_app/admin.py:184
+#: massageProject/main_app/admin.py:185
 msgid "Информация за услугата"
 msgstr ""
 
-#: massageProject/main_app/admin.py:185 templates/pages/reservation.html:146
+#: massageProject/main_app/admin.py:186 templates/pages/reservation.html:146
 #: templates/reservation/delete-reservation.html:37
 #: templates/reservation/edit-reservation.html:69
 msgid "Допълнителни бележки"
 msgstr "Additional Notes"
 
-#: massageProject/main_app/admin.py:186
+#: massageProject/main_app/admin.py:187
 msgid "Системен одит"
 msgstr ""
 
-#: massageProject/main_app/admin.py:187 massageProject/main_app/models.py:559
-#: massageProject/main_app/models.py:604 massageProject/main_app/models.py:689
+#: massageProject/main_app/admin.py:188 massageProject/main_app/models.py:561
+#: massageProject/main_app/models.py:606 massageProject/main_app/models.py:691
 #: massageProject/settings.py:343 templates/pages/gallery.html:9
 #: templates/partials/header.html:12
 msgid "Галерия"
 msgstr "Gallery"
 
-#: massageProject/main_app/admin.py:192
+#: massageProject/main_app/admin.py:193
 #: templates/partials/specialist_calendar.html:91
 msgid "Клиент"
 msgstr "Client"
 
-#: massageProject/main_app/admin.py:228
+#: massageProject/main_app/admin.py:229
 msgid "Съдържание"
 msgstr ""
 
-#: massageProject/main_app/admin.py:240 massageProject/main_app/admin.py:337
+#: massageProject/main_app/admin.py:241 massageProject/main_app/admin.py:338
 msgid "Няма изображение"
 msgstr "No comments yet"
 
-#: massageProject/main_app/admin.py:268
+#: massageProject/main_app/admin.py:269
 msgid "Брой снимки"
 msgstr "Photo count"
 
-#: massageProject/main_app/admin.py:270 massageProject/main_app/admin.py:306
+#: massageProject/main_app/admin.py:271 massageProject/main_app/admin.py:307
 msgid "Качване на много снимки"
 msgstr "Bulk upload images"
 
-#: massageProject/main_app/admin.py:290
+#: massageProject/main_app/admin.py:291
 #, python-format
 msgid "Пропусната %(name)s: %(error)s"
 msgstr "Skipped %(name)s: %(error)s"
 
-#: massageProject/main_app/admin.py:299
+#: massageProject/main_app/admin.py:300
 #, python-format
 msgid "Качени %(count)d снимки."
 msgstr "Uploaded %(count)d photos."
 
-#: massageProject/main_app/admin.py:325 templates/pages/privacy_policy.html:6
+#: massageProject/main_app/admin.py:326 templates/pages/privacy_policy.html:6
 #: templates/partials/footer.html:54
 msgid "Политика за поверителност"
 msgstr "Privacy Policy"
 
-#: massageProject/main_app/admin.py:338
+#: massageProject/main_app/admin.py:339
 msgid "Основна снимка"
 msgstr ""
 
-#: massageProject/main_app/admin.py:355
+#: massageProject/main_app/admin.py:361
 msgid "Тема — цветове"
 msgstr "Theme — colors"
 
-#: massageProject/main_app/admin.py:360
+#: massageProject/main_app/admin.py:367
 msgid "Типография и стил"
 msgstr "Typography and style"
 
-#: massageProject/main_app/admin.py:361
+#: massageProject/main_app/admin.py:368
 msgid "Терминология"
 msgstr "Terminology"
 
-#: massageProject/main_app/admin.py:365
+#: massageProject/main_app/admin.py:372
 msgid "Функционалности"
 msgstr "Features"
+
+#: massageProject/main_app/admin.py:405
+#, python-format
+msgid ""
+"Ниска контрастност между \"%(a)s\" и \"%(b)s\" (%(ratio).1f:1, "
+"препоръчително поне 4.5:1) — текстът може да е трудно четим."
+msgstr ""
+"Low contrast between \"%(a)s\" and \"%(b)s\" (%(ratio).1f:1, at least 4.5:1 "
+"recommended) — the text may be hard to read."
 
 #: massageProject/main_app/apps.py:8
 msgid "Основни данни"
@@ -358,33 +367,33 @@ msgstr "Enter a comment"
 msgid "Твоя коментар"
 msgstr "Your comment"
 
-#: massageProject/main_app/models.py:18
+#: massageProject/main_app/models.py:20
 msgid "Наименование"
 msgstr "Name"
 
-#: massageProject/main_app/models.py:19
+#: massageProject/main_app/models.py:21
 msgid "Показва се като таб-категория на страницата с услуги."
 msgstr "Shown as a category tab on the services page."
 
-#: massageProject/main_app/models.py:23 massageProject/main_app/models.py:553
-#: massageProject/main_app/models.py:630 massageProject/main_app/models.py:707
-#: massageProject/main_app/models.py:835
+#: massageProject/main_app/models.py:25 massageProject/main_app/models.py:555
+#: massageProject/main_app/models.py:632 massageProject/main_app/models.py:709
+#: massageProject/main_app/models.py:837
 msgid "Ред"
 msgstr "Order"
 
-#: massageProject/main_app/models.py:24
+#: massageProject/main_app/models.py:26
 msgid "Определя реда, в който категориите се показват на страницата с услуги."
 msgstr "Controls the order category tabs appear in on the services page."
 
-#: massageProject/main_app/models.py:29
+#: massageProject/main_app/models.py:31
 msgid "Група услуги"
 msgstr "Service group"
 
-#: massageProject/main_app/models.py:30
+#: massageProject/main_app/models.py:32
 msgid "Групи услуги"
 msgstr "Service groups"
 
-#: massageProject/main_app/models.py:40
+#: massageProject/main_app/models.py:42
 msgid ""
 "Показва се в предпочитаните услуги на началната страница, на страницата с "
 "услуги и навсякъде в процеса на резервация."
@@ -392,7 +401,7 @@ msgstr ""
 "Shown in the homepage's featured services, the services page, and throughout "
 "the booking flow."
 
-#: massageProject/main_app/models.py:46
+#: massageProject/main_app/models.py:48
 msgid ""
 "Показва се разгънат (при клик \"Научете повече\" / върху картата) в "
 "предпочитаните услуги на началната страница."
@@ -400,13 +409,13 @@ msgstr ""
 "Shown expanded (on \"Learn more\" click / card click) in the homepage's "
 "featured services."
 
-#: massageProject/main_app/models.py:54
+#: massageProject/main_app/models.py:56
 msgid ""
 "Показва се на страницата с услуги и в предпочитаните услуги на началната "
 "страница."
 msgstr "Shown on the services page and the homepage's featured services."
 
-#: massageProject/main_app/models.py:60
+#: massageProject/main_app/models.py:62
 msgid ""
 "Показва се на страницата с услуги и в предпочитаните услуги на началната "
 "страница; използва се и за изчисляване на свободните часове за резервация."
@@ -414,7 +423,7 @@ msgstr ""
 "Shown on the services page and the homepage's featured services; also used "
 "to calculate available booking time slots."
 
-#: massageProject/main_app/models.py:68
+#: massageProject/main_app/models.py:70
 msgid ""
 "Кратък текст, показван в предпочитаните услуги на началната страница и във "
 "всяка карта на страницата с услуги."
@@ -422,7 +431,7 @@ msgstr ""
 "Shown as the short teaser text on the homepage's featured services and on "
 "each service card on the services page."
 
-#: massageProject/main_app/models.py:75
+#: massageProject/main_app/models.py:77
 msgid ""
 "Показва се на картата в страницата с услуги и в предпочитаните услуги на "
 "началната страница. Ако е празно, се показва градиентен placeholder."
@@ -430,7 +439,7 @@ msgstr ""
 "Shown on the services page card and the homepage's featured services. If "
 "left empty, a gradient placeholder is shown instead."
 
-#: massageProject/main_app/models.py:85
+#: massageProject/main_app/models.py:87
 msgid ""
 "Когато е отметнато, услугата се показва в секция \"Предпочитани услуги\" на "
 "началната страница (максимум 3)."
@@ -438,30 +447,30 @@ msgstr ""
 "When checked, this service appears in the \"Featured services\" section on "
 "the homepage (maximum 3)."
 
-#: massageProject/main_app/models.py:95
+#: massageProject/main_app/models.py:97
 msgid "Група"
 msgstr "Group"
 
-#: massageProject/main_app/models.py:96
+#: massageProject/main_app/models.py:98
 msgid ""
 "Определя под кой таб-категория е класирана услугата на страницата с услуги."
 msgstr ""
 "Determines which category tab this service is filed under on the services "
 "page."
 
-#: massageProject/main_app/models.py:100
+#: massageProject/main_app/models.py:102
 msgid "Масаж"
 msgstr "Therapist"
 
-#: massageProject/main_app/models.py:101
+#: massageProject/main_app/models.py:103
 msgid "Масажи"
 msgstr "Therapist"
 
-#: massageProject/main_app/models.py:110
+#: massageProject/main_app/models.py:112
 msgid "Можете да изберете най-много 3 предпочитани масажа."
 msgstr ""
 
-#: massageProject/main_app/models.py:120
+#: massageProject/main_app/models.py:122
 msgid ""
 "Показва се в селектора на терапевти на страницата за резервация и в профила "
 "на клиента (предстоящи/минали резервации)."
@@ -469,21 +478,21 @@ msgstr ""
 "Shown on the booking page's specialist selector and on the customer's "
 "profile page (upcoming/past bookings)."
 
-#: massageProject/main_app/models.py:125
+#: massageProject/main_app/models.py:127
 msgid ""
 "Показва се като кратко био в селектора на терапевти на страницата за "
 "резервация."
 msgstr "Shown as a short bio on the booking page's specialist selector."
 
-#: massageProject/main_app/models.py:139
+#: massageProject/main_app/models.py:141
 msgid "Терапевт"
 msgstr ""
 
-#: massageProject/main_app/models.py:140 massageProject/settings.py:308
+#: massageProject/main_app/models.py:142 massageProject/settings.py:308
 msgid "Терапевти"
 msgstr ""
 
-#: massageProject/main_app/models.py:154 massageProject/main_app/models.py:160
+#: massageProject/main_app/models.py:156 massageProject/main_app/models.py:162
 msgid ""
 "Не се показва директно, но определя кои часове се предлагат на клиентите при "
 "резервация с този терапевт в този ден."
@@ -492,22 +501,22 @@ msgstr ""
 "booking with this specialist on this day."
 
 # Templates - working_hours
-#: massageProject/main_app/models.py:167 massageProject/main_app/models.py:168
+#: massageProject/main_app/models.py:169 massageProject/main_app/models.py:170
 #: massageProject/settings.py:313 templates/pages/home.html:146
 msgid "Работно време"
 msgstr "Working Hours"
 
-#: massageProject/main_app/models.py:178
+#: massageProject/main_app/models.py:180
 msgid ""
 "Използва се като алтернативен текст (alt) на снимката на студиото в страница "
 "\"За нас\"."
 msgstr "Used as the alt text for the studio photo on the About page."
 
-#: massageProject/main_app/models.py:181
+#: massageProject/main_app/models.py:183
 msgid "Показва се като основен текст в страница \"За нас\"."
 msgstr "Shown as the main body text on the About page."
 
-#: massageProject/main_app/models.py:186
+#: massageProject/main_app/models.py:188
 #, fuzzy
 #| msgid ""
 #| "Снимката се показва в естествените си пропорции (без изрязване), с "
@@ -529,13 +538,13 @@ msgstr ""
 "shorter side. Very elongated (panoramic or narrow) images can look "
 "disproportionate next to the text."
 
-#: massageProject/main_app/models.py:195
+#: massageProject/main_app/models.py:197
 msgid ""
 "Показва се в контактната карта в профила на клиента и в долния колонтитул "
 "(footer) на сайта."
 msgstr "Shown on the customer profile page's contact card and the site footer."
 
-#: massageProject/main_app/models.py:201
+#: massageProject/main_app/models.py:203
 msgid ""
 "Показва се в профила на клиента и в долния колонтитул (footer) на сайта като "
 "линк за обаждане."
@@ -543,16 +552,16 @@ msgstr ""
 "Shown on the customer profile page and the site footer (as a tap-to-call "
 "link)."
 
-#: massageProject/main_app/models.py:206
+#: massageProject/main_app/models.py:208
 msgid "Показва се в долния колонтитул (footer) на сайта като mailto линк."
 msgstr "Shown in the site footer as a mailto link."
 
-#: massageProject/main_app/models.py:210 massageProject/main_app/models.py:214
-#: massageProject/main_app/models.py:218
+#: massageProject/main_app/models.py:212 massageProject/main_app/models.py:216
+#: massageProject/main_app/models.py:220
 msgid "Показва се като социална икона в долния колонтитул (footer) на сайта."
 msgstr "Shown as a social icon link in the site footer."
 
-#: massageProject/main_app/models.py:224
+#: massageProject/main_app/models.py:226
 #, fuzzy
 #| msgid ""
 #| "JSON обект с показатели (изберете кои да покажете, останалите се "
@@ -569,7 +578,7 @@ msgstr ""
 "{\"years_of_practice\": \"8+\", \"clients_served\": \"500+\", "
 "\"average_rating\": \"4.9\", \"certifications_count\": \"12\"}"
 
-#: massageProject/main_app/models.py:233
+#: massageProject/main_app/models.py:235
 #, fuzzy
 #| msgid ""
 #| "JSON обект с два списъка — \"training\" и \"recognition\". Всеки елемент: "
@@ -591,7 +600,7 @@ msgstr ""
 "\"subtitle\": \"Vienna Institute\", \"year\": \"2019\", \"description\": "
 "\"...\"}], \"recognition\": []}"
 
-#: massageProject/main_app/models.py:243
+#: massageProject/main_app/models.py:245
 #, fuzzy
 #| msgid ""
 #| "JSON списък от въпроси и отговори. Празен списък скрива секцията. Пример: "
@@ -608,34 +617,34 @@ msgstr ""
 "appointment only.\"}]"
 
 # Templates - footer
-#: massageProject/main_app/models.py:250 massageProject/settings.py:294
+#: massageProject/main_app/models.py:252 massageProject/settings.py:294
 msgid "Студио"
 msgstr "Studio"
 
 # Templates - footer
-#: massageProject/main_app/models.py:251
+#: massageProject/main_app/models.py:253
 msgid "Студиа"
 msgstr "Studio"
 
 # models.py - MessageReservation STATUS_CHOICES
-#: massageProject/main_app/models.py:267
+#: massageProject/main_app/models.py:269
 msgid "Предстояща"
 msgstr "Upcoming"
 
-#: massageProject/main_app/models.py:268
+#: massageProject/main_app/models.py:270
 msgid "Завършена"
 msgstr "Completed"
 
-#: massageProject/main_app/models.py:269
+#: massageProject/main_app/models.py:271
 msgid "Не се е явил"
 msgstr "No Show"
 
-#: massageProject/main_app/models.py:270
+#: massageProject/main_app/models.py:272
 msgid "Отказана"
 msgstr "Cancelled"
 
-#: massageProject/main_app/models.py:277 massageProject/main_app/models.py:284
-#: massageProject/main_app/models.py:294 massageProject/main_app/models.py:298
+#: massageProject/main_app/models.py:279 massageProject/main_app/models.py:286
+#: massageProject/main_app/models.py:296 massageProject/main_app/models.py:300
 msgid ""
 "Показва се в потвърждението на резервацията и в списъка с резервации в "
 "профила на клиента."
@@ -643,7 +652,7 @@ msgstr ""
 "Shown in the booking confirmation and on the customer's profile page "
 "bookings list."
 
-#: massageProject/main_app/models.py:306
+#: massageProject/main_app/models.py:308
 msgid ""
 "Определя дали резервацията се показва като предстояща или минала в профила "
 "на клиента (или изобщо не се показва, ако е отказана)."
@@ -651,13 +660,13 @@ msgstr ""
 "Determines whether the booking appears in the customer's upcoming or past "
 "bookings list (or is hidden entirely, if cancelled)."
 
-#: massageProject/main_app/models.py:321
+#: massageProject/main_app/models.py:323
 msgid ""
 "Показва се на клиента при преглед, редакция или отказ на резервацията му."
 msgstr ""
 "Shown to the customer when viewing, editing, or cancelling their booking."
 
-#: massageProject/main_app/models.py:335
+#: massageProject/main_app/models.py:337
 msgid ""
 "Отбележете, когато галерията е готова и клиентът трябва да прегледа и "
 "маркира снимките си в профила си. Показва се на страницата за преглед на "
@@ -669,11 +678,11 @@ msgstr ""
 "while checked — automatically unchecked once the customer finalizes their "
 "selection."
 
-#: massageProject/main_app/models.py:344
+#: massageProject/main_app/models.py:346
 msgid "Да бъде ли изпратено уведомление до клиента при създаване на галерия?"
 msgstr ""
 
-#: massageProject/main_app/models.py:350
+#: massageProject/main_app/models.py:352
 msgid ""
 "Кога клиентът е финализирал избора на снимки от страницата за преглед на "
 "снимки от резервацията си. Докато е попълнено, клиентът вижда страницата "
@@ -684,50 +693,50 @@ msgstr ""
 "review."
 
 # models.py - validation errors
-#: massageProject/main_app/models.py:417
+#: massageProject/main_app/models.py:419
 msgid "Резервация трябва да се направи поне 2 часа предварително."
 msgstr "Reservation must be made at least 2 hours in advance."
 
-#: massageProject/main_app/models.py:423
+#: massageProject/main_app/models.py:425
 #, python-format
 msgid "%(name)s не работи в този ден."
 msgstr "%(name)s does not work on this day."
 
-#: massageProject/main_app/models.py:433
+#: massageProject/main_app/models.py:435
 #, python-format
 msgid ""
 "Избраният час е извън работното време на %(name)s (%(start)s - %(end)s)."
 msgstr ""
 "The selected time is outside %(name)s's working hours (%(start)s - %(end)s)."
 
-#: massageProject/main_app/models.py:455
+#: massageProject/main_app/models.py:457
 #, python-format
 msgid "Часът се застъпва с друга резервация за %(name)s."
 msgstr "The time overlaps with another reservation for %(name)s."
 
-#: massageProject/main_app/models.py:492 massageProject/main_app/models.py:515
+#: massageProject/main_app/models.py:494 massageProject/main_app/models.py:517
 #: templates/pages/reservation.html:11
 msgid "Резервация"
 msgstr "Reservation"
 
-#: massageProject/main_app/models.py:493 massageProject/settings.py:331
+#: massageProject/main_app/models.py:495 massageProject/settings.py:331
 msgid "Резервации"
 msgstr "Reservations"
 
-#: massageProject/main_app/models.py:514 massageProject/main_app/models.py:787
+#: massageProject/main_app/models.py:516 massageProject/main_app/models.py:789
 #: massageProject/settings.py:298
 msgid "Начална страница"
 msgstr "Homepage"
 
-#: massageProject/main_app/models.py:516
+#: massageProject/main_app/models.py:518
 msgid "Албум"
 msgstr "Album"
 
-#: massageProject/main_app/models.py:521
+#: massageProject/main_app/models.py:523
 msgid "Тип галерия"
 msgstr "Gallery type"
 
-#: massageProject/main_app/models.py:523
+#: massageProject/main_app/models.py:525
 msgid ""
 "Определя къде се показва тази галерия: \"Начална страница\" — секцията с "
 "галерия на началната страница (може да има само една); \"Резервация\" — "
@@ -739,11 +748,11 @@ msgstr ""
 "a specific reservation; \"Album\" — shown as a standalone album on the "
 "gallery page."
 
-#: massageProject/main_app/models.py:530
+#: massageProject/main_app/models.py:532
 msgid "Заглавие"
 msgstr "Title"
 
-#: massageProject/main_app/models.py:532
+#: massageProject/main_app/models.py:534
 msgid ""
 "За албуми: показва се като заглавие на албума на страницата с галерии и на "
 "собствената му страница (задължително за албуми). За началната страница: "
@@ -753,11 +762,11 @@ msgstr ""
 "page (required for albums). For the homepage: shown as a small caption above "
 "the gallery section."
 
-#: massageProject/main_app/models.py:538
+#: massageProject/main_app/models.py:540
 msgid "Описание"
 msgstr "Description"
 
-#: massageProject/main_app/models.py:540
+#: massageProject/main_app/models.py:542
 msgid ""
 "За албуми: показва се на собствената страница на албума, а за първия по ред "
 "албум — и в плочката му на страницата с галерии. За началната страница: "
@@ -767,11 +776,11 @@ msgstr ""
 "— also on its tile on the gallery page. For the homepage: shown as the "
 "gallery section's heading."
 
-#: massageProject/main_app/models.py:546
+#: massageProject/main_app/models.py:548
 msgid "Slug"
 msgstr "Slug"
 
-#: massageProject/main_app/models.py:548
+#: massageProject/main_app/models.py:550
 msgid ""
 "Използва се за изграждане на адреса (URL) на страницата на албума. Не се "
 "използва за другите типове галерии."
@@ -779,35 +788,35 @@ msgstr ""
 "Used to build the URL of the album's page. Not used for the other gallery "
 "types."
 
-#: massageProject/main_app/models.py:554
+#: massageProject/main_app/models.py:556
 msgid "Определя реда, в който албумите се показват на страницата с галерии."
 msgstr "Determines the order in which albums are shown on the gallery page."
 
-#: massageProject/main_app/models.py:560 massageProject/settings.py:347
+#: massageProject/main_app/models.py:562 massageProject/settings.py:347
 msgid "Галерии"
 msgstr "Galleries"
 
-#: massageProject/main_app/models.py:569
+#: massageProject/main_app/models.py:571
 msgid "Може да има само една галерия от тип \"Начална страница\"."
 msgstr "There can only be one gallery of type \"Homepage\"."
 
-#: massageProject/main_app/models.py:572
+#: massageProject/main_app/models.py:574
 msgid "Заглавието е задължително за галерии от тип \"Албум\"."
 msgstr "Title is required for galleries of type \"Album\"."
 
-#: massageProject/main_app/models.py:593
+#: massageProject/main_app/models.py:595
 msgid "Горе"
 msgstr "Top"
 
-#: massageProject/main_app/models.py:594
+#: massageProject/main_app/models.py:596
 msgid "В центъра"
 msgstr "Center"
 
-#: massageProject/main_app/models.py:595
+#: massageProject/main_app/models.py:597
 msgid "Долу"
 msgstr "Bottom"
 
-#: massageProject/main_app/models.py:609
+#: massageProject/main_app/models.py:611
 msgid ""
 "Показва се в секцията с галерия на началната страница, или на страницата на "
 "албума (и като корична снимка на албума на страницата с галерии, ако е "
@@ -819,11 +828,11 @@ msgstr ""
 "Automatically resized and compressed on upload — no need to process the "
 "photo beforehand."
 
-#: massageProject/main_app/models.py:617
+#: massageProject/main_app/models.py:619
 msgid "Позиция при изрязване"
 msgstr "Crop position"
 
-#: massageProject/main_app/models.py:619
+#: massageProject/main_app/models.py:621
 msgid ""
 "Определя коя част от снимката да остане видима, когато тя бъде изрязана да "
 "пасне на рамка — в секцията с галерия и началния банер на началната "
@@ -835,11 +844,11 @@ msgstr ""
 "tiles on the gallery page. Use this if the important part of the photo gets "
 "cut off when it's displayed."
 
-#: massageProject/main_app/models.py:627
+#: massageProject/main_app/models.py:629
 msgid "Използва се като алтернативен текст (alt) за тази снимка."
 msgstr "Used as the alt text for this photo."
 
-#: massageProject/main_app/models.py:632
+#: massageProject/main_app/models.py:634
 msgid ""
 "Определя реда, в който снимките се показват в галерията/албума, и коя се "
 "използва като корична (първата по ред)."
@@ -847,15 +856,15 @@ msgstr ""
 "Determines the order in which photos are shown in the gallery/album, and "
 "which one is used as the cover (the first in order)."
 
-#: massageProject/main_app/models.py:639
+#: massageProject/main_app/models.py:641
 msgid "Изображение"
 msgstr "Image"
 
-#: massageProject/main_app/models.py:640
+#: massageProject/main_app/models.py:642
 msgid "Изображения"
 msgstr "Images"
 
-#: massageProject/main_app/models.py:655
+#: massageProject/main_app/models.py:657
 #, python-format
 msgid ""
 "Снимката е твърде малка (%(width)dx%(height)d px). Минималният размер е "
@@ -864,7 +873,7 @@ msgstr ""
 "The photo is too small (%(width)dx%(height)d px). The minimum size is "
 "%(min)dpx on the shorter side."
 
-#: massageProject/main_app/models.py:694
+#: massageProject/main_app/models.py:696
 msgid ""
 "Името на етикета, който клиентът вижда и може да прикачи към снимки при "
 "преглед на снимките от своята резервация."
@@ -872,11 +881,11 @@ msgstr ""
 "The label's name, which the client sees and can attach to photos when "
 "proofing photos from their reservation."
 
-#: massageProject/main_app/models.py:700
+#: massageProject/main_app/models.py:702
 msgid "Максимален брой"
 msgstr "Maximum count"
 
-#: massageProject/main_app/models.py:702
+#: massageProject/main_app/models.py:704
 msgid ""
 "Максимален брой снимки, които клиентът може да маркира с този етикет при "
 "преглед на снимките от своята резервация."
@@ -884,7 +893,7 @@ msgstr ""
 "Maximum number of photos the client can mark with this label when proofing "
 "photos from their reservation."
 
-#: massageProject/main_app/models.py:709
+#: massageProject/main_app/models.py:711
 msgid ""
 "Определя реда, в който етикетите се показват на клиента при преглед на "
 "снимките от своята резервация."
@@ -892,15 +901,15 @@ msgstr ""
 "Determines the order in which labels are shown to the client when proofing "
 "photos from their reservation."
 
-#: massageProject/main_app/models.py:716
+#: massageProject/main_app/models.py:718
 msgid "Етикет за преглед на снимки"
 msgstr "Photo proofing label"
 
-#: massageProject/main_app/models.py:717
+#: massageProject/main_app/models.py:719
 msgid "Етикети за преглед на снимки"
 msgstr "Photo proofing labels"
 
-#: massageProject/main_app/models.py:728
+#: massageProject/main_app/models.py:730
 msgid ""
 "Дали клиентът е маркирал тази снимка като любима при преглед на снимките от "
 "своята резервация."
@@ -908,7 +917,7 @@ msgstr ""
 "Whether the client has marked this photo as a favorite when proofing photos "
 "from their reservation."
 
-#: massageProject/main_app/models.py:735
+#: massageProject/main_app/models.py:737
 msgid ""
 "Забележка или коментар, което клиентът е написал за тази снимка при преглед "
 "на снимките от своята резервация."
@@ -916,7 +925,7 @@ msgstr ""
 "A note or comment the client has written about this photo when proofing "
 "photos from their reservation."
 
-#: massageProject/main_app/models.py:742
+#: massageProject/main_app/models.py:744
 msgid ""
 "Етикетите, които клиентът е избрал за тази снимка при преглед на снимките от "
 "своята резервация."
@@ -924,15 +933,15 @@ msgstr ""
 "The labels the client has selected for this photo when proofing photos from "
 "their reservation."
 
-#: massageProject/main_app/models.py:749
+#: massageProject/main_app/models.py:751
 msgid "Избор на клиент за снимка"
 msgstr "Client photo selection"
 
-#: massageProject/main_app/models.py:750
+#: massageProject/main_app/models.py:752
 msgid "Избори на клиенти за снимки"
 msgstr "Client photo selections"
 
-#: massageProject/main_app/models.py:760
+#: massageProject/main_app/models.py:762
 msgid ""
 "Показва се като име на сайта в началния банер, в алтернативния текст (alt) "
 "на логото в горния колонтитул, в реда за авторски права в долния колонтитул "
@@ -943,37 +952,37 @@ msgstr ""
 "footer copyright line, and in emails sent to customers (booking codes, "
 "password resets)."
 
-#: massageProject/main_app/models.py:766
+#: massageProject/main_app/models.py:768
 msgid "Показва се като подзаглавие в началния банер на началната страница."
 msgstr "Shown as the subtitle text in the homepage hero."
 
-#: massageProject/main_app/models.py:770
+#: massageProject/main_app/models.py:772
 msgid ""
 "Показва се като лого в горния колонтитул на сайта и в имейлите до клиентите."
 msgstr "Shown as the logo in the site header and in emails sent to customers."
 
-#: massageProject/main_app/models.py:779
+#: massageProject/main_app/models.py:781
 #, fuzzy
 #| msgid "Политика за поверителност"
 msgid "Показва се изцяло на страницата \"Политика за поверителност\"."
 msgstr "Privacy Policy"
 
-#: massageProject/main_app/models.py:783
+#: massageProject/main_app/models.py:785
 msgid ""
 "Показва се като кратък текст (tagline) в долния колонтитул (footer) на сайта."
 msgstr "Shown as the tagline text in the site footer."
 
 # Templates - register
-#: massageProject/main_app/models.py:788
+#: massageProject/main_app/models.py:790
 msgid "Начални страници"
 msgstr "Registration"
 
 # models.py - StudioWorkingHours
-#: massageProject/main_app/models.py:819
+#: massageProject/main_app/models.py:821
 msgid "Ден / период"
 msgstr "Day / Period"
 
-#: massageProject/main_app/models.py:821
+#: massageProject/main_app/models.py:823
 msgid ""
 "напр. \"Понеделник до Петък\". Показва се в списъка \"Работно време\" на "
 "началната страница и в профила на клиента."
@@ -981,11 +990,11 @@ msgstr ""
 "e.g. \"Monday to Friday\". Shown in the \"Working hours\" list on the "
 "homepage and the customer profile page."
 
-#: massageProject/main_app/models.py:828
+#: massageProject/main_app/models.py:830
 msgid "Часове"
 msgstr "Hours"
 
-#: massageProject/main_app/models.py:830
+#: massageProject/main_app/models.py:832
 msgid ""
 "напр. \"9:00 - 18:00\" — оставете празно за \"Почивен ден\". Показва се в "
 "списъка \"Работно време\" на началната страница и в профила на клиента."
@@ -993,19 +1002,19 @@ msgstr ""
 "e.g. \"9:00 - 18:00\" — leave empty for \"Closed\". Shown in the \"Working "
 "hours\" list on the homepage and the customer profile page."
 
-#: massageProject/main_app/models.py:836
+#: massageProject/main_app/models.py:838
 msgid "Определя реда, в който тези редове се показват."
 msgstr "Controls the order these rows appear in."
 
-#: massageProject/main_app/models.py:841 massageProject/main_app/models.py:842
+#: massageProject/main_app/models.py:843 massageProject/main_app/models.py:844
 msgid "Работно време на студиото"
 msgstr "Studio Working Hours"
 
-#: massageProject/main_app/models.py:862
+#: massageProject/main_app/models.py:864
 msgid "резервация"
 msgstr "Reservations"
 
-#: massageProject/main_app/models.py:869
+#: massageProject/main_app/models.py:871
 msgid ""
 "Показва се като име на автора в секцията с отзиви на началната страница и на "
 "страницата с всички отзиви."
@@ -1013,7 +1022,7 @@ msgstr ""
 "Shown as the reviewer's name on the homepage reviews section and the full "
 "reviews page."
 
-#: massageProject/main_app/models.py:874
+#: massageProject/main_app/models.py:876
 msgid ""
 "Показва се като текст на отзива в секцията с отзиви на началната страница и "
 "на страницата с всички отзиви."
@@ -1021,16 +1030,16 @@ msgstr ""
 "Shown as the review text on the homepage reviews section and the full "
 "reviews page."
 
-#: massageProject/main_app/models.py:879
+#: massageProject/main_app/models.py:881
 msgid ""
 "Показва се като звезден рейтинг в секцията с отзиви на началната страница."
 msgstr "Shown as the star rating on the homepage reviews section."
 
-#: massageProject/main_app/models.py:884
+#: massageProject/main_app/models.py:886
 msgid "Показва се като дата на отзива на страницата с всички отзиви."
 msgstr "Shown as the review date on the full reviews page."
 
-#: massageProject/main_app/models.py:891
+#: massageProject/main_app/models.py:893
 msgid ""
 "Трябва да е отметнато, за да се показва този отзив публично в секцията с "
 "отзиви на началната страница и на страницата с всички отзиви."
@@ -1038,132 +1047,149 @@ msgstr ""
 "Must be checked for this review to appear publicly on the homepage and the "
 "full reviews page."
 
-#: massageProject/main_app/models.py:897
+#: massageProject/main_app/models.py:899
 msgid "Коментар"
 msgstr "Comments"
 
-#: massageProject/main_app/models.py:898 massageProject/settings.py:369
+#: massageProject/main_app/models.py:900 massageProject/settings.py:369
 msgid "Коментари"
 msgstr "Comments"
 
-#: massageProject/main_app/models.py:914
+#: massageProject/main_app/models.py:916
 msgid "Въведете валиден HEX цвят, напр. #4A3728."
 msgstr "Enter a valid HEX color, e.g. #4A3728."
 
-#: massageProject/main_app/models.py:920
+#: massageProject/main_app/models.py:922
 msgid "Playfair Display + Montserrat"
 msgstr "Playfair Display + Montserrat"
 
-#: massageProject/main_app/models.py:921
+#: massageProject/main_app/models.py:923
 msgid "Cormorant Garamond + Lato"
 msgstr "Cormorant Garamond + Lato"
 
-#: massageProject/main_app/models.py:922
+#: massageProject/main_app/models.py:924
 msgid "Poppins + Open Sans"
 msgstr "Poppins + Open Sans"
 
-#: massageProject/main_app/models.py:923
+#: massageProject/main_app/models.py:925
 msgid "Merriweather + Source Sans 3"
 msgstr "Merriweather + Source Sans 3"
 
-#: massageProject/main_app/models.py:924
+#: massageProject/main_app/models.py:926
 msgid "Raleway + Roboto"
 msgstr "Raleway + Roboto"
 
-#: massageProject/main_app/models.py:928
+#: massageProject/main_app/models.py:930
 msgid "Мек (текущи radius и сенки)"
 msgstr "Soft (current radius and shadows)"
 
-#: massageProject/main_app/models.py:929
+#: massageProject/main_app/models.py:931
 msgid "Остър (минимални radius, плоски сенки)"
 msgstr "Sharp (minimal radius, flat shadows)"
 
-#: massageProject/main_app/models.py:930
+#: massageProject/main_app/models.py:932
 msgid "Заоблен (pill бутони, големи radius)"
 msgstr "Round (pill buttons, large radius)"
 
-#: massageProject/main_app/models.py:934
+#: massageProject/main_app/models.py:936
 msgid "Split — текст и снимка една до друга"
 msgstr "Split — text and photo side by side"
 
-#: massageProject/main_app/models.py:935
+#: massageProject/main_app/models.py:937
 msgid "Carousel — въртяща се галерия"
 msgstr "Carousel — rotating gallery"
 
-#: massageProject/main_app/models.py:936
+#: massageProject/main_app/models.py:938
 msgid "Fullbleed — снимка на цяла ширина"
 msgstr "Fullbleed — full-width photo"
 
+# Templates - register
 #: massageProject/main_app/models.py:941
+msgid "Персонализирано"
+msgstr "Custom"
+
+#: massageProject/main_app/models.py:947
+msgid "Готова цветова комбинация"
+msgstr "Ready-made color combination"
+
+#: massageProject/main_app/models.py:949
+msgid ""
+"Изберете готова цветова комбинация, за да зададете наведнъж всички цветове "
+"по-долу. Прилага се на всички страници на сайта."
+msgstr ""
+"Choose a ready-made color combination to set all the colors below at once. "
+"Applies to every page of the site."
+
+#: massageProject/main_app/models.py:956
 msgid "Основен цвят"
 msgstr "Primary color"
 
-#: massageProject/main_app/models.py:942 massageProject/main_app/models.py:947
-#: massageProject/main_app/models.py:952 massageProject/main_app/models.py:957
-#: massageProject/main_app/models.py:962 massageProject/main_app/models.py:967
-#: massageProject/main_app/models.py:972 massageProject/main_app/models.py:977
+#: massageProject/main_app/models.py:957 massageProject/main_app/models.py:962
+#: massageProject/main_app/models.py:967 massageProject/main_app/models.py:972
+#: massageProject/main_app/models.py:977 massageProject/main_app/models.py:982
+#: massageProject/main_app/models.py:987 massageProject/main_app/models.py:992
 msgid "Цвят по цялата тема на сайта, използван на всички страници."
 msgstr "Site-wide theme color, used across all pages."
 
-#: massageProject/main_app/models.py:946
+#: massageProject/main_app/models.py:961
 msgid "Основен цвят (светъл)"
 msgstr "Primary color (light)"
 
-#: massageProject/main_app/models.py:951
+#: massageProject/main_app/models.py:966
 msgid "Вторичен цвят"
 msgstr "Secondary color"
 
-#: massageProject/main_app/models.py:956
+#: massageProject/main_app/models.py:971
 msgid "Акцентен цвят"
 msgstr "Accent color"
 
-#: massageProject/main_app/models.py:961
+#: massageProject/main_app/models.py:976
 msgid "Фон"
 msgstr "Background"
 
-#: massageProject/main_app/models.py:966
+#: massageProject/main_app/models.py:981
 msgid "Текст"
 msgstr "Text"
 
-#: massageProject/main_app/models.py:971
+#: massageProject/main_app/models.py:986
 msgid "Текст (приглушен)"
 msgstr "Text (muted)"
 
-#: massageProject/main_app/models.py:976
+#: massageProject/main_app/models.py:991
 msgid "Цвят на рамки"
 msgstr "Border color"
 
-#: massageProject/main_app/models.py:982
+#: massageProject/main_app/models.py:997
 msgid "Двойка шрифтове"
 msgstr "Font pair"
 
-#: massageProject/main_app/models.py:983
+#: massageProject/main_app/models.py:998
 msgid "Шрифт по цялата тема на сайта, използван на всички страници."
 msgstr "Site-wide font choice, used across all pages."
 
-#: massageProject/main_app/models.py:987
+#: massageProject/main_app/models.py:1002
 msgid "Стил (форми и сенки)"
 msgstr "Style (shapes and shadows)"
 
-#: massageProject/main_app/models.py:988
+#: massageProject/main_app/models.py:1003
 msgid ""
 "Стил на форми и сенки (заобляне на ъгли, бутони, карти) по цялата тема на "
 "сайта."
 msgstr "Site-wide shape/shadow style (corners, buttons, cards)."
 
-#: massageProject/main_app/models.py:992
+#: massageProject/main_app/models.py:1007
 msgid "Начален банер"
 msgstr "Hero banner"
 
-#: massageProject/main_app/models.py:993
+#: massageProject/main_app/models.py:1008
 msgid "Определя кой изглед на банера се използва на началната страница."
 msgstr "Controls which homepage hero layout is used."
 
-#: massageProject/main_app/models.py:997
+#: massageProject/main_app/models.py:1012
 msgid "Услуга (ед. число)"
 msgstr "Service (singular)"
 
-#: massageProject/main_app/models.py:998
+#: massageProject/main_app/models.py:1013
 msgid ""
 "Използва се навсякъде, където сайтът се обръща към \"услуга\" — напр. "
 "страницата за резервация и профила на клиента."
@@ -1171,11 +1197,11 @@ msgstr ""
 "Used wherever the site refers to a \"service\" — e.g. the booking page and "
 "profile page."
 
-#: massageProject/main_app/models.py:1001
+#: massageProject/main_app/models.py:1016
 msgid "Услуги (мн. число)"
 msgstr "Services (plural)"
 
-#: massageProject/main_app/models.py:1002
+#: massageProject/main_app/models.py:1017
 msgid ""
 "Използва се навсякъде, където сайтът се обръща към \"услуги\" — напр. "
 "страницата за резервация и профила на клиента."
@@ -1183,11 +1209,11 @@ msgstr ""
 "Used wherever the site refers to \"services\" — e.g. the booking page and "
 "profile page."
 
-#: massageProject/main_app/models.py:1005
+#: massageProject/main_app/models.py:1020
 msgid "Специалист (ед. число)"
 msgstr "Specialist (singular)"
 
-#: massageProject/main_app/models.py:1006
+#: massageProject/main_app/models.py:1021
 msgid ""
 "Използва се навсякъде, където сайтът се обръща към \"специалист\" — напр. "
 "страницата за резервация и профила на клиента."
@@ -1195,11 +1221,11 @@ msgstr ""
 "Used wherever the site refers to a \"specialist\" — e.g. the booking page "
 "and profile page."
 
-#: massageProject/main_app/models.py:1009
+#: massageProject/main_app/models.py:1024
 msgid "Специалисти (мн. число)"
 msgstr "Specialists (plural)"
 
-#: massageProject/main_app/models.py:1010
+#: massageProject/main_app/models.py:1025
 msgid ""
 "Използва се навсякъде, където сайтът се обръща към \"специалисти\" — напр. "
 "страницата за резервация и профила на клиента."
@@ -1207,11 +1233,11 @@ msgstr ""
 "Used wherever the site refers to \"specialists\" — e.g. the booking page and "
 "profile page."
 
-#: massageProject/main_app/models.py:1014
+#: massageProject/main_app/models.py:1029
 msgid "Резервации активни"
 msgstr "Booking enabled"
 
-#: massageProject/main_app/models.py:1016
+#: massageProject/main_app/models.py:1031
 msgid ""
 "Когато е изключено, скрива всички бутони/линкове за резервация по целия сайт "
 "(горно меню, начална страница, страница с услуги, профил на клиента)."
@@ -1219,27 +1245,47 @@ msgstr ""
 "When unchecked, hides all booking buttons/links site-wide (header, homepage, "
 "services page, profile page)."
 
-#: massageProject/main_app/models.py:1021
+#: massageProject/main_app/models.py:1036
 msgid "Коментари активни"
 msgstr "Comments enabled"
 
-#: massageProject/main_app/models.py:1022
+#: massageProject/main_app/models.py:1037
 msgid "Когато е изключено, скрива секцията с отзиви на началната страница."
 msgstr "When unchecked, hides the reviews section on the homepage."
 
-#: massageProject/main_app/models.py:1025
+#: massageProject/main_app/models.py:1040
 msgid "Вход с Google активен"
 msgstr "Google login enabled"
 
-#: massageProject/main_app/models.py:1026
+#: massageProject/main_app/models.py:1041
 msgid "Когато е изключено, скрива опцията \"Вход с Google\" в модала за вход."
 msgstr ""
 "When unchecked, hides the \"Sign in with Google\" option in the login modal."
 
-#: massageProject/main_app/models.py:1030
-#: massageProject/main_app/models.py:1031 massageProject/settings.py:323
+#: massageProject/main_app/models.py:1045
+#: massageProject/main_app/models.py:1046 massageProject/settings.py:323
 msgid "Настройки на сайта"
 msgstr "Site Configuration"
+
+#: massageProject/main_app/theme.py:65
+msgid "Топла земя"
+msgstr "Warm Earth"
+
+#: massageProject/main_app/theme.py:72
+msgid "Океан"
+msgstr "Ocean"
+
+#: massageProject/main_app/theme.py:79
+msgid "Монохром"
+msgstr "Monochrome"
+
+#: massageProject/main_app/theme.py:86
+msgid "Гора"
+msgstr "Forest"
+
+#: massageProject/main_app/theme.py:93
+msgid "Розово"
+msgstr "Rose"
 
 # views.py
 #: massageProject/main_app/views.py:277
@@ -5038,9 +5084,6 @@ msgstr ""
 #~ msgstr ""
 #~ "We've sent a confirmation link to the email address you provided. Please "
 #~ "open it to activate your account."
-
-#~ msgid "Готови за вашия момент на грижа?"
-#~ msgstr "Ready for your moment of care?"
 
 #~ msgid "Запазете час и усетете атмосферата на живо."
 #~ msgstr "Book an appointment and feel the atmosphere in person."

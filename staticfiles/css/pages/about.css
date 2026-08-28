@@ -118,7 +118,7 @@
 .about-stats .stat-value {
     font-family: var(--font-heading);
     font-size: var(--fs-4xl);
-    color: var(--white);
+    color: var(--on-primary);
     margin-bottom: var(--space-xs);
 }
 
@@ -126,7 +126,7 @@
     font-size: var(--fs-xs);
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.75);
+    color: color-mix(in srgb, var(--on-primary) 75%, transparent);
 }
 
 /* Credentials Section */

@@ -1,9 +1,14 @@
+from django.contrib.admin.sites import AdminSite
+from django.contrib.messages import get_messages
+from django.contrib.messages.storage.fallback import FallbackStorage
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.test import RequestFactory, TestCase
 from django.utils import translation
 
+from massageProject.main_app.admin import SiteConfigurationAdmin
 from massageProject.main_app.models import SiteConfiguration
+from massageProject.main_app.theme import COLOR_PRESETS
 
 
 class SiteConfigurationGetSoloTest(TestCase):
@@ -112,6 +117,58 @@ class SiteConfigurationAdminTest(TestCase):
         url = reverse('admin:main_app_siteconfiguration_change', args=[obj.pk])
         response = self.client.get(url)
         self.assertContains(response, 'type="color"')
+
+
+class SiteConfigurationAdminSaveModelTest(TestCase):
+    def setUp(self):
+        self.admin = SiteConfigurationAdmin(SiteConfiguration, AdminSite())
+        self.factory = RequestFactory()
+
+    def _request(self):
+        request = self.factory.post('/admin/main_app/siteconfiguration/1/change/')
+        request.session = {}
+        request._messages = FallbackStorage(request)
+        return request
+
+    class _FakeForm:
+        def __init__(self, changed_data):
+            self.changed_data = changed_data
+
+    def test_low_contrast_combo_triggers_warning(self):
+        obj = SiteConfiguration.get_solo()
+        obj.text_color = obj.background_color
+        request = self._request()
+        self.admin.save_model(request, obj, self._FakeForm(['text_color']), change=True)
+        warnings = [str(m) for m in get_messages(request)]
+        self.assertTrue(any('Ниска контрастност' in m for m in warnings))
+
+    def test_default_combo_triggers_no_warning(self):
+        obj = SiteConfiguration.get_solo()
+        request = self._request()
+        self.admin.save_model(request, obj, self._FakeForm([]), change=True)
+        warnings = list(get_messages(request))
+        self.assertEqual(len(warnings), 0)
+
+    def test_selecting_preset_populates_all_color_fields(self):
+        obj = SiteConfiguration.get_solo()
+        obj.color_preset = 'ocean'
+        request = self._request()
+        self.admin.save_model(request, obj, self._FakeForm(['color_preset']), change=True)
+        obj.refresh_from_db()
+        for field, value in COLOR_PRESETS['ocean'].items():
+            if field != 'label':
+                self.assertEqual(getattr(obj, field), value, field)
+
+    def test_manually_editing_a_color_field_resets_preset_to_custom(self):
+        obj = SiteConfiguration.get_solo()
+        obj.color_preset = 'ocean'
+        obj.save()
+        obj.primary_color = '#123456'
+        request = self._request()
+        self.admin.save_model(request, obj, self._FakeForm(['primary_color']), change=True)
+        obj.refresh_from_db()
+        self.assertEqual(obj.color_preset, 'custom')
+        self.assertEqual(obj.primary_color, '#123456')
 
 
 class SiteConfigurationCacheInvalidationTest(TestCase):

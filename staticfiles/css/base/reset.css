@@ -21,13 +21,3 @@ html, body {
 main {
     flex: 1;
 }
-
-
-/* Footer Styling */
-footer {
-    background: #5c3d2e; /* Example footer background color */
-    color: white;
-    text-align: center;
-    position: relative; /* Ensure it stays relative to its container */
-}
-

@@ -409,7 +409,7 @@
 
 .btn-gallery:hover {
     background: var(--primary-color);
-    color: var(--white);
+    color: var(--on-primary);
 }
 
 /* ================================================================

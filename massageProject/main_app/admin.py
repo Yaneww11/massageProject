@@ -21,6 +21,7 @@ from massageProject.main_app.models import (
     BusinessWorkingHours, ServiceGroup,
     SiteConfiguration, PhotoLabel,
 )
+from massageProject.main_app.theme import COLOR_PRESETS, contrast_ratio
 
 # --- Forms ---
 
@@ -351,8 +352,14 @@ class SiteConfigurationAdmin(ModelAdmin, TabbedTranslationAdmin):
         'border_color',
     )
 
+    CONTRAST_PAIRS = (
+        ('text_color', 'background_color'),
+        ('primary_color', 'background_color'),
+    )
+
     fieldsets = (
         (_('Тема — цветове'), {'fields': (
+            'color_preset',
             'primary_color', 'primary_light_color', 'secondary_color',
             'accent_color', 'background_color', 'text_color', 'text_muted_color',
             'border_color',
@@ -376,3 +383,30 @@ class SiteConfigurationAdmin(ModelAdmin, TabbedTranslationAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+    def save_model(self, request, obj, form, change):
+        if 'color_preset' in form.changed_data and obj.color_preset != 'custom':
+            preset = COLOR_PRESETS.get(obj.color_preset)
+            if preset:
+                for field, value in preset.items():
+                    if field != 'label':
+                        setattr(obj, field, value)
+        elif change and any(f in form.changed_data for f in self.COLOR_FIELDS):
+            obj.color_preset = 'custom'
+
+        super().save_model(request, obj, form, change)
+
+        for field_a, field_b in self.CONTRAST_PAIRS:
+            ratio = contrast_ratio(getattr(obj, field_a), getattr(obj, field_b))
+            if ratio < 4.5:
+                messages.warning(
+                    request,
+                    _(
+                        'Ниска контрастност между "%(a)s" и "%(b)s" (%(ratio).1f:1, препоръчително поне '
+                        '4.5:1) — текстът може да е трудно четим.'
+                    ) % {
+                        'a': obj._meta.get_field(field_a).verbose_name,
+                        'b': obj._meta.get_field(field_b).verbose_name,
+                        'ratio': ratio,
+                    },
+                )

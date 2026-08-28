@@ -1,4 +1,4 @@
-{% load theme_extras %}{% with pair=site_config.font_pair|font_pair_info preset=site_config.style_preset|style_preset_vars %}<link rel="stylesheet" href="{{ pair.google_fonts_url }}">
+{% load theme_extras %}{% with pair=site_config.font_pair|font_pair_info preset=site_config.style_preset|style_preset_vars oc=site_config|on_color_vars %}<link rel="stylesheet" href="{{ pair.google_fonts_url }}">
 <style>
 :root {
     --primary-color: {{ site_config.primary_color }};
@@ -9,6 +9,10 @@
     --text-main: {{ site_config.text_color }};
     --text-muted: {{ site_config.text_muted_color }};
     --border-color: {{ site_config.border_color }};
+    --on-primary: {{ oc.on_primary }};
+    --on-primary-light: {{ oc.on_primary_light }};
+    --on-secondary: {{ oc.on_secondary }};
+    --on-accent: {{ oc.on_accent }};
     --font-main: {{ pair.body_family }};
     --font-heading: {{ pair.heading_family }};
     --radius-sm: {{ preset.radius_sm }};

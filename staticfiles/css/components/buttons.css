@@ -18,26 +18,26 @@
 
 .btn-primary {
     background-color: var(--primary-color);
-    color: var(--white);
+    color: var(--on-primary);
 }
 
 .btn-primary:hover {
     background-color: var(--primary-light);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
-    color: var(--white);
+    color: var(--on-primary-light);
 }
 
 .btn-secondary {
     background-color: var(--secondary-color);
-    color: var(--white);
+    color: var(--on-secondary);
 }
 
 .btn-secondary:hover {
     background-color: var(--accent-color);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
-    color: var(--white);
+    color: var(--on-accent);
 }
 
 .btn-outline {
@@ -48,7 +48,7 @@
 
 .btn-outline:hover {
     background-color: var(--primary-color);
-    color: var(--white);
+    color: var(--on-primary);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
 }

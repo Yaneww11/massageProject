@@ -102,7 +102,7 @@
 .auth-modal-input:focus { border-color: var(--accent-color); }
 
 .auth-modal-error {
-    color: #B3261E;
+    color: var(--error);
     font-size: 0.85rem;
 }
 

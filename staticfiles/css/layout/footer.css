@@ -1,7 +1,7 @@
 /* Footer Styles */
 .site-footer {
     background-color: var(--primary-color);
-    color: var(--white);
+    color: var(--on-primary);
     margin-top: auto;
     font-size: var(--fs-sm);
 }
@@ -25,7 +25,7 @@
 /* Titles */
 .footer-col-title {
     font-family: var(--font-heading);
-    color: var(--white);
+    color: var(--on-primary);
     font-size: var(--fs-lg);
     font-weight: 600;
     margin: 0 0 0.25rem;
@@ -39,7 +39,7 @@
 }
 
 .footer-social-links a {
-    color: var(--white);
+    color: var(--on-primary);
     text-decoration: none;
     font-weight: 500;
     transition: var(--transition);
@@ -52,7 +52,7 @@
 
 .footer-tagline {
     margin: 0;
-    color: rgba(255, 255, 255, 0.9);
+    color: color-mix(in srgb, var(--on-primary) 90%, transparent);
     max-width: 480px;
     line-height: 1.8;
 }
@@ -60,7 +60,7 @@
 /* Column 2 — Address */
 .footer-address {
     margin: 0;
-    color: rgba(255, 255, 255, 0.9);
+    color: color-mix(in srgb, var(--on-primary) 90%, transparent);
     line-height: 1.5;
 }
 
@@ -75,7 +75,7 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    color: var(--white);
+    color: var(--on-primary);
 }
 
 .footer-contact-item i {
@@ -86,7 +86,7 @@
 }
 
 .footer-contact-link {
-    color: var(--white);
+    color: var(--on-primary);
     text-decoration: none;
     transition: var(--transition);
 }
@@ -97,7 +97,7 @@
 
 /* Bottom Bar */
 .footer-bottom {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid color-mix(in srgb, var(--on-primary) 10%, transparent);
     background-color: rgba(0, 0, 0, 0.1);
 }
 
@@ -111,9 +111,9 @@
     gap: 1rem;
 }
 
-.footer-bottom p, 
+.footer-bottom p,
 .footer-bottom a {
-    color: rgba(255, 255, 255, 0.4);
+    color: color-mix(in srgb, var(--on-primary) 40%, transparent);
     font-size: var(--fs-xs);
     margin: 0;
     text-decoration: none;

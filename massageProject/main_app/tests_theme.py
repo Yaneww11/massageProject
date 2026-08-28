@@ -2,7 +2,9 @@ from django.test import TestCase
 from django.template import Context, Template
 
 from massageProject.main_app.models import SiteConfiguration
-from massageProject.main_app.theme import FONT_PAIRS, STYLE_PRESETS
+from massageProject.main_app.theme import (
+    FONT_PAIRS, STYLE_PRESETS, COLOR_PRESETS, on_color, contrast_ratio,
+)
 
 
 class ThemeDataTest(TestCase):
@@ -42,6 +44,56 @@ class ThemeDataTest(TestCase):
         self.assertEqual(default['body_family'], "'Montserrat', sans-serif")
 
 
+class OnColorHelperTest(TestCase):
+    def test_white_background_gets_black_text(self):
+        self.assertEqual(on_color('#FFFFFF'), '#000000')
+
+    def test_black_background_gets_white_text(self):
+        self.assertEqual(on_color('#000000'), '#FFFFFF')
+
+    def test_mid_gray_boundary(self):
+        # #767676 sits right around the WCAG luminance threshold used by on_color.
+        result = on_color('#767676')
+        self.assertIn(result, ('#000000', '#FFFFFF'))
+
+
+class ContrastRatioHelperTest(TestCase):
+    def test_black_on_white_is_max_contrast(self):
+        self.assertAlmostEqual(contrast_ratio('#FFFFFF', '#000000'), 21, places=0)
+
+    def test_identical_colors_have_contrast_of_one(self):
+        self.assertAlmostEqual(contrast_ratio('#4A3728', '#4A3728'), 1, places=5)
+
+    def test_order_of_arguments_does_not_matter(self):
+        self.assertAlmostEqual(
+            contrast_ratio('#FAF7F2', '#2D241E'), contrast_ratio('#2D241E', '#FAF7F2'), places=5,
+        )
+
+
+class ColorPresetsDataTest(TestCase):
+    def test_color_presets_cover_every_non_custom_model_choice(self):
+        model_keys = {key for key, _ in SiteConfiguration.COLOR_PRESET_CHOICES if key != 'custom'}
+        self.assertEqual(set(COLOR_PRESETS.keys()), model_keys)
+
+    COLOR_FIELDS = (
+        'primary_color', 'primary_light_color', 'secondary_color', 'accent_color',
+        'background_color', 'text_color', 'text_muted_color', 'border_color',
+    )
+
+    def test_every_preset_has_all_color_fields_and_a_label(self):
+        for key, preset in COLOR_PRESETS.items():
+            self.assertIn('label', preset, key)
+            for field in self.COLOR_FIELDS:
+                self.assertIn(field, preset, f'{key}.{field}')
+
+    def test_every_preset_backgrounds_pass_contrast_against_their_on_color(self):
+        for key, preset in COLOR_PRESETS.items():
+            for field in ('primary_color', 'primary_light_color', 'secondary_color', 'accent_color'):
+                bg = preset[field]
+                ratio = contrast_ratio(bg, on_color(bg))
+                self.assertGreaterEqual(ratio, 4.5, f'{key}.{field}={bg} contrast={ratio:.2f}')
+
+
 class ThemeTemplateFiltersTest(TestCase):
     def test_font_pair_info_filter_returns_matching_dict(self):
         # dict lookup via dot-notation in a template requires the filter's
@@ -69,12 +121,23 @@ class ThemeTemplateFiltersTest(TestCase):
         ).render(Context({}))
         self.assertEqual(rendered, '4px')
 
+    def test_on_color_vars_filter_derives_from_site_config(self):
+        config = SiteConfiguration.get_solo()
+        rendered = Template(
+            "{% load theme_extras %}{% with oc=site_config|on_color_vars %}{{ oc.on_primary }}{% endwith %}"
+        ).render(Context({'site_config': config}))
+        self.assertEqual(rendered, on_color(config.primary_color))
+
 
 class ThemeOverridesRenderingTest(TestCase):
     def test_home_page_includes_theme_colors_and_font_link(self):
         response = self.client.get('/bg/')
         content = response.content.decode()
         self.assertIn('--primary-color: #4A3728', content)
+        self.assertIn('--on-primary: #FFFFFF', content)
+        self.assertIn('--on-primary-light: #FFFFFF', content)
+        self.assertIn('--on-secondary: #000000', content)
+        self.assertIn('--on-accent: #000000', content)
         self.assertIn('--font-heading: \'Playfair Display\', serif', content)
         self.assertIn('fonts.googleapis.com/css2?family=Playfair+Display', content)
 

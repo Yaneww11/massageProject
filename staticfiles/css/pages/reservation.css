@@ -286,7 +286,7 @@
 
 .bn-cal-day--selected {
     background: var(--accent-color) !important;
-    color: var(--white) !important;
+    color: var(--on-accent) !important;
     border-color: var(--accent-color);
     font-weight: 700;
 }
@@ -352,13 +352,13 @@
 
 .time-slot:hover:not(.disabled) {
     background: var(--primary-color);
-    color: var(--white);
+    color: var(--on-primary);
 }
 
 .time-slot.selected {
     background: var(--accent-color);
     border-color: var(--accent-color);
-    color: var(--white);
+    color: var(--on-accent);
 }
 
 .time-slot.disabled {
@@ -567,7 +567,7 @@
 
 .toast {
     background: var(--primary-color);
-    color: var(--white);
+    color: var(--on-primary);
     padding: var(--space-md) var(--space-lg);
     border-radius: var(--radius-sm);
     margin-bottom: var(--space-sm);
