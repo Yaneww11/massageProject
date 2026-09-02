@@ -10,7 +10,8 @@
     --text-muted: #6B5E55;      /* Greyish Brown */
     --border-color: #4A3728;   /* Deep Earthy Brown */
     --white: #FFFFFF;
-    
+    --gallery-dark-bg: #121212;  /* Fixed near-black for photographer-site gallery sections */
+
     /* Semantic Colors */
     --success: #6B7A5E;         /* Muted Sage Green */
     --success-light: #ECFDF5;   /* Light tint for success badges/hover states */

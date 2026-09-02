@@ -28,7 +28,7 @@
 
 <!-- ========== GALLERY — Mosaic grid ========== -->
 {% if gallery_images %}
-<section class="hp-gallery" id="gallery">
+<section class="hp-gallery{% if is_photographer_website %} hp-gallery--dark{% endif %}" id="gallery">
     <div class="hp-container">
         <div class="hp-reveal hp-centered-text">
             <span class="hp-eyebrow">{{ gallery.title }}</span>

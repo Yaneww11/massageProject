@@ -793,6 +793,7 @@ class GalleryView(TemplateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        ctx['is_photographer_website'] = settings.IS_PHOTOGRAPHER_WEBSITE
         ctx['albums'] = list(
             Gallery.objects.filter(gallery_type=Gallery.TYPE_ALBUM)
             .order_by('order').prefetch_related('images')
@@ -805,6 +806,7 @@ class GalleryAlbumView(TemplateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
+        ctx['is_photographer_website'] = settings.IS_PHOTOGRAPHER_WEBSITE
         album = get_object_or_404(Gallery, slug=kwargs['slug'], gallery_type=Gallery.TYPE_ALBUM)
         ctx['album'] = album
         ctx['photos'] = album.images.order_by('order')

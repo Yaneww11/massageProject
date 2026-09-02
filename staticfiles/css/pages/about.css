@@ -118,7 +118,7 @@
 .about-stats .stat-value {
     font-family: var(--font-heading);
     font-size: var(--fs-4xl);
-    color: var(--on-primary);
+    color: var(--text-muted);
     margin-bottom: var(--space-xs);
 }
 
@@ -126,7 +126,7 @@
     font-size: var(--fs-xs);
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: color-mix(in srgb, var(--on-primary) 75%, transparent);
+    color: color-mix(in srgb, var(--text-main) 75%, transparent);
 }
 
 /* Credentials Section */
@@ -212,7 +212,7 @@
 .about-faq h2 {
     font-family: var(--font-heading);
     font-size: var(--fs-3xl);
-    color: var(--text-main);
+    color: var(--text-muted);
     text-align: center;
     margin-bottom: var(--space-lg);
 }
@@ -224,7 +224,7 @@
 
 .faq-item summary {
     font-weight: 600;
-    color: var(--text-main);
+    color: var(--text-muted);
     cursor: pointer;
     list-style: none;
 }

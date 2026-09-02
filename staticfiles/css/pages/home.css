@@ -355,6 +355,29 @@
     padding: 6rem 2rem;
 }
 
+.hp-gallery--dark {
+    background: var(--gallery-dark-bg);
+}
+
+.hp-gallery--dark .hp-eyebrow {
+    color: var(--white);
+    opacity: 0.7;
+}
+
+.hp-gallery--dark .hp-section-title {
+    color: var(--white);
+}
+
+.hp-gallery--dark .btn-gallery {
+    border-color: var(--white);
+    color: var(--white);
+}
+
+.hp-gallery--dark .btn-gallery:hover {
+    background: var(--white);
+    color: var(--gallery-dark-bg);
+}
+
 .hp-gallery-grid {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -751,7 +774,7 @@
 
 .hp-contact-value {
     font-size: 1.125rem;
-    color: var(--text-main);
+    color: var(--text-muted);
 }
 
 .btn-block {

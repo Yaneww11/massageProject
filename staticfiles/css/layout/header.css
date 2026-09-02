@@ -22,8 +22,9 @@
 }
 
 .logo-svg {
-    width: 2.5rem;
-    height: 2.5rem;
+    height: 3.5rem;
+    width: auto;
+    max-width: 12rem;
     object-fit: contain;
 }
 
@@ -231,6 +232,11 @@
 @media (max-width: 940px) {
     .navbar {
         padding: var(--space-sm) var(--space-md);
+    }
+
+    .logo-svg {
+        height: 2.75rem;
+        max-width: 8rem;
     }
 
     .nav-links {

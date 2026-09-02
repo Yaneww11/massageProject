@@ -5,6 +5,10 @@
   min-height: 60vh;
 }
 
+.gal-page--dark {
+  background: var(--gallery-dark-bg);
+}
+
 /* Page header */
 .gal-header {
   background: var(--bg-paper);
