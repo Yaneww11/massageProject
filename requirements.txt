@@ -23,6 +23,7 @@ google-cloud-storage==3.13.0
 google-crc32c==1.8.0
 google-resumable-media==2.10.0
 googleapis-common-protos==1.75.0
+gunicorn==26.2.0
 httplib2==0.32.0
 idna==3.18
 oauthlib==3.3.1
@@ -46,3 +47,4 @@ typing_extensions==4.15.0
 uritemplate==4.2.0
 urllib3==2.7.0
 webencodings==0.5.1
+whitenoise==6.12.0

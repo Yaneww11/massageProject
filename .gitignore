@@ -23,6 +23,7 @@ db.sqlite3
 
 /static/
 *.static
+static_collected/
 
 .idea/
 GEMINI.md

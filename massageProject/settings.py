@@ -43,6 +43,12 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
 
 if not DEBUG:
+    # Trust the reverse proxy's X-Forwarded-Proto header so Django knows the
+    # original request was HTTPS even though the proxy forwards it over
+    # plain HTTP internally — without this, SECURE_SSL_REDIRECT below causes
+    # an infinite redirect loop.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
     # Force HTTPS
     SECURE_SSL_REDIRECT = True
 
@@ -111,6 +117,7 @@ BLEACH_STRIP_TAGS = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -199,6 +206,7 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = (
     BASE_DIR / 'staticfiles',
 )
+STATIC_ROOT = BASE_DIR / 'static_collected'
 
 GS_BUCKET_NAME = env('GS_BUCKET_NAME')
 GS_CREDENTIALS = service_account.Credentials.from_service_account_info(
@@ -213,7 +221,7 @@ STORAGES = {
         },
     },
     "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 
