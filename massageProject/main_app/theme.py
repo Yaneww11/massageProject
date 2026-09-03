@@ -58,6 +58,46 @@ FONT_PAIRS = {
         'heading_family': "'Raleway', sans-serif",
         'body_family': "'Roboto', sans-serif",
     },
+    'yeseva_ptsans': {
+        'google_fonts_url': (
+            'https://fonts.googleapis.com/css2?family=Yeseva+One'
+            '&family=PT+Sans:wght@400;700&display=swap'
+        ),
+        'heading_family': "'Yeseva One', serif",
+        'body_family': "'PT Sans', sans-serif",
+    },
+    'alegreya_alegreyasans': {
+        'google_fonts_url': (
+            'https://fonts.googleapis.com/css2?family=Alegreya:wght@400;600;700'
+            '&family=Alegreya+Sans:wght@400;700&display=swap'
+        ),
+        'heading_family': "'Alegreya', serif",
+        'body_family': "'Alegreya Sans', sans-serif",
+    },
+    'cormorant_ptsans': {
+        'google_fonts_url': (
+            'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700'
+            '&family=PT+Sans:wght@400;700&display=swap'
+        ),
+        'heading_family': "'Cormorant Garamond', serif",
+        'body_family': "'PT Sans', sans-serif",
+    },
+    'philosopher_manrope': {
+        'google_fonts_url': (
+            'https://fonts.googleapis.com/css2?family=Philosopher:wght@400;700'
+            '&family=Manrope:wght@400;500;600;700&display=swap'
+        ),
+        'heading_family': "'Philosopher', sans-serif",
+        'body_family': "'Manrope', sans-serif",
+    },
+    'oldstandard_nunitosans': {
+        'google_fonts_url': (
+            'https://fonts.googleapis.com/css2?family=Old+Standard+TT:wght@400;700'
+            '&family=Nunito+Sans:wght@400;600;700&display=swap'
+        ),
+        'heading_family': "'Old Standard TT', serif",
+        'body_family': "'Nunito Sans', sans-serif",
+    },
 }
 
 COLOR_PRESETS = {

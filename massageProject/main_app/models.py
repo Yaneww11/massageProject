@@ -924,6 +924,11 @@ class SiteConfiguration(models.Model):
         ('poppins_opensans', _('Poppins + Open Sans')),
         ('merriweather_sourcesans', _('Merriweather + Source Sans 3')),
         ('raleway_roboto', _('Raleway + Roboto')),
+        ('yeseva_ptsans', _('Yeseva One + PT Sans')),
+        ('alegreya_alegreyasans', _('Alegreya + Alegreya Sans')),
+        ('cormorant_ptsans', _('Cormorant Garamond + PT Sans')),
+        ('philosopher_manrope', _('Philosopher + Manrope')),
+        ('oldstandard_nunitosans', _('Old Standard TT + Nunito Sans')),
     ]
 
     STYLE_PRESET_CHOICES = [
