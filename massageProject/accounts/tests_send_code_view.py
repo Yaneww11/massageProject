@@ -45,6 +45,16 @@ class SendCodeViewTest(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(len(mail.outbox), 0)
 
+    @patch('massageProject.accounts.booking_auth_views.send_otp_email', side_effect=Exception('gmail refresh token dead'))
+    @patch(TURNSTILE_PATCH, return_value=True)
+    def test_email_send_failure_returns_a_graceful_error_instead_of_a_500(self, mock_turnstile, mock_send):
+        response = self.client.post(reverse('auth_send_code'), {
+            'email': 'newsignup@example.com', 'turnstile_token': 'good',
+        })
+        self.assertEqual(response.status_code, 503)
+        self.assertFalse(response.json()['success'])
+        self.assertTrue(response.json()['error'])
+
     @patch(TURNSTILE_PATCH, return_value=True)
     def test_sixth_request_from_the_same_ip_within_a_minute_is_rate_limited(self, mock_turnstile):
         for i in range(5):

@@ -29,17 +29,24 @@ class BrandedPasswordResetView(PasswordResetView):
     success_url = reverse_lazy('password_reset_done')
 
     @property
+    def from_email(self):
+        from email.utils import formataddr
+
+        from django.conf import settings
+        from massageProject.main_app.models import HomePage
+
+        homepage = HomePage.get_solo()
+        brand_name = homepage.brand_name if homepage else _('Relax & Health')
+        return formataddr((str(brand_name), settings.DEFAULT_FROM_EMAIL))
+
+    @property
     def extra_email_context(self):
         from massageProject.main_app.models import HomePage, BusinessInfo
 
         homepage = HomePage.get_solo()
         business_info = BusinessInfo.objects.first()
-        logo_url = None
-        if homepage and homepage.logo:
-            logo_url = self.request.build_absolute_uri(homepage.logo.url)
 
         return {
             'brand_name': homepage.brand_name if homepage else _('Relax & Health'),
             'business_info': business_info,
-            'logo_url': logo_url,
         }

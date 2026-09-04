@@ -1,14 +1,13 @@
 from django.core.management.base import BaseCommand
 from django.db.models import Model
 
-from massageProject.main_app.models import BusinessInfo, HomePage, Image, Service, Specialist
+from massageProject.main_app.models import BusinessInfo, Image, Service, Specialist
 
 MODEL_FIELDS = [
     (Service, 'image'),
     (Specialist, 'image'),
     (BusinessInfo, 'main_image'),
     (Image, 'image'),
-    (HomePage, 'logo'),
 ]
 
 

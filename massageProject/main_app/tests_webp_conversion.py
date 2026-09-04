@@ -6,7 +6,7 @@ from PIL import Image as PILImage
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 
-from massageProject.main_app.models import Gallery, HomePage, Service
+from massageProject.main_app.models import Service
 
 
 def _make_uploaded_png(name, mode, size=(100, 100)):
@@ -37,10 +37,12 @@ class WebpConversionAlphaTest(TestCase):
         self.addCleanup(self.storage_override.disable)
 
     def test_palette_mode_transparency_is_preserved_as_webp(self):
-        gallery = Gallery.objects.create(gallery_type=Gallery.TYPE_HOMEPAGE, title='Home')
         upload = _make_uploaded_png('logo.png', mode='P')
-        home_page = HomePage.objects.create(brand_name='Studio', description='desc', gallery=gallery, logo=upload)
-        with PILImage.open(home_page.logo.path) as saved:
+        service = Service.objects.create(
+            name='Massage', description='d', price=10, duration_in_minutes=30,
+            short_description='sd', image=upload,
+        )
+        with PILImage.open(service.image.path) as saved:
             self.assertEqual(saved.mode, 'RGBA')
             self.assertEqual(saved.getpixel((0, 0))[3], 0)
 

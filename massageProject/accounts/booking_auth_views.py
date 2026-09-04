@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import sentry_sdk
 from django.contrib.auth import get_user_model, login
 from django.db import IntegrityError, transaction
 from django.http import JsonResponse
@@ -79,7 +80,14 @@ def send_code(request):
 
     purpose = EmailOTP.PURPOSE_LOGIN if User.objects.filter(email__iexact=email).exists() else EmailOTP.PURPOSE_SIGNUP
     otp, code = EmailOTP.objects.create_for_email(email, purpose)
-    send_otp_email(request, email, code)
+    try:
+        send_otp_email(email, code)
+    except Exception as e:
+        sentry_sdk.capture_exception(e, extra={'email': email, 'operation': 'send_otp_email'})
+        return JsonResponse({
+            'success': False,
+            'error': _('Неуспешно изпращане на имейл. Опитайте отново по-късно.'),
+        }, status=503)
 
     return JsonResponse({'success': True})
 

@@ -771,7 +771,6 @@ class ImageProof(models.Model):
 
 
 class HomePage(WebPImageFieldsMixin, models.Model):
-    webp_image_fields = ('logo',)
     brand_name = models.CharField(
         max_length=255,
         help_text=_(
@@ -785,7 +784,7 @@ class HomePage(WebPImageFieldsMixin, models.Model):
     )
     logo = models.ImageField(
         upload_to='branding/', null=True, blank=True,
-        help_text=_('Показва се като лого в горния колонтитул на сайта и в имейлите до клиентите.'),
+        help_text=_('Показва се като лого в горния колонтитул на сайта.'),
     )
     gallery = models.OneToOneField(
         Gallery,
