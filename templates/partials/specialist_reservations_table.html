@@ -1,0 +1,110 @@
+{% load i18n %}
+<div class="reservations-table-section">
+  <div class="section-header-row">
+    <div>
+      <span class="profile-eyebrow">{% trans "РЕЗЕРВАЦИИ" %}</span>
+      <h2 class="section-title">
+        {% if role == 'staff' %}{% trans "Всички резервации" %}{% else %}{% trans "Вашите резервации" %}{% endif %}
+      </h2>
+    </div>
+  </div>
+
+  <form method="get" class="reservations-filter-bar">
+    {% if role == 'staff' %}
+    <div class="filter-field">
+      <label class="form-label" for="filter-specialist">{{ site_config.specialist_singular|capfirst }}</label>
+      <select id="filter-specialist" name="specialist_id" class="form-textarea">
+        <option value="">{% trans "Всички" %}</option>
+        {% for s in specialists %}
+        <option value="{{ s.pk }}" {% if specialist_id == s.pk|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endif %}
+    <div class="filter-field">
+      <label class="form-label" for="filter-phase">{% trans "Статус" %}</label>
+      <select id="filter-phase" name="phase" class="form-textarea">
+        <option value="">{% trans "Всички" %}</option>
+        {% for value, label in phase_choices %}
+        <option value="{{ value }}" {% if selected_phase == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="filter-field">
+      <label class="form-label" for="filter-service">{{ site_config.service_singular|capfirst }}</label>
+      <select id="filter-service" name="service_id" class="form-textarea">
+        <option value="">{% trans "Всички" %}</option>
+        {% for s in services %}
+        <option value="{{ s.pk }}" {% if service_id == s.pk|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="filter-field">
+      <label class="form-label" for="filter-date-from">{% trans "От дата" %}</label>
+      <input type="date" id="filter-date-from" name="date_from" value="{{ date_from }}" class="form-textarea">
+    </div>
+    <div class="filter-field">
+      <label class="form-label" for="filter-date-to">{% trans "До дата" %}</label>
+      <input type="date" id="filter-date-to" name="date_to" value="{{ date_to }}" class="form-textarea">
+    </div>
+    <div class="filter-field">
+      <label class="form-label" for="filter-q">{% trans "Търсене по клиент" %}</label>
+      <input type="text" id="filter-q" name="q" value="{{ query }}" placeholder="{% trans 'Име или телефон' %}" class="form-textarea">
+    </div>
+    <div class="filter-actions">
+      <button type="submit" class="btn-primary-profile">{% trans "Филтрирай" %}</button>
+      {% if selected_phase or date_from or date_to or service_id or query or specialist_id %}
+      <a href="{{ request.path }}" class="btn-outline-profile">{% trans "Изчисти филтрите" %}</a>
+      {% endif %}
+    </div>
+  </form>
+
+  {% if reservations %}
+  <div class="bookings-table-wrap">
+    <table class="bookings-table">
+      <thead>
+        <tr>
+          <th>{% trans "ДАТА" %}</th>
+          <th>{% trans "ЧАС" %}</th>
+          <th>{% trans "УСЛУГА" %}</th>
+          {% if role == 'staff' %}<th>{{ site_config.specialist_singular|capfirst }}</th>{% endif %}
+          <th>{% trans "КЛИЕНТ" %}</th>
+          <th>{% trans "СТАТУС" %}</th>
+          {% if is_photographer_website %}<th></th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in reservations %}
+        <tr>
+          <td data-label="{% trans 'ДАТА' %}">{{ r.date|date:"d.m.Y" }}</td>
+          <td data-label="{% trans 'ЧАС' %}">{{ r.time|time:"H:i" }}</td>
+          <td data-label="{% trans 'УСЛУГА' %}">{{ r.service.name }}</td>
+          {% if role == 'staff' %}<td data-label="{{ site_config.specialist_singular|capfirst }}">{{ r.specialist.name }}</td>{% endif %}
+          <td data-label="{% trans 'КЛИЕНТ' %}">{{ r.user.get_full_name|default:r.user.phone_number }}</td>
+          <td data-label="{% trans 'СТАТУС' %}">
+            <span class="phase-badge phase-{{ r.phase }}">
+              {% if is_photographer_website %}{{ r.phase_display }}{% else %}{{ r.get_status_display }}{% endif %}
+            </span>
+          </td>
+          {% if is_photographer_website %}
+          <td class="action-cell" data-label="">
+            {% if not r.gallery_id %}
+            <a href="{% url 'proofing_gallery_upload' %}?reservation_id={{ r.pk }}" class="btn-action-edit">{% trans "Качи галерия" %}</a>
+            {% endif %}
+            {% if r.proofing_finalized_at %}
+            <a href="{% url 'marked_photos' r.pk %}" class="btn-action-edit">{% trans "Маркирани снимки" %}</a>
+            {% endif %}
+            {% if r.proofing_finalized_at and not r.final_gallery_id %}
+            <a href="{% url 'final_gallery_upload' %}?reservation_id={{ r.pk }}" class="btn-action-edit">{% trans "Качи финали" %}</a>
+            {% endif %}
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty-state-msg">{% trans "Няма резервации, отговарящи на филтрите." %}</p>
+  {% endif %}
+</div>

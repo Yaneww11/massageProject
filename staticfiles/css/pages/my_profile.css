@@ -906,201 +906,56 @@
     }
 }
 
-/* ── Specialist / staff calendar ─────────────────────── */
-.specialist-calendar {
+/* ── Specialist / staff reservations table ───────────── */
+.reservations-table-section {
     margin-bottom: 3rem;
 }
 
-.profile-stats.stats-cols-3 {
-    grid-template-columns: repeat(3, 1fr);
-    margin-bottom: 2rem;
-}
-
-.specialist-picker-form {
+.reservations-filter-bar {
     display: flex;
-    align-items: center;
-    gap: 0.6rem;
-}
-
-.specialist-picker-form select {
-    padding: 0.5rem 0.75rem;
-    border: 1.5px solid var(--border-color);
-    border-radius: var(--radius-md);
-    font-family: var(--font-main);
-    font-size: var(--fs-sm);
-    color: var(--text-main);
-    background: var(--bg-paper);
-}
-
-.calendar-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: flex-end;
     gap: 1rem;
-    margin-bottom: 1.25rem;
-}
-
-.calendar-week-label {
-    font-family: var(--font-main);
-    font-weight: 600;
-    color: var(--primary-color);
-    font-size: var(--fs-sm);
-}
-
-.calendar-grid-wrap {
-    overflow-x: auto;
-    background: var(--bg-paper);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--border-color);
-}
-
-.calendar-grid {
-    display: grid;
-    grid-template-columns: 56px repeat(7, minmax(110px, 1fr));
-    min-width: 850px;
-}
-
-.calendar-time-axis {
-    position: relative;
-    border-right: 1px solid var(--border-color);
-}
-
-.calendar-hour-mark {
-    position: absolute;
-    left: 0;
-    right: 0;
-    transform: translateY(-50%);
-    font-size: var(--fs-xs);
-    color: var(--text-muted);
-    padding: 0 0.4rem;
-}
-
-.calendar-day-column {
-    border-right: 1px solid var(--border-color);
-}
-
-.calendar-day-column:last-child {
-    border-right: none;
-}
-
-.calendar-day-heading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    padding: 0.75rem 0.5rem;
-    border-bottom: 1px solid var(--border-color);
-    background: var(--bg-light);
-}
-
-.calendar-day-name {
-    font-size: var(--fs-xs);
-    font-weight: 600;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    letter-spacing: 0.06em;
-}
-
-.calendar-day-num {
-    font-family: var(--font-heading);
-    font-weight: 700;
-    color: var(--primary-color);
-}
-
-.calendar-day-num.is-today {
-    color: var(--on-primary);
-    background: var(--primary-color);
-    border-radius: 50%;
-    width: 1.8rem;
-    height: 1.8rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Fixed height is required: percentage-based absolute positioning of .calendar-booking needs a definite height on this ancestor. Do not make this fluid without reworking the positioning scheme. */
-.calendar-day-body {
-    position: relative;
-    height: 640px;
-}
-
-.calendar-day-off {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-muted);
-    font-size: var(--fs-xs);
-    font-style: italic;
-}
-
-.calendar-booking {
-    position: absolute;
-    left: 4px;
-    right: 4px;
-    min-height: 28px;
-    background: var(--secondary-color);
-    color: var(--on-secondary);
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: 0.25rem 0.4rem;
-    font-family: var(--font-main);
-    text-align: left;
-    cursor: pointer;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-    transition: var(--transition);
-}
-
-.calendar-booking:hover {
-    background: var(--accent-color);
-    color: var(--on-accent);
-}
-
-.calendar-booking-time {
-    font-size: var(--fs-xs);
-    font-weight: 700;
-}
-
-.calendar-booking-service {
-    font-size: var(--fs-xs);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.calendar-modal-body {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
     margin-bottom: 1.5rem;
 }
 
-.calendar-modal-row {
-    font-size: var(--fs-sm);
-    color: var(--text-main);
-}
-
-.calendar-modal-row strong {
-    color: var(--text-muted);
-    font-weight: 600;
-    margin-right: 0.35rem;
-}
-
-.calendar-modal-actions {
+.reservations-filter-bar .filter-field {
     display: flex;
-    gap: 0.75rem;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.reservations-filter-bar .filter-field .form-label {
+    margin-bottom: 0;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 0.6rem;
+}
+
+.phase-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-sm);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    background: var(--bg-light);
+    color: var(--text-muted);
 }
 
 @media (max-width: 768px) {
-    .calendar-nav {
+    .reservations-filter-bar {
         flex-direction: column;
         align-items: stretch;
-        text-align: center;
+    }
+    .filter-actions {
+        flex-direction: column;
+    }
+    .filter-actions .btn-primary-profile,
+    .filter-actions .btn-outline-profile {
+        width: 100%;
+        justify-content: center;
     }
 }
 

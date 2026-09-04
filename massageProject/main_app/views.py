@@ -20,7 +20,7 @@ from django.http.request import validate_host
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from datetime import datetime, timedelta, date
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.contrib import messages
 from django.core.cache import cache
 from django.http import HttpResponse, FileResponse, JsonResponse, Http404
@@ -341,75 +341,6 @@ class AllCommentsView(CommentsEnabledMixin, ListView):
         return Comment.objects.filter(is_reviewed=True).order_by('-created_at')
 
 
-def _time_to_minutes(t):
-    return t.hour * 60 + t.minute
-
-
-def _build_week_calendar(specialist, week_start):
-    week_days = [week_start + timedelta(days=i) for i in range(7)]
-
-    working_hours_by_day = {
-        wh.day_of_week: wh
-        for wh in WorkingHours.objects.filter(specialist=specialist)
-    }
-
-    reservations = list(
-        Reservation.objects.active()
-        .filter(specialist=specialist, date__range=(week_days[0], week_days[-1]))
-        .select_related('user')
-        .order_by('time')
-    )
-    reservations_by_date = {}
-    for r in reservations:
-        reservations_by_date.setdefault(r.date, []).append(r)
-
-    user_ids = {r.user_id for r in reservations}
-    visit_counts = {}
-    if user_ids:
-        visit_counts = {
-            row['user_id']: row['c']
-            for row in Reservation.all_objects.filter(
-                specialist=specialist, user_id__in=user_ids, status=Reservation.STATUS_COMPLETED,
-            ).values('user_id').annotate(c=Count('id'))
-        }
-
-    if working_hours_by_day:
-        window_start = min(_time_to_minutes(wh.start_time) for wh in working_hours_by_day.values())
-        window_end = max(_time_to_minutes(wh.end_time) for wh in working_hours_by_day.values())
-    else:
-        window_start, window_end = 8 * 60, 20 * 60
-    window_span = (window_end - window_start) or 1
-
-    days = []
-    for day_date in week_days:
-        wh = working_hours_by_day.get(day_date.weekday())
-        day_entries = []
-        for r in reservations_by_date.get(day_date, []):
-            start_minutes = _time_to_minutes(r.time)
-            end_minutes = _time_to_minutes(r.end_time)
-            day_entries.append({
-                'reservation': r,
-                'top_pct': round(min(100.0, max(0.0, (start_minutes - window_start) / window_span * 100)), 2),
-                'height_pct': round(min(100.0, max(0.0, (end_minutes - start_minutes) / window_span * 100)), 2),
-                'visit_count': visit_counts.get(r.user_id, 0),
-            })
-        days.append({'date': day_date, 'working_hours': wh, 'reservations': day_entries})
-
-    hour_marks = []
-    first_hour = window_start // 60
-    last_hour = -(-window_end // 60)
-    for h in range(first_hour, last_hour + 1):
-        minute = h * 60
-        if minute < window_start or minute > window_end:
-            continue
-        hour_marks.append({
-            'label': '%02d:00' % h,
-            'top_pct': round((minute - window_start) / window_span * 100, 2),
-        })
-
-    return {'days': days, 'hour_marks': hour_marks}
-
-
 def _resolve_photo_workflow_scope(user):
     """(is_staff_mode, specialist) for the photographer-mode photo-workflow
     views — staff full-access takes precedence, mirroring ProfilePage's role
@@ -442,7 +373,13 @@ class ProofingGalleryUploadView(PhotographerModeMixin, LoginRequiredMixin, Templ
         context = super().get_context_data(**kwargs)
         context['title'] = _('Качване на галерия за преглед')
         if 'upload_form' not in context:
-            context['upload_form'] = ProofingGalleryUploadForm(reservation_queryset=self._reservation_queryset())
+            initial = {}
+            reservation_id = self.request.GET.get('reservation_id')
+            if reservation_id:
+                initial['reservation'] = reservation_id
+            context['upload_form'] = ProofingGalleryUploadForm(
+                reservation_queryset=self._reservation_queryset(), initial=initial,
+            )
         if 'label_formset' not in context:
             context['label_formset'] = ProofingLabelFormSet(prefix='labels')
         return context
@@ -607,7 +544,13 @@ class FinalGalleryUploadView(PhotographerModeMixin, LoginRequiredMixin, Template
         context = super().get_context_data(**kwargs)
         context['title'] = _('Качване на финална галерия')
         if 'upload_form' not in context:
-            context['upload_form'] = FinalGalleryUploadForm(reservation_queryset=self._reservation_queryset())
+            initial = {}
+            reservation_id = self.request.GET.get('reservation_id')
+            if reservation_id:
+                initial['reservation'] = reservation_id
+            context['upload_form'] = FinalGalleryUploadForm(
+                reservation_queryset=self._reservation_queryset(), initial=initial,
+            )
         return context
 
     def get(self, request, *args, **kwargs):
@@ -694,20 +637,15 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
         if user.has_perm('main_app.view_all_reservations'):
             context['role'] = 'staff'
             context['title'] = _('Управление на резервации')
-            specialists = list(Specialist.objects.order_by('name'))
-            context['specialists'] = specialists
-            selected_id = self.request.GET.get('specialist_id')
-            selected = None
-            if selected_id:
-                selected = next((s for s in specialists if str(s.pk) == selected_id), None)
-            if selected is None and specialists:
-                selected = specialists[0]
-            self._add_calendar_context(context, selected)
+            context['specialists'] = list(Specialist.objects.order_by('name'))
+            base_qs = Reservation.objects.all()
+            context.update(_build_reservations_table_context(self.request, base_qs, is_staff=True))
         elif specialist_link and user.has_perm('main_app.view_specialist_reservations'):
             context['role'] = 'specialist'
             # _("график") is nested in an f-string; makemessages can't extract it — the .po/.mo entries for it are maintained by hand.
             context['title'] = f'{user.get_full_name()} - {_("график")}'
-            self._add_calendar_context(context, specialist_link)
+            base_qs = Reservation.objects.filter(specialist=specialist_link)
+            context.update(_build_reservations_table_context(self.request, base_qs, is_staff=False))
         else:
             context['role'] = 'client'
             user_qs = Reservation.objects.filter(user=user)
@@ -740,43 +678,75 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
 
         return context
 
-    def _add_calendar_context(self, context, specialist):
-        today = date.today()
-        context['today'] = today
 
-        week_param = self.request.GET.get('week')
-        requested = today
-        if week_param:
-            try:
-                requested = datetime.strptime(week_param, '%Y-%m-%d').date()
-            except ValueError:
-                requested = today
-        week_start = requested - timedelta(days=requested.weekday())
+def _build_reservations_table_context(request, base_qs, is_staff):
+    """Filterable/sortable reservations table shared by the specialist and
+    staff branches of the profile page. Default sort is soonest-upcoming
+    first: reservations still to come, soonest first, then past ones, most
+    recent first — mirroring the client profile's active/past convention."""
+    is_photographer = settings.IS_PHOTOGRAPHER_WEBSITE
 
-        context['calendar_specialist'] = specialist
-        context['week_start'] = week_start
-        context['prev_week'] = week_start - timedelta(days=7)
-        context['next_week'] = week_start + timedelta(days=7)
+    qs = base_qs.select_related('service', 'specialist', 'user')
 
-        if specialist is None:
-            context['calendar'] = None
-            context['bookings_today'] = 0
-            context['bookings_this_week'] = 0
-            context['next_client_reservation'] = None
-            return
+    phase_choices = list(Reservation.PHOTO_PHASE_CHOICES) if is_photographer else []
+    phase_choices += [c for c in Reservation.STATUS_CHOICES if c[0] != Reservation.STATUS_DELETED]
 
-        context['calendar'] = _build_week_calendar(specialist, week_start)
+    selected_phase = request.GET.get('phase', '')
+    if selected_phase:
+        phase_q = Reservation.phase_query(selected_phase)
+        if phase_q is not None:
+            qs = qs.filter(phase_q)
+        else:
+            selected_phase = ''
 
-        week_end = week_start + timedelta(days=6)
-        context['week_end'] = week_end
-        week_reservations = Reservation.objects.active().filter(
-            specialist=specialist, date__range=(week_start, week_end),
+    date_from = request.GET.get('date_from', '')
+    if date_from:
+        try:
+            qs = qs.filter(date__gte=datetime.strptime(date_from, '%Y-%m-%d').date())
+        except ValueError:
+            date_from = ''
+
+    date_to = request.GET.get('date_to', '')
+    if date_to:
+        try:
+            qs = qs.filter(date__lte=datetime.strptime(date_to, '%Y-%m-%d').date())
+        except ValueError:
+            date_to = ''
+
+    service_id = request.GET.get('service_id', '')
+    if service_id:
+        qs = qs.filter(service_id=service_id)
+
+    specialist_id = ''
+    if is_staff:
+        specialist_id = request.GET.get('specialist_id', '')
+        if specialist_id:
+            qs = qs.filter(specialist_id=specialist_id)
+
+    query = request.GET.get('q', '').strip()
+    if query:
+        qs = qs.filter(
+            Q(user__first_name__icontains=query) | Q(user__last_name__icontains=query) |
+            Q(user__phone_number__icontains=query)
         )
-        context['bookings_this_week'] = week_reservations.count()
 
-        today_and_future = Reservation.objects.active().filter(specialist=specialist, date__gte=today)
-        context['bookings_today'] = today_and_future.filter(date=today).count()
-        context['next_client_reservation'] = today_and_future.order_by('date', 'time').first()
+    now = timezone.localtime()
+    today, current_time = now.date(), now.time()
+    upcoming_q = Q(date__gt=today) | Q(date=today, time__gte=current_time)
+    upcoming = list(qs.filter(upcoming_q).order_by('date', 'time'))
+    past = list(qs.exclude(upcoming_q).order_by('-date', '-time'))
+
+    return {
+        'reservations': upcoming + past,
+        'phase_choices': phase_choices,
+        'selected_phase': selected_phase,
+        'date_from': date_from,
+        'date_to': date_to,
+        'services': list(Service.objects.order_by('name')),
+        'service_id': service_id,
+        'specialist_id': specialist_id,
+        'query': query,
+    }
 
 
 @login_required

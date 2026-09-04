@@ -612,6 +612,31 @@ class Reservation(models.Model):
     def phase_display(self):
         return self.PHOTO_PHASE_LABELS.get(self.phase, self.get_status_display())
 
+    @classmethod
+    def phase_query(cls, phase_value):
+        """A Q object matching `phase_value` against the same priority order
+        as the `phase` property, for filtering a queryset by phase (e.g. the
+        specialist/staff reservations table's phase filter)."""
+        if phase_value == cls.PHASE_FINALS_DELIVERED:
+            return models.Q(final_gallery__isnull=False, finals_delivered_at__isnull=False)
+        if phase_value == cls.PHASE_FINALS_READY:
+            return models.Q(final_gallery__isnull=False, finals_delivered_at__isnull=True)
+        if phase_value == cls.PHASE_EDITING:
+            return models.Q(final_gallery__isnull=True, proofing_finalized_at__isnull=False)
+        if phase_value == cls.PHASE_AWAITING_REVIEW:
+            return models.Q(
+                final_gallery__isnull=True, proofing_finalized_at__isnull=True,
+                gallery__isnull=False, need_client_review=True,
+            )
+        if phase_value == cls.PHASE_GALLERY_UPLOADED:
+            return models.Q(
+                final_gallery__isnull=True, proofing_finalized_at__isnull=True,
+                gallery__isnull=False, need_client_review=False,
+            )
+        if phase_value in dict(cls.STATUS_CHOICES):
+            return models.Q(gallery__isnull=True, status=phase_value)
+        return None
+
     def save(self, *args, **kwargs):
         if self.status == self.STATUS_ACTIVE and self.specialist_id:
             with transaction.atomic():
