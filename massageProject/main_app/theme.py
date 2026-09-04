@@ -136,6 +136,34 @@ COLOR_PRESETS = {
         'background_color': '#FDF6F7', 'text_color': '#331A21',
         'text_muted_color': '#6E4A52', 'border_color': '#7A3B4E',
     },
+    'neon_night': {
+        'label': _('Неон нощ'),
+        'primary_color': '#0D0D10', 'primary_light_color': '#2E2E36',
+        'secondary_color': '#9497A6', 'accent_color': '#E6007E',
+        'background_color': '#F7F7F9', 'text_color': '#0D0D10',
+        'text_muted_color': '#5B5D66', 'border_color': '#0D0D10',
+    },
+    'pastel_duo': {
+        'label': _('Пастелен дует'),
+        'primary_color': '#3E6E88', 'primary_light_color': '#5C8BA3',
+        'secondary_color': '#B9E8D5', 'accent_color': '#B84E32',
+        'background_color': '#F7FBFC', 'text_color': '#1C2B31',
+        'text_muted_color': '#51636A', 'border_color': '#3E6E88',
+    },
+    'emerald_jewel': {
+        'label': _('Изумруд'),
+        'primary_color': '#0B4A3A', 'primary_light_color': '#146B54',
+        'secondary_color': '#C9A227', 'accent_color': '#8F6509',
+        'background_color': '#F8F9F4', 'text_color': '#132621',
+        'text_muted_color': '#4E6660', 'border_color': '#0B4A3A',
+    },
+    'sunset': {
+        'label': _('Залез'),
+        'primary_color': '#C1440E', 'primary_light_color': '#E0651F',
+        'secondary_color': '#F2A65A', 'accent_color': '#8E2A6B',
+        'background_color': '#FDF8F4', 'text_color': '#3A231C',
+        'text_muted_color': '#7A5A4C', 'border_color': '#C1440E',
+    },
 }
 
 STYLE_PRESETS = {

@@ -1,11 +1,12 @@
 {% extends "base.html" %}
-{% load i18n bleach_tags %}
+{% load i18n bleach_tags translation_extras %}
 
 {% block content %}
 <section class="about-hero">
     <p class="eyebrow">{% trans "ЗА НАС" %}</p>
     <h1>{% trans "Историята зад студиото" %}</h1>
-    <p class="subtitle">{% trans "Лична практика, изградена върху обучение, внимание и години усъвършенстване на занаята — това е кратката версия." %}</p>
+    {% trans "Лична практика, изградена върху обучение, внимание и години усъвършенстване на занаята — това е кратката версия." as about_subtitle %}
+    <p class="subtitle">{{ about_subtitle|hide_if_marker }}</p>
 </section>
 
 <section class="about-info">

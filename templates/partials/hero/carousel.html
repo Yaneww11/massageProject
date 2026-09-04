@@ -1,4 +1,4 @@
-{% load static i18n %}
+{% load static i18n translation_extras %}
 <section class="hp-hero-carousel">
     <div class="hp-hero-carousel-track" id="hp-hero-carousel-track">
         {% for image in gallery_images %}
@@ -12,7 +12,7 @@
         {% if page %}
             <h1 class="hp-hero-carousel-title">{{ page.brand_name }}</h1>
             {% if not is_photographer_website %}
-            <p class="hp-hero-carousel-sub">{{ page.description }}</p>
+            <p class="hp-hero-carousel-sub">{{ page.description|hide_if_marker }}</p>
             {% endif %}
         {% endif %}
         {% if not is_photographer_website %}

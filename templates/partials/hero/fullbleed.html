@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n translation_extras %}
 <section class="hp-hero-fullbleed">
 {% with first_image=gallery_images.0 %}
     {% if first_image %}
@@ -9,7 +9,7 @@
     <div class="hp-hero-fullbleed-content">
         {% if page %}
             <h1 class="hp-hero-fullbleed-title">{{ page.brand_name }}</h1>
-            <p class="hp-hero-fullbleed-sub">{{ page.description }}</p>
+            <p class="hp-hero-fullbleed-sub">{{ page.description|hide_if_marker }}</p>
         {% endif %}
         {% if site_config.booking_enabled %}
         <a href="{% url 'reservation_page' %}" class="btn btn-primary btn-lg" data-auth-modal-link>{% trans "Запазете час" %}</a>
