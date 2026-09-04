@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-04 21:27+0000\n"
+"POT-Creation-Date: 2026-09-04 21:51+0000\n"
 "PO-Revision-Date: 2026-09-04 06:03+0000\n"
 "Last-Translator: Yane Yanev <admin@admin.com>\n"
 "Language-Team: Bulgarian\n"
@@ -257,11 +257,9 @@ msgstr ""
 msgid "Галерия за преглед"
 msgstr "Галерия за преглед"
 
-
 #: massageProject/main_app/admin.py:166 massageProject/main_app/models.py:660
 msgid "Финална галерия"
 msgstr "Финална галерия"
-
 
 #: massageProject/main_app/admin.py:171
 #: templates/partials/specialist_calendar.html:91
@@ -288,7 +286,7 @@ msgstr ""
 msgid "Качване на много снимки"
 msgstr "Качване на много снимки"
 
-#: massageProject/main_app/admin.py:275 massageProject/main_app/views.py:470
+#: massageProject/main_app/admin.py:275 massageProject/main_app/views.py:472
 #, python-format
 msgid "Пропусната %(name)s: %(error)s"
 msgstr "Пропусната %(name)s: %(error)s"
@@ -392,11 +390,9 @@ msgstr "Максимален брой"
 msgid "Въведете максимален брой за етикета \"%(name)s\"."
 msgstr "Въведете максимален брой за етикета \"%(name)s\"."
 
-
 #: massageProject/main_app/forms.py:156
 msgid "Въведете име за етикета."
 msgstr "Въведете име за етикета."
-
 
 #: massageProject/main_app/models.py:20
 msgid "Наименование"
@@ -545,7 +541,6 @@ msgstr ""
 "изглеждат непропорционално до текста. Показва се като главна снимка в "
 "страница \"За нас\"."
 
-
 #: massageProject/main_app/models.py:238
 msgid ""
 "Показва се в контактната карта в профила на клиента и в долния колонтитул "
@@ -581,7 +576,6 @@ msgstr ""
 "years_of_practice, clients_served и certifications_count се показват като "
 "карти с показатели в страница \"За нас\"."
 
-
 #: massageProject/main_app/models.py:276
 msgid ""
 "JSON обект с два списъка — \"training\" и \"recognition\". Всеки елемент: "
@@ -598,7 +592,6 @@ msgstr ""
 "\"...\"}], \"recognition\": []}. Показва се като секция \"Обучения/"
 "Признания\" в страница \"За нас\"."
 
-
 #: massageProject/main_app/models.py:286
 msgid ""
 "JSON списък от въпроси и отговори. Празен списък скрива секцията. Пример: "
@@ -610,7 +603,6 @@ msgstr ""
 "[{\"question\": \"Приемате ли без резервация?\", \"answer\": \"Не, само с "
 "предварителна резервация.\"}]. Показва се като разгъващ се списък с въпроси "
 "и отговори в страница \"За нас\"."
-
 
 # Templates - footer
 #: massageProject/main_app/models.py:293 massageProject/settings.py:318
@@ -642,21 +634,17 @@ msgstr ""
 msgid "Финалите са доставени"
 msgstr "Финалите са доставени"
 
-
 #: massageProject/main_app/models.py:325
 msgid "Финалните снимки са готови"
 msgstr "Финалните снимки са готови"
-
 
 #: massageProject/main_app/models.py:326
 msgid "В процес на обработка"
 msgstr "В процес на обработка"
 
-
 #: massageProject/main_app/models.py:327
 msgid "Изчаква преглед от клиента"
 msgstr "Изчаква преглед от клиента"
-
 
 #: massageProject/main_app/models.py:328
 msgid "Галерията е качена"
@@ -722,7 +710,6 @@ msgstr ""
 "Финална галерия може да бъде прикачена само след като клиентът е финализирал "
 "прегледа на снимките си."
 
-
 #: massageProject/main_app/models.py:497
 msgid ""
 "Не може да се отбележи доставка на финални снимки преди да е прикачена "
@@ -763,7 +750,6 @@ msgstr "Начална страница"
 msgid "Преглед на снимки"
 msgstr "Преглед на снимки"
 
-
 #: massageProject/main_app/models.py:659
 msgid "Албум"
 msgstr "Албум"
@@ -785,7 +771,6 @@ msgstr ""
 "— снимки, свързани с преглед на резервация от клиента; \"Албум\" — показва "
 "се като самостоятелен албум на страницата с галерии; \"Финална галерия\" — "
 "готовите, обработени снимки, доставени на клиента."
-
 
 #: massageProject/main_app/models.py:675
 msgid "Заглавие"
@@ -1340,75 +1325,78 @@ msgid "Залез"
 msgstr "Залез"
 
 # views.py
-#: massageProject/main_app/views.py:281
+#: massageProject/main_app/views.py:283
 msgid "Вашият коментар е изпратен успешно и ще бъде публикуван след преглед."
 msgstr ""
 
-#: massageProject/main_app/views.py:301
+#: massageProject/main_app/views.py:303
 msgid "Моля, изчакайте преди да изпратите нов коментар."
 msgstr "Моля, изчакайте преди да изпратите нов коментар."
 
-#: massageProject/main_app/views.py:311
+#: massageProject/main_app/views.py:313
 msgid "Въведете мнение"
 msgstr ""
 
-#: massageProject/main_app/views.py:314
+#: massageProject/main_app/views.py:316
 msgid "Мнението не може да надвишава 2000 символа."
 msgstr "Мнението не може да надвишава 2000 символа."
 
-#: massageProject/main_app/views.py:440
+#: massageProject/main_app/views.py:442
 #: templates/pages/proofing_gallery_upload.html:10
 msgid "Качване на галерия за преглед"
 msgstr "Качване на галерия за преглед"
 
-
-#: massageProject/main_app/views.py:478
+#: massageProject/main_app/views.py:480
 msgid "Нито една снимка не беше качена успешно."
 msgstr ""
 
-#: massageProject/main_app/views.py:498
+#: massageProject/main_app/views.py:500
 #, python-format
 msgid "Галерията е качена успешно (%(count)d снимки)."
 msgstr "Галерията е качена успешно (%(count)d снимки)."
 
+#: massageProject/main_app/views.py:535
+msgid "Маркирани снимки"
+msgstr "Маркирани снимки"
 
-#: massageProject/main_app/views.py:518
+
+#: massageProject/main_app/views.py:596
 msgid "Управление на резервации"
 msgstr ""
 
-#: massageProject/main_app/views.py:712
+#: massageProject/main_app/views.py:790
 msgid "Прегледът е финализиран."
 msgstr "Прегледът е финализиран."
 
-#: massageProject/main_app/views.py:751
+#: massageProject/main_app/views.py:829
 msgid "Проверка на снимки"
 msgstr "Проверка на снимки"
 
-#: massageProject/main_app/views.py:786
+#: massageProject/main_app/views.py:864
 msgid "Достигнат е максималният брой за този етикет."
 msgstr "Достигнат е максималният брой за този етикет."
 
-#: massageProject/main_app/views.py:802
+#: massageProject/main_app/views.py:880
 msgid "Бележката не може да надвишава 2000 символа."
 msgstr "Бележката не може да надвишава 2000 символа."
 
-#: massageProject/main_app/views.py:816
+#: massageProject/main_app/views.py:894
 msgid "Прегледът вече е финализиран."
 msgstr "Прегледът вече е финализиран."
 
-#: massageProject/main_app/views.py:819
+#: massageProject/main_app/views.py:897
 msgid "Маркирайте поне една снимка."
 msgstr "Маркирайте поне една снимка."
 
-#: massageProject/main_app/views.py:843
+#: massageProject/main_app/views.py:923
 msgid "Не можете да променяте резервация по-малко от 24 часа преди часа."
 msgstr ""
 
-#: massageProject/main_app/views.py:871
+#: massageProject/main_app/views.py:951
 msgid "Не можете да отменяте резервация по-малко от 24 часа преди часа."
 msgstr ""
 
-#: massageProject/main_app/views.py:880
+#: massageProject/main_app/views.py:960
 msgid "Резервацията беше отменена успешно."
 msgstr ""
 
@@ -1477,13 +1465,11 @@ msgstr "Качване"
 msgid "Вашата галерия за преглед е готова"
 msgstr "Вашата галерия за преглед е готова"
 
-
 #: templates/emails/gallery_ready_email.html:5
 #: templates/emails/gallery_ready_email.txt:1
 #, python-format
 msgid "Здравейте, %(client_name)s"
 msgstr "Здравейте, %(client_name)s"
-
 
 #: templates/emails/gallery_ready_email.html:6
 msgid ""
@@ -1495,11 +1481,37 @@ msgstr ""
 msgid "Прегледайте снимките си"
 msgstr "Прегледайте снимките си"
 
-
 #: templates/emails/gallery_ready_email.txt:3
 msgid ""
 "Вашите снимки от сесията са готови за преглед. Влезте в профила си, за да "
 "маркирате любимите си кадри:"
+msgstr ""
+
+#: templates/emails/marks_finalized_email.html:3
+#: templates/emails/marks_finalized_email_subject.txt:1
+#, python-format
+msgid "%(client_name)s финализира маркираните снимки"
+msgstr ""
+
+#: templates/emails/marks_finalized_email.html:5
+msgid "Готово за обработка"
+msgstr "Готово за обработка"
+
+
+#: templates/emails/marks_finalized_email.html:6
+#: templates/emails/marks_finalized_email.txt:1
+#, python-format
+msgid "%(client_name)s финализира маркираните снимки от своята сесия."
+msgstr "%(client_name)s финализира маркираните снимки от своята сесия."
+
+
+#: templates/emails/marks_finalized_email.html:8
+msgid "Вижте маркираните снимки"
+msgstr "Вижте маркираните снимки"
+
+
+#: templates/emails/marks_finalized_email.txt:3
+msgid "Вижте кои снимки са маркирани и изтеглете оригиналите за обработка:"
 msgstr ""
 
 #: templates/emails/otp_email.html:3 templates/emails/otp_email_subject.txt:1
@@ -1776,6 +1788,24 @@ msgstr ""
 msgid "Запазете час"
 msgstr ""
 
+#: templates/pages/marked_photos.html:9
+msgid "МАРКИРАНИ СНИМКИ"
+msgstr "МАРКИРАНИ СНИМКИ"
+
+
+#: templates/pages/marked_photos.html:17
+msgid "Изтегли всички (ZIP)"
+msgstr ""
+
+#: templates/pages/marked_photos.html:39
+msgid "Изтегли"
+msgstr ""
+
+#: templates/pages/marked_photos.html:46
+msgid "Клиентът все още не е маркирал снимки."
+msgstr "Клиентът все още не е маркирал снимки."
+
+
 # my_profile.html — Profile page redesign
 #: templates/pages/my_profile.html:17
 msgid "МОИТЕ ЧАСОВЕ"
@@ -1919,7 +1949,6 @@ msgstr "КОНТАКТИ"
 #: templates/pages/my_profile.html:258
 msgid "Качи галерия за преглед"
 msgstr "Качи галерия за преглед"
-
 
 #: templates/pages/my_profile.html:289
 msgid "Вашето мнение"
@@ -2120,7 +2149,6 @@ msgstr ""
 msgid "ГАЛЕРИЯ ЗА ПРЕГЛЕД"
 msgstr "ГАЛЕРИЯ ЗА ПРЕГЛЕД"
 
-
 #: templates/pages/proofing_gallery_upload.html:11
 msgid "Изберете резервация, качете снимките и настройте етикетите за преглед."
 msgstr ""
@@ -2128,7 +2156,6 @@ msgstr ""
 #: templates/pages/proofing_gallery_upload.html:37
 msgid "ЕТИКЕТИ ЗА ПРЕГЛЕД"
 msgstr "ЕТИКЕТИ ЗА ПРЕГЛЕД"
-
 
 #: templates/pages/proofing_gallery_upload.html:38
 msgid ""
@@ -2144,7 +2171,6 @@ msgstr ""
 msgid "Качете галерията"
 msgstr "Качете галерията"
 
-
 #: templates/pages/reservation.html:13
 msgid ""
 "Изберете процедура и удобно за Вас време — ние ще се погрижим за останалото."
@@ -2153,7 +2179,6 @@ msgstr ""
 #: templates/pages/reservation.html:75
 msgid "Дата и час"
 msgstr "Дата и час"
-
 
 #: templates/pages/reservation.html:76
 msgid "Затворено в неделя"
@@ -2166,7 +2191,6 @@ msgstr ""
 #: templates/pages/reservation.html:101
 msgid "Вашите данни"
 msgstr "Вашите данни"
-
 
 #: templates/pages/reservation.html:110 templates/pages/reservation.html:122
 msgid "Само букви (кирилица или латиница), интервали и тирета"
@@ -2182,7 +2206,6 @@ msgstr ""
 msgid "Ще получите потвърждение"
 msgstr "Ще получите потвърждение"
 
-
 #: templates/pages/reservation.html:147
 msgid "По избор"
 msgstr "По избор"
@@ -2191,11 +2214,9 @@ msgstr "По избор"
 msgid "Специални изисквания или притеснения..."
 msgstr "Специални изисквания или притеснения..."
 
-
 #: templates/pages/reservation.html:162
 msgid "Вашата резервация"
 msgstr "Вашата резервация"
-
 
 # Templates - my_profile
 #: templates/pages/reservation.html:171 templates/pages/reservation.html:212
@@ -2210,7 +2231,6 @@ msgstr ""
 msgid "Час"
 msgstr "Час"
 
-
 #: templates/pages/reservation.html:177 templates/pages/reservation.html:218
 #: templates/pages/reservation.html:272
 msgid "Продължителност"
@@ -2219,7 +2239,6 @@ msgstr ""
 #: templates/pages/reservation.html:182
 msgid "Потвърдете резервацията"
 msgstr "Потвърдете резервацията"
-
 
 #: templates/pages/reservation.html:194 templates/pages/reservation.html:226
 msgid "Безплатно анулиране до 24 часа преди процедурата."
@@ -2253,7 +2272,6 @@ msgstr ""
 msgid "Вижте моите резервации"
 msgstr "Вижте моите резервации"
 
-
 #: templates/pages/reservation.html:337
 #: templates/reservation/edit-reservation.html:166
 msgid "Моля, попълнете всички полета по-горе, преди да продължите."
@@ -2262,7 +2280,6 @@ msgstr "Моля, попълнете всички полета по-горе, п
 #: templates/pages/reservation.html:338
 msgid "Моля, изберете час за Вашата резервация."
 msgstr "Моля, изберете час за Вашата резервация."
-
 
 #: templates/pages/reservation.html:339
 msgid "Зареждане..."
@@ -2296,7 +2313,6 @@ msgstr ""
 #: templates/pages/reservation.html:346
 msgid "Изпращане..."
 msgstr "Изпращане..."
-
 
 #: templates/pages/services_page.html:265 templates/partials/header.html:10
 msgid "Начало"

@@ -1129,3 +1129,51 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* ── Marked Photos ────────────────────────────────────── */
+.marked-photos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.25rem;
+}
+
+.marked-photo-card {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: #fff;
+}
+
+.marked-photo-thumb {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    display: block;
+}
+
+.marked-photo-body {
+    padding: 0.75rem 1rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.marked-photo-labels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.marked-photo-label {
+    font-size: var(--fs-xs);
+    background: var(--bg-light);
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    padding: 0.15rem 0.5rem;
+}
+
+.marked-photo-comment {
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+    margin: 0;
+}

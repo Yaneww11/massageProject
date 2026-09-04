@@ -1,5 +1,7 @@
 import hashlib
 import logging
+import os
+import zipfile
 from io import BytesIO
 
 from django.conf import settings
@@ -21,11 +23,11 @@ from datetime import datetime, timedelta, date
 from django.db.models import Count
 from django.contrib import messages
 from django.core.cache import cache
-from django.http import HttpResponse, JsonResponse, Http404
+from django.http import HttpResponse, FileResponse, JsonResponse, Http404
 from PIL import Image as PILImage, ImageDraw, ImageFont
 
 from massageProject.main_app.context_processors import get_cached_homepage
-from massageProject.main_app.emails import send_gallery_ready_email
+from massageProject.main_app.emails import send_gallery_ready_email, send_marks_finalized_email
 from massageProject.main_app.ics import build_reservation_ics
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
     ReservationDeleteForm, CommentForm, UserNameForm, ProofingGalleryUploadForm, \
@@ -503,6 +505,82 @@ class ProofingGalleryUploadView(PhotographerModeMixin, LoginRequiredMixin, Templ
         )
 
 
+def _get_owned_reservation_for_photo_workflow(request, reservation_id):
+    """Ownership + role check shared by the Marked Photos view and its
+    downloads: the owning specialist, or staff on behalf of any specialist."""
+    reservation = get_object_or_404(Reservation, pk=reservation_id)
+    is_staff_mode, specialist = _resolve_photo_workflow_scope(request.user)
+    if is_staff_mode is None:
+        raise PermissionDenied
+    if not is_staff_mode and reservation.specialist_id != specialist.pk:
+        raise PermissionDenied
+    return reservation
+
+
+def _marked_images_queryset(reservation):
+    if not reservation.gallery_id:
+        return Image.objects.none()
+    return (
+        Image.objects.filter(gallery=reservation.gallery, proof__is_marked=True)
+        .select_related('proof').prefetch_related('proof__labels').order_by('order')
+    )
+
+
+class MarkedPhotosView(PhotographerModeMixin, LoginRequiredMixin, TemplateView):
+    template_name = 'pages/marked_photos.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        reservation = _get_owned_reservation_for_photo_workflow(self.request, self.kwargs['reservation_id'])
+        context['title'] = _('Маркирани снимки')
+        context['reservation'] = reservation
+        context['marked_images'] = list(_marked_images_queryset(reservation))
+        return context
+
+
+@login_required
+def serve_marked_photo_image(request, reservation_id, image_id):
+    if not settings.IS_PHOTOGRAPHER_WEBSITE:
+        raise Http404
+    reservation = _get_owned_reservation_for_photo_workflow(request, reservation_id)
+    image = get_object_or_404(_marked_images_queryset(reservation), pk=image_id)
+    return FileResponse(image.image.open('rb'), content_type='image/webp')
+
+
+@login_required
+def download_marked_photo(request, reservation_id, image_id):
+    if not settings.IS_PHOTOGRAPHER_WEBSITE:
+        raise Http404
+    reservation = _get_owned_reservation_for_photo_workflow(request, reservation_id)
+    image = get_object_or_404(_marked_images_queryset(reservation), pk=image_id)
+    filename = os.path.basename(image.image.name)
+    return FileResponse(image.image.open('rb'), as_attachment=True, filename=filename)
+
+
+@login_required
+def download_marked_photos_zip(request, reservation_id):
+    if not settings.IS_PHOTOGRAPHER_WEBSITE:
+        raise Http404
+    reservation = _get_owned_reservation_for_photo_workflow(request, reservation_id)
+    images = _marked_images_queryset(reservation)
+
+    buffer = BytesIO()
+    with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_STORED) as archive:
+        used_names = set()
+        for image in images:
+            name = os.path.basename(image.image.name)
+            if name in used_names:
+                name = f'{image.pk}-{name}'
+            used_names.add(name)
+            with image.image.open('rb') as source:
+                archive.writestr(name, source.read())
+    buffer.seek(0)
+
+    response = HttpResponse(buffer.getvalue(), content_type='application/zip')
+    response['Content-Disposition'] = f'attachment; filename="marked-photos-reservation-{reservation.pk}.zip"'
+    return response
+
+
 class ProfilePage(LoginRequiredMixin, TemplateView):
     template_name = 'pages/my_profile.html'
 
@@ -818,6 +896,8 @@ def finalize_photo_proofing(request):
     if marked_count == 0:
         return JsonResponse({'success': False, 'error': _('Маркирайте поне една снимка.')}, status=400)
     reservation.finalize_proofing()
+    if settings.IS_PHOTOGRAPHER_WEBSITE:
+        send_marks_finalized_email(request, reservation)
     return JsonResponse({'success': True})
 
 

@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-04 21:27+0000\n"
+"POT-Creation-Date: 2026-09-04 21:51+0000\n"
 "PO-Revision-Date: 2026-09-04 06:05+0000\n"
 "Last-Translator: Yane Yanev <admin@admin.com>\n"
 "Language-Team: English\n"
@@ -295,7 +295,7 @@ msgstr "Photo count"
 msgid "Качване на много снимки"
 msgstr "Bulk upload images"
 
-#: massageProject/main_app/admin.py:275 massageProject/main_app/views.py:470
+#: massageProject/main_app/admin.py:275 massageProject/main_app/views.py:472
 #, python-format
 msgid "Пропусната %(name)s: %(error)s"
 msgstr "Skipped %(name)s: %(error)s"
@@ -766,7 +766,9 @@ msgstr ""
 msgid ""
 "Финална галерия може да бъде прикачена само след като клиентът е финализирал "
 "прегледа на снимките си."
-msgstr "A Final Gallery can only be attached once the client has finalized their photo review."
+msgstr ""
+"A Final Gallery can only be attached once the client has finalized their "
+"photo review."
 
 #: massageProject/main_app/models.py:497
 msgid ""
@@ -824,7 +826,12 @@ msgid ""
 "— снимки, свързани с преглед на резервация от клиента; \"Албум\" — показва "
 "се като самостоятелен албум на страницата с галерии; \"Финална галерия\" — "
 "готовите, обработени снимки, доставени на клиента."
-msgstr "Determines where this gallery is shown: \"Homepage\" — the gallery section on the homepage (there can only be one); \"Photo Proofing\" — photos linked to a client's reservation review; \"Album\" — shown as a standalone album on the gallery page; \"Final Gallery\" — the finished, edited photos delivered to the client."
+msgstr ""
+"Determines where this gallery is shown: \"Homepage\" — the gallery section "
+"on the homepage (there can only be one); \"Photo Proofing\" — photos linked "
+"to a client's reservation review; \"Album\" — shown as a standalone album on "
+"the gallery page; \"Final Gallery\" — the finished, edited photos delivered "
+"to the client."
 
 #: massageProject/main_app/models.py:675
 msgid "Заглавие"
@@ -1410,76 +1417,80 @@ msgid "Залез"
 msgstr "Sunset"
 
 # views.py
-#: massageProject/main_app/views.py:281
+#: massageProject/main_app/views.py:283
 msgid "Вашият коментар е изпратен успешно и ще бъде публикуван след преглед."
 msgstr ""
 "Your comment was submitted successfully and will be published after review."
 
-#: massageProject/main_app/views.py:301
+#: massageProject/main_app/views.py:303
 msgid "Моля, изчакайте преди да изпратите нов коментар."
 msgstr "Please wait before submitting another comment."
 
-#: massageProject/main_app/views.py:311
+#: massageProject/main_app/views.py:313
 msgid "Въведете мнение"
 msgstr "Please enter a review"
 
-#: massageProject/main_app/views.py:314
+#: massageProject/main_app/views.py:316
 msgid "Мнението не може да надвишава 2000 символа."
 msgstr "The comment cannot exceed 2000 characters."
 
-#: massageProject/main_app/views.py:440
+#: massageProject/main_app/views.py:442
 #: templates/pages/proofing_gallery_upload.html:10
 msgid "Качване на галерия за преглед"
 msgstr "Upload Proofing Gallery"
 
-#: massageProject/main_app/views.py:478
+#: massageProject/main_app/views.py:480
 msgid "Нито една снимка не беше качена успешно."
 msgstr "None of the photos were uploaded successfully."
 
-#: massageProject/main_app/views.py:498
+#: massageProject/main_app/views.py:500
 #, python-format
 msgid "Галерията е качена успешно (%(count)d снимки)."
 msgstr "The gallery was uploaded successfully (%(count)d photos)."
 
-#: massageProject/main_app/views.py:518
+#: massageProject/main_app/views.py:535
+msgid "Маркирани снимки"
+msgstr "Marked Photos"
+
+#: massageProject/main_app/views.py:596
 msgid "Управление на резервации"
 msgstr "Reservation Management"
 
-#: massageProject/main_app/views.py:712
+#: massageProject/main_app/views.py:790
 msgid "Прегледът е финализиран."
 msgstr "The review has been finalized."
 
-#: massageProject/main_app/views.py:751
+#: massageProject/main_app/views.py:829
 msgid "Проверка на снимки"
 msgstr "Photo review"
 
-#: massageProject/main_app/views.py:786
+#: massageProject/main_app/views.py:864
 msgid "Достигнат е максималният брой за този етикет."
 msgstr "The maximum count for this label has been reached."
 
-#: massageProject/main_app/views.py:802
+#: massageProject/main_app/views.py:880
 msgid "Бележката не може да надвишава 2000 символа."
 msgstr "The note cannot exceed 2000 characters."
 
-#: massageProject/main_app/views.py:816
+#: massageProject/main_app/views.py:894
 msgid "Прегледът вече е финализиран."
 msgstr "The review has already been finalized."
 
-#: massageProject/main_app/views.py:819
+#: massageProject/main_app/views.py:897
 msgid "Маркирайте поне една снимка."
 msgstr "Mark at least one photo."
 
-#: massageProject/main_app/views.py:843
+#: massageProject/main_app/views.py:923
 msgid "Не можете да променяте резервация по-малко от 24 часа преди часа."
 msgstr ""
 "You cannot modify a reservation less than 24 hours before the appointment."
 
-#: massageProject/main_app/views.py:871
+#: massageProject/main_app/views.py:951
 msgid "Не можете да отменяте резервация по-малко от 24 часа преди часа."
 msgstr ""
 "You cannot cancel a reservation less than 24 hours before the appointment."
 
-#: massageProject/main_app/views.py:880
+#: massageProject/main_app/views.py:960
 msgid "Резервацията беше отменена успешно."
 msgstr "The reservation was successfully cancelled."
 
@@ -1570,6 +1581,30 @@ msgstr "Review your photos"
 msgid ""
 "Вашите снимки от сесията са готови за преглед. Влезте в профила си, за да "
 "маркирате любимите си кадри:"
+msgstr ""
+
+#: templates/emails/marks_finalized_email.html:3
+#: templates/emails/marks_finalized_email_subject.txt:1
+#, python-format
+msgid "%(client_name)s финализира маркираните снимки"
+msgstr ""
+
+#: templates/emails/marks_finalized_email.html:5
+msgid "Готово за обработка"
+msgstr "Ready for editing"
+
+#: templates/emails/marks_finalized_email.html:6
+#: templates/emails/marks_finalized_email.txt:1
+#, python-format
+msgid "%(client_name)s финализира маркираните снимки от своята сесия."
+msgstr "%(client_name)s has finalized their marked photos from their session."
+
+#: templates/emails/marks_finalized_email.html:8
+msgid "Вижте маркираните снимки"
+msgstr "View marked photos"
+
+#: templates/emails/marks_finalized_email.txt:3
+msgid "Вижте кои снимки са маркирани и изтеглете оригиналите за обработка:"
 msgstr ""
 
 #: templates/emails/otp_email.html:3 templates/emails/otp_email_subject.txt:1
@@ -1852,6 +1887,22 @@ msgstr "Address"
 #: templates/partials/hero/split.html:12
 msgid "Запазете час"
 msgstr "Book now"
+
+#: templates/pages/marked_photos.html:9
+msgid "МАРКИРАНИ СНИМКИ"
+msgstr "MARKED PHOTOS"
+
+#: templates/pages/marked_photos.html:17
+msgid "Изтегли всички (ZIP)"
+msgstr ""
+
+#: templates/pages/marked_photos.html:39
+msgid "Изтегли"
+msgstr ""
+
+#: templates/pages/marked_photos.html:46
+msgid "Клиентът все още не е маркирал снимки."
+msgstr "The client hasn't marked any photos yet."
 
 # my_profile.html — Profile page redesign
 #: templates/pages/my_profile.html:17

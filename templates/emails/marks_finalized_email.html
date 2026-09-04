@@ -1,0 +1,10 @@
+{% extends "emails/base_email.html" %}
+{% load i18n %}
+{% block subject %}{% blocktrans %}{{ client_name }} финализира маркираните снимки{% endblocktrans %}{% endblock %}
+{% block content %}
+<h1 style="font-family:'Playfair Display', Georgia, serif; font-size:22px; color:#4A3728; margin:0 0 16px;">{% trans "Готово за обработка" %}</h1>
+<p style="font-size:15px; line-height:1.6; margin:0 0 24px;">{% blocktrans %}{{ client_name }} финализира маркираните снимки от своята сесия.{% endblocktrans %}</p>
+<p style="text-align:center; margin:0 0 24px;">
+  <a href="{{ marked_photos_url }}" style="display:inline-block; background-color:#4A3728; color:#FFFFFF; text-decoration:none; font-size:15px; font-weight:600; padding:14px 28px; border-radius:8px;">{% trans "Вижте маркираните снимки" %}</a>
+</p>
+{% endblock %}

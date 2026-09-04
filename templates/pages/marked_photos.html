@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+<section class="profile-page">
+  <div class="profile-container">
+    <div class="section-header-row">
+      <div>
+        <span class="profile-eyebrow">{% trans "МАРКИРАНИ СНИМКИ" %}</span>
+        <h1 class="section-title">{{ reservation.service.name }}</h1>
+        <p class="section-subtitle">
+          {{ reservation.date|date:"d.m.Y" }} &middot; {{ reservation.user.get_full_name|default:reservation.user.phone_number }}
+        </p>
+      </div>
+      {% if marked_images %}
+      <a href="{% url 'marked_photos_zip' reservation.pk %}" class="btn-primary-profile">
+        <i class="fas fa-file-archive"></i> {% trans "Изтегли всички (ZIP)" %}
+      </a>
+      {% endif %}
+    </div>
+
+    {% if marked_images %}
+    <div class="marked-photos-grid">
+      {% for image in marked_images %}
+      <div class="marked-photo-card">
+        <img src="{% url 'marked_photo_image' reservation.pk image.pk %}" alt="{{ image.alt_text }}" class="marked-photo-thumb">
+        <div class="marked-photo-body">
+          {% with labels=image.proof.labels.all %}
+          {% if labels %}
+          <div class="marked-photo-labels">
+            {% for label in labels %}<span class="marked-photo-label">{{ label.name }}</span>{% endfor %}
+          </div>
+          {% endif %}
+          {% endwith %}
+          {% if image.proof.comment %}
+          <p class="marked-photo-comment">{{ image.proof.comment }}</p>
+          {% endif %}
+          <a href="{% url 'marked_photo_download' reservation.pk image.pk %}" class="btn-outline-sm">
+            <i class="fas fa-download"></i> {% trans "Изтегли" %}
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-state-msg">{% trans "Клиентът все още не е маркирал снимки." %}</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
