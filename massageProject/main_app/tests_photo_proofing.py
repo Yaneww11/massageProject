@@ -28,7 +28,7 @@ class ProofingModelsBase(TestCase):
         WorkingHours.objects.create(
             specialist=self.specialist, day_of_week=0, start_time=time_cls(9, 0), end_time=time_cls(17, 0),
         )
-        self.gallery = Gallery.objects.create(gallery_type=Gallery.TYPE_RESERVATION)
+        self.gallery = Gallery.objects.create(gallery_type=Gallery.TYPE_PROOFING)
         self.image = Image.objects.create(gallery=self.gallery, order=0, alt_text='Photo 1', image='gallery/test.jpg')
         self.reservation = Reservation.objects.create(
             user=self.user, service=self.service, specialist=self.specialist,
@@ -312,7 +312,7 @@ class ProofImageServingViewTest(ProofingModelsBase):
 
     def test_token_for_image_owned_by_another_user_is_rejected(self):
         other_user = self._make_other_user()
-        other_gallery = Gallery.objects.create(gallery_type=Gallery.TYPE_RESERVATION)
+        other_gallery = Gallery.objects.create(gallery_type=Gallery.TYPE_PROOFING)
         other_image = Image.objects.create(
             gallery=other_gallery, order=0, alt_text='Other photo', image='gallery/other.jpg',
         )

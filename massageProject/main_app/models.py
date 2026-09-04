@@ -313,6 +313,22 @@ class Reservation(models.Model):
         (STATUS_DELETED, _('Отказана')),
     ]
 
+    # Derived photo-workflow phase (display-only, never stored) — see `phase` below.
+    PHASE_FINALS_DELIVERED = 'finals_delivered'
+    PHASE_FINALS_READY = 'finals_ready'
+    PHASE_EDITING = 'editing'
+    PHASE_AWAITING_REVIEW = 'awaiting_review'
+    PHASE_GALLERY_UPLOADED = 'gallery_uploaded'
+
+    PHOTO_PHASE_CHOICES = [
+        (PHASE_FINALS_DELIVERED, _('Финалите са доставени')),
+        (PHASE_FINALS_READY, _('Финалните снимки са готови')),
+        (PHASE_EDITING, _('В процес на обработка')),
+        (PHASE_AWAITING_REVIEW, _('Изчаква преглед от клиента')),
+        (PHASE_GALLERY_UPLOADED, _('Галерията е качена')),
+    ]
+    PHOTO_PHASE_LABELS = dict(PHOTO_PHASE_CHOICES)
+
     service = models.ForeignKey(
         Service,
         on_delete=models.CASCADE,
@@ -372,6 +388,26 @@ class Reservation(models.Model):
         blank=True,
     )
 
+    final_gallery = models.OneToOneField(
+        "Gallery",
+        on_delete=models.CASCADE,
+        related_name='final_gallery_reservation',
+        null=True,
+        blank=True,
+        help_text=_(
+            'Готовите, обработени снимки, доставени на клиента. Показва се в профила на '
+            'клиента под съответната резервация, след като бъде прикачена тук.'
+        ),
+    )
+
+    finals_delivered_at = models.DateTimeField(
+        null=True, blank=True,
+        help_text=_(
+            'Кога финалните снимки са изпратени на клиента по имейл. Попълва се '
+            'автоматично при успешно изпращане.'
+        ),
+    )
+
     need_client_review = models.BooleanField(
         default=False,
         help_text=_(
@@ -424,6 +460,8 @@ class Reservation(models.Model):
         self._loaded_date = self.date
         self._loaded_time = self.time
         self._loaded_status = self.status
+        self._loaded_final_gallery_id = self.final_gallery_id
+        self._loaded_finals_delivered_at = self.finals_delivered_at
 
     @property
     def end_time(self):
@@ -432,6 +470,35 @@ class Reservation(models.Model):
         return (start_dt + duration).time()
 
     def clean(self):
+        # Final Gallery invariants apply to every reservation regardless of
+        # status (finals are delivered for completed reservations, which the
+        # early-returns below would otherwise skip past). Checked on
+        # transition only (mirroring the `is_new_or_rescheduled` idiom below)
+        # so that editing an unrelated field on an already-delivered
+        # reservation — e.g. unlock_proofing() clearing proofing_finalized_at —
+        # doesn't retroactively fail validation.
+        final_gallery_is_new_or_changed = (
+            self.pk is None or self.final_gallery_id != self._loaded_final_gallery_id
+        )
+        if final_gallery_is_new_or_changed and self.final_gallery_id and not self.is_proofing_finalized:
+            raise ValidationError({
+                'final_gallery': _(
+                    'Финална галерия може да бъде прикачена само след като клиентът е '
+                    'финализирал прегледа на снимките си.'
+                )
+            })
+
+        finals_delivered_is_new_or_changed = (
+            self.pk is None or self.finals_delivered_at != self._loaded_finals_delivered_at
+        )
+        if finals_delivered_is_new_or_changed and self.finals_delivered_at and not self.final_gallery_id:
+            raise ValidationError({
+                'finals_delivered_at': _(
+                    'Не може да се отбележи доставка на финални снимки преди да е прикачена '
+                    'финална галерия.'
+                )
+            })
+
         # Use _id to avoid RelatedObjectDoesNotExist if the field is not set
         if not all([self.service_id, self.specialist_id, self.date, self.time]):
             return
@@ -519,6 +586,32 @@ class Reservation(models.Model):
         self.need_client_review = True
         self.save(update_fields=['proofing_finalized_at', 'need_client_review'])
 
+    @property
+    def is_finals_delivered(self):
+        return self.finals_delivered_at is not None
+
+    @property
+    def phase(self):
+        """Derived, not-stored photo-workflow stage, highest priority first.
+        Falls through to the plain booking status once no photo workflow has
+        started — this is what makes it safe to compute unconditionally
+        regardless of photographer mode (see ADR 0004)."""
+        if self.final_gallery_id and self.finals_delivered_at:
+            return self.PHASE_FINALS_DELIVERED
+        if self.final_gallery_id:
+            return self.PHASE_FINALS_READY
+        if self.proofing_finalized_at:
+            return self.PHASE_EDITING
+        if self.gallery_id and self.need_client_review:
+            return self.PHASE_AWAITING_REVIEW
+        if self.gallery_id:
+            return self.PHASE_GALLERY_UPLOADED
+        return self.status
+
+    @property
+    def phase_display(self):
+        return self.PHOTO_PHASE_LABELS.get(self.phase, self.get_status_display())
+
     def save(self, *args, **kwargs):
         if self.status == self.STATUS_ACTIVE and self.specialist_id:
             with transaction.atomic():
@@ -530,6 +623,12 @@ class Reservation(models.Model):
         else:
             self.full_clean()
             super().save(*args, **kwargs)
+        # Re-snapshot so a second save() on this same in-memory instance (e.g.
+        # unlock_proofing() called right after a final_gallery attach) checks
+        # transitions against what's now in the DB, not what was loaded at
+        # __init__ time.
+        self._loaded_final_gallery_id = self.final_gallery_id
+        self._loaded_finals_delivered_at = self.finals_delivered_at
 
     class Meta:
         verbose_name = _('Резервация')
@@ -551,12 +650,14 @@ class Reservation(models.Model):
 
 class Gallery(models.Model):
     TYPE_HOMEPAGE = 'homepage'
-    TYPE_RESERVATION = 'reservation'
+    TYPE_PROOFING = 'proofing'
     TYPE_ALBUM = 'album'
+    TYPE_FINAL = 'final'
     TYPE_CHOICES = [
         (TYPE_HOMEPAGE, _('Начална страница')),
-        (TYPE_RESERVATION, _('Резервация')),
+        (TYPE_PROOFING, _('Преглед на снимки')),
         (TYPE_ALBUM, _('Албум')),
+        (TYPE_FINAL, _('Финална галерия')),
     ]
 
     gallery_type = models.CharField(
@@ -564,9 +665,10 @@ class Gallery(models.Model):
         verbose_name=_('Тип галерия'),
         help_text=_(
             'Определя къде се показва тази галерия: "Начална страница" — секцията с '
-            'галерия на началната страница (може да има само една); "Резервация" — '
-            'снимки, свързани с конкретна резервация; "Албум" — показва се като '
-            'самостоятелен албум на страницата с галерии.'
+            'галерия на началната страница (може да има само една); "Преглед на снимки" — '
+            'снимки, свързани с преглед на резервация от клиента; "Албум" — показва се като '
+            'самостоятелен албум на страницата с галерии; "Финална галерия" — готовите, '
+            'обработени снимки, доставени на клиента.'
         ),
     )
     title = models.CharField(
@@ -686,6 +788,11 @@ class Image(WebPImageFieldsMixin, models.Model):
 
     def clean(self):
         super().clean()
+        # Final Gallery images are already-edited deliverables, not proofing
+        # previews — the minimum-dimension rule exists for live preview
+        # display and doesn't apply to them (see ADR 0004).
+        if self.gallery_id and self.gallery.gallery_type == Gallery.TYPE_FINAL:
+            return
         if self.image and not self.image._committed:
             self.image.seek(0)
             with PILImage.open(self.image) as img:

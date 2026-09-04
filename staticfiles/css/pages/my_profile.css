@@ -1103,3 +1103,29 @@
         text-align: center;
     }
 }
+
+/* ── Proofing Gallery upload form ────────────────────── */
+.gallery-upload-form {
+    max-width: 640px;
+}
+
+.label-formset-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.label-formset-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+}
+
+@media (max-width: 600px) {
+    .label-formset-row {
+        grid-template-columns: 1fr;
+    }
+}

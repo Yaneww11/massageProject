@@ -31,6 +31,14 @@ def booking_enabled_required(view_func):
     return wrapper
 
 
+class PhotographerModeMixin:
+    def dispatch(self, request, *args, **kwargs):
+        from django.conf import settings
+        if not settings.IS_PHOTOGRAPHER_WEBSITE:
+            raise Http404
+        return super().dispatch(request, *args, **kwargs)
+
+
 class CommentsEnabledMixin:
     def dispatch(self, request, *args, **kwargs):
         from massageProject.main_app.models import SiteConfiguration

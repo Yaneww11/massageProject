@@ -252,6 +252,12 @@
     {% endif %}
 
     {% else %}
+    {% if is_photographer_website %}
+    <div class="section-header-row">
+      <div></div>
+      <a href="{% url 'proofing_gallery_upload' %}" class="btn-primary-profile">{% trans "Качи галерия за преглед" %}</a>
+    </div>
+    {% endif %}
     {% include "partials/specialist_calendar.html" %}
     {% endif %}
 

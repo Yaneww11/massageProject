@@ -1,9 +1,34 @@
 from django import forms
-from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator, MinValueValidator
 from django.utils.translation import gettext_lazy as _
 
 from massageProject.main_app.mixins import DisableFieldMixin
 from massageProject.main_app.models import Reservation, Comment
+
+
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+
+class MultipleFileField(forms.FileField):
+    """FileField that accepts and cleans a list of files (Django's
+    documented recipe for native multi-file <input> support — Django has no
+    built-in multi-file form field)."""
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('widget', MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single_file_clean = super().clean
+        if isinstance(data, (list, tuple)):
+            result = [single_file_clean(d, initial) for d in data]
+        else:
+            result = single_file_clean(data, initial)
+        if self.required and not result:
+            raise ValidationError(self.error_messages['required'], code='required')
+        return result
 
 _NAME_VALIDATOR = RegexValidator(
     regex=r'^[A-Za-zА-Яа-яЁё\s\-]+$',
@@ -91,3 +116,45 @@ class CommentForm(forms.ModelForm):
             'class': 'form-control',
             'placeholder': _('Твоя коментар'),
         })
+
+
+class ProofingGalleryUploadForm(forms.Form):
+    reservation = forms.ModelChoiceField(queryset=Reservation.objects.none(), label=_('Резервация'))
+    images = MultipleFileField(label=_('Снимки'))
+
+    def __init__(self, *args, reservation_queryset=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if reservation_queryset is not None:
+            self.fields['reservation'].queryset = reservation_queryset
+        self.fields['reservation'].label_from_instance = lambda r: (
+            f"{r.specialist.name} — {r.date} {r.time.strftime('%H:%M')} — {r.service.name} — "
+            f"{r.user.get_full_name() or r.user.phone_number}"
+        )
+        self.fields['reservation'].widget.attrs.update({'class': 'form-textarea'})
+        self.fields['images'].widget.attrs.update({'class': 'form-textarea'})
+
+
+class ProofingLabelForm(forms.Form):
+    name = forms.CharField(
+        max_length=100, required=False, label=_('Етикет'),
+        widget=forms.TextInput(attrs={'class': 'form-textarea'}),
+    )
+    cap = forms.IntegerField(
+        required=False, validators=[MinValueValidator(1)], label=_('Максимален брой'),
+        widget=forms.NumberInput(attrs={'class': 'form-textarea'}),
+    )
+
+    def clean(self):
+        cleaned = super().clean()
+        name = cleaned.get('name')
+        cap = cleaned.get('cap')
+        if name and not cap:
+            raise ValidationError(
+                _('Въведете максимален брой за етикета "%(name)s".') % {'name': name}
+            )
+        if cap and not name:
+            raise ValidationError(_('Въведете име за етикета.'))
+        return cleaned
+
+
+ProofingLabelFormSet = forms.formset_factory(ProofingLabelForm, extra=3, can_delete=True)

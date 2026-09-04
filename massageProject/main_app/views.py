@@ -3,6 +3,8 @@ import logging
 from io import BytesIO
 
 from django.conf import settings
+from django import forms as django_forms
+from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.views.generic import TemplateView, ListView, CreateView
@@ -23,11 +25,13 @@ from django.http import HttpResponse, JsonResponse, Http404
 from PIL import Image as PILImage, ImageDraw, ImageFont
 
 from massageProject.main_app.context_processors import get_cached_homepage
+from massageProject.main_app.emails import send_gallery_ready_email
 from massageProject.main_app.ics import build_reservation_ics
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
-    ReservationDeleteForm, CommentForm, UserNameForm
+    ReservationDeleteForm, CommentForm, UserNameForm, ProofingGalleryUploadForm, \
+    ProofingLabelFormSet
 from massageProject.main_app.mixins import BookingEnabledMixin, booking_enabled_required, \
-    CommentsEnabledMixin, comments_enabled_required
+    CommentsEnabledMixin, comments_enabled_required, PhotographerModeMixin
 from massageProject.main_app.models import Service, Specialist, Reservation, Comment, WorkingHours, ServiceGroup, \
     Gallery, Image, ImageProof, PhotoLabel
 
@@ -401,6 +405,102 @@ def _build_week_calendar(specialist, week_start):
         })
 
     return {'days': days, 'hour_marks': hour_marks}
+
+
+def _resolve_photo_workflow_scope(user):
+    """(is_staff_mode, specialist) for the photographer-mode photo-workflow
+    views — staff full-access takes precedence, mirroring ProfilePage's role
+    resolution. Returns (None, None) if the user has neither."""
+    if user.has_perm('main_app.view_all_reservations'):
+        return True, None
+    specialist_link = getattr(user, 'specialist_profile', None)
+    if specialist_link and user.has_perm('main_app.view_specialist_reservations'):
+        return False, specialist_link
+    return None, None
+
+
+class ProofingGalleryUploadView(PhotographerModeMixin, LoginRequiredMixin, TemplateView):
+    template_name = 'pages/proofing_gallery_upload.html'
+
+    def _load_scope(self):
+        is_staff_mode, specialist = _resolve_photo_workflow_scope(self.request.user)
+        if is_staff_mode is None:
+            raise PermissionDenied
+        self.is_staff_mode = is_staff_mode
+        self.specialist = specialist
+
+    def _reservation_queryset(self):
+        qs = Reservation.objects.filter(gallery__isnull=True).select_related('specialist', 'service', 'user')
+        if not self.is_staff_mode:
+            qs = qs.filter(specialist=self.specialist)
+        return qs.order_by('-date', '-time')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = _('Качване на галерия за преглед')
+        if 'upload_form' not in context:
+            context['upload_form'] = ProofingGalleryUploadForm(reservation_queryset=self._reservation_queryset())
+        if 'label_formset' not in context:
+            context['label_formset'] = ProofingLabelFormSet(prefix='labels')
+        return context
+
+    def get(self, request, *args, **kwargs):
+        self._load_scope()
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self._load_scope()
+        upload_form = ProofingGalleryUploadForm(
+            request.POST, request.FILES, reservation_queryset=self._reservation_queryset(),
+        )
+        label_formset = ProofingLabelFormSet(request.POST, prefix='labels')
+
+        if upload_form.is_valid() and label_formset.is_valid():
+            reservation = upload_form.cleaned_data['reservation']
+            gallery = Gallery.objects.create(gallery_type=Gallery.TYPE_PROOFING)
+            image_validator = django_forms.ImageField()
+            uploaded = 0
+            for order, uploaded_file in enumerate(upload_form.cleaned_data['images']):
+                try:
+                    image_validator.clean(uploaded_file)
+                    image = Image(gallery=gallery, image=uploaded_file, order=order)
+                    image.full_clean()
+                    image.save()
+                except ValidationError as exc:
+                    messages.error(request, _('Пропусната %(name)s: %(error)s') % {
+                        'name': uploaded_file.name, 'error': '; '.join(exc.messages),
+                    })
+                    continue
+                uploaded += 1
+
+            if uploaded == 0:
+                gallery.delete()
+                messages.error(request, _('Нито една снимка не беше качена успешно.'))
+                return self.render_to_response(
+                    self.get_context_data(upload_form=upload_form, label_formset=label_formset)
+                )
+
+            label_order = 0
+            for label_form in label_formset:
+                if not label_form.cleaned_data:
+                    continue
+                name = label_form.cleaned_data.get('name')
+                cap = label_form.cleaned_data.get('cap')
+                if name and cap:
+                    PhotoLabel.objects.create(gallery=gallery, name=name, cap=cap, order=label_order)
+                    label_order += 1
+
+            reservation.gallery = gallery
+            reservation.need_client_review = True
+            reservation.save(update_fields=['gallery', 'need_client_review'])
+            send_gallery_ready_email(request, reservation)
+
+            messages.success(request, _('Галерията е качена успешно (%(count)d снимки).') % {'count': uploaded})
+            return redirect('profile_page')
+
+        return self.render_to_response(
+            self.get_context_data(upload_form=upload_form, label_formset=label_formset)
+        )
 
 
 class ProfilePage(LoginRequiredMixin, TemplateView):

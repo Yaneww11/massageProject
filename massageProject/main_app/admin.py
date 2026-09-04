@@ -21,33 +21,10 @@ from massageProject.main_app.models import (
     BusinessWorkingHours, ServiceGroup,
     SiteConfiguration, PhotoLabel,
 )
+from massageProject.main_app.forms import MultipleFileField
 from massageProject.main_app.theme import COLOR_PRESETS, contrast_ratio
 
 # --- Forms ---
-
-class MultipleFileInput(forms.ClearableFileInput):
-    allow_multiple_selected = True
-
-
-class MultipleFileField(forms.FileField):
-    """FileField that accepts and cleans a list of files (Django's
-    documented recipe for native multi-file <input> support — Django has no
-    built-in multi-file form field)."""
-
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault('widget', MultipleFileInput())
-        super().__init__(*args, **kwargs)
-
-    def clean(self, data, initial=None):
-        single_file_clean = super().clean
-        if isinstance(data, (list, tuple)):
-            result = [single_file_clean(d, initial) for d in data]
-        else:
-            result = single_file_clean(data, initial)
-        if self.required and not result:
-            raise ValidationError(self.error_messages['required'], code='required')
-        return result
-
 
 class GalleryBulkImageUploadForm(forms.Form):
     images = MultipleFileField(label=_('Снимки'))
@@ -172,12 +149,12 @@ class WorkingHoursAdmin(ModelAdmin):
 
 @admin.register(Reservation)
 class ReservationAdmin(ModelAdmin):
-    list_display = ('date', 'time', 'get_client_name', 'service', 'specialist', 'status', 'status_updated_at', 'need_client_review')
+    list_display = ('date', 'time', 'get_client_name', 'service', 'specialist', 'status', 'status_updated_at', 'need_client_review', 'phase_badge')
     list_filter = ('status', ReservationDateFilter, 'specialist', 'service', 'date', 'need_client_review', 'proofing_finalized_at')
     search_fields = ('user__phone_number', 'user__first_name', 'user__last_name', 'service__name')
     date_hierarchy = 'date'
     actions = [export_reservations_csv, mark_as_completed, mark_as_noshow, unlock_photo_proofing]
-    readonly_fields = ('updated_at', 'status_updated_at', 'status_updated_by', 'proofing_finalized_at')
+    readonly_fields = ('updated_at', 'status_updated_at', 'status_updated_by', 'proofing_finalized_at', 'phase_badge')
     list_filter_sheet = True
 
     fieldsets = (
@@ -185,24 +162,31 @@ class ReservationAdmin(ModelAdmin):
         (_('Информация за услугата'), {'fields': ('service', 'specialist')}),
         (_('Допълнителни бележки'), {'fields': ('additional_text',)}),
         (_('Системен одит'), {'fields': ('updated_at', 'status_updated_at', 'status_updated_by', 'proofing_finalized_at'), 'classes': ('collapse',)}),
-        (_('Галерия'), {'fields': ('gallery', 'need_client_review')}),
+        (_('Галерия за преглед'), {'fields': ('gallery', 'need_client_review')}),
+        (_('Финална галерия'), {'fields': ('final_gallery', 'finals_delivered_at', 'phase_badge')}),
     )
 
     def get_client_name(self, obj):
         return obj.user.get_full_name() or obj.user.phone_number
     get_client_name.short_description = _('Клиент')
 
+    def phase_badge(self, obj):
+        return obj.phase_display
+    phase_badge.short_description = _('Фаза')
+
     def get_queryset(self, request):
         return Reservation.all_objects.all()
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == 'gallery':
-            unused = Gallery.objects.filter(home_page__isnull=True, reservations__isnull=True)
+        if db_field.name in ('gallery', 'final_gallery'):
+            unused = Gallery.objects.filter(
+                home_page__isnull=True, reservations__isnull=True, final_gallery_reservation__isnull=True,
+            )
             object_id = request.resolver_match.kwargs.get('object_id')
             if object_id:
-                current_gallery_id = Reservation.all_objects.filter(pk=object_id).values_list('gallery_id', flat=True).first()
-                if current_gallery_id:
-                    unused = Gallery.objects.filter(pk=current_gallery_id) | unused
+                current_id = Reservation.all_objects.filter(pk=object_id).values_list(db_field.name + '_id', flat=True).first()
+                if current_id:
+                    unused = Gallery.objects.filter(pk=current_id) | unused
             kwargs['queryset'] = unused.distinct()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
