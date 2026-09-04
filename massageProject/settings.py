@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import json
 import os
+import sys
 import environ
 import sentry_sdk
 from pathlib import Path
@@ -231,7 +232,12 @@ STORAGES = {
         },
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        # Manifest storage requires `collectstatic` to have been run, which `manage.py test`
+        # doesn't do; fall back to plain storage under the test runner to avoid
+        # "Missing staticfiles manifest entry" errors on every template using {% static %}.
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+        if sys.argv[1:2] == ["test"]
+        else "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 
