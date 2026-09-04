@@ -16,7 +16,6 @@ git pull origin main
 pip install --no-cache-dir -r requirements.txt
 
 python manage.py migrate --noinput
-python manage.py compilemessages
 python manage.py collectstatic --noinput
 
 if [ -f "$GUNICORN_PID_FILE" ] && kill -0 "$(cat "$GUNICORN_PID_FILE")" 2>/dev/null; then
