@@ -19,6 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.i18n import i18n_patterns
+from django.views.generic import RedirectView
 import django.conf.urls.i18n as i18n_urls
 
 # Admin Customization
@@ -28,6 +29,9 @@ admin.site.index_title = "Welcome to the Studio Management Dashboard"
 
 urlpatterns = [
     path('i18n/', include(i18n_urls)),
+    # Always default the unprefixed root to /bg/, regardless of browser language,
+    # instead of LocaleMiddleware's Accept-Language-based redirect.
+    path('', RedirectView.as_view(url='/bg/'), name='root-redirect'),
 ]
 
 urlpatterns += [

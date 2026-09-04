@@ -35,7 +35,46 @@ class ServiceGroup(models.Model):
         return self.name
 
 
-class Service(models.Model):
+class WebPImageFieldsMixin:
+    """Converts freshly-uploaded images in `webp_image_fields` to WebP on save."""
+    WEBP_MAX_DIMENSION = 2560
+    WEBP_QUALITY = 80
+    webp_image_fields = ()
+
+    def save(self, *args, **kwargs):
+        # _committed is False only for a freshly assigned upload, never for a FieldFile
+        # loaded from an existing row — this keeps re-saves of unrelated fields cheap.
+        for field_name in self.webp_image_fields:
+            field_file = getattr(self, field_name)
+            if field_file and not field_file._committed:
+                self.convert_image_field_to_webp(field_name)
+        super().save(*args, **kwargs)
+
+    def convert_image_field_to_webp(self, field_name):
+        field_file = getattr(self, field_name)
+        field_file.seek(0)
+        with PILImage.open(field_file) as img:
+            img = ImageOps.exif_transpose(img)
+            if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+                img = img.convert('RGBA')
+            elif img.mode != 'RGB':
+                img = img.convert('RGB')
+            width, height = img.size
+            longest = max(width, height)
+            if longest > self.WEBP_MAX_DIMENSION:
+                scale = self.WEBP_MAX_DIMENSION / longest
+                img = img.resize(
+                    (round(width * scale), round(height * scale)), PILImage.Resampling.LANCZOS,
+                )
+            buffer = BytesIO()
+            img.save(buffer, format='WEBP', quality=self.WEBP_QUALITY)
+        new_name = os.path.splitext(field_file.name)[0] + '.webp'
+        setattr(self, field_name, ContentFile(buffer.getvalue(), name=new_name))
+
+
+class Service(WebPImageFieldsMixin, models.Model):
+    webp_image_fields = ('image',)
+
     name = models.CharField(
         max_length=80,
         help_text=_(
@@ -115,7 +154,8 @@ class Service(models.Model):
     def __str__(self):
         return self.name
 
-class Specialist(models.Model):
+class Specialist(WebPImageFieldsMixin, models.Model):
+    webp_image_fields = ('image',)
     name = models.CharField(
         max_length=255,
         help_text=_(
@@ -174,7 +214,8 @@ class WorkingHours(models.Model):
 
 DESCRIPTION_LONG_THRESHOLD_CHARS = 500
 
-class BusinessInfo(models.Model):
+class BusinessInfo(WebPImageFieldsMixin, models.Model):
+    webp_image_fields = ('main_image',)
     name = models.CharField(
         max_length=255,
         help_text=_('Използва се като алтернативен текст (alt) на снимката на студиото в страница "За нас".'),
@@ -587,7 +628,7 @@ class Gallery(models.Model):
         return self.images.count()
 
 
-class Image(models.Model):
+class Image(WebPImageFieldsMixin, models.Model):
     CROP_TOP = 'top'
     CROP_CENTER = 'center'
     CROP_BOTTOM = 'bottom'
@@ -598,8 +639,7 @@ class Image(models.Model):
     ]
 
     MIN_DIMENSION = 600
-    MAX_DIMENSION = 2560
-    WEBP_QUALITY = 80
+    webp_image_fields = ('image',)
 
     gallery = models.ForeignKey(
         'Gallery', on_delete=models.CASCADE, related_name='images',
@@ -658,31 +698,6 @@ class Image(models.Model):
                         'Минималният размер е %(min)dpx от по-късата страна.'
                     ) % {'width': width, 'height': height, 'min': self.MIN_DIMENSION}
                 })
-
-    def save(self, *args, **kwargs):
-        # _committed is False only for a freshly assigned upload, never for a FieldFile
-        # loaded from an existing row — this keeps re-saves of unrelated fields cheap.
-        if self.image and not self.image._committed:
-            self._process_image()
-        super().save(*args, **kwargs)
-
-    def _process_image(self):
-        self.image.seek(0)
-        with PILImage.open(self.image) as img:
-            img = ImageOps.exif_transpose(img)
-            if img.mode not in ('RGB', 'RGBA'):
-                img = img.convert('RGB')
-            width, height = img.size
-            longest = max(width, height)
-            if longest > self.MAX_DIMENSION:
-                scale = self.MAX_DIMENSION / longest
-                img = img.resize(
-                    (round(width * scale), round(height * scale)), PILImage.Resampling.LANCZOS,
-                )
-            buffer = BytesIO()
-            img.save(buffer, format='WEBP', quality=self.WEBP_QUALITY)
-        new_name = os.path.splitext(self.image.name)[0] + '.webp'
-        self.image = ContentFile(buffer.getvalue(), name=new_name)
 
 
 class PhotoLabel(models.Model):
@@ -755,7 +770,8 @@ class ImageProof(models.Model):
         return f'ImageProof({self.image_id})'
 
 
-class HomePage(models.Model):
+class HomePage(WebPImageFieldsMixin, models.Model):
+    webp_image_fields = ('logo',)
     brand_name = models.CharField(
         max_length=255,
         help_text=_(
