@@ -18,11 +18,14 @@ pip install --no-cache-dir -r requirements.txt
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput
 
-if [ -f "$GUNICORN_PID_FILE" ] && kill -0 "$(cat "$GUNICORN_PID_FILE")" 2>/dev/null; then
-    kill "$(cat "$GUNICORN_PID_FILE")"
-    while kill -0 "$(cat "$GUNICORN_PID_FILE")" 2>/dev/null; do
-        sleep 1
-    done
+if [ -f "$GUNICORN_PID_FILE" ]; then
+    OLD_PID="$(cat "$GUNICORN_PID_FILE" 2>/dev/null || true)"
+    if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
+        kill "$OLD_PID"
+        while kill -0 "$OLD_PID" 2>/dev/null; do
+            sleep 1
+        done
+    fi
 fi
 
 nohup gunicorn massageProject.wsgi:application \
@@ -30,4 +33,5 @@ nohup gunicorn massageProject.wsgi:application \
     --workers "$GUNICORN_WORKERS" \
     --pid "$GUNICORN_PID_FILE" \
     --daemon \
-    --log-file "$REPO_DIR/gunicorn.log"
+    --log-file "$REPO_DIR/gunicorn.log" \
+    >/dev/null 2>&1
