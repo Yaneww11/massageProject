@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from massageProject.accounts.models import CustomUser
-from massageProject.main_app.models import Gallery, Reservation, Service, Specialist
+from massageProject.main_app.models import Gallery, Reservation, Service, Specialist, WorkingHours
 
 
 def _make_uploaded_image(name='photo.jpg', size=(800, 800)):
@@ -164,3 +164,27 @@ class ProofingGalleryUploadViewTest(TestCase):
         email = mail.outbox[0]
         self.assertEqual(email.to, [self.client_user.email])
         self.assertIn(reverse('photo_proofing'), email.body)
+
+    def test_reservation_revalidation_failure_on_save_rolls_back_gallery_not_a_500(self):
+        # Only STATUS_ACTIVE reservations re-run the working-hours/overlap
+        # checks in Reservation.clean() on every save() — construct one, then
+        # remove its specialist's working hours so the gallery-attach save()
+        # re-validates against a schedule that's since changed.
+        future = timezone.localdate() + timedelta(days=7)
+        while future.weekday() != 0:
+            future += timedelta(days=1)
+        WorkingHours.objects.create(
+            specialist=self.specialist, day_of_week=0, start_time=time_cls(9, 0), end_time=time_cls(17, 0),
+        )
+        active_reservation = Reservation.objects.create(
+            user=self.client_user, service=self.service, specialist=self.specialist,
+            date=future, time=time_cls(10, 0), status=Reservation.STATUS_ACTIVE,
+        )
+        WorkingHours.objects.filter(specialist=self.specialist, day_of_week=0).delete()
+
+        self.client.force_login(self.specialist_user)
+        response = self._post(active_reservation, [_make_uploaded_image('a.jpg')])
+        self.assertEqual(response.status_code, 200)
+        active_reservation.refresh_from_db()
+        self.assertIsNone(active_reservation.gallery_id)
+        self.assertEqual(Gallery.objects.filter(gallery_type=Gallery.TYPE_PROOFING).count(), 0)

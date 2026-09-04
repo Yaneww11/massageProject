@@ -432,10 +432,23 @@ class ProofingGalleryUploadView(PhotographerModeMixin, LoginRequiredMixin, Templ
 
             reservation.gallery = gallery
             reservation.need_client_review = True
-            reservation.save(update_fields=['gallery', 'need_client_review'])
-            send_gallery_ready_email(request, reservation)
+            try:
+                reservation.save(update_fields=['gallery', 'need_client_review'])
+            except ValidationError as exc:
+                gallery.delete()
+                messages.error(request, _('Резервацията не можа да бъде обновена: %(error)s') % {
+                    'error': '; '.join(exc.messages),
+                })
+                return self.render_to_response(
+                    self.get_context_data(upload_form=upload_form, label_formset=label_formset)
+                )
 
-            messages.success(request, _('Галерията е качена успешно (%(count)d снимки).') % {'count': uploaded})
+            if not send_gallery_ready_email(request, reservation):
+                messages.warning(request, _(
+                    'Галерията е качена успешно (%(count)d снимки), но имейлът до клиента не бе изпратен.'
+                ) % {'count': uploaded})
+            else:
+                messages.success(request, _('Галерията е качена успешно (%(count)d снимки).') % {'count': uploaded})
             return redirect('profile_page')
 
         return self.render_to_response(
@@ -587,13 +600,24 @@ class FinalGalleryUploadView(PhotographerModeMixin, LoginRequiredMixin, Template
                 return self.render_to_response(self.get_context_data(upload_form=upload_form))
 
             reservation.final_gallery = gallery
-            reservation.save(update_fields=['final_gallery'])
-            send_final_delivery_email(request, reservation)
+            try:
+                reservation.save(update_fields=['final_gallery'])
+            except ValidationError as exc:
+                gallery.delete()
+                messages.error(request, _('Резервацията не можа да бъде обновена: %(error)s') % {
+                    'error': '; '.join(exc.messages),
+                })
+                return self.render_to_response(self.get_context_data(upload_form=upload_form))
 
-            messages.success(
-                request,
-                _('Финалната галерия е качена и доставена успешно (%(count)d снимки).') % {'count': uploaded},
-            )
+            if send_final_delivery_email(request, reservation):
+                messages.success(
+                    request,
+                    _('Финалната галерия е качена и доставена успешно (%(count)d снимки).') % {'count': uploaded},
+                )
+            else:
+                messages.warning(request, _(
+                    'Финалната галерия е качена успешно (%(count)d снимки), но имейлът до клиента не бе изпратен.'
+                ) % {'count': uploaded})
             return redirect('profile_page')
 
         return self.render_to_response(self.get_context_data(upload_form=upload_form))
@@ -715,13 +739,19 @@ def _build_reservations_table_context(request, base_qs, is_staff):
 
     service_id = request.GET.get('service_id', '')
     if service_id:
-        qs = qs.filter(service_id=service_id)
+        if service_id.isdigit():
+            qs = qs.filter(service_id=service_id)
+        else:
+            service_id = ''
 
     specialist_id = ''
     if is_staff:
         specialist_id = request.GET.get('specialist_id', '')
         if specialist_id:
-            qs = qs.filter(specialist_id=specialist_id)
+            if specialist_id.isdigit():
+                qs = qs.filter(specialist_id=specialist_id)
+            else:
+                specialist_id = ''
 
     query = request.GET.get('q', '').strip()
     if query:

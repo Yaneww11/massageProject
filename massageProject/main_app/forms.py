@@ -164,4 +164,4 @@ class ProofingLabelForm(forms.Form):
         return cleaned
 
 
-ProofingLabelFormSet = forms.formset_factory(ProofingLabelForm, extra=3, can_delete=True)
+ProofingLabelFormSet = forms.formset_factory(ProofingLabelForm, extra=3)

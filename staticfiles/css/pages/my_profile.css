@@ -996,7 +996,7 @@
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     overflow: hidden;
-    background: #fff;
+    background: var(--bg-paper);
 }
 
 .marked-photo-thumb {

@@ -219,3 +219,22 @@ class ReservationAdminFinalGalleryFieldTest(FinalGalleryModelsBase):
         self.assertIn(final_gallery, formfield.queryset)
         self.assertIn(spare_gallery, formfield.queryset)
         self.assertNotIn(self.proofing_gallery, formfield.queryset)
+
+
+class UnlockPhotoProofingActionTest(FinalGalleryModelsBase):
+    def setUp(self):
+        super().setUp()
+        self.admin_instance = ReservationAdmin(Reservation, django_admin.site)
+        self.factory = RequestFactory()
+
+    def test_unlock_skips_reservation_whose_finals_are_already_ready_or_delivered(self):
+        from massageProject.main_app.admin import unlock_photo_proofing
+
+        self.reservation.finalize_proofing()
+        self.reservation.final_gallery = self._make_final_gallery()
+        self.reservation.save()
+
+        request = self.factory.post('/admin/main_app/reservation/')
+        unlock_photo_proofing(self.admin_instance, request, Reservation.objects.filter(pk=self.reservation.pk))
+        self.reservation.refresh_from_db()
+        self.assertTrue(self.reservation.is_proofing_finalized)

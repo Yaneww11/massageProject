@@ -162,6 +162,18 @@ class TableFilterTest(SpecialistReservationsTableTestBase):
         reservations = response.context['reservations']
         self.assertEqual(list(reservations), [self.active])
 
+    def test_non_numeric_service_id_is_ignored_not_a_500(self):
+        response = self.client.get(reverse('profile_page'), {'service_id': 'abc'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['service_id'], '')
+
+    def test_non_numeric_specialist_id_is_ignored_not_a_500(self):
+        self.client.logout()
+        self.client.force_login(self.staff_user)
+        response = self.client.get(reverse('profile_page'), {'specialist_id': 'abc'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['specialist_id'], '')
+
     def test_filter_by_service(self):
         response = self.client.get(reverse('profile_page'), {'service_id': self.service_b.pk})
         reservations = response.context['reservations']

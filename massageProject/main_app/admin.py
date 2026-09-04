@@ -76,7 +76,10 @@ def mark_as_noshow(modeladmin, request, queryset):
 @admin.action(description=_('Отключи прегледа на снимки'))
 def unlock_photo_proofing(modeladmin, request, queryset):
     for reservation in queryset:
-        if reservation.is_proofing_finalized:
+        # A delivered Final Gallery must remain untouched even if a
+        # bookkeeping correction later reopens proofing (story 28) — skip
+        # reservations whose finals are already ready or delivered.
+        if reservation.is_proofing_finalized and not reservation.final_gallery_id:
             reservation.unlock_proofing()
 
 # --- Filters ---
@@ -154,7 +157,10 @@ class ReservationAdmin(ModelAdmin):
     search_fields = ('user__phone_number', 'user__first_name', 'user__last_name', 'service__name')
     date_hierarchy = 'date'
     actions = [export_reservations_csv, mark_as_completed, mark_as_noshow, unlock_photo_proofing]
-    readonly_fields = ('updated_at', 'status_updated_at', 'status_updated_by', 'proofing_finalized_at', 'phase_badge')
+    readonly_fields = (
+        'updated_at', 'status_updated_at', 'status_updated_by', 'proofing_finalized_at',
+        'finals_delivered_at', 'phase_badge',
+    )
     list_filter_sheet = True
 
     fieldsets = (
@@ -177,9 +183,12 @@ class ReservationAdmin(ModelAdmin):
     def get_queryset(self, request):
         return Reservation.all_objects.all()
 
+    GALLERY_FIELD_TYPES = {'gallery': Gallery.TYPE_PROOFING, 'final_gallery': Gallery.TYPE_FINAL}
+
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name in ('gallery', 'final_gallery'):
+        if db_field.name in self.GALLERY_FIELD_TYPES:
             unused = Gallery.objects.filter(
+                gallery_type=self.GALLERY_FIELD_TYPES[db_field.name],
                 home_page__isnull=True, reservations__isnull=True, final_gallery_reservation__isnull=True,
             )
             object_id = request.resolver_match.kwargs.get('object_id')

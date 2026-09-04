@@ -29,8 +29,6 @@ class SpecialistAdminUserLinkTest(TestCase):
         self.assertIn('user', admin_instance.autocomplete_fields)
 
 
-from django.utils import timezone
-
 from massageProject.accounts.models import CustomUser
 from django.test import Client
 from django.urls import reverse

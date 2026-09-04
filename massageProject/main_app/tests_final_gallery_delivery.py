@@ -3,6 +3,7 @@ import tempfile
 import zipfile
 from datetime import time as time_cls, timedelta
 from io import BytesIO
+from unittest import mock
 
 from PIL import Image as PILImage
 from django.contrib.auth.models import Permission
@@ -99,6 +100,19 @@ class FinalGalleryUploadDeliveryTest(TestCase):
         self.assertEqual(self.reservation.final_gallery.gallery_type, Gallery.TYPE_FINAL)
         self.assertEqual(self.reservation.final_gallery.images.count(), 2)
         self.assertIsNotNone(self.reservation.finals_delivered_at)
+
+    def test_email_send_failure_does_not_500_and_does_not_stamp_delivery(self):
+        self.reservation.finalize_proofing()
+        self.client.force_login(self.specialist_user)
+        with mock.patch(
+            'django.core.mail.EmailMultiAlternatives.send', side_effect=Exception('smtp down'),
+        ):
+            response = self._post(self.reservation, [_make_uploaded_image()])
+        self.assertRedirects(response, reverse('profile_page'))
+        self.reservation.refresh_from_db()
+        # The gallery upload itself still succeeds — only the delivery email failed.
+        self.assertIsNotNone(self.reservation.final_gallery_id)
+        self.assertIsNone(self.reservation.finals_delivered_at)
 
     def test_staff_can_upload_on_behalf_of_specialist(self):
         self.reservation.finalize_proofing()
