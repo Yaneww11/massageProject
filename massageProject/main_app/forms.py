@@ -134,6 +134,13 @@ class ProofingGalleryUploadForm(forms.Form):
         self.fields['images'].widget.attrs.update({'class': 'form-textarea'})
 
 
+class FinalGalleryUploadForm(ProofingGalleryUploadForm):
+    """Same reservation + images shape as ProofingGalleryUploadForm — the
+    view scopes `reservation_queryset` to reservations awaiting a Final
+    Gallery instead of a Proofing Gallery."""
+    pass
+
+
 class ProofingLabelForm(forms.Form):
     name = forms.CharField(
         max_length=100, required=False, label=_('Етикет'),

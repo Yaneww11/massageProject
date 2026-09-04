@@ -1,0 +1,10 @@
+{% extends "emails/base_email.html" %}
+{% load i18n %}
+{% block subject %}{% trans "Финалните ви снимки са готови" %}{% endblock %}
+{% block content %}
+<h1 style="font-family:'Playfair Display', Georgia, serif; font-size:22px; color:#4A3728; margin:0 0 16px;">{% blocktrans %}Здравейте, {{ client_name }}{% endblocktrans %}</h1>
+<p style="font-size:15px; line-height:1.6; margin:0 0 24px;">{% trans "Финалните, обработени снимки от вашата сесия са готови." %}</p>
+<p style="text-align:center; margin:0 0 24px;">
+  <a href="{{ download_url }}" style="display:inline-block; background-color:#4A3728; color:#FFFFFF; text-decoration:none; font-size:15px; font-weight:600; padding:14px 28px; border-radius:8px;">{% trans "Изтеглете вашите снимки" %}</a>
+</p>
+{% endblock %}

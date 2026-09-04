@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
@@ -53,7 +54,8 @@ def send_marks_finalized_email(request, reservation):
 
 def send_final_delivery_email(request, reservation):
     """Notifies the client their Final Gallery is ready, with a secure
-    download link (not an attachment)."""
+    download link (not an attachment). Stamps finals_delivered_at the moment
+    the email sends successfully — no separate manual "mark as delivered" step."""
     client_name = reservation.user.get_full_name() or str(reservation.user.phone_number)
     download_url = request.build_absolute_uri(
         reverse('final_gallery_download', args=[reservation.pk])
@@ -62,3 +64,5 @@ def send_final_delivery_email(request, reservation):
         'client_name': client_name,
         'download_url': download_url,
     })
+    reservation.finals_delivered_at = timezone.now()
+    reservation.save(update_fields=['finals_delivered_at'])

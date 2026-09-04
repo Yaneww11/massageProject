@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-04 21:51+0000\n"
+"POT-Creation-Date: 2026-09-04 21:59+0000\n"
 "PO-Revision-Date: 2026-09-04 06:05+0000\n"
 "Last-Translator: Yane Yanev <admin@admin.com>\n"
 "Language-Team: English\n"
@@ -67,7 +67,7 @@ msgstr ""
 "This phone number is already registered. Please log in to your account."
 
 #: massageProject/accounts/emails.py:13 massageProject/accounts/views.py:39
-#: massageProject/accounts/views.py:50 massageProject/main_app/emails.py:14
+#: massageProject/accounts/views.py:50 massageProject/main_app/emails.py:15
 msgid "Relax & Health"
 msgstr ""
 
@@ -170,7 +170,7 @@ msgid "Login"
 msgstr "Login"
 
 #: massageProject/main_app/admin.py:30 massageProject/main_app/forms.py:123
-#: massageProject/settings.py:376
+#: massageProject/settings.py:376 templates/pages/final_gallery_upload.html:31
 #: templates/pages/proofing_gallery_upload.html:31
 msgid "Снимки"
 msgstr "Photos"
@@ -295,7 +295,8 @@ msgstr "Photo count"
 msgid "Качване на много снимки"
 msgstr "Bulk upload images"
 
-#: massageProject/main_app/admin.py:275 massageProject/main_app/views.py:472
+#: massageProject/main_app/admin.py:275 massageProject/main_app/views.py:473
+#: massageProject/main_app/views.py:635
 #, python-format
 msgid "Пропусната %(name)s: %(error)s"
 msgstr "Skipped %(name)s: %(error)s"
@@ -380,26 +381,27 @@ msgid "Твоя коментар"
 msgstr "Your comment"
 
 #: massageProject/main_app/forms.py:122 massageProject/main_app/models.py:634
+#: templates/pages/final_gallery_upload.html:25
 #: templates/pages/proofing_gallery_upload.html:25
 #: templates/pages/reservation.html:11
 msgid "Резервация"
 msgstr "Reservation"
 
-#: massageProject/main_app/forms.py:139
+#: massageProject/main_app/forms.py:146
 msgid "Етикет"
 msgstr ""
 
-#: massageProject/main_app/forms.py:143 massageProject/main_app/models.py:824
+#: massageProject/main_app/forms.py:150 massageProject/main_app/models.py:824
 #: templates/pages/proofing_gallery_upload.html:54
 msgid "Максимален брой"
 msgstr "Maximum count"
 
-#: massageProject/main_app/forms.py:153
+#: massageProject/main_app/forms.py:160
 #, python-format
 msgid "Въведете максимален брой за етикета \"%(name)s\"."
 msgstr "Enter a maximum count for the label \"%(name)s\"."
 
-#: massageProject/main_app/forms.py:156
+#: massageProject/main_app/forms.py:163
 msgid "Въведете име за етикета."
 msgstr "Enter a name for the label."
 
@@ -1417,80 +1419,90 @@ msgid "Залез"
 msgstr "Sunset"
 
 # views.py
-#: massageProject/main_app/views.py:283
+#: massageProject/main_app/views.py:284
 msgid "Вашият коментар е изпратен успешно и ще бъде публикуван след преглед."
 msgstr ""
 "Your comment was submitted successfully and will be published after review."
 
-#: massageProject/main_app/views.py:303
+#: massageProject/main_app/views.py:304
 msgid "Моля, изчакайте преди да изпратите нов коментар."
 msgstr "Please wait before submitting another comment."
 
-#: massageProject/main_app/views.py:313
+#: massageProject/main_app/views.py:314
 msgid "Въведете мнение"
 msgstr "Please enter a review"
 
-#: massageProject/main_app/views.py:316
+#: massageProject/main_app/views.py:317
 msgid "Мнението не може да надвишава 2000 символа."
 msgstr "The comment cannot exceed 2000 characters."
 
-#: massageProject/main_app/views.py:442
+#: massageProject/main_app/views.py:443
 #: templates/pages/proofing_gallery_upload.html:10
 msgid "Качване на галерия за преглед"
 msgstr "Upload Proofing Gallery"
 
-#: massageProject/main_app/views.py:480
+#: massageProject/main_app/views.py:481 massageProject/main_app/views.py:643
 msgid "Нито една снимка не беше качена успешно."
 msgstr "None of the photos were uploaded successfully."
 
-#: massageProject/main_app/views.py:500
+#: massageProject/main_app/views.py:501
 #, python-format
 msgid "Галерията е качена успешно (%(count)d снимки)."
 msgstr "The gallery was uploaded successfully (%(count)d photos)."
 
-#: massageProject/main_app/views.py:535
+#: massageProject/main_app/views.py:536
 msgid "Маркирани снимки"
 msgstr "Marked Photos"
 
-#: massageProject/main_app/views.py:596
+#: massageProject/main_app/views.py:608
+#: templates/pages/final_gallery_upload.html:10
+msgid "Качване на финална галерия"
+msgstr "Upload Final Gallery"
+
+#: massageProject/main_app/views.py:652
+#, python-format
+msgid "Финалната галерия е качена и доставена успешно (%(count)d снимки)."
+msgstr "The Final Gallery was uploaded and delivered successfully (%(count)d photos)."
+
+#: massageProject/main_app/views.py:696
 msgid "Управление на резервации"
 msgstr "Reservation Management"
 
-#: massageProject/main_app/views.py:790
+#: massageProject/main_app/views.py:890
 msgid "Прегледът е финализиран."
 msgstr "The review has been finalized."
 
-#: massageProject/main_app/views.py:829
+#: massageProject/main_app/views.py:929
 msgid "Проверка на снимки"
 msgstr "Photo review"
 
-#: massageProject/main_app/views.py:864
+#: massageProject/main_app/views.py:964
 msgid "Достигнат е максималният брой за този етикет."
 msgstr "The maximum count for this label has been reached."
 
-#: massageProject/main_app/views.py:880
+#: massageProject/main_app/views.py:980
 msgid "Бележката не може да надвишава 2000 символа."
 msgstr "The note cannot exceed 2000 characters."
 
-#: massageProject/main_app/views.py:894
+#: massageProject/main_app/views.py:994
 msgid "Прегледът вече е финализиран."
 msgstr "The review has already been finalized."
 
-#: massageProject/main_app/views.py:897
+#: massageProject/main_app/views.py:997
 msgid "Маркирайте поне една снимка."
 msgstr "Mark at least one photo."
 
-#: massageProject/main_app/views.py:923
+#: massageProject/main_app/views.py:1023
 msgid "Не можете да променяте резервация по-малко от 24 часа преди часа."
 msgstr ""
 "You cannot modify a reservation less than 24 hours before the appointment."
 
-#: massageProject/main_app/views.py:951
+#: massageProject/main_app/views.py:1051
 msgid "Не можете да отменяте резервация по-малко от 24 часа преди часа."
 msgstr ""
 "You cannot cancel a reservation less than 24 hours before the appointment."
 
-#: massageProject/main_app/views.py:960
+#: massageProject/main_app/views.py:1060
 msgid "Резервацията беше отменена успешно."
 msgstr "The reservation was successfully cancelled."
 
@@ -1555,16 +1567,37 @@ msgstr "Choose files"
 msgid "Качване"
 msgstr "Upload"
 
-#: templates/emails/gallery_ready_email.html:3
-#: templates/emails/gallery_ready_email_subject.txt:1
-msgid "Вашата галерия за преглед е готова"
-msgstr "Your Proofing Gallery is ready"
+#: templates/emails/final_delivery_email.html:3
+#: templates/emails/final_delivery_email_subject.txt:1
+msgid "Финалните ви снимки са готови"
+msgstr "Your final photos are ready"
 
+#: templates/emails/final_delivery_email.html:5
+#: templates/emails/final_delivery_email.txt:1
 #: templates/emails/gallery_ready_email.html:5
 #: templates/emails/gallery_ready_email.txt:1
 #, python-format
 msgid "Здравейте, %(client_name)s"
 msgstr "Hello, %(client_name)s"
+
+#: templates/emails/final_delivery_email.html:6
+msgid "Финалните, обработени снимки от вашата сесия са готови."
+msgstr "Your finished, edited photos from your session are ready."
+
+#: templates/emails/final_delivery_email.html:8
+msgid "Изтеглете вашите снимки"
+msgstr "Download your photos"
+
+#: templates/emails/final_delivery_email.txt:3
+msgid ""
+"Финалните, обработени снимки от вашата сесия са готови. Изтеглете ги от "
+"следния защитен линк:"
+msgstr ""
+
+#: templates/emails/gallery_ready_email.html:3
+#: templates/emails/gallery_ready_email_subject.txt:1
+msgid "Вашата галерия за преглед е готова"
+msgstr "Your Proofing Gallery is ready"
 
 #: templates/emails/gallery_ready_email.html:6
 msgid ""
@@ -1757,6 +1790,20 @@ msgstr "Last"
 msgid "Обратно към За нас"
 msgstr "Back to About Us"
 
+#: templates/pages/final_gallery_upload.html:9
+msgid "ФИНАЛНА ГАЛЕРИЯ"
+msgstr ""
+
+#: templates/pages/final_gallery_upload.html:11
+msgid ""
+"Изберете резервация, чийто клиент вече е финализирал прегледа, и качете "
+"готовите снимки."
+msgstr "Select a reservation whose client has already finalized their review, and upload the finished photos."
+
+#: templates/pages/final_gallery_upload.html:36
+msgid "Качете и доставете"
+msgstr "Upload and deliver"
+
 #: templates/pages/gallery.html:10
 #, fuzzy
 #| msgid "Виж пълната галерия"
@@ -1788,7 +1835,7 @@ msgstr "The album has no photos yet."
 msgid "Увеличена снимка"
 msgstr "Enlarged photo"
 
-#: templates/pages/gallery_album.html:57 templates/pages/my_profile.html:271
+#: templates/pages/gallery_album.html:57 templates/pages/my_profile.html:277
 #: templates/pages/photo_proofing.html:134
 #: templates/pages/photo_proofing.html:143 templates/partials/auth_modal.html:7
 #: templates/partials/specialist_calendar.html:87
@@ -1825,7 +1872,7 @@ msgstr "What our clients say"
 
 #: templates/pages/home.html:62 templates/pages/home.html:64
 #: templates/pages/home.html:111 templates/pages/my_profile.html:204
-#: templates/pages/my_profile.html:272
+#: templates/pages/my_profile.html:278
 msgid "Оставете мнение"
 msgstr "Leave a review"
 
@@ -1841,7 +1888,7 @@ msgstr "Next"
 msgid "Отзив"
 msgstr "Review"
 
-#: templates/pages/home.html:115 templates/pages/my_profile.html:278
+#: templates/pages/home.html:115 templates/pages/my_profile.html:284
 msgid "Оценка"
 msgstr "Rating"
 
@@ -1869,7 +1916,7 @@ msgstr "Thank you! Your review will be published after moderation."
 msgid "Заповядайте"
 msgstr "Welcome"
 
-#: templates/pages/home.html:153 templates/pages/my_profile.html:231
+#: templates/pages/home.html:153 templates/pages/my_profile.html:236
 #: templates/partials/specialist_calendar.html:59
 msgid "Почивен ден"
 msgstr "Day Off"
@@ -2029,38 +2076,46 @@ msgid "ОЦЕНЕНО"
 msgstr "RATED"
 
 #: templates/pages/my_profile.html:209
+msgid "Финални снимки"
+msgstr "Final photos"
+
+#: templates/pages/my_profile.html:214
 msgid "Запазете отново"
 msgstr "Book again"
 
-#: templates/pages/my_profile.html:218
+#: templates/pages/my_profile.html:223
 msgid "Нямате предишни резервации."
 msgstr "You have no past bookings."
 
-#: templates/pages/my_profile.html:227
+#: templates/pages/my_profile.html:232
 msgid "РАБОТНО ВРЕМЕ"
 msgstr "WORKING HOURS"
 
-#: templates/pages/my_profile.html:238
+#: templates/pages/my_profile.html:243
 msgid "КОНТАКТИ"
 msgstr "CONTACTS"
 
-#: templates/pages/my_profile.html:258
+#: templates/pages/my_profile.html:263
 msgid "Качи галерия за преглед"
 msgstr "Upload Proofing Gallery"
 
-#: templates/pages/my_profile.html:289
+#: templates/pages/my_profile.html:264
+msgid "Качи финална галерия"
+msgstr "Upload Final Gallery"
+
+#: templates/pages/my_profile.html:295
 msgid "Вашето мнение"
 msgstr "Your review"
 
-#: templates/pages/my_profile.html:291
+#: templates/pages/my_profile.html:297
 msgid "Споделете своите впечатления..."
 msgstr "Share your impressions..."
 
-#: templates/pages/my_profile.html:293
+#: templates/pages/my_profile.html:299
 msgid "Изпратете"
 msgstr "Submit"
 
-#: templates/pages/my_profile.html:351
+#: templates/pages/my_profile.html:357
 msgid "Грешка при изпращане."
 msgstr "An error occurred while submitting."
 

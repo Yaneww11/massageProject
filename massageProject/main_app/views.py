@@ -27,11 +27,12 @@ from django.http import HttpResponse, FileResponse, JsonResponse, Http404
 from PIL import Image as PILImage, ImageDraw, ImageFont
 
 from massageProject.main_app.context_processors import get_cached_homepage
-from massageProject.main_app.emails import send_gallery_ready_email, send_marks_finalized_email
+from massageProject.main_app.emails import send_gallery_ready_email, send_marks_finalized_email, \
+    send_final_delivery_email
 from massageProject.main_app.ics import build_reservation_ics
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
     ReservationDeleteForm, CommentForm, UserNameForm, ProofingGalleryUploadForm, \
-    ProofingLabelFormSet
+    ProofingLabelFormSet, FinalGalleryUploadForm
 from massageProject.main_app.mixins import BookingEnabledMixin, booking_enabled_required, \
     CommentsEnabledMixin, comments_enabled_required, PhotographerModeMixin
 from massageProject.main_app.models import Service, Specialist, Reservation, Comment, WorkingHours, ServiceGroup, \
@@ -557,13 +558,7 @@ def download_marked_photo(request, reservation_id, image_id):
     return FileResponse(image.image.open('rb'), as_attachment=True, filename=filename)
 
 
-@login_required
-def download_marked_photos_zip(request, reservation_id):
-    if not settings.IS_PHOTOGRAPHER_WEBSITE:
-        raise Http404
-    reservation = _get_owned_reservation_for_photo_workflow(request, reservation_id)
-    images = _marked_images_queryset(reservation)
-
+def _zip_images_response(images, filename):
     buffer = BytesIO()
     with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_STORED) as archive:
         used_names = set()
@@ -577,8 +572,113 @@ def download_marked_photos_zip(request, reservation_id):
     buffer.seek(0)
 
     response = HttpResponse(buffer.getvalue(), content_type='application/zip')
-    response['Content-Disposition'] = f'attachment; filename="marked-photos-reservation-{reservation.pk}.zip"'
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
+
+
+@login_required
+def download_marked_photos_zip(request, reservation_id):
+    if not settings.IS_PHOTOGRAPHER_WEBSITE:
+        raise Http404
+    reservation = _get_owned_reservation_for_photo_workflow(request, reservation_id)
+    images = _marked_images_queryset(reservation)
+    return _zip_images_response(images, f'marked-photos-reservation-{reservation.pk}.zip')
+
+
+class FinalGalleryUploadView(PhotographerModeMixin, LoginRequiredMixin, TemplateView):
+    template_name = 'pages/final_gallery_upload.html'
+
+    def _load_scope(self):
+        is_staff_mode, specialist = _resolve_photo_workflow_scope(self.request.user)
+        if is_staff_mode is None:
+            raise PermissionDenied
+        self.is_staff_mode = is_staff_mode
+        self.specialist = specialist
+
+    def _reservation_queryset(self):
+        qs = Reservation.objects.filter(
+            proofing_finalized_at__isnull=False, final_gallery__isnull=True,
+        ).select_related('specialist', 'service', 'user')
+        if not self.is_staff_mode:
+            qs = qs.filter(specialist=self.specialist)
+        return qs.order_by('-date', '-time')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = _('Качване на финална галерия')
+        if 'upload_form' not in context:
+            context['upload_form'] = FinalGalleryUploadForm(reservation_queryset=self._reservation_queryset())
+        return context
+
+    def get(self, request, *args, **kwargs):
+        self._load_scope()
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self._load_scope()
+        upload_form = FinalGalleryUploadForm(
+            request.POST, request.FILES, reservation_queryset=self._reservation_queryset(),
+        )
+
+        if upload_form.is_valid():
+            reservation = upload_form.cleaned_data['reservation']
+            gallery = Gallery.objects.create(gallery_type=Gallery.TYPE_FINAL)
+            image_validator = django_forms.ImageField()
+            uploaded = 0
+            for order, uploaded_file in enumerate(upload_form.cleaned_data['images']):
+                try:
+                    image_validator.clean(uploaded_file)
+                    image = Image(gallery=gallery, image=uploaded_file, order=order)
+                    image.full_clean()
+                    image.save()
+                except ValidationError as exc:
+                    messages.error(request, _('Пропусната %(name)s: %(error)s') % {
+                        'name': uploaded_file.name, 'error': '; '.join(exc.messages),
+                    })
+                    continue
+                uploaded += 1
+
+            if uploaded == 0:
+                gallery.delete()
+                messages.error(request, _('Нито една снимка не беше качена успешно.'))
+                return self.render_to_response(self.get_context_data(upload_form=upload_form))
+
+            reservation.final_gallery = gallery
+            reservation.save(update_fields=['final_gallery'])
+            send_final_delivery_email(request, reservation)
+
+            messages.success(
+                request,
+                _('Финалната галерия е качена и доставена успешно (%(count)d снимки).') % {'count': uploaded},
+            )
+            return redirect('profile_page')
+
+        return self.render_to_response(self.get_context_data(upload_form=upload_form))
+
+
+def _get_owned_final_gallery_reservation(request, reservation_id):
+    reservation = get_object_or_404(Reservation, pk=reservation_id, user=request.user)
+    if not reservation.final_gallery_id:
+        raise Http404
+    return reservation
+
+
+@login_required
+def serve_final_gallery_image(request, reservation_id, image_id):
+    if not settings.IS_PHOTOGRAPHER_WEBSITE:
+        raise Http404
+    reservation = _get_owned_final_gallery_reservation(request, reservation_id)
+    image = get_object_or_404(Image, pk=image_id, gallery=reservation.final_gallery)
+    return FileResponse(image.image.open('rb'), content_type='image/webp')
+
+
+@login_required
+def download_final_gallery(request, reservation_id):
+    if not settings.IS_PHOTOGRAPHER_WEBSITE:
+        raise Http404
+    reservation = _get_owned_final_gallery_reservation(request, reservation_id)
+    images = reservation.final_gallery.images.order_by('order')
+    return _zip_images_response(images, f'final-photos-reservation-{reservation.pk}.zip')
 
 
 class ProfilePage(LoginRequiredMixin, TemplateView):

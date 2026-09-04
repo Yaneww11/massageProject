@@ -204,6 +204,11 @@
               &#9734; {% trans "Оставете мнение" %}
             </button>
             {% endif %}
+            {% if is_photographer_website and r.final_gallery_id %}
+            <a href="{% url 'final_gallery_download' r.pk %}" class="btn-outline-sm">
+              <i class="fas fa-download"></i> {% trans "Финални снимки" %}
+            </a>
+            {% endif %}
             {% if site_config.booking_enabled %}
             <a href="{% url 'reservation_page' %}?service={{ r.service.pk }}" class="btn-outline-sm" data-auth-modal-link>
               &rarr; {% trans "Запазете отново" %}
@@ -256,6 +261,7 @@
     <div class="section-header-row">
       <div></div>
       <a href="{% url 'proofing_gallery_upload' %}" class="btn-primary-profile">{% trans "Качи галерия за преглед" %}</a>
+      <a href="{% url 'final_gallery_upload' %}" class="btn-outline-profile">{% trans "Качи финална галерия" %}</a>
     </div>
     {% endif %}
     {% include "partials/specialist_calendar.html" %}

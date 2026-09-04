@@ -5,7 +5,7 @@ from massageProject.main_app.views import Index, ServicesDashboard, ReservationP
     submit_comment, GalleryView, GalleryAlbumView, PhotoProofingGallery, mark_photo, toggle_photo_label, \
     save_photo_comment, finalize_photo_proofing, serve_proof_image, download_reservation_ics, \
     ProofingGalleryUploadView, MarkedPhotosView, serve_marked_photo_image, download_marked_photo, \
-    download_marked_photos_zip
+    download_marked_photos_zip, FinalGalleryUploadView, serve_final_gallery_image, download_final_gallery
 
 urlpatterns = [
     path('', Index.as_view(), name='index'),
@@ -23,6 +23,9 @@ urlpatterns = [
     path('profile/reservations/<int:reservation_id>/marked-photos/zip/', download_marked_photos_zip, name='marked_photos_zip'),
     path('profile/reservations/<int:reservation_id>/marked-photos/<int:image_id>/', serve_marked_photo_image, name='marked_photo_image'),
     path('profile/reservations/<int:reservation_id>/marked-photos/<int:image_id>/download/', download_marked_photo, name='marked_photo_download'),
+    path('profile/final-gallery-upload/', FinalGalleryUploadView.as_view(), name='final_gallery_upload'),
+    path('profile/reservations/<int:reservation_id>/final-gallery/', download_final_gallery, name='final_gallery_download'),
+    path('profile/reservations/<int:reservation_id>/final-gallery/<int:image_id>/', serve_final_gallery_image, name='final_gallery_image'),
     path('profile/photos/', PhotoProofingGallery.as_view(), name='photo_proofing'),
     path('profile/photos/<int:image_id>/mark/', mark_photo, name='photo_proofing_mark'),
     path('profile/photos/<int:image_id>/label/<int:label_id>/', toggle_photo_label, name='photo_proofing_label'),
