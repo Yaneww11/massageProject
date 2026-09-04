@@ -14,7 +14,6 @@
             <h2 class="hp-section-title">{% trans "Предпочитани" %}</h2>
             {% trans "Всяка сесия е съобразена с вашето тяло и нужди." as services_sub %}
             <p class="hp-section-sub">{{ services_sub|hide_if_marker }}</p>
-            {% endif %}
         </div>
         {% if featured_has_images %}
             {% include 'partials/featured_with_image.html' %}
