@@ -219,29 +219,44 @@ STATICFILES_DIRS = (
 )
 STATIC_ROOT = BASE_DIR / 'static_collected'
 
-GS_BUCKET_NAME = env('GS_BUCKET_NAME')
-GS_CREDENTIALS = service_account.Credentials.from_service_account_info(
-    json.loads(env('GS_CREDENTIALS_JSON'))
-)
-STORAGES = {
-    "default": {
-        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
-        "OPTIONS": {
-            "bucket_name": GS_BUCKET_NAME,
-            "credentials": GS_CREDENTIALS,
-        },
-    },
-    "staticfiles": {
-        # Manifest storage requires `collectstatic` to have been run, which `manage.py test`
-        # doesn't do; fall back to plain storage under the test runner to avoid
-        # "Missing staticfiles manifest entry" errors on every template using {% static %}.
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
-        if sys.argv[1:2] == ["test"]
-        else "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
+USE_GCS_STORAGE = env.bool('USE_GCS_STORAGE', default=True)
 
-MEDIA_URL = f"https://storage.googleapis.com/{GS_BUCKET_NAME}/"
+if USE_GCS_STORAGE:
+    GS_BUCKET_NAME = env('GS_BUCKET_NAME')
+    GS_CREDENTIALS = service_account.Credentials.from_service_account_info(
+        json.loads(env('GS_CREDENTIALS_JSON'))
+    )
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+            "OPTIONS": {
+                "bucket_name": GS_BUCKET_NAME,
+                "credentials": GS_CREDENTIALS,
+            },
+        },
+        "staticfiles": {
+            # Manifest storage requires `collectstatic` to have been run, which `manage.py test`
+            # doesn't do; fall back to plain storage under the test runner to avoid
+            # "Missing staticfiles manifest entry" errors on every template using {% static %}.
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if sys.argv[1:2] == ["test"]
+            else "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+
+    MEDIA_URL = f"https://storage.googleapis.com/{GS_BUCKET_NAME}/"
+else:
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
