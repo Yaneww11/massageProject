@@ -12,6 +12,9 @@ GUNICORN_PID_FILE="${GUNICORN_PID_FILE:-$REPO_DIR/gunicorn.pid}"
 GUNICORN_BIND="${GUNICORN_BIND:-127.0.0.1:8000}"
 GUNICORN_WORKERS="${GUNICORN_WORKERS:-2}"
 WATCHDOG_LOG="$REPO_DIR/gunicorn-watchdog.log"
+HEARTBEAT_FILE="$REPO_DIR/gunicorn-watchdog.heartbeat"
+
+date '+%Y-%m-%d %H:%M:%S' > "$HEARTBEAT_FILE"
 
 is_pid_alive() {
     [ -f "$GUNICORN_PID_FILE" ] && kill -0 "$(cat "$GUNICORN_PID_FILE" 2>/dev/null)" 2>/dev/null
@@ -48,9 +51,7 @@ if [ -f "$GUNICORN_PID_FILE" ]; then
     fi
 fi
 
-. "$VENV_DIR/bin/activate"
-
-nohup gunicorn massageProject.wsgi:application \
+nohup "$VENV_DIR/bin/gunicorn" massageProject.wsgi:application \
     --bind "$GUNICORN_BIND" \
     --workers "$GUNICORN_WORKERS" \
     --pid "$GUNICORN_PID_FILE" \
