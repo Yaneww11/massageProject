@@ -1,4 +1,5 @@
 import os
+import re
 from io import BytesIO
 
 from PIL import Image as PILImage, ImageOps
@@ -743,7 +744,7 @@ class Gallery(models.Model):
 
     def __str__(self):
         if self.gallery_type == self.TYPE_HOMEPAGE and hasattr(self, 'home_page'):
-            return f"{_('Галерия')} - {self.home_page.brand_name}"
+            return f"{_('Галерия')} - {self.home_page.brand_name_plain}"
         return self.title or f"{_('Галерия')} {self.id}"
 
     @property
@@ -904,12 +905,13 @@ class ImageProof(models.Model):
 
 
 class HomePage(WebPImageFieldsMixin, models.Model):
-    brand_name = models.CharField(
-        max_length=255,
+    brand_name = models.TextField(
         help_text=_(
             'Показва се като име на сайта в началния банер, в алтернативния текст (alt) на '
             'логото в горния колонтитул, в реда за авторски права в долния колонтитул '
-            '(footer), както и в имейлите до клиентите (кодове за резервация, смяна на парола).'
+            '(footer), както и в имейлите до клиентите (кодове за резервация, смяна на парола). '
+            'В началния банер и в долния колонтитул поддържа удебелен и наклонен текст и нов ред; '
+            'навсякъде другаде се показва като обикновен текст.'
         ),
     )
     description = models.TextField(
@@ -954,8 +956,13 @@ class HomePage(WebPImageFieldsMixin, models.Model):
         )
         return obj
 
+    @property
+    def brand_name_plain(self):
+        text = re.sub(r'<(?:br|/p|/div|/h[1-6]|/li)[^>]*>', ' ', self.brand_name or '')
+        return ' '.join(strip_tags(text).split())
+
     def __str__(self):
-        return self.brand_name
+        return self.brand_name_plain
 
 
 class BusinessWorkingHours(models.Model):

@@ -10,7 +10,7 @@ def send_otp_email(email, code):
     from massageProject.main_app.models import HomePage
 
     homepage = HomePage.get_solo()
-    brand_name = homepage.brand_name if homepage else _('Relax & Health')
+    brand_name = homepage.brand_name_plain if homepage else _('Relax & Health')
 
     context = {
         'code': code,

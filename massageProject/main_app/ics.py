@@ -32,7 +32,7 @@ def build_reservation_ics(request, reservation):
     dtend = _format_ics_datetime(reservation.date, reservation.end_time)
     dtstamp = datetime.now(UTC).strftime('%Y%m%dT%H%M%SZ')
 
-    summary = _escape_ics_text(f'{reservation.service.name} — {homepage.brand_name}')
+    summary = _escape_ics_text(f'{reservation.service.name} — {homepage.brand_name_plain}')
     location = _escape_ics_text(business_info.address) if business_info else ''
 
     description_parts = [reservation.specialist.name]
@@ -45,7 +45,7 @@ def build_reservation_ics(request, reservation):
     lines = [
         'BEGIN:VCALENDAR',
         'VERSION:2.0',
-        f'PRODID:-//{_escape_ics_text(homepage.brand_name)}//Reservation Calendar//BG',
+        f'PRODID:-//{_escape_ics_text(homepage.brand_name_plain)}//Reservation Calendar//BG',
         'BEGIN:VEVENT',
         f'UID:{uid}',
         f'DTSTAMP:{dtstamp}',

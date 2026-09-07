@@ -1,4 +1,4 @@
-{% load static i18n %}
+{% load static i18n bleach_tags %}
 <!-- Footer Section -->
 <footer class="site-footer">
     <div class="footer-inner">
@@ -50,7 +50,7 @@
 
     <div class="footer-bottom">
         <div class="footer-bottom-inner">
-            <p>&copy; 2026 {{ brand_name }}</p>
+            <p>&copy; 2026 {{ brand_name_html|bleach }}</p>
             <a href="{% url 'privacy_policy' %}">{% trans "Политика за поверителност" %}</a>
         </div>
     </div>

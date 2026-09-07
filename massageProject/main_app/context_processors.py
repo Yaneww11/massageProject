@@ -26,11 +26,13 @@ def get_cached_business_info():
 def admin_branding(request):
     try:
         homepage = get_cached_homepage()
-        brand_name = homepage.brand_name
+        brand_name = homepage.brand_name_plain
+        brand_name_html = homepage.brand_name
         brand_logo = homepage.logo.url if homepage.logo else None
         footer_tagline = homepage.footer_tagline
     except Exception:
         brand_name = 'Relax & Health'
+        brand_name_html = 'Relax & Health'
         brand_logo = None
         footer_tagline = ''
 
@@ -44,6 +46,7 @@ def admin_branding(request):
 
     return {
         'brand_name': brand_name,
+        'brand_name_html': brand_name_html,
         'brand_logo': brand_logo,
         'footer_tagline': footer_tagline,
         'business_info': business_info,

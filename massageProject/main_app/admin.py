@@ -312,12 +312,23 @@ class BusinessWorkingHoursInline(TabularInline):
 
 @admin.register(HomePage)
 class HomePageAdmin(ModelAdmin, TabbedTranslationAdmin):
-    list_display = ('brand_name',)
+    list_display = ('brand_name_display',)
     inlines = [BusinessWorkingHoursInline]
     fieldsets = (
         (None, {'fields': ('brand_name', 'logo', 'description', 'footer_tagline', 'gallery')}),
         (_('Политика за поверителност'), {'fields': ('privacy_policy_content',), 'classes': ('collapse',)}),
     )
+    RICH_TEXT_FIELDS = ('brand_name', 'brand_name_bg', 'brand_name_en')
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        if db_field.name in self.RICH_TEXT_FIELDS:
+            formfield.widget = WysiwygWidget()
+        return formfield
+
+    def brand_name_display(self, obj):
+        return obj.brand_name_plain
+    brand_name_display.short_description = _('Име на бранда')
 
 @admin.register(BusinessInfo)
 class BusinessInfosAdmin(ModelAdmin, TabbedTranslationAdmin):

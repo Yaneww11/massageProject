@@ -1,10 +1,10 @@
-{% load static i18n translation_extras %}
+{% load static i18n translation_extras bleach_tags %}
 <section class="hp-hero">
     <div class="hp-container hp-hero-inner">
         <div class="hp-hero-text">
             <span class="hp-eyebrow">{% trans "Нашето студио · от 2014" %}</span>
             {% if page %}
-                <h1 class="hp-hero-title">{{ page.brand_name }}</h1>
+                <h1 class="hp-hero-title">{{ page.brand_name|bleach }}</h1>
                 <p class="hp-hero-sub">{{ page.description|hide_if_marker }}</p>
             {% endif %}
             <div class="hp-hero-btns">
@@ -29,7 +29,7 @@
             </div>
         </div>
         <div class="hp-hero-media">
-            <img src="{{ first_image.image.url }}" alt="{% if page %}{{ page.brand_name }}{% else %}{% trans "Нашето студио" %}{% endif %}" style="object-position: center {{ first_image.crop_position }};">
+            <img src="{{ first_image.image.url }}" alt="{% if page %}{{ page.brand_name_plain }}{% else %}{% trans "Нашето студио" %}{% endif %}" style="object-position: center {{ first_image.crop_position }};">
         </div>
     </div>
 </section>

@@ -36,7 +36,7 @@ class BrandedPasswordResetView(PasswordResetView):
         from massageProject.main_app.models import HomePage
 
         homepage = HomePage.get_solo()
-        brand_name = homepage.brand_name if homepage else _('Relax & Health')
+        brand_name = homepage.brand_name_plain if homepage else _('Relax & Health')
         return formataddr((str(brand_name), settings.DEFAULT_FROM_EMAIL))
 
     @property
@@ -47,6 +47,6 @@ class BrandedPasswordResetView(PasswordResetView):
         business_info = BusinessInfo.objects.first()
 
         return {
-            'brand_name': homepage.brand_name if homepage else _('Relax & Health'),
+            'brand_name': homepage.brand_name_plain if homepage else _('Relax & Health'),
             'business_info': business_info,
         }

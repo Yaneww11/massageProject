@@ -15,7 +15,7 @@ def _brand_name():
     from massageProject.main_app.models import HomePage
 
     homepage = HomePage.get_solo()
-    return homepage.brand_name if homepage else _('Relax & Health')
+    return homepage.brand_name_plain if homepage else _('Relax & Health')
 
 
 def _send_reservation_email(template_prefix, to_email, context):
