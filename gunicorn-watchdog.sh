@@ -57,6 +57,22 @@ nohup "$VENV_DIR/bin/gunicorn" massageProject.wsgi:application \
     --pid "$GUNICORN_PID_FILE" \
     --daemon \
     --log-file "$REPO_DIR/gunicorn.log" \
-    >/dev/null 2>&1
+    >/dev/null 2>&1 || true
 
-echo "[$TIMESTAMP] restart command issued." | tee -a "$WATCHDOG_LOG"
+RESTART_OK=0
+i=0
+while [ "$i" -lt 5 ]; do
+    sleep 1
+    if is_port_responding; then
+        RESTART_OK=1
+        break
+    fi
+    i=$((i + 1))
+done
+
+if [ "$RESTART_OK" = 1 ]; then
+    echo "[$TIMESTAMP] restart command issued." | tee -a "$WATCHDOG_LOG"
+else
+    echo "[$TIMESTAMP] restart FAILED: gunicorn still not responding after restart attempt." | tee -a "$WATCHDOG_LOG"
+    exit 1
+fi
