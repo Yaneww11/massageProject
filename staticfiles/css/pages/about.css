@@ -97,7 +97,7 @@
 /* Stats Section */
 .about-stats {
     width: 100%;
-    background: var(--primary-color);
+    background: var(--bg-sunken);
     padding: var(--space-xl) 0;
     margin-bottom: var(--space-xl);
 }
@@ -118,7 +118,7 @@
 .about-stats .stat-value {
     font-family: var(--font-heading);
     font-size: var(--fs-4xl);
-    color: var(--on-primary);
+    color: var(--text-main);
     margin-bottom: var(--space-xs);
 }
 
@@ -126,7 +126,7 @@
     font-size: var(--fs-xs);
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: color-mix(in srgb, var(--on-primary) 75%, transparent);
+    color: color-mix(in srgb, var(--text-main) 75%, transparent);
 }
 
 /* Credentials Section */

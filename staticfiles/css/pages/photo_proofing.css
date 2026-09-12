@@ -334,8 +334,8 @@
     position: absolute;
     top: -4px;
     right: -4px;
-    background: var(--white);
-    color: var(--primary-color);
+    background: var(--primary-color);
+    color: var(--on-primary);
     font-size: 9px;
     font-weight: 700;
     width: 14px;
@@ -380,7 +380,7 @@
     left: 8px;
     z-index: 3;
     background: var(--success);
-    color: var(--white);
+    color: var(--on-success);
     font-size: var(--fs-xs);
     font-weight: 600;
     padding: 0.2em 0.6em;

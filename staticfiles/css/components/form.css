@@ -57,8 +57,8 @@
 .form-group textarea:focus {
     border-color: var(--accent-color);
     outline: none;
-    background-color: var(--white);
-    box-shadow: 0 0 0 3px rgba(194, 163, 142, 0.2);
+    background-color: var(--bg-paper);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 25%, transparent);
 }
 
 .form-group textarea {
@@ -93,13 +93,13 @@
 }
 
 .alert-error, .alert-danger {
-    background-color: #FEE2E2;
+    background-color: var(--error-light);
     color: var(--error);
-    border: 1px solid #FECACA;
+    border: 1px solid var(--error);
 }
 
 .alert-success {
-    background-color: #ECFDF5;
+    background-color: var(--success-light);
     color: var(--success);
-    border: 1px solid #D1FAE5;
+    border: 1px solid var(--success);
 }

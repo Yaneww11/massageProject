@@ -1,22 +1,26 @@
 :root {
-    /* Colors - Sophisticated Spa Palette */
-    --primary-color: #4A3728;    /* Deep Earthy Brown */
-    --primary-light: #6D5442;  /* Medium Earthy Brown */
-    --secondary-color: #C2A38E;  /* Warm Taupe */
-    --accent-color: #8E735B;     /* Muted Bronze */
-    --bg-light: #FAF7F2;        /* Off-White / Cream */
-    --bg-paper: #FFFFFF;        /* Pure White */
-    --text-main: #2D241E;       /* Almost Black Brown */
-    --text-muted: #6B5E55;      /* Greyish Brown */
-    --border-color: #4A3728;   /* Deep Earthy Brown */
-    --white: #FFFFFF;
-    --gallery-dark-bg: #121212;  /* Fixed near-black for photographer-site gallery sections */
+    /* Colors - Gallery Black (fallbacks; SiteConfiguration overrides these at runtime) */
+    --primary-color: #EDEAE4;    /* Bone - headings, links, primary fills */
+    --primary-light: #FFFFFF;    /* Pure White - primary hover */
+    --secondary-color: #A8A8A4;  /* Mid Neutral - quiet text and fills */
+    --accent-color: #C89B6A;     /* Bronze - links, focus rings, one CTA */
+    --bg-light: #0A0A0B;         /* Canvas */
+    --bg-sunken: #060607;        /* Recessed bands behind the canvas */
+    --bg-paper: #141416;         /* Cards, panels, modals */
+    --bg-raised: #1D1D20;        /* Hover / overlay surface */
+    --text-main: #F2F2F0;        /* Near-white */
+    --text-muted: #A3A3A0;       /* Neutral grey */
+    --border-color: #2B2B2F;     /* Hairline */
+    --white: #FFFFFF;           /* Text and chrome sitting on a photograph or scrim,
+                                   where the ground is the image, not the theme */
 
-    /* Semantic Colors */
-    --success: #6B7A5E;         /* Muted Sage Green */
-    --success-light: #ECFDF5;   /* Light tint for success badges/hover states */
-    --error: #A35D5D;           /* Muted Terracotta */
-    --error-light: #FEF2F2;     /* Light tint for error/cancel hover states */
+    /* Semantic Colors (fallbacks; derived from the background at runtime) */
+    --success: #9CBE87;         /* Muted Sage - success text, borders, fills */
+    --success-light: #17200F;   /* Dark wash behind success badges */
+    --on-success: #000000;      /* Legible text on a --success fill */
+    --error: #E59A95;           /* Muted Rose - error text, borders, fills */
+    --error-light: #251312;     /* Dark wash behind error/cancel hover states */
+    --on-error: #000000;        /* Legible text on an --error fill */
 
     /* Typography */
     --font-main: 'Montserrat', sans-serif;
@@ -42,8 +46,11 @@
     --radius-sm: 4px;
     --radius-md: 8px;
     --radius-lg: 16px;
-    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
-    --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
+    --shadow-tint-sm: rgba(0,0,0,0.4);
+    --shadow-tint-md: rgba(0,0,0,0.55);
+    --shadow-tint-lg: rgba(0,0,0,0.7);
+    --shadow-sm: 0 2px 4px var(--shadow-tint-sm);
+    --shadow-md: 0 4px 12px var(--shadow-tint-md);
+    --shadow-lg: 0 10px 25px var(--shadow-tint-lg);
     --transition: all 0.3s ease;
 }

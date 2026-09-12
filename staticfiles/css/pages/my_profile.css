@@ -659,7 +659,7 @@
 .review-modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(45, 36, 30, 0.55);
+    background: rgba(0, 0, 0, 0.55);
     z-index: 1000;
     align-items: center;
     justify-content: center;
@@ -736,7 +736,7 @@
 .form-textarea:focus {
     outline: none;
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(194,163,142,0.2);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 25%, transparent);
 }
 
 .star-input {

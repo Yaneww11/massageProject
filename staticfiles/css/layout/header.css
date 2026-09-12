@@ -1,162 +1,335 @@
-/* Navbar Styles */
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--space-md) var(--space-xl);
-    background-color: var(--bg-paper);
-    color: var(--text-main);
+/* ==========================================================================
+   Site header — "Header Redesign" turn 2
+   Every colour resolves to a SiteConfiguration token; brand tints are derived
+   with color-mix() so no design literal is copied in.
+   See docs/header-redesign-color-mapping.md
+   ========================================================================== */
+
+.site-header {
     position: sticky;
     top: 0;
     z-index: 1000;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
+    background-color: var(--bg-paper);
+    transition: transform 0.22s ease-out, box-shadow 0.22s ease-out;
 }
 
-/* Logo Container */
-.logo-container {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    gap: var(--space-sm);
+/* Hidden after a downward scroll, restored on scroll-up. */
+.site-header.is-hidden {
+    transform: translateY(-100%);
 }
 
-.logo-svg {
-    height: 3.5rem;
-    width: auto;
-    max-width: 12rem;
-    object-fit: contain;
+/* Compact, elevated treatment once the page has scrolled. */
+.site-header.is-compact {
+    background-color: color-mix(in srgb, var(--bg-paper) 94%, transparent);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-md);
 }
 
-.logo-text {
-    color: var(--primary-color);
-    margin: 0;
-}
-
-/* Navigation Links */
-.nav-links {
-    display: flex;
-    gap: var(--space-xl);
-    align-items: center;
-}
-
-.nav-links a {
-    font-family: var(--font-main);
-    color: var(--text-main);
-    text-decoration: none;
-    font-size: var(--fs-base);
-    font-weight: 500;
-    position: relative;
-    padding: var(--space-xs) 0;
-    transition: var(--transition);
-}
-
-.nav-links a::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 2px;
+.site-header__accent {
+    display: block;
+    height: 4px;
     background-color: var(--accent-color);
-    transition: var(--transition);
 }
 
-.nav-links a:hover {
-    color: var(--accent-color);
-}
-
-.nav-links a:hover::after {
-    width: 100%;
-}
-
-/* Mobile-only auth block — hidden on desktop */
-.nav-auth-mobile {
+.site-header.is-compact .site-header__accent {
     display: none;
 }
 
-/* Navbar right-side actions */
-.navbar-actions {
-    display: flex;
+.site-header__bar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    gap: var(--space-md);
+    gap: var(--space-lg);
+    height: 88px;
+    padding: 0 3.5rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: height 0.22s ease-out;
 }
 
-/* CTA Button */
-.navbar-cta {
+.site-header.is-compact .site-header__bar {
+    height: 64px;
+    border-bottom-color: transparent;
+}
+
+/* --- Brand ---------------------------------------------------------------- */
+
+.site-header__brand {
     display: flex;
     align-items: center;
-    gap: var(--space-sm);
-    font-size: var(--fs-sm);
-    padding: 0.7rem 1.75rem;
+    gap: 0.8rem;
+    justify-self: start;
+    min-width: 0;
+    text-decoration: none;
+}
+
+/* The design's crest is square; a real logo is usually wider than it is tall,
+   so height drives the size and width follows, capped so it cannot crowd the
+   centred nav. */
+.site-header__logo {
+    height: 56px;
+    width: auto;
+    max-width: 14rem;
+    flex: none;
+    object-fit: contain;
+    object-position: left center;
+    display: block;
+    transition: height 0.22s ease-out;
+}
+
+.site-header.is-compact .site-header__logo {
+    height: 38px;
+}
+
+/* The design's "RENKART" is an uppercase literal, not a transform — the real
+   brand name comes from SiteConfiguration, so it is rendered as configured.
+   Shown only when no logo is configured, so it has the whole left zone — the
+   clamp just stops a very long name reaching the centred nav. */
+.site-header__wordmark {
+    font-family: var(--font-heading);
+    font-size: 1.4375rem;
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: 0.12em;
+    color: var(--text-main);
+    max-width: 24ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
-    border-radius: 999px;
-    box-shadow: var(--shadow-sm);
+    transition: font-size 0.22s ease-out;
 }
 
-.navbar-cta i {
-    font-size: 0.9rem;
+.site-header.is-compact .site-header__wordmark {
+    font-size: 1.125rem;
 }
 
-/* Language Switcher */
+/* --- Centre navigation ---------------------------------------------------- */
+
+.site-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    justify-self: center;
+}
+
+.site-nav__group {
+    position: relative;
+}
+
+.site-nav__trigger,
+.site-nav__link {
+    display: flex;
+    align-items: center;
+    gap: 0.5625rem;
+    height: 44px;
+    padding: 0 1.125rem;
+    border: 0;
+    border-radius: var(--radius-md);
+    background-color: transparent;
+    font-family: var(--font-main);
+    font-size: var(--fs-base);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    color: var(--text-muted);
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.site-nav__trigger:hover,
+.site-nav__link:hover {
+    background-color: var(--bg-raised);
+    color: var(--text-main);
+}
+
+.site-nav__trigger[aria-expanded="true"] {
+    background-color: color-mix(in srgb, var(--primary-color) 12%, transparent);
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.site-nav__caret {
+    transition: transform 0.18s ease;
+}
+
+[aria-expanded="true"] > .site-nav__caret {
+    transform: rotate(180deg);
+}
+
+/* --- Dropdown ------------------------------------------------------------- */
+
+.site-nav__dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 14px);
+    left: 0;
+    width: 292px;
+    padding: var(--space-sm);
+    background-color: var(--bg-paper);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 40;
+}
+
+.site-nav__group.is-open .site-nav__dropdown {
+    display: block;
+    animation: siteNavIn 0.18s ease both;
+}
+
+@keyframes siteNavIn {
+    from { transform: translateY(-10px); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+}
+
+.site-nav__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 46px;
+    padding: 0 0.875rem;
+    border-radius: var(--radius-md);
+    font-family: var(--font-main);
+    font-size: 0.9375rem;
+    color: var(--text-main);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.site-nav__item:hover {
+    background-color: var(--bg-raised);
+}
+
+.site-nav__item.is-active {
+    background-color: color-mix(in srgb, var(--primary-color) 7%, transparent);
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.site-nav__hint {
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
+}
+
+/* --- Right-hand actions --------------------------------------------------- */
+
+.site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    justify-self: end;
+}
+
+.site-header__divider {
+    width: 1px;
+    height: 26px;
+    background-color: var(--border-color);
+}
+
+/* Language switcher — segmented control on a recessed track */
 .lang-switcher {
     display: flex;
     align-items: center;
-    gap: var(--space-xs);
-    border: none;
-    background: none;
-    padding: 0;
+    padding: 3px;
     margin: 0;
-}
-
-.lang-switcher--mobile {
-    display: none;
+    border: 0;
+    background-color: var(--bg-raised);
+    border-radius: var(--radius-md);
 }
 
 .lang-btn {
-    background: none;
-    border: 1px solid var(--secondary-color);
+    height: 38px;
+    padding: 0 0.8125rem;
+    border: 0;
     border-radius: var(--radius-sm);
-    color: var(--text-main);
-    font-size: var(--fs-xs);
+    background-color: transparent;
     font-family: var(--font-main);
-    font-weight: 600;
-    padding: 2px 8px;
+    font-size: 0.78125rem;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    white-space: nowrap;
     cursor: pointer;
     transition: var(--transition);
-    line-height: 1.4;
 }
 
-.lang-btn:hover,
-.lang-btn.active {
+.lang-btn:hover {
+    background-color: var(--bg-paper);
+    color: var(--text-main);
+}
+
+.lang-btn.is-active {
     background-color: var(--primary-color);
-    border-color: var(--primary-color);
     color: var(--on-primary);
+    font-weight: 500;
 }
 
-/* User Menu Dropdown */
+/* Primary CTA */
+.site-cta {
+    display: flex;
+    align-items: center;
+    gap: 0.5625rem;
+    height: 48px;
+    padding: 0 1.5rem;
+    border: 0;
+    border-radius: var(--radius-md);
+    background-color: var(--primary-color);
+    color: var(--on-primary);
+    font-family: var(--font-main);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    letter-spacing: 0.015em;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.site-cta:hover {
+    background-color: var(--primary-light);
+    color: var(--on-primary-light);
+    box-shadow: var(--shadow-md);
+}
+
+.site-cta__label-short {
+    display: none;
+}
+
+.site-cta--block {
+    justify-content: center;
+    height: 52px;
+    width: 100%;
+}
+
+/* Booking CTA is redundant on the reservation page itself — in the overlay too,
+   which is reachable at any width once opened. */
+.page-reservation .mobile-overlay .site-cta {
+    display: none;
+}
+
+/* Profile button */
 .user-menu {
     position: relative;
 }
 
 .user-menu-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: none;
-    border: 1px solid var(--secondary-color);
-    border-radius: 50%;
-    width: 2.25rem;
-    height: 2.25rem;
-    cursor: pointer;
-    color: var(--primary-color);
-    transition: var(--transition);
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
     padding: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    background-color: var(--bg-paper);
+    color: var(--primary-color);
+    cursor: pointer;
+    transition: var(--transition);
 }
 
 .user-menu-toggle:hover {
-    background-color: var(--bg-light);
     border-color: var(--primary-color);
+    background-color: var(--bg-raised);
 }
 
 .user-menu-dropdown {
@@ -164,13 +337,13 @@
     position: absolute;
     top: calc(100% + 0.5rem);
     right: 0;
-    background: var(--bg-paper);
-    border: 1px solid var(--border-color, #e8e0d8);
-    border-radius: var(--radius-md, 8px);
-    box-shadow: var(--shadow-md);
     min-width: 180px;
-    z-index: 1100;
+    background-color: var(--bg-paper);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
     overflow: hidden;
+    z-index: 1100;
 }
 
 .user-menu--open .user-menu-dropdown {
@@ -188,152 +361,262 @@
 }
 
 .user-menu-dropdown a:hover {
-    background-color: var(--bg-light);
+    background-color: var(--bg-raised);
     color: var(--accent-color);
 }
 
-/* Mobile Menu Toggle Button */
-.mobile-menu-toggle {
+/* Hamburger / close — mobile only */
+.site-header__menu-btn {
     display: none;
-    background: none;
-    border: none;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: var(--radius-md);
+    background-color: transparent;
+    color: var(--text-main);
     cursor: pointer;
-    padding: var(--space-xs);
-    z-index: 1100;
-    width: 2.5rem;
-    height: 2.5rem;
+    transition: var(--transition);
+}
+
+.site-header__menu-btn:hover {
+    background-color: var(--bg-raised);
+}
+
+/* --- Focus ---------------------------------------------------------------- */
+
+.site-nav__trigger:focus-visible,
+.site-nav__link:focus-visible,
+.site-nav__item:focus-visible,
+.site-cta:focus-visible,
+.lang-btn:focus-visible,
+.user-menu-toggle:focus-visible,
+.site-header__menu-btn:focus-visible,
+.mobile-overlay__trigger:focus-visible,
+.mobile-overlay__link:focus-visible,
+.mobile-overlay__sublink:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--bg-paper), 0 0 0 4px var(--accent-color);
+}
+
+/* --- Mobile overlay ------------------------------------------------------- */
+
+.mobile-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    flex-direction: column;
+    background-color: var(--bg-paper);
+}
+
+.mobile-overlay.is-open {
+    display: flex;
+    animation: mobileOverlayIn 0.24s cubic-bezier(0.22, 0.8, 0.3, 1) both;
+}
+
+@keyframes mobileOverlayIn {
+    from { transform: translateY(-10px); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+}
+
+.mobile-overlay__head {
+    display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    height: 64px;
+    padding: 0 0.75rem 0 0.875rem;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.hamburger-icon {
-    width: 24px;
-    height: 2px;
-    background-color: var(--primary-color);
-    position: relative;
-    display: block;
+.mobile-overlay__head .site-header__logo {
+    height: 40px;
+    max-width: 10rem;
+}
+
+.mobile-overlay__head .site-header__wordmark {
+    font-size: 1.125rem;
+    letter-spacing: 0.11em;
+}
+
+.mobile-overlay__head .site-header__menu-btn {
+    display: grid;
+}
+
+.mobile-overlay__nav {
+    display: flex;
+    flex-direction: column;
+    padding: 0.875rem 0.75rem 0;
+    overflow-y: auto;
+}
+
+.mobile-overlay__trigger,
+.mobile-overlay__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    padding: 0 0.75rem;
+    border: 0;
+    border-radius: var(--radius-md);
+    background-color: transparent;
+    font-family: var(--font-heading);
+    font-size: 1.375rem;
+    font-weight: 400;
+    color: var(--text-main);
+    text-decoration: none;
+    text-align: left;
+    cursor: pointer;
     transition: var(--transition);
 }
 
-.hamburger-icon::before,
-.hamburger-icon::after {
-    content: '';
-    position: absolute;
-    width: 24px;
-    height: 2px;
-    background-color: var(--primary-color);
+.mobile-overlay__trigger:hover,
+.mobile-overlay__link:hover {
+    background-color: var(--bg-raised);
+}
+
+.mobile-overlay__trigger .site-nav__caret {
+    color: var(--primary-color);
+}
+
+.mobile-overlay__submenu {
+    display: flex;
+    flex-direction: column;
+    margin: 2px 0 6px;
+    padding-left: 0.75rem;
+    border-left: 1px solid color-mix(in srgb, var(--primary-color) 18%, transparent);
+}
+
+.mobile-overlay__submenu[hidden] {
+    display: none;
+}
+
+.mobile-overlay__sublink {
+    display: flex;
+    align-items: center;
+    height: 48px;
+    padding: 0 0.75rem;
+    border-radius: var(--radius-md);
+    font-family: var(--font-main);
+    font-size: 1.0625rem;
+    color: var(--text-main);
+    text-decoration: none;
     transition: var(--transition);
 }
 
-.hamburger-icon::before { top: -8px; }
-.hamburger-icon::after { top: 8px; }
+.mobile-overlay__sublink:hover {
+    background-color: var(--bg-raised);
+}
 
-/* Mobile View */
+.mobile-overlay__sublink.is-active {
+    background-color: color-mix(in srgb, var(--primary-color) 7%, transparent);
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.mobile-overlay__foot {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: auto;
+    padding: var(--space-md) var(--space-md) 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.mobile-overlay__utility {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.625rem;
+}
+
+.mobile-overlay__account {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.mobile-overlay__account-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5625rem;
+    min-height: 44px;
+    font-family: var(--font-main);
+    font-size: 0.9375rem;
+    color: var(--text-main);
+    text-decoration: none;
+}
+
+.mobile-overlay__account-link .site-icon {
+    color: var(--primary-color);
+}
+
+.mobile-overlay__utility .lang-btn {
+    height: 44px;
+    min-width: 52px;
+}
+
+/* --- Mobile layout -------------------------------------------------------- */
+
 @media (max-width: 940px) {
-    .navbar {
-        padding: var(--space-sm) var(--space-md);
-    }
-
-    .logo-svg {
-        height: 2.75rem;
-        max-width: 8rem;
-    }
-
-    .nav-links {
-        position: fixed;
-        top: 0;
-        right: -100%;
-        width: 280px;
-        height: 100vh;
-        background-color: var(--bg-paper);
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: flex-start;
-        padding: 5rem 2rem 2rem;
-        gap: var(--space-lg);
-        box-shadow: var(--shadow-lg);
-        transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 1050;
-    }
-
-    .nav-links.active {
-        right: 0;
-    }
-
-    .nav-links a {
-        font-size: var(--fs-lg);
-        width: 100%;
-        border-bottom: 1px solid var(--bg-light);
-        padding-bottom: var(--space-sm);
-    }
-
-    .lang-switcher--desktop {
+    .site-header__accent {
         display: none;
     }
 
-    .lang-switcher--mobile {
+    .site-header__bar,
+    .site-header.is-compact .site-header__bar {
         display: flex;
-        margin-top: auto;
-        padding-top: var(--space-lg);
-        border-top: 1px solid var(--secondary-color);
-        width: 100%;
+        justify-content: space-between;
+        height: 64px;
+        padding: 0 0.75rem 0 0.875rem;
+        gap: var(--space-sm);
     }
 
-    .nav-auth-mobile {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--space-md);
-        width: 100%;
-        margin-top: var(--space-md);
+    .site-header__logo,
+    .site-header.is-compact .site-header__logo {
+        height: 40px;
+        max-width: 10rem;
     }
 
-    .nav-auth-mobile a {
-        font-size: var(--fs-base);
+    .site-header__wordmark,
+    .site-header.is-compact .site-header__wordmark {
+        font-size: 1.125rem;
+        letter-spacing: 0.11em;
+        max-width: 14ch;
     }
 
-    /* User menu links in slide-in nav */
+    .site-nav,
+    .site-header__divider,
+    .site-header__actions .lang-switcher,
     .user-menu {
         display: none;
     }
 
-    .navbar-cta {
-        width: 2.5rem;
-        height: 2.5rem;
-        padding: 0;
-        border-radius: 50%;
-        justify-content: center;
-        margin-left: auto;
+    .site-header__actions {
+        gap: var(--space-xs);
     }
 
-    .navbar-cta span {
+    .site-header__menu-btn {
+        display: grid;
+    }
+
+    .site-cta {
+        height: 44px;
+        padding: 0 0.875rem;
+        font-size: var(--fs-sm);
+        box-shadow: none;
+    }
+
+    .site-cta__label {
         display: none;
     }
 
-    .navbar-cta i {
-        margin: 0;
-        font-size: 1.1rem;
+    .site-cta__label-short {
+        display: inline;
     }
 
     /* Booking CTA is redundant on the reservation page itself */
-    .page-reservation .navbar-cta {
+    .page-reservation .site-header__actions .site-cta {
         display: none;
     }
-
-    .mobile-menu-toggle {
-        display: flex;
-    }
-
-    .mobile-menu-toggle.active .hamburger-icon {
-        background-color: transparent;
-    }
-
-    .mobile-menu-toggle.active .hamburger-icon::before {
-        transform: translateY(8px) rotate(45deg);
-    }
-
-    .mobile-menu-toggle.active .hamburger-icon::after {
-        transform: translateY(-8px) rotate(-45deg);
-    }
 }
-

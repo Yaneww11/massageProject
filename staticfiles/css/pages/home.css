@@ -5,7 +5,7 @@
 /* Supplement tokens not in variables.css */
 :root {
     --hp-border: var(--border-color);
-    --hp-sunken: #F2EBE2;
+    --hp-sunken: var(--bg-sunken);
 }
 
 /* --- Layout containers --- */
@@ -115,7 +115,7 @@
     height: 100%;
     object-fit: cover;
     border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(74, 55, 40, 0.2);
+    box-shadow: var(--shadow-lg);
     display: block;
 }
 
@@ -246,12 +246,12 @@
     display: block;
     overflow: hidden;
     border-radius: 14px;
-    box-shadow: 0 14px 36px rgba(74, 55, 40, 0.18);
+    box-shadow: var(--shadow-md);
     transition: box-shadow 0.4s ease, transform 0.4s ease;
 }
 
 .hp-feat-img:hover {
-    box-shadow: 0 22px 50px rgba(74, 55, 40, 0.26);
+    box-shadow: var(--shadow-lg);
     transform: translateY(-4px);
 }
 
@@ -356,26 +356,25 @@
 }
 
 .hp-gallery--dark {
-    background: var(--gallery-dark-bg);
+    background: var(--bg-sunken);
 }
 
 .hp-gallery--dark .hp-eyebrow {
-    color: var(--white);
-    opacity: 0.7;
+    color: var(--text-muted);
 }
 
 .hp-gallery--dark .hp-section-title {
-    color: var(--white);
+    color: var(--text-main);
 }
 
 .hp-gallery--dark .btn-gallery {
-    border-color: var(--white);
-    color: var(--white);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
 }
 
 .hp-gallery--dark .btn-gallery:hover {
-    background: var(--white);
-    color: var(--gallery-dark-bg);
+    background: var(--primary-color);
+    color: var(--on-primary);
 }
 
 .hp-gallery-grid {
@@ -472,7 +471,7 @@
 
 .hp-review-card {
     flex: 0 0 calc(50% - 0.75rem);
-    background: #fff;
+    background: var(--bg-paper);
     border: 1px solid var(--hp-border);
     border-radius: 12px;
     padding: 2.5rem;
@@ -597,12 +596,12 @@
 }
 
 .hp-modal {
-    background: #fff;
+    background: var(--bg-raised);
     border-radius: 16px;
     padding: 2.5rem;
     max-width: 480px;
     width: 100%;
-    box-shadow: 0 20px 60px rgba(74, 55, 40, 0.15);
+    box-shadow: var(--shadow-lg);
 }
 
 .hp-modal-title {
@@ -633,7 +632,7 @@
     font-size: 1rem;
     font-family: var(--font-main);
     color: var(--text-main);
-    background: #fff;
+    background: var(--bg-paper);
     box-sizing: border-box;
     transition: border-color 0.2s;
     outline: none;

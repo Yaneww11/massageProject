@@ -22,12 +22,12 @@
 
 .auth-modal {
     position: relative;
-    background: #fff;
+    background: var(--bg-raised);
     border-radius: 16px;
     padding: 2.5rem;
     max-width: 420px;
     width: 100%;
-    box-shadow: 0 20px 60px rgba(74, 55, 40, 0.15);
+    box-shadow: var(--shadow-lg);
 }
 
 .auth-modal-close {
@@ -82,7 +82,7 @@
 }
 
 .auth-page .auth-modal {
-    box-shadow: 0 8px 30px rgba(74, 55, 40, 0.12);
+    box-shadow: var(--shadow-md);
 }
 
 .auth-modal-input {
@@ -93,7 +93,7 @@
     font-size: 1rem;
     font-family: var(--font-main);
     color: var(--text-main);
-    background: #fff;
+    background: var(--bg-paper);
     box-sizing: border-box;
     transition: border-color 0.2s;
     outline: none;
@@ -195,11 +195,11 @@
     padding: 0.75rem 1rem;
     border: 1.5px solid var(--hp-border);
     border-radius: 8px;
-    background: #fff;
+    background: var(--bg-paper);
     font-size: 0.95rem;
     cursor: pointer;
 }
 
 .auth-modal-google-btn:hover {
-    background: #f7f5f2;
+    background: var(--bg-raised);
 }

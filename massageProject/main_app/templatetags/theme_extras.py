@@ -1,7 +1,9 @@
 from django import template
 from django.utils.safestring import mark_safe
 
-from massageProject.main_app.theme import FONT_PAIRS, STYLE_PRESETS, on_color
+from massageProject.main_app.theme import (
+    FONT_PAIRS, STYLE_PRESETS, derived_theme_vars, on_color,
+)
 
 register = template.Library()
 
@@ -26,3 +28,8 @@ def on_color_vars(site_config):
         'on_secondary': on_color(site_config.secondary_color),
         'on_accent': on_color(site_config.accent_color),
     }
+
+
+@register.filter
+def derived_vars(site_config):
+    return derived_theme_vars(site_config.background_color)

@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-07 13:07+0000\n"
+"POT-Creation-Date: 2026-09-12 11:49+0000\n"
 "PO-Revision-Date: 2026-09-04 06:03+0000\n"
 "Last-Translator: Yane Yanev <admin@admin.com>\n"
 "Language-Team: Bulgarian\n"
@@ -308,23 +308,23 @@ msgstr "Име на бранда"
 msgid "Основна снимка"
 msgstr ""
 
-#: massageProject/main_app/admin.py:365
+#: massageProject/main_app/admin.py:368
 msgid "Тема — цветове"
 msgstr "Тема — цветове"
 
-#: massageProject/main_app/admin.py:371
+#: massageProject/main_app/admin.py:375
 msgid "Типография и стил"
 msgstr "Типография и стил"
 
-#: massageProject/main_app/admin.py:372
+#: massageProject/main_app/admin.py:376
 msgid "Терминология"
 msgstr "Терминология"
 
-#: massageProject/main_app/admin.py:376
+#: massageProject/main_app/admin.py:380
 msgid "Функционалности"
 msgstr "Функционалности"
 
-#: massageProject/main_app/admin.py:409
+#: massageProject/main_app/admin.py:413
 #, python-format
 msgid ""
 "Ниска контрастност между \"%(a)s\" и \"%(b)s\" (%(ratio).1f:1, "
@@ -1198,136 +1198,180 @@ msgstr "Текст (приглушен)"
 msgid "Цвят на рамки"
 msgstr "Цвят на рамки"
 
-#: massageProject/main_app/models.py:1157
+#: massageProject/main_app/models.py:1156
+msgid "Фон (вдълбан)"
+msgstr "Фон (вдълбан)"
+
+#: massageProject/main_app/models.py:1158
+msgid ""
+"Фон на тъмните ленти по страниците — секцията с галерията на началната "
+"страница, страницата с галерията, лентата със статистики в \"За нас\", "
+"долния колонтитул и заетите часове в календара за резервация."
+msgstr ""
+"Фон на тъмните ленти по страниците — секцията с галерията на началната "
+"страница, страницата с галерията, лентата със статистики в \"За нас\", "
+"долния колонтитул и заетите часове в календара за резервация."
+
+#: massageProject/main_app/models.py:1165
+msgid "Фон (карти и панели)"
+msgstr "Фон (карти и панели)"
+
+#: massageProject/main_app/models.py:1167
+msgid ""
+"Фон на картите, панелите и полетата за въвеждане — горното меню, началната "
+"страница, галерията, формата за резервация, профила на клиента и прегледа на "
+"снимки."
+msgstr ""
+"Фон на картите, панелите и полетата за въвеждане — горното меню, началната "
+"страница, галерията, формата за резервация, профила на клиента и прегледа на "
+"снимки."
+
+#: massageProject/main_app/models.py:1174
+msgid "Фон (при посочване)"
+msgstr "Фон (при посочване)"
+
+#: massageProject/main_app/models.py:1176
+msgid ""
+"Фон на изскачащите прозорци за вход и за отзив, както и на плочките със "
+"специалисти и дните в календара, когато мишката е върху тях."
+msgstr ""
+"Фон на изскачащите прозорци за вход и за отзив, както и на плочките със "
+"специалисти и дните в календара, когато мишката е върху тях."
+
+#: massageProject/main_app/models.py:1183
 msgid "Двойка шрифтове"
 msgstr "Двойка шрифтове"
 
-#: massageProject/main_app/models.py:1158
+#: massageProject/main_app/models.py:1184
 msgid "Шрифт по цялата тема на сайта, използван на всички страници."
 msgstr ""
 
-#: massageProject/main_app/models.py:1162
+#: massageProject/main_app/models.py:1188
 msgid "Стил (форми и сенки)"
 msgstr "Стил (форми и сенки)"
 
-#: massageProject/main_app/models.py:1163
+#: massageProject/main_app/models.py:1189
 msgid ""
 "Стил на форми и сенки (заобляне на ъгли, бутони, карти) по цялата тема на "
 "сайта."
 msgstr ""
 
-#: massageProject/main_app/models.py:1167
+#: massageProject/main_app/models.py:1193
 msgid "Начален банер"
 msgstr "Начален банер"
 
-#: massageProject/main_app/models.py:1168
+#: massageProject/main_app/models.py:1194
 msgid "Определя кой изглед на банера се използва на началната страница."
 msgstr ""
 
-#: massageProject/main_app/models.py:1172
+#: massageProject/main_app/models.py:1198
 msgid "Услуга (ед. число)"
 msgstr "Услуга (ед. число)"
 
-#: massageProject/main_app/models.py:1173
+#: massageProject/main_app/models.py:1199
 msgid ""
 "Използва се навсякъде, където сайтът се обръща към \"услуга\" — напр. "
 "страницата за резервация и профила на клиента."
 msgstr ""
 
-#: massageProject/main_app/models.py:1176
+#: massageProject/main_app/models.py:1202
 msgid "Услуги (мн. число)"
 msgstr "Услуги (мн. число)"
 
-#: massageProject/main_app/models.py:1177
+#: massageProject/main_app/models.py:1203
 msgid ""
 "Използва се навсякъде, където сайтът се обръща към \"услуги\" — напр. "
 "страницата за резервация и профила на клиента."
 msgstr ""
 
-#: massageProject/main_app/models.py:1180
+#: massageProject/main_app/models.py:1206
 msgid "Специалист (ед. число)"
 msgstr "Специалист (ед. число)"
 
-#: massageProject/main_app/models.py:1181
+#: massageProject/main_app/models.py:1207
 msgid ""
 "Използва се навсякъде, където сайтът се обръща към \"специалист\" — напр. "
 "страницата за резервация и профила на клиента."
 msgstr ""
 
-#: massageProject/main_app/models.py:1184
+#: massageProject/main_app/models.py:1210
 msgid "Специалисти (мн. число)"
 msgstr "Специалисти (мн. число)"
 
-#: massageProject/main_app/models.py:1185
+#: massageProject/main_app/models.py:1211
 msgid ""
 "Използва се навсякъде, където сайтът се обръща към \"специалисти\" — напр. "
 "страницата за резервация и профила на клиента."
 msgstr ""
 
-#: massageProject/main_app/models.py:1189
+#: massageProject/main_app/models.py:1215
 msgid "Резервации активни"
 msgstr "Резервации активни"
 
-#: massageProject/main_app/models.py:1191
+#: massageProject/main_app/models.py:1217
 msgid ""
 "Когато е изключено, скрива всички бутони/линкове за резервация по целия сайт "
 "(горно меню, начална страница, страница с услуги, профил на клиента)."
 msgstr ""
 
-#: massageProject/main_app/models.py:1196
+#: massageProject/main_app/models.py:1222
 msgid "Коментари активни"
 msgstr "Коментари активни"
 
-#: massageProject/main_app/models.py:1197
+#: massageProject/main_app/models.py:1223
 msgid "Когато е изключено, скрива секцията с отзиви на началната страница."
 msgstr ""
 
-#: massageProject/main_app/models.py:1200
+#: massageProject/main_app/models.py:1226
 msgid "Вход с Google активен"
 msgstr "Вход с Google активен"
 
-#: massageProject/main_app/models.py:1201
+#: massageProject/main_app/models.py:1227
 msgid "Когато е изключено, скрива опцията \"Вход с Google\" в модала за вход."
 msgstr ""
 
-#: massageProject/main_app/models.py:1205
-#: massageProject/main_app/models.py:1206 massageProject/settings.py:362
+#: massageProject/main_app/models.py:1231
+#: massageProject/main_app/models.py:1232 massageProject/settings.py:362
 msgid "Настройки на сайта"
 msgstr "Настройки на сайта"
 
-#: massageProject/main_app/theme.py:105
+#: massageProject/main_app/theme.py:145
+msgid "Галерийно черно"
+msgstr "Галерийно черно"
+
+#: massageProject/main_app/theme.py:154
 msgid "Топла земя"
 msgstr "Топла земя"
 
-#: massageProject/main_app/theme.py:112
+#: massageProject/main_app/theme.py:163
 msgid "Океан"
 msgstr "Океан"
 
-#: massageProject/main_app/theme.py:119
+#: massageProject/main_app/theme.py:172
 msgid "Монохром"
 msgstr "Монохром"
 
-#: massageProject/main_app/theme.py:126
+#: massageProject/main_app/theme.py:181
 msgid "Гора"
 msgstr "Гора"
 
-#: massageProject/main_app/theme.py:133
+#: massageProject/main_app/theme.py:190
 msgid "Розово"
 msgstr "Розово"
 
-#: massageProject/main_app/theme.py:140
+#: massageProject/main_app/theme.py:199
 msgid "Неон нощ"
 msgstr "Неон нощ"
 
-#: massageProject/main_app/theme.py:147
+#: massageProject/main_app/theme.py:208
 msgid "Пастелен дует"
 msgstr "Пастелен дует"
 
-#: massageProject/main_app/theme.py:154
+#: massageProject/main_app/theme.py:217
 msgid "Изумруд"
 msgstr "Изумруд"
 
-#: massageProject/main_app/theme.py:161
+#: massageProject/main_app/theme.py:226
 msgid "Залез"
 msgstr "Залез"
 
@@ -1852,7 +1896,7 @@ msgid "Адрес"
 msgstr ""
 
 #: templates/pages/home.html:173 templates/pages/reservation.html:12
-#: templates/partials/featured_with_image.html:28
+#: templates/partials/featured_with_image.html:27
 #: templates/partials/featured_without_image.html:17
 #: templates/partials/header.html:46 templates/partials/header.html:48
 #: templates/partials/hero/carousel.html:21
@@ -1920,7 +1964,7 @@ msgstr "СЛЕДВАЩА РЕЗЕРВАЦИЯ"
 
 #: templates/pages/my_profile.html:76 templates/pages/my_profile.html:147
 #: templates/pages/reservation.html:38 templates/pages/services_page.html:305
-#: templates/partials/featured_with_image.html:13
+#: templates/partials/featured_with_image.html:12
 #: templates/partials/featured_without_image.html:12
 #: templates/reservation/edit-reservation.html:24
 msgid "мин"
@@ -1928,7 +1972,7 @@ msgstr "мин"
 
 #: templates/pages/my_profile.html:78 templates/pages/my_profile.html:147
 #: templates/pages/reservation.html:38 templates/pages/services_page.html:297
-#: templates/partials/featured_with_image.html:14
+#: templates/partials/featured_with_image.html:13
 #: templates/partials/featured_without_image.html:11
 msgid "€"
 msgstr "€"
@@ -2424,13 +2468,13 @@ msgstr ""
 
 #: templates/pages/services_page.html:318
 #: templates/pages/services_page.html:320
-#: templates/partials/featured_with_image.html:24
-#: templates/partials/featured_with_image.html:26
+#: templates/partials/featured_with_image.html:23
+#: templates/partials/featured_with_image.html:25
 msgid "Научете повече"
 msgstr "Научете повече"
 
 #: templates/pages/services_page.html:319
-#: templates/partials/featured_with_image.html:25
+#: templates/partials/featured_with_image.html:24
 msgid "Покажи по-малко"
 msgstr "Покажи по-малко"
 
@@ -5086,6 +5130,20 @@ msgstr ""
 #: venv/lib/python3.12/site-packages/unfold/widgets.py:969
 msgid "Select currency"
 msgstr ""
+
+#~ msgid ""
+#~ "Фон на вдълбаните секции — лентите със снимки в галерията и албума, "
+#~ "прегледа на снимки и долния колонтитул."
+#~ msgstr ""
+#~ "Фон на вдълбаните секции — лентите със снимки в галерията и албума, "
+#~ "прегледа на снимки и долния колонтитул."
+
+#~ msgid ""
+#~ "Фон на карта, ред или меню, когато мишката е върху него — на всички "
+#~ "страници, както и на изскачащите прозорци."
+#~ msgstr ""
+#~ "Фон на карта, ред или меню, когато мишката е върху него — на всички "
+#~ "страници, както и на изскачащите прозорци."
 
 #~ msgid "СЕДМИЧЕН ГРАФИК"
 #~ msgstr "СЕДМИЧЕН ГРАФИК"
