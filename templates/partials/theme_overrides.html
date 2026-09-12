@@ -1,6 +1,7 @@
 {% load theme_extras %}{% with pair=site_config.font_pair|font_pair_info preset=site_config.style_preset|style_preset_vars oc=site_config|on_color_vars dv=site_config|derived_vars %}<link rel="stylesheet" href="{{ pair.google_fonts_url }}">
 <style>
 :root {
+    color-scheme: {{ dv.color_scheme }};
     --primary-color: {{ site_config.primary_color }};
     --primary-light: {{ site_config.primary_light_color }};
     --secondary-color: {{ site_config.secondary_color }};

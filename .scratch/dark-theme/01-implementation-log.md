@@ -229,3 +229,44 @@ reports no drift.
 - `gallery.css:90` `.gal-tile__bg` placeholder is still light — step 05.
 - Pre-existing, unrelated: `responsive.css:19` references `var(--font-color)`, which is not
   defined anywhere.
+
+## Step 05a — profile page  ✅ code complete
+
+### Bug: hover sank below the surface it was on (6 places)
+`.bookings-table tbody tr:hover td`, `.history-row:hover`, the mobile `.bookings-table tr:hover`,
+and three button hovers (`.btn-outline-profile`, `.btn-action-edit`, `.btn-outline-sm`) all used
+`background: var(--bg-light)` — the **canvas**. Those elements sit on `--bg-paper` cards, so on a
+light theme the canvas read as a subtle darkening and looked right; inverted, hovering pushed the
+row *below* its own card. All six now lift to `--bg-raised`, per the proposal's elevation rule.
+
+### Bug: the rating input was invisible and carried state in colour alone
+`templates/pages/my_profile.html:286-290` emits five identical solid stars (`&#9733;`); the only
+difference between rated and unrated was `color`. The off colour was `--border-color`, which is
+**1.14:1** on the review modal's `--bg-raised` — the empty stars could not be seen at all, so the
+control did not read as a five-star rating.
+
+Off state is now `--text-muted` (6.65:1) and the glyph is drawn by `::before`, so off/on differ in
+**shape** (`☆` / `★`) as well as colour. This matters beyond the invisibility bug: measured,
+`--text-muted` on raised is 6.65 and `--accent-color` on raised is 6.69 — near-identical
+luminance, so a colour-only distinction would vanish for a colour-blind user. No JS or template
+change was needed.
+
+### Checked and deliberately left alone
+- **The display stars** (`.star / .star.filled`, both `--secondary-color`) are *not* a bug: the
+  template emits different glyphs (`★` filled, `☆` empty), so shape already carries the state.
+- **Inset chips** at `my_profile.css:169, 376, 1034` use the canvas as a background on a
+  `--bg-paper` card. That reads as a recessed chip and inverts correctly; left as-is.
+- **`.next-booking-date-block`** stays `--primary-color`. In the light theme this was a dark-brown
+  tile on a white card; the faithful inversion is a bone tile on a dark card, and it is one small
+  tile (~105px), not a slab. Same design intent, not an oversight.
+- **`nth-child` rules** at 767-769 and 868 are responsive grid borders, not zebra striping, so the
+  no-striping rule does not apply.
+
+### Contrast after the pass
+Row hover text 15.00 · button hover label 14.01 · star off 6.65 · star on 6.69 ·
+table header 7.87 · chip label 7.83 · avatar initials 8.80 · date tile text 17.49. All ≥ 4.5.
+
+### Noted for later passes
+`var(--bg-light)` is used as an element background in gallery, form, header, home and
+photo_proofing too. Each needs the same judgement: *is it a hover on a raised surface (bug) or a
+deliberately recessed panel (fine)?* Not a blanket replace.

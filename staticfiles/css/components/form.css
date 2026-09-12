@@ -46,7 +46,7 @@
     -moz-appearance: none;
     cursor: pointer;
     padding-right: 3rem;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%234A3728' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%23A3A3A0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.9rem center;
     background-size: 18px 18px;
@@ -102,4 +102,12 @@
     background-color: var(--success-light);
     color: var(--success);
     border: 1px solid var(--success);
+}
+
+/* Native dropdown lists are drawn by the OS: without an explicit ground they use
+   the browser default (white) while inheriting the theme's light text. */
+select option,
+select optgroup {
+    background-color: var(--bg-paper);
+    color: var(--text-main);
 }

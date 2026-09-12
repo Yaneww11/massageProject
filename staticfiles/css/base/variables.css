@@ -1,4 +1,8 @@
 :root {
+    /* Tells the browser to draw native controls (select popups, scrollbars,
+       autofill) for this theme; overridden at runtime from the background colour. */
+    color-scheme: dark;
+
     /* Colors - Gallery Black (fallbacks; SiteConfiguration overrides these at runtime) */
     --primary-color: #EDEAE4;    /* Bone - headings, links, primary fills */
     --primary-light: #FFFFFF;    /* Pure White - primary hover */

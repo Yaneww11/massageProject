@@ -227,6 +227,10 @@ class StylesheetTokenUsageTest(TestCase):
     HEX = re.compile(r'#[0-9A-Fa-f]{3,8}\b')
     # Neutral black/white scrims over photographs are ground-independent, so they stay.
     TINTED_RGBA = re.compile(r'rgba\(\s*(?!0\s*,\s*0\s*,\s*0|255\s*,\s*255\s*,\s*255)')
+    # A data: URI cannot read a CSS variable, so a colour inside one is percent-encoded
+    # and invisible to HEX above. Only deliberately ground-independent neutrals are allowed.
+    ENCODED_HEX = re.compile(r'%23[0-9A-Fa-f]{3,8}')
+    ENCODED_ALLOWED = {'%23A3A3A0'}
 
     def _stylesheets(self):
         for path in sorted(Path(self.CSS_ROOT).rglob('*.css')):
@@ -242,6 +246,18 @@ class StylesheetTokenUsageTest(TestCase):
             if self.HEX.search(line)
         ]
         self.assertEqual(offenders, [], 'hardcoded hex colours found:\n' + '\n'.join(offenders))
+
+    def test_no_brand_colors_percent_encoded_inside_data_uris(self):
+        offenders = [
+            f'{rel}:{i}: {found}'
+            for rel, text in self._stylesheets()
+            for i, line in enumerate(text.splitlines(), 1)
+            for found in self.ENCODED_HEX.findall(line)
+            if found.upper() not in {a.upper() for a in self.ENCODED_ALLOWED}
+        ]
+        self.assertEqual(
+            offenders, [], 'brand colours encoded in data: URIs:\n' + '\n'.join(offenders),
+        )
 
     def test_no_brand_tinted_rgba_outside_variables_css(self):
         offenders = [

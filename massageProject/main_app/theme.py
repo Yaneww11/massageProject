@@ -51,6 +51,7 @@ def derived_theme_vars(bg_hex):
         **semantic,
         'on_success': on_color(semantic['success']),
         'on_error': on_color(semantic['error']),
+        'color_scheme': 'dark' if dark else 'light',
         'shadow_tint_sm': tints['sm'],
         'shadow_tint_md': tints['md'],
         'shadow_tint_lg': tints['lg'],
