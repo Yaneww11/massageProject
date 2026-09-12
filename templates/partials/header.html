@@ -1,100 +1,175 @@
 {% load static i18n %}{% get_current_language as CURRENT_LANG %}
 
 <!-- Header Section -->
-<header class="navbar">
-    <a href="{% url 'index' %}" class="logo-container">
-        <img src="{{ brand_logo }}" alt="{{ brand_name }}" class="logo-svg">
-    </a>
+<header class="site-header" id="site-header">
+    <span class="site-header__accent" aria-hidden="true"></span>
 
-    <nav class="nav-links" id="nav-links">
-        <a href="{% url 'index' %}">{% trans "Начало" %}</a>
-        <a href="{% url 'index' %}#services">{% trans "Услуги" %}</a>
-        <a href="{% url 'index' %}#gallery">{% trans "Галерия" %}</a>
-        <a href="{% url 'index' %}#reviews">{% trans "Отзиви" %}</a>
-        <a href="{% url 'index' %}#contacts">{% trans "Контакти" %}</a>
-        <a href="{% url 'about_page' %}">{% trans "За нас" %}</a>
-
-        <!-- Mobile Language Switcher -->
-        <form action="{% url 'set_language' %}" method="post" class="lang-switcher lang-switcher--mobile">
-            {% csrf_token %}
-            <input name="next" type="hidden" value="{{ request.path }}">
-            <button type="submit" name="language" value="bg" class="lang-btn {% if CURRENT_LANG == 'bg' %}active{% endif %}">BG</button>
-            <button type="submit" name="language" value="en" class="lang-btn {% if CURRENT_LANG == 'en' %}active{% endif %}">EN</button>
-        </form>
-
-        <!-- Mobile-only auth links -->
-        <div class="nav-auth-mobile">
-            {% if user.is_authenticated %}
-                <a href="{% url 'profile_page' %}">{% trans "Моите часове" %}</a>
-                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit()">{% trans "Изход" %}</a>
+    <div class="site-header__bar">
+        {# The logo already carries the brand name, so the wordmark is the no-logo fallback. #}
+        <a href="{% url 'index' %}" class="site-header__brand">
+            {% if brand_logo %}
+                <img src="{{ brand_logo }}" alt="{{ brand_name }}" class="site-header__logo">
             {% else %}
-                <a href="#" data-auth-modal-trigger>{% trans "Вход" %}</a>
-                <a href="#" data-auth-modal-trigger>{% trans "Регистрация" %}</a>
+                <span class="site-header__wordmark">{{ brand_name }}</span>
             {% endif %}
-        </div>
-    </nav>
-
-    <div class="navbar-actions">
-        <form action="{% url 'set_language' %}" method="post" class="lang-switcher lang-switcher--desktop">
-            {% csrf_token %}
-            <input name="next" type="hidden" value="{{ request.path }}">
-            <button type="submit" name="language" value="bg" class="lang-btn {% if CURRENT_LANG == 'bg' %}active{% endif %}">BG</button>
-            <button type="submit" name="language" value="en" class="lang-btn {% if CURRENT_LANG == 'en' %}active{% endif %}">EN</button>
-        </form>
-
-        {% if site_config.booking_enabled %}
-        <a href="{% url 'reservation_page' %}" class="btn btn-primary navbar-cta" data-auth-modal-link title="{% trans 'Запазете час' %}">
-            <i class="fas fa-calendar-alt"></i>
-            <span>{% trans "Запазете час" %}</span>
         </a>
-        {% endif %}
 
-        <div class="user-menu" id="user-menu">
-            <button class="user-menu-toggle" id="user-menu-toggle" aria-label="{% trans 'Профил' %}" aria-expanded="false">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
+        <nav class="site-nav" aria-label="{% trans 'Основна навигация' %}">
+            <div class="site-nav__group">
+                <button type="button" class="site-nav__trigger" id="primary-menu-trigger"
+                        aria-expanded="false" aria-controls="primary-menu" aria-haspopup="true">
+                    {% trans "Начална страница" %}
+                    <svg class="site-nav__caret" width="12" height="12" viewBox="0 0 12 12" fill="none"
+                         stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+                        <path d="M2.5 4.5L6 8l3.5-3.5"></path>
+                    </svg>
+                </button>
+
+                <div class="site-nav__dropdown" id="primary-menu" role="menu" aria-labelledby="primary-menu-trigger">
+                    <a href="{% url 'index' %}" role="menuitem" class="site-nav__item">
+                        {% trans "Начало" %}<span class="site-nav__hint">#home</span>
+                    </a>
+                    <a href="{% url 'index' %}#services" role="menuitem" class="site-nav__item">
+                        {% trans "Услуги" %}<span class="site-nav__hint">#services</span>
+                    </a>
+                    <a href="{% url 'index' %}#gallery" role="menuitem" class="site-nav__item">
+                        {% trans "Галерия" %}<span class="site-nav__hint">#gallery</span>
+                    </a>
+                    <a href="{% url 'index' %}#reviews" role="menuitem" class="site-nav__item">
+                        {% trans "Отзиви" %}<span class="site-nav__hint">#reviews</span>
+                    </a>
+                    <a href="{% url 'index' %}#contacts" role="menuitem" class="site-nav__item">
+                        {% trans "Контакти" %}<span class="site-nav__hint">#contacts</span>
+                    </a>
+                </div>
+            </div>
+
+            <a href="{% url 'about_page' %}" class="site-nav__link">{% trans "За нас" %}</a>
+        </nav>
+
+        <div class="site-header__actions">
+            <form action="{% url 'set_language' %}" method="post" class="lang-switcher">
+                {% csrf_token %}
+                <input name="next" type="hidden" value="{{ request.path }}">
+                <button type="submit" name="language" value="bg" class="lang-btn {% if CURRENT_LANG == 'bg' %}is-active{% endif %}">BG</button>
+                <button type="submit" name="language" value="en" class="lang-btn {% if CURRENT_LANG == 'en' %}is-active{% endif %}">EN</button>
+            </form>
+
+            <span class="site-header__divider" aria-hidden="true"></span>
+
+            {% if site_config.booking_enabled %}
+                <a href="{% url 'reservation_page' %}" class="site-cta" data-auth-modal-link title="{% trans 'Запазете час' %}">
+                    {% include 'partials/icons/calendar.svg' %}
+                    <span class="site-cta__label">{% trans "Запазете час" %}</span>
+                    <span class="site-cta__label-short">{% trans "Запази" %}</span>
+                </a>
+            {% endif %}
+
+            <div class="user-menu" id="user-menu">
+                <button class="user-menu-toggle" id="user-menu-toggle" aria-label="{% trans 'Профил' %}" aria-expanded="false">
+                    {% include 'partials/icons/user.svg' %}
+                </button>
+                <div class="user-menu-dropdown" id="user-menu-dropdown" role="menu">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'profile_page' %}" role="menuitem">{% trans "Моите часове" %}</a>
+                        <a href="#" role="menuitem" onclick="event.preventDefault(); document.getElementById('logout-form').submit()">{% trans "Изход" %}</a>
+                    {% else %}
+                        <a href="#" role="menuitem" data-auth-modal-trigger>{% trans "Вход" %}</a>
+                        <a href="#" role="menuitem" data-auth-modal-trigger>{% trans "Регистрация" %}</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="button" class="site-header__menu-btn" id="mobile-menu-open"
+                    aria-label="{% trans 'Меню' %}" aria-expanded="false" aria-controls="mobile-overlay">
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor"
+                     stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+                    <path d="M4 7h14M4 11h14M4 15h9"></path>
                 </svg>
             </button>
-            <div class="user-menu-dropdown" id="user-menu-dropdown" role="menu">
-                {% if user.is_authenticated %}
-                    <a href="{% url 'profile_page' %}" role="menuitem">{% trans "Моите часове" %}</a>
-                    <a href="#" role="menuitem" onclick="event.preventDefault(); document.getElementById('logout-form').submit()">{% trans "Изход" %}</a>
-                {% else %}
-                    <a href="#" role="menuitem" data-auth-modal-trigger>{% trans "Вход" %}</a>
-                    <a href="#" role="menuitem" data-auth-modal-trigger>{% trans "Регистрация" %}</a>
-                {% endif %}
-            </div>
         </div>
     </div>
-
-    <button class="mobile-menu-toggle" aria-label="Open menu">
-        <span class="hamburger-icon"></span>
-    </button>
 </header>
+
+<!-- Mobile full-screen overlay -->
+<div class="mobile-overlay" id="mobile-overlay" role="dialog" aria-modal="true"
+     aria-label="{% trans 'Меню' %}" hidden>
+    <div class="mobile-overlay__head">
+        <span class="site-header__brand">
+            {% if brand_logo %}
+                <img src="{{ brand_logo }}" alt="{{ brand_name }}" class="site-header__logo">
+            {% else %}
+                <span class="site-header__wordmark">{{ brand_name }}</span>
+            {% endif %}
+        </span>
+        <button type="button" class="site-header__menu-btn" id="mobile-menu-close" aria-label="{% trans 'Затвори' %}">
+            <svg width="21" height="21" viewBox="0 0 20 20" fill="none" stroke="currentColor"
+                 stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+                <path d="M5 5l10 10M15 5L5 15"></path>
+            </svg>
+        </button>
+    </div>
+
+    <nav class="mobile-overlay__nav" aria-label="{% trans 'Основна навигация' %}">
+        <button type="button" class="mobile-overlay__trigger" id="mobile-submenu-trigger"
+                aria-expanded="true" aria-controls="mobile-submenu">
+            {% trans "Начална страница" %}
+            <svg class="site-nav__caret" width="16" height="16" viewBox="0 0 12 12" fill="none"
+                 stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+                <path d="M2.5 4.5L6 8l3.5-3.5"></path>
+            </svg>
+        </button>
+
+        <div class="mobile-overlay__submenu" id="mobile-submenu">
+            <a href="{% url 'index' %}" class="mobile-overlay__sublink">{% trans "Начало" %}</a>
+            <a href="{% url 'index' %}#services" class="mobile-overlay__sublink">{% trans "Услуги" %}</a>
+            <a href="{% url 'index' %}#gallery" class="mobile-overlay__sublink">{% trans "Галерия" %}</a>
+            <a href="{% url 'index' %}#reviews" class="mobile-overlay__sublink">{% trans "Отзиви" %}</a>
+            <a href="{% url 'index' %}#contacts" class="mobile-overlay__sublink">{% trans "Контакти" %}</a>
+        </div>
+
+        <a href="{% url 'about_page' %}" class="mobile-overlay__link">{% trans "За нас" %}</a>
+    </nav>
+
+    <div class="mobile-overlay__foot">
+        {% if site_config.booking_enabled %}
+            <a href="{% url 'reservation_page' %}" class="site-cta site-cta--block" data-auth-modal-link>
+                {% include 'partials/icons/calendar.svg' %}
+                <span>{% trans "Запазете час" %}</span>
+            </a>
+        {% endif %}
+
+        <div class="mobile-overlay__utility">
+            <div class="mobile-overlay__account">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'profile_page' %}" class="mobile-overlay__account-link">
+                        {% include 'partials/icons/user.svg' %}
+                        {% trans "Моите часове" %}
+                    </a>
+                    <a href="#" class="mobile-overlay__account-link"
+                       onclick="event.preventDefault(); document.getElementById('logout-form').submit()">{% trans "Изход" %}</a>
+                {% else %}
+                    <a href="#" class="mobile-overlay__account-link" data-auth-modal-trigger>
+                        {% include 'partials/icons/user.svg' %}
+                        {% trans "Вход" %}
+                    </a>
+                    <a href="#" class="mobile-overlay__account-link" data-auth-modal-trigger>{% trans "Регистрация" %}</a>
+                {% endif %}
+            </div>
+
+            <form action="{% url 'set_language' %}" method="post" class="lang-switcher">
+                {% csrf_token %}
+                <input name="next" type="hidden" value="{{ request.path }}">
+                <button type="submit" name="language" value="bg" class="lang-btn {% if CURRENT_LANG == 'bg' %}is-active{% endif %}">BG</button>
+                <button type="submit" name="language" value="en" class="lang-btn {% if CURRENT_LANG == 'en' %}is-active{% endif %}">EN</button>
+            </form>
+        </div>
+    </div>
+</div>
 
 <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
     {% csrf_token %}
 </form>
-
-<script>
-(function () {
-    var toggle = document.getElementById('user-menu-toggle');
-    var menu = document.getElementById('user-menu');
-    if (!toggle) return;
-    toggle.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var open = menu.classList.toggle('user-menu--open');
-        toggle.setAttribute('aria-expanded', open);
-    });
-    document.addEventListener('click', function (e) {
-        if (!menu.contains(e.target)) {
-            menu.classList.remove('user-menu--open');
-            toggle.setAttribute('aria-expanded', 'false');
-        }
-    });
-})();
-</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
