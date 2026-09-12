@@ -165,7 +165,7 @@
     top: calc(100% + 0.5rem);
     right: 0;
     background: var(--bg-paper);
-    border: 1px solid var(--border-color, #e8e0d8);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-md, 8px);
     box-shadow: var(--shadow-md);
     min-width: 180px;
@@ -209,7 +209,7 @@
 .hamburger-icon {
     width: 24px;
     height: 2px;
-    background-color: var(--primary-color);
+    background-color: var(--text-main);
     position: relative;
     display: block;
     transition: var(--transition);
@@ -221,7 +221,7 @@
     position: absolute;
     width: 24px;
     height: 2px;
-    background-color: var(--primary-color);
+    background-color: var(--text-main);
     transition: var(--transition);
 }
 

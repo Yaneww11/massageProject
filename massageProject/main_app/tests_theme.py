@@ -1,9 +1,13 @@
+import re
+from pathlib import Path
+
 from django.test import TestCase
 from django.template import Context, Template
 
 from massageProject.main_app.models import SiteConfiguration
 from massageProject.main_app.theme import (
     FONT_PAIRS, STYLE_PRESETS, COLOR_PRESETS, on_color, contrast_ratio,
+    derived_theme_vars, is_dark,
 )
 
 
@@ -32,9 +36,9 @@ class ThemeDataTest(TestCase):
         self.assertEqual(soft['radius_sm'], '4px')
         self.assertEqual(soft['radius_md'], '8px')
         self.assertEqual(soft['radius_lg'], '16px')
-        self.assertEqual(soft['shadow_sm'], '0 2px 4px rgba(0,0,0,0.05)')
-        self.assertEqual(soft['shadow_md'], '0 4px 12px rgba(0,0,0,0.1)')
-        self.assertEqual(soft['shadow_lg'], '0 10px 25px rgba(0,0,0,0.15)')
+        self.assertEqual(soft['shadow_sm'], '0 2px 4px var(--shadow-tint-sm)')
+        self.assertEqual(soft['shadow_md'], '0 4px 12px var(--shadow-tint-md)')
+        self.assertEqual(soft['shadow_lg'], '0 10px 25px var(--shadow-tint-lg)')
 
     def test_default_font_pair_matches_current_variables_css_import(self):
         default = FONT_PAIRS['playfair_montserrat']
@@ -78,6 +82,7 @@ class ColorPresetsDataTest(TestCase):
     COLOR_FIELDS = (
         'primary_color', 'primary_light_color', 'secondary_color', 'accent_color',
         'background_color', 'text_color', 'text_muted_color', 'border_color',
+        'surface_sunken_color', 'surface_paper_color', 'surface_raised_color',
     )
 
     def test_every_preset_has_all_color_fields_and_a_label(self):
@@ -92,6 +97,68 @@ class ColorPresetsDataTest(TestCase):
                 bg = preset[field]
                 ratio = contrast_ratio(bg, on_color(bg))
                 self.assertGreaterEqual(ratio, 4.5, f'{key}.{field}={bg} contrast={ratio:.2f}')
+
+    def test_every_preset_text_passes_contrast_against_every_surface(self):
+        for key, preset in COLOR_PRESETS.items():
+            for surface in ('background_color', 'surface_sunken_color',
+                            'surface_paper_color', 'surface_raised_color'):
+                for text in ('text_color', 'text_muted_color'):
+                    ratio = contrast_ratio(preset[text], preset[surface])
+                    self.assertGreaterEqual(
+                        ratio, 4.5, f'{key}.{text} on {key}.{surface} contrast={ratio:.2f}',
+                    )
+
+
+class DerivedThemeVarsTest(TestCase):
+    SURFACE_FIELDS = (
+        'background_color', 'surface_sunken_color',
+        'surface_paper_color', 'surface_raised_color',
+    )
+
+    def test_every_preset_gets_semantic_colors_matching_its_brightness(self):
+        for key, preset in COLOR_PRESETS.items():
+            derived = derived_theme_vars(preset['background_color'])
+            dark = is_dark(preset['background_color'])
+            # a dark theme needs dark washes, a light theme light ones
+            self.assertEqual(
+                is_dark(derived['success_light']), dark, f'{key}.success_light',
+            )
+            self.assertEqual(
+                is_dark(derived['error_light']), dark, f'{key}.error_light',
+            )
+
+    def test_semantic_colors_are_legible_on_every_surface_of_their_preset(self):
+        for key, preset in COLOR_PRESETS.items():
+            derived = derived_theme_vars(preset['background_color'])
+            for role in ('success', 'error'):
+                for field in self.SURFACE_FIELDS:
+                    ratio = contrast_ratio(derived[role], preset[field])
+                    self.assertGreaterEqual(
+                        ratio, 4.5, f'{key}: {role} on {field} contrast={ratio:.2f}',
+                    )
+
+    def test_semantic_colors_are_legible_on_their_own_wash_and_fill(self):
+        for key, preset in COLOR_PRESETS.items():
+            derived = derived_theme_vars(preset['background_color'])
+            for role in ('success', 'error'):
+                wash = contrast_ratio(derived[role], derived[f'{role}_light'])
+                self.assertGreaterEqual(wash, 4.5, f'{key}: {role} on its wash={wash:.2f}')
+                fill = contrast_ratio(derived[role], derived[f'on_{role}'])
+                self.assertGreaterEqual(fill, 4.5, f'{key}: on_{role} on {role}={fill:.2f}')
+
+    def test_dark_backgrounds_get_deeper_shadow_tints_than_light_ones(self):
+        dark = derived_theme_vars('#0A0A0B')
+        light = derived_theme_vars('#FAF7F2')
+        self.assertNotEqual(dark['shadow_tint_md'], light['shadow_tint_md'])
+        self.assertEqual(light['shadow_tint_md'], 'rgba(0,0,0,0.1)')
+        self.assertEqual(dark['shadow_tint_md'], 'rgba(0,0,0,0.55)')
+
+    def test_style_preset_shadows_reference_the_tint_variable(self):
+        for key, preset in STYLE_PRESETS.items():
+            for field in ('shadow_sm', 'shadow_md', 'shadow_lg'):
+                value = preset[field]
+                if value != 'none':
+                    self.assertIn('var(--shadow-tint-', value, f'{key}.{field}')
 
 
 class ThemeTemplateFiltersTest(TestCase):
@@ -133,9 +200,13 @@ class ThemeOverridesRenderingTest(TestCase):
     def test_home_page_includes_theme_colors_and_font_link(self):
         response = self.client.get('/bg/')
         content = response.content.decode()
-        self.assertIn('--primary-color: #4A3728', content)
-        self.assertIn('--on-primary: #FFFFFF', content)
-        self.assertIn('--on-primary-light: #FFFFFF', content)
+        self.assertIn('--primary-color: #EDEAE4', content)
+        self.assertIn('--bg-light: #0A0A0B', content)
+        self.assertIn('--bg-sunken: #060607', content)
+        self.assertIn('--bg-paper: #141416', content)
+        self.assertIn('--bg-raised: #1D1D20', content)
+        self.assertIn('--on-primary: #000000', content)
+        self.assertIn('--on-primary-light: #000000', content)
         self.assertIn('--on-secondary: #000000', content)
         self.assertIn('--on-accent: #000000', content)
         self.assertIn('--font-heading: \'Playfair Display\', serif', content)
@@ -145,6 +216,41 @@ class ThemeOverridesRenderingTest(TestCase):
         with open('staticfiles/css/base/variables.css') as f:
             content = f.read()
         self.assertNotIn('@import url(\'https://fonts.googleapis.com', content)
+
+
+class StylesheetTokenUsageTest(TestCase):
+    """CLAUDE.md: colours live in SiteConfiguration tokens, never as literals in .css."""
+
+    CSS_ROOT = 'staticfiles/css'
+    # variables.css declares the tokens; the admin stylesheet themes Django admin, not the site.
+    EXEMPT = ('base/variables.css', 'admin/')
+    HEX = re.compile(r'#[0-9A-Fa-f]{3,8}\b')
+    # Neutral black/white scrims over photographs are ground-independent, so they stay.
+    TINTED_RGBA = re.compile(r'rgba\(\s*(?!0\s*,\s*0\s*,\s*0|255\s*,\s*255\s*,\s*255)')
+
+    def _stylesheets(self):
+        for path in sorted(Path(self.CSS_ROOT).rglob('*.css')):
+            rel = str(path.relative_to(self.CSS_ROOT))
+            if not any(rel.startswith(e) or rel == e for e in self.EXEMPT):
+                yield rel, path.read_text()
+
+    def test_no_hardcoded_hex_colors_outside_variables_css(self):
+        offenders = [
+            f'{rel}:{i}: {line.strip()}'
+            for rel, text in self._stylesheets()
+            for i, line in enumerate(text.splitlines(), 1)
+            if self.HEX.search(line)
+        ]
+        self.assertEqual(offenders, [], 'hardcoded hex colours found:\n' + '\n'.join(offenders))
+
+    def test_no_brand_tinted_rgba_outside_variables_css(self):
+        offenders = [
+            f'{rel}:{i}: {line.strip()}'
+            for rel, text in self._stylesheets()
+            for i, line in enumerate(text.splitlines(), 1)
+            if self.TINTED_RGBA.search(line)
+        ]
+        self.assertEqual(offenders, [], 'brand-tinted rgba() found:\n' + '\n'.join(offenders))
 
 
 class HeroVariantSelectionTest(TestCase):

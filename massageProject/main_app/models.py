@@ -1103,7 +1103,7 @@ class SiteConfiguration(models.Model):
     ]
 
     color_preset = models.CharField(
-        max_length=30, choices=COLOR_PRESET_CHOICES, default='custom', blank=True,
+        max_length=30, choices=COLOR_PRESET_CHOICES, default='gallery_black', blank=True,
         verbose_name=_('Готова цветова комбинация'),
         help_text=_(
             'Изберете готова цветова комбинация, за да зададете наведнъж всички цветове по-долу. '
@@ -1112,44 +1112,70 @@ class SiteConfiguration(models.Model):
     )
 
     primary_color = models.CharField(
-        max_length=7, default='#4A3728', validators=[_HEX_COLOR_VALIDATOR],
+        max_length=7, default='#EDEAE4', validators=[_HEX_COLOR_VALIDATOR],
         verbose_name=_('Основен цвят'),
         help_text=_('Цвят по цялата тема на сайта, използван на всички страници.'),
     )
     primary_light_color = models.CharField(
-        max_length=7, default='#6D5442', validators=[_HEX_COLOR_VALIDATOR],
+        max_length=7, default='#FFFFFF', validators=[_HEX_COLOR_VALIDATOR],
         verbose_name=_('Основен цвят (светъл)'),
         help_text=_('Цвят по цялата тема на сайта, използван на всички страници.'),
     )
     secondary_color = models.CharField(
-        max_length=7, default='#C2A38E', validators=[_HEX_COLOR_VALIDATOR],
+        max_length=7, default='#A8A8A4', validators=[_HEX_COLOR_VALIDATOR],
         verbose_name=_('Вторичен цвят'),
         help_text=_('Цвят по цялата тема на сайта, използван на всички страници.'),
     )
     accent_color = models.CharField(
-        max_length=7, default='#8E735B', validators=[_HEX_COLOR_VALIDATOR],
+        max_length=7, default='#C89B6A', validators=[_HEX_COLOR_VALIDATOR],
         verbose_name=_('Акцентен цвят'),
         help_text=_('Цвят по цялата тема на сайта, използван на всички страници.'),
     )
     background_color = models.CharField(
-        max_length=7, default='#FAF7F2', validators=[_HEX_COLOR_VALIDATOR],
+        max_length=7, default='#0A0A0B', validators=[_HEX_COLOR_VALIDATOR],
         verbose_name=_('Фон'),
         help_text=_('Цвят по цялата тема на сайта, използван на всички страници.'),
     )
     text_color = models.CharField(
-        max_length=7, default='#2D241E', validators=[_HEX_COLOR_VALIDATOR],
+        max_length=7, default='#F2F2F0', validators=[_HEX_COLOR_VALIDATOR],
         verbose_name=_('Текст'),
         help_text=_('Цвят по цялата тема на сайта, използван на всички страници.'),
     )
     text_muted_color = models.CharField(
-        max_length=7, default='#6B5E55', validators=[_HEX_COLOR_VALIDATOR],
+        max_length=7, default='#A3A3A0', validators=[_HEX_COLOR_VALIDATOR],
         verbose_name=_('Текст (приглушен)'),
         help_text=_('Цвят по цялата тема на сайта, използван на всички страници.'),
     )
     border_color = models.CharField(
-        max_length=7, default='#4A3728', validators=[_HEX_COLOR_VALIDATOR],
+        max_length=7, default='#2B2B2F', validators=[_HEX_COLOR_VALIDATOR],
         verbose_name=_('Цвят на рамки'),
         help_text=_('Цвят по цялата тема на сайта, използван на всички страници.'),
+    )
+    surface_sunken_color = models.CharField(
+        max_length=7, default='#060607', validators=[_HEX_COLOR_VALIDATOR],
+        verbose_name=_('Фон (вдълбан)'),
+        help_text=_(
+            'Фон на тъмните ленти по страниците — секцията с галерията на началната '
+            'страница, страницата с галерията, лентата със статистики в "За нас", '
+            'долния колонтитул и заетите часове в календара за резервация.'
+        ),
+    )
+    surface_paper_color = models.CharField(
+        max_length=7, default='#141416', validators=[_HEX_COLOR_VALIDATOR],
+        verbose_name=_('Фон (карти и панели)'),
+        help_text=_(
+            'Фон на картите, панелите и полетата за въвеждане — горното меню, '
+            'началната страница, галерията, формата за резервация, профила на '
+            'клиента и прегледа на снимки.'
+        ),
+    )
+    surface_raised_color = models.CharField(
+        max_length=7, default='#1D1D20', validators=[_HEX_COLOR_VALIDATOR],
+        verbose_name=_('Фон (при посочване)'),
+        help_text=_(
+            'Фон на изскачащите прозорци за вход и за отзив, както и на плочките със '
+            'специалисти и дните в календара, когато мишката е върху тях.'
+        ),
     )
 
     font_pair = models.CharField(

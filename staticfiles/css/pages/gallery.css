@@ -6,7 +6,7 @@
 }
 
 .gal-page--dark {
-  background: var(--gallery-dark-bg);
+  background: var(--bg-sunken);
 }
 
 /* Page header */
@@ -99,7 +99,7 @@
 .gal-tile__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(38,28,20,0.84) 0%, rgba(38,28,20,0.28) 38%, transparent 62%);
+  background: linear-gradient(to top, rgba(0,0,0,0.84) 0%, rgba(0,0,0,0.28) 38%, transparent 62%);
 }
 
 .gal-tile__body {
@@ -277,7 +277,7 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: rgba(45,36,30,0.62);
+  background: rgba(0,0,0,0.62);
   color: var(--white);
   display: flex;
   align-items: center;
@@ -298,7 +298,7 @@
   position: fixed;
   inset: 0;
   z-index: 999;
-  background: rgba(35,27,21,0.9);
+  background: rgba(0,0,0,0.9);
   backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
@@ -333,7 +333,7 @@
   max-width: min(90vw, 1000px);
   max-height: 90vh;
   border-radius: 14px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  box-shadow: var(--shadow-lg);
   object-fit: contain;
 }
 

@@ -127,13 +127,13 @@
 
 .bn-therapist-tile:hover {
     border-color: var(--accent-color);
-    background: #FAF7F2;
+    background: var(--bg-raised);
 }
 
 .bn-therapist-tile.selected {
-    background: #FAF7F2;
+    background: var(--bg-raised);
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px rgba(142, 115, 91, 0.2);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 25%, transparent);
 }
 
 /* ── Avatar (initials circle) ────────────────────────────── */
@@ -142,7 +142,7 @@
     height: 38px;
     flex: none;
     border-radius: 50%;
-    background: #ECE0D4;
+    background: var(--bg-raised);
     color: var(--accent-color);
     display: inline-flex;
     align-items: center;
@@ -230,7 +230,7 @@
 }
 
 .bn-cal-nav:hover:not(:disabled) {
-    background: #FAF7F2;
+    background: var(--bg-raised);
     border-color: var(--accent-color);
 }
 
@@ -281,7 +281,7 @@
 }
 
 .bn-cal-day:hover:not(:disabled):not(.bn-cal-day--selected) {
-    background: #F2EBE2;
+    background: var(--bg-raised);
 }
 
 .bn-cal-day--selected {
@@ -294,7 +294,7 @@
 .bn-cal-day:disabled {
     opacity: 0.38;
     cursor: default;
-    color: #B0A090;
+    color: var(--text-muted);
 }
 
 .bn-cal-day--today::after {
@@ -310,7 +310,7 @@
 }
 
 .bn-cal-day--today.bn-cal-day--selected::after {
-    background: var(--white);
+    background: var(--on-accent);
 }
 
 /* ── Time slots ──────────────────────────────────────────── */
@@ -362,9 +362,9 @@
 }
 
 .time-slot.disabled {
-    background: #eee;
-    border-color: #ccc;
-    color: #999;
+    background: var(--bg-sunken);
+    border-color: var(--border-color);
+    color: var(--text-muted);
     cursor: not-allowed;
     text-decoration: line-through;
     opacity: 0.6;
@@ -519,7 +519,7 @@
     width: 66px;
     height: 66px;
     border-radius: 50%;
-    background: #ECF1E7;
+    background: var(--success-light);
     color: var(--success);
     display: inline-flex;
     align-items: center;

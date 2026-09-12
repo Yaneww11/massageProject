@@ -31,15 +31,20 @@ class SiteConfigurationGetSoloTest(TestCase):
 
 
 class SiteConfigurationDefaultsTest(TestCase):
-    def test_defaults_match_current_spa_theme(self):
+    def test_defaults_match_gallery_black_theme(self):
         obj = SiteConfiguration.get_solo()
-        self.assertEqual(obj.primary_color, '#4A3728')
-        self.assertEqual(obj.primary_light_color, '#6D5442')
-        self.assertEqual(obj.secondary_color, '#C2A38E')
-        self.assertEqual(obj.accent_color, '#8E735B')
-        self.assertEqual(obj.background_color, '#FAF7F2')
-        self.assertEqual(obj.text_color, '#2D241E')
-        self.assertEqual(obj.text_muted_color, '#6B5E55')
+        self.assertEqual(obj.color_preset, 'gallery_black')
+        self.assertEqual(obj.primary_color, '#EDEAE4')
+        self.assertEqual(obj.primary_light_color, '#FFFFFF')
+        self.assertEqual(obj.secondary_color, '#A8A8A4')
+        self.assertEqual(obj.accent_color, '#C89B6A')
+        self.assertEqual(obj.background_color, '#0A0A0B')
+        self.assertEqual(obj.text_color, '#F2F2F0')
+        self.assertEqual(obj.text_muted_color, '#A3A3A0')
+        self.assertEqual(obj.border_color, '#2B2B2F')
+        self.assertEqual(obj.surface_sunken_color, '#060607')
+        self.assertEqual(obj.surface_paper_color, '#141416')
+        self.assertEqual(obj.surface_raised_color, '#1D1D20')
         self.assertEqual(obj.font_pair, 'playfair_montserrat')
         self.assertEqual(obj.style_preset, 'soft')
         self.assertEqual(obj.hero_variant, 'split')

@@ -353,12 +353,15 @@ class SiteConfigurationAdmin(ModelAdmin, TabbedTranslationAdmin):
     COLOR_FIELDS = (
         'primary_color', 'primary_light_color', 'secondary_color',
         'accent_color', 'background_color', 'text_color', 'text_muted_color',
-        'border_color',
+        'border_color', 'surface_sunken_color', 'surface_paper_color',
+        'surface_raised_color',
     )
 
     CONTRAST_PAIRS = (
         ('text_color', 'background_color'),
         ('primary_color', 'background_color'),
+        ('text_color', 'surface_paper_color'),
+        ('text_color', 'surface_sunken_color'),
     )
 
     fieldsets = (
@@ -366,7 +369,8 @@ class SiteConfigurationAdmin(ModelAdmin, TabbedTranslationAdmin):
             'color_preset',
             'primary_color', 'primary_light_color', 'secondary_color',
             'accent_color', 'background_color', 'text_color', 'text_muted_color',
-            'border_color',
+            'border_color', 'surface_sunken_color', 'surface_paper_color',
+            'surface_raised_color',
         )}),
         (_('Типография и стил'), {'fields': ('font_pair', 'style_preset', 'hero_variant')}),
         (_('Терминология'), {'fields': (
