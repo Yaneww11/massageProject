@@ -94,11 +94,11 @@ class BookingEnabledUIHidingTest(TestCase):
         config.booking_enabled = False
         config.save()
 
-    def test_navbar_cta_hidden_when_booking_disabled(self):
+    def test_header_cta_hidden_when_booking_disabled(self):
         self._disable_booking()
         response = self.client.get('/bg/')
         content = response.content.decode()
-        self.assertNotIn('navbar-cta', content)
+        self.assertNotIn('site-cta', content)
 
     def test_hero_reservation_cta_hidden_when_booking_disabled(self):
         self._disable_booking()
