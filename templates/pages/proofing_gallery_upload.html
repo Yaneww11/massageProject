@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block content %}
 <section class="profile-page">
@@ -12,7 +12,12 @@
       </div>
     </div>
 
-    <form method="post" enctype="multipart/form-data" class="gallery-upload-form">
+    {% include "partials/gallery/draft_list.html" %}
+
+    <form method="post" enctype="multipart/form-data" class="gallery-upload-form"
+          id="chunked-gallery-upload-form"
+          data-chunk-size="{{ chunk_size }}"
+          data-done-url="{% url 'profile_page' %}">
       {% csrf_token %}
 
       {% if upload_form.non_field_errors %}
@@ -56,8 +61,13 @@
         </div>
       </div>
 
-      <button type="submit" class="btn-primary-profile">{% trans "Качете галерията" %}</button>
+      <p class="form-hint">{% blocktrans %}Снимките се качват на групи по {{ chunk_size }} и стават видими за клиента едва след като качването приключи.{% endblocktrans %}</p>
+
+      {% include "partials/gallery/chunked_upload_ui.html" %}
+
+      <button type="submit" class="btn-primary-profile" id="chunked-upload-submit">{% trans "Качете галерията" %}</button>
     </form>
   </div>
 </section>
+<script src="{% static 'js/chunked-gallery-upload.js' %}" defer></script>
 {% endblock %}

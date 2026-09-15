@@ -686,6 +686,15 @@ class Gallery(models.Model):
         (TYPE_FINAL, _('Финална галерия')),
     ]
 
+    # A client session runs to a few hundred frames; a 400-slide homepage
+    # carousel or album is a mistake, not a use case.
+    IMAGE_CAPS = {
+        TYPE_HOMEPAGE: 50,
+        TYPE_ALBUM: 50,
+        TYPE_PROOFING: 400,
+        TYPE_FINAL: 400,
+    }
+
     gallery_type = models.CharField(
         max_length=20, choices=TYPE_CHOICES, default=TYPE_ALBUM,
         verbose_name=_('Тип галерия'),
@@ -724,6 +733,13 @@ class Gallery(models.Model):
         default=0, verbose_name=_('Ред'),
         help_text=_('Определя реда, в който албумите се показват на страницата с галерии.'),
     )
+    draft_reservation = models.ForeignKey(
+        'Reservation', on_delete=models.CASCADE, null=True, blank=True,
+        related_name='draft_galleries', verbose_name=_('Чернова към резервация'),
+    )
+    published_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_('Публикувана на'),
+    )
 
     class Meta:
         ordering = ['order']
@@ -754,6 +770,14 @@ class Gallery(models.Model):
     @property
     def photo_count(self):
         return self.images.count()
+
+    @property
+    def image_cap(self):
+        return self.IMAGE_CAPS[self.gallery_type]
+
+    @property
+    def is_published(self):
+        return self.published_at is not None
 
 
 class Image(WebPImageFieldsMixin, models.Model):
@@ -796,6 +820,11 @@ class Image(WebPImageFieldsMixin, models.Model):
         max_length=255, blank=True,
         help_text=_('Използва се като алтернативен текст (alt) за тази снимка.'),
     )
+    # convert_image_field_to_webp() rewrites `image.name` to .webp and the
+    # stored size becomes the WebP size, so a resumed upload has nothing left
+    # to recognise an already-uploaded file by unless it is captured here.
+    source_name = models.CharField(max_length=255, blank=True, verbose_name=_('Име на файла при качване'))
+    source_size = models.PositiveBigIntegerField(null=True, blank=True, verbose_name=_('Размер при качване'))
     order = models.PositiveIntegerField(
         default=0, verbose_name=_('Ред'),
         help_text=_(
