@@ -9,13 +9,16 @@ from io import BytesIO
 from PIL import Image as PILImage
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
+from unittest import mock
+
 from django.core import mail
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
-from django.utils import timezone
+from django.utils import timezone, translation
 
 from massageProject.accounts.models import CustomUser
+from massageProject.main_app.views import ProofingGalleryUploadView
 from massageProject.main_app.models import (
     Gallery, Image, Reservation, Service, Specialist,
 )
@@ -496,3 +499,94 @@ class SingleShotValidationTest(ChunkedUploadTestBase):
         self.new_draft_id(labels=['За албум'])
         names = list(Gallery.objects.get(pk=gallery_id).photo_labels.values_list('name', flat=True))
         self.assertEqual(names, ['За печат'])
+
+
+class ReviewFindingsTest(ChunkedUploadTestBase):
+    def test_oversized_plain_post_reports_the_real_reason_and_leaves_no_draft(self):
+        """Finding 1: _single_shot discarded the reason _append_chunk refused,
+        so a batch over the chunk size was reported as a cap error and left a
+        draft behind."""
+        response = self.client.post(self.url, {
+            'reservation': self.reservation.pk,
+            'images': [_uploaded(f'{i}.jpg') for i in range(7)],
+            'labels-TOTAL_FORMS': '3', 'labels-INITIAL_FORMS': '0',
+            'labels-MIN_NUM_FORMS': '0', 'labels-MAX_NUM_FORMS': '1000',
+            'labels-0-name': '', 'labels-1-name': '', 'labels-2-name': '',
+        })
+        self.assertEqual(response.status_code, 200)
+        text = ' '.join(str(m) for m in response.context['messages'])
+        self.assertNotIn('400', text, 'the cap is not why this was refused')
+        self.assertFalse(Gallery.objects.filter(draft_reservation=self.reservation).exists())
+
+    def test_a_non_numeric_gallery_id_is_a_400_not_a_500(self):
+        """Finding 8: the raw POST value went straight into pk=."""
+        for step in ('chunk', 'publish', 'discard'):
+            response = self.client.post(self.url, {'step': step, 'gallery_id': 'undefined'})
+            self.assertEqual(response.status_code, 400, step)
+
+    def test_a_resumed_chunk_of_duplicates_is_not_refused_at_the_cap(self):
+        """Finding 10: the cap counted files that would immediately be skipped
+        as duplicates, so a resume near the cap was refused when it would fit."""
+        gallery_id = self.new_draft_id()
+        gallery = Gallery.objects.get(pk=gallery_id)
+        Image.objects.bulk_create([
+            Image(gallery=gallery, order=i, image=f'gallery/photos/f{i}.webp')
+            for i in range(gallery.image_cap - 2)
+        ])
+        already = _uploaded('dup.jpg')
+        self.send_chunk(gallery_id, [already])
+        resend = SimpleUploadedFile('dup.jpg', already.file.getvalue(), content_type='image/jpeg')
+        response = self.send_chunk(gallery_id, [resend, _uploaded('new.jpg')])
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.json()['skipped'], 1)
+        self.assertEqual(gallery.images.count(), gallery.image_cap)
+
+    def test_publish_failure_does_not_destroy_a_pre_existing_resumable_draft(self):
+        """Also-noted: _single_shot's rollback deleted the draft even when it
+        had been built up by earlier chunked sessions."""
+        gallery_id = self.new_draft_id()
+        self.send_chunk(gallery_id, [_uploaded('earlier.jpg')])
+        with mock.patch.object(
+            ProofingGalleryUploadView, '_publish_draft',
+            return_value=('boom', False),
+        ):
+            self.client.post(self.url, {
+                'reservation': self.reservation.pk,
+                'images': [_uploaded('later.jpg')],
+                'labels-TOTAL_FORMS': '3', 'labels-INITIAL_FORMS': '0',
+                'labels-MIN_NUM_FORMS': '0', 'labels-MAX_NUM_FORMS': '1000',
+                'labels-0-name': '', 'labels-1-name': '', 'labels-2-name': '',
+            })
+        self.assertTrue(
+            Gallery.objects.filter(pk=gallery_id).exists(),
+            'a draft with earlier work must survive a failed publish',
+        )
+
+
+class UploadPageTitleLocaleTest(ChunkedUploadTestBase):
+    def test_title_follows_the_request_language(self):
+        """Finding 3: page_title was evaluated once at class-definition time
+        with eager gettext, freezing it to whichever locale was active then."""
+        with translation.override('bg'):
+            bg_url = reverse(self.url_name)
+        with translation.override('en'):
+            en_url = reverse(self.url_name)
+        self.assertNotEqual(bg_url, en_url)
+        bg_title = str(self.client.get(bg_url).context['title'])
+        en_title = str(self.client.get(en_url).context['title'])
+        self.assertEqual(bg_title, 'Качване на галерия за преглед')
+        self.assertNotEqual(bg_title, en_title)
+
+
+class ReservationDeletionTest(ChunkedUploadTestBase):
+    def test_deleting_the_reservation_does_not_destroy_a_published_gallery(self):
+        """draft_reservation outlives publishing, so cascading it would take
+        the delivered gallery and every image with the reservation."""
+        gallery_id = self.new_draft_id()
+        self.send_chunk(gallery_id, [_uploaded('a.jpg')])
+        self.publish(gallery_id)
+        self.reservation.delete()
+        gallery = Gallery.objects.filter(pk=gallery_id).first()
+        self.assertIsNotNone(gallery, 'the delivered gallery must survive')
+        self.assertIsNone(gallery.draft_reservation_id)
+        self.assertEqual(gallery.images.count(), 1)

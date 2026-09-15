@@ -145,9 +145,25 @@
         }
 
         setStatus(TEXT.publishing, false);
-        const published = await post({ step: 'publish', gallery_id: galleryId });
+        let published;
+        try {
+            published = await post({ step: 'publish', gallery_id: galleryId });
+        } catch (err) {
+            // The gallery may or may not have published; say so rather than
+            // leaving the photographer on a frozen "publishing…".
+            setStatus(TEXT.publishUnknown, true);
+            submitBtn.disabled = false;
+            return;
+        }
         if (!published.ok || !published.data.success) {
-            setStatus(published.data.error || TEXT.genericError, true);
+            setStatus((published.data && published.data.error) || TEXT.genericError, true);
+            submitBtn.disabled = false;
+            return;
+        }
+        if (published.data.email_sent === false) {
+            // Published, but the client was not notified. Redirecting here
+            // would leave the photographer believing the email went out.
+            setStatus(published.data.message || TEXT.genericError, true);
             submitBtn.disabled = false;
             return;
         }
@@ -173,6 +189,9 @@
                 }
                 btn.disabled = false;
                 window.alert((data && data.error) || TEXT.genericError);
+            }).catch(() => {
+                btn.disabled = false;
+                window.alert(TEXT.networkError);
             });
         });
     });

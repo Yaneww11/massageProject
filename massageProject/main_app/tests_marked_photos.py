@@ -212,10 +212,9 @@ class MarkedPhotoThumbnailTest(MarkedPhotosTestBase):
 
     def test_thumbnail_is_generated_once_and_then_served_from_cache(self):
         from django.core.files.storage import default_storage
-        from massageProject.main_app.views import _marked_thumbnail_path
 
         self._thumb_response()
-        path = _marked_thumbnail_path(self.marked_image.pk)
+        path = self.marked_image.marked_thumbnail_path
         self.assertTrue(default_storage.exists(path))
         first_mtime = default_storage.get_modified_time(path)
         self._thumb_response()
@@ -264,3 +263,36 @@ class MarkedPhotoThumbnailTest(MarkedPhotosTestBase):
         self.client.force_login(self.specialist_user)
         response = self.client.get(reverse('marked_photos', args=[self.reservation.pk]))
         self.assertContains(response, 'loading="lazy"')
+
+
+class MarkedThumbnailInvalidationTest(MarkedPhotosTestBase):
+    """Finding 9: the derivative is keyed only by image id, so nothing evicted
+    it when the underlying photo changed or went away."""
+
+    def _thumb(self):
+        self.client.force_login(self.specialist_user)
+        return self.client.get(
+            reverse('marked_photo_image', args=[self.reservation.pk, self.marked_image.pk])
+        )
+
+    def test_replacing_the_photo_evicts_the_cached_thumbnail(self):
+        from django.core.files.storage import default_storage
+
+        self._thumb()
+        path = self.marked_image.marked_thumbnail_path
+        self.assertTrue(default_storage.exists(path))
+
+        self.marked_image.image = _make_uploaded_image('replacement.jpg', 'green')
+        self.marked_image.save()
+        self.assertFalse(
+            default_storage.exists(path),
+            'a replaced photo must not keep serving the old thumbnail',
+        )
+
+    def test_deleting_the_image_removes_its_thumbnail(self):
+        from django.core.files.storage import default_storage
+
+        self._thumb()
+        path = self.marked_image.marked_thumbnail_path
+        self.marked_image.delete()
+        self.assertFalse(default_storage.exists(path))

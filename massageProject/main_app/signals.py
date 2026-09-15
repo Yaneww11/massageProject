@@ -17,10 +17,27 @@ from massageProject.main_app.models import BusinessInfo, HomePage, Image, SiteCo
 logger = logging.getLogger(__name__)
 
 
+def _delete_image_derivatives(image):
+    """Every cached derivative of one Image: the per-user watermarked proofs and
+    the photographer's Marked Photos thumbnail. Both are keyed by row id, so
+    they survive a replaced or deleted photo unless evicted here."""
+    prefix = f'proof_derivatives/{image.pk}/'
+    try:
+        _, filenames = default_storage.listdir(prefix)
+    except (FileNotFoundError, NotADirectoryError):
+        filenames = []
+    for filename in filenames:
+        default_storage.delete(prefix + filename)
+
+    thumbnail = image.marked_thumbnail_path
+    if default_storage.exists(thumbnail):
+        default_storage.delete(thumbnail)
+
+
 @receiver(pre_save, sender=Image)
 def clear_proof_derivatives_on_image_change(sender, instance, **kwargs):
-    """Photo proofing derivatives are cached per (image, user); if an admin replaces
-    the original file, stale derivatives must be cleared so they regenerate."""
+    """Derivatives are cached against the row, so replacing the original file
+    must clear them or the stale ones keep being served."""
     if not instance.pk:
         return
     try:
@@ -31,13 +48,14 @@ def clear_proof_derivatives_on_image_change(sender, instance, **kwargs):
     new_name = instance.image.name if instance.image else None
     if old_name == new_name:
         return
-    prefix = f'proof_derivatives/{instance.pk}/'
-    try:
-        _, filenames = default_storage.listdir(prefix)
-    except (FileNotFoundError, NotADirectoryError):
-        return
-    for filename in filenames:
-        default_storage.delete(prefix + filename)
+    _delete_image_derivatives(instance)
+
+
+@receiver(pre_delete, sender=Image)
+def clear_proof_derivatives_on_image_delete(sender, instance, **kwargs):
+    """Otherwise the derivatives are orphaned in the bucket forever — nothing
+    else references them once the row is gone."""
+    _delete_image_derivatives(instance)
 
 
 UserModel = get_user_model()

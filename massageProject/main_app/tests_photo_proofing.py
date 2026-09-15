@@ -491,3 +491,42 @@ class ProofingPaginationTest(ProofingModelsBase):
         response = self.client.get(reverse('photo_proofing'), {'page': 99})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['page_obj'].number, 2)
+
+
+class ProofFrameNumberingTest(ProofingModelsBase):
+    """Finding 7: frame numbers were derived from the position on the filtered
+    page, so the same photo was "Кадър 1" on the marked tab and "Кадър 8" on
+    the all tab. A client's comment naming a frame has to mean one photo."""
+
+    def setUp(self):
+        super().setUp()
+        self.client = Client()
+        self.client.force_login(self.user)
+        self.images = [self.image] + [
+            Image.objects.create(gallery=self.gallery, order=i, image=f'gallery/photos/p{i}.webp')
+            for i in range(1, 10)
+        ]
+
+    def _numbers(self, **params):
+        response = self.client.get(reverse('photo_proofing'), params)
+        return {p['id']: p['number'] for p in response.context['photos']}
+
+    def test_number_is_the_position_in_the_whole_gallery(self):
+        numbers = self._numbers()
+        self.assertEqual([numbers[img.pk] for img in self.images], list(range(1, 11)))
+
+    def test_number_is_unchanged_by_the_marked_filter(self):
+        late = self.images[7]
+        ImageProof.objects.create(image=late, is_marked=True)
+        self.assertEqual(self._numbers(filter='marked')[late.pk], 8)
+
+    def test_number_is_unchanged_by_pagination(self):
+        all_numbers = self._numbers()
+        self.assertEqual(self._numbers(page=1)[self.images[9].pk], all_numbers[self.images[9].pk])
+
+    def test_numbering_ignores_gaps_in_the_order_column(self):
+        """Admin-curated galleries have non-contiguous `order` values, so the
+        number is a position, not the raw order field."""
+        Image.objects.filter(pk=self.images[1].pk).update(order=99)
+        numbers = self._numbers()
+        self.assertEqual(sorted(numbers.values()), list(range(1, 11)))

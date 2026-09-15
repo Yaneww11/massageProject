@@ -19,7 +19,7 @@ from django.core.files.storage import default_storage
 from django.core.paginator import Paginator
 from django.http.request import validate_host
 from django.utils import timezone
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext as _, gettext_lazy as _lazy
 from datetime import datetime, timedelta, date
 from django.db import IntegrityError
 from django.db.models import Count, Max, Q
@@ -482,6 +482,10 @@ class GalleryUploadBaseView(PhotographerModeMixin, LoginRequiredMixin, TemplateV
         return qs
 
     def _get_draft(self, gallery_id, allow_published=False):
+        try:
+            gallery_id = int(gallery_id)
+        except (TypeError, ValueError):
+            return None
         qs = Gallery.objects.filter(
             pk=gallery_id, gallery_type=self.gallery_type,
             draft_reservation__in=self._draftable_reservations(),
@@ -503,6 +507,10 @@ class GalleryUploadBaseView(PhotographerModeMixin, LoginRequiredMixin, TemplateV
             'capExceeded': _('Галерията може да съдържа най-много {cap} снимки.'),
             'networkError': _('Няма връзка със сървъра.'),
             'genericError': _('Възникна грешка. Опитайте отново.'),
+            'publishUnknown': _(
+                'Връзката прекъсна при публикуването. Проверете в профила си дали '
+                'галерията е доставена, преди да опитате отново.'
+            ),
             'discardConfirm': _('Да бъде ли изтрита тази чернова заедно с качените в нея снимки?'),
         }
         if 'upload_form' not in context:
@@ -594,22 +602,33 @@ class GalleryUploadBaseView(PhotographerModeMixin, LoginRequiredMixin, TemplateV
             ],
         })
 
-    def _append_chunk(self, request, gallery, uploaded_files):
-        """Returns (saved, skipped, errors, error_response)."""
+    def _check_chunk(self, gallery, uploaded_files):
+        """The reason a chunk cannot be accepted, or None."""
         chunk_size = settings.GALLERY_UPLOAD_CHUNK_SIZE
         if len(uploaded_files) > chunk_size:
-            return 0, 0, [], self._error(
-                _('Наведнъж може да се качват най-много %(count)d снимки.') % {'count': chunk_size}
-            )
+            return _('Наведнъж може да се качват най-много %(count)d снимки.') % {
+                'count': chunk_size,
+            }
 
         # Checked once per chunk against the gallery's current count, not per
         # image: a per-image check is an extra COUNT each time and would trip
-        # mid-batch, leaving the gallery partly filled.
+        # mid-batch, leaving the gallery partly filled. Files the gallery
+        # already holds do not count — a resumed chunk near the cap re-sends
+        # them, and they are about to be skipped rather than stored.
         cap = gallery.image_cap
-        if gallery.images.count() + len(uploaded_files) > cap:
-            return 0, 0, [], self._error(
-                _('Галерията може да съдържа най-много %(cap)d снимки.') % {'cap': cap}
-            )
+        seen = _already_uploaded(gallery)
+        incoming = sum(
+            1 for f in uploaded_files if (f.name, f.size) not in seen
+        )
+        if gallery.images.count() + incoming > cap:
+            return _('Галерията може да съдържа най-много %(cap)d снимки.') % {'cap': cap}
+        return None
+
+    def _append_chunk(self, request, gallery, uploaded_files):
+        """Returns (saved, skipped, errors, refusal_message)."""
+        refusal = self._check_chunk(gallery, uploaded_files)
+        if refusal:
+            return 0, 0, [], refusal
 
         errors = []
         saved, skipped = _save_uploaded_images(
@@ -622,11 +641,11 @@ class GalleryUploadBaseView(PhotographerModeMixin, LoginRequiredMixin, TemplateV
         if gallery is None:
             return self._error(_('Черновата не е намерена.'))
 
-        saved, skipped, errors, error = self._append_chunk(
+        saved, skipped, errors, refusal = self._append_chunk(
             request, gallery, request.FILES.getlist('images'),
         )
-        if error:
-            return error
+        if refusal:
+            return self._error(refusal)
         return JsonResponse({
             'success': True, 'saved': saved, 'skipped': skipped,
             'total': gallery.images.count(), 'errors': errors,
@@ -693,28 +712,32 @@ class GalleryUploadBaseView(PhotographerModeMixin, LoginRequiredMixin, TemplateV
         gallery, error = self._create_draft(request)
         if error:
             return self._invalid(upload_form, label_formset)
+        # _create_draft may have handed back a draft built up by earlier
+        # chunked sessions, which must survive anything that goes wrong here.
+        had_earlier_work = gallery.images.exists()
 
-        saved, _skipped, errors, chunk_error = self._append_chunk(
+        def abandon():
+            if not had_earlier_work:
+                gallery.delete()
+            return self._invalid(upload_form, label_formset)
+
+        saved, _skipped, errors, refusal = self._append_chunk(
             request, gallery, upload_form.cleaned_data['images'],
         )
         for message in errors:
             messages.error(request, message)
-        if chunk_error is not None:
-            messages.error(request, _('Галерията може да съдържа най-много %(cap)d снимки.') % {
-                'cap': gallery.image_cap,
-            })
-            return self._invalid(upload_form, label_formset)
+        if refusal is not None:
+            messages.error(request, refusal)
+            return abandon()
 
         if not gallery.images.exists():
-            gallery.delete()
             messages.error(request, _('Нито една снимка не беше качена успешно.'))
-            return self._invalid(upload_form, label_formset)
+            return abandon()
 
         publish_error, email_sent = self._publish_draft(request, gallery)
         if publish_error:
-            gallery.delete()
             messages.error(request, publish_error)
-            return self._invalid(upload_form, label_formset)
+            return abandon()
 
         count = gallery.images.count()
         if email_sent:
@@ -740,7 +763,7 @@ class ProofingGalleryUploadView(GalleryUploadBaseView):
     gallery_type = Gallery.TYPE_PROOFING
     form_class = ProofingGalleryUploadForm
     reservation_field = 'gallery'
-    page_title = _('Качване на галерия за преглед')
+    page_title = _lazy('Качване на галерия за преглед')
     uses_labels = True
 
     def _eligible_reservations(self):
@@ -795,10 +818,6 @@ class MarkedPhotosView(PhotographerModeMixin, LoginRequiredMixin, TemplateView):
 MARKED_THUMBNAIL_MAX_DIMENSION = 400
 
 
-def _marked_thumbnail_path(image_id):
-    return f'marked_thumbnails/{image_id}.webp'
-
-
 def _generate_marked_thumbnail(image):
     """Small unwatermarked derivative for the photographer's Marked Photos grid.
 
@@ -807,7 +826,7 @@ def _generate_marked_thumbnail(image):
     thereafter, mirroring _generate_proof_derivative. No watermark: this page
     is the photographer's own, not the client's.
     """
-    path = _marked_thumbnail_path(image.pk)
+    path = image.marked_thumbnail_path
     if default_storage.exists(path):
         return path
 
@@ -876,7 +895,7 @@ class FinalGalleryUploadView(GalleryUploadBaseView):
     gallery_type = Gallery.TYPE_FINAL
     form_class = FinalGalleryUploadForm
     reservation_field = 'final_gallery'
-    page_title = _('Качване на финална галерия')
+    page_title = _lazy('Качване на финална галерия')
 
     def _eligible_reservations(self):
         return Reservation.objects.filter(
@@ -1215,11 +1234,22 @@ class PhotoProofingGallery(LoginRequiredMixin, TemplateView):
                 p.image_id: p for p in
                 ImageProof.objects.filter(image__in=page_obj.object_list).prefetch_related('labels')
             }
+            # "Кадър N" has to name the same photo whichever filter or page the
+            # client is on — a comment that says "Кадър 3" is worthless if the
+            # number is a position within the current page. Cheap: one id-only
+            # pass over the gallery in its display order.
+            frame_numbers = {
+                pk: index
+                for index, pk in enumerate(
+                    reservation.gallery.images.values_list('pk', flat=True), start=1,
+                )
+            }
             photos = []
             for img in page_obj.object_list:
                 proof = proofs.get(img.pk)
                 photos.append({
                     'id': img.pk,
+                    'number': frame_numbers.get(img.pk),
                     'url': reverse('photo_proofing_image', args=[_proof_image_token(img.pk, user.pk)]),
                     'alt': img.alt_text,
                     'is_marked': proof.is_marked if proof else False,

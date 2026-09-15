@@ -47,7 +47,7 @@
     {% for photo in photos %}
     <div class="proof-tile{% if photo.is_marked %} is-marked{% endif %}{% if photo.comment %} has-comment{% endif %}{% if is_finalized and photo.is_marked %} is-finalized{% endif %}"
          data-photo-id="{{ photo.id }}"
-         data-caption="{% trans 'Кадър' %} {{ forloop.counter0|add:page_obj.start_index }}"
+         data-caption="{% trans 'Кадър' %} {{ photo.number }}"
          data-comment="{{ photo.comment }}"
          tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
          role="gridcell">
@@ -73,7 +73,7 @@
           </button>
         </div>
         <div class="proof-tile-footer">
-          <span class="proof-filename">{% trans "Кадър" %} {{ forloop.counter0|add:page_obj.start_index }}</span>
+          <span class="proof-filename">{% trans "Кадър" %} {{ photo.number }}</span>
           <div class="proof-label-row">
             {% for label in labels_config %}
             <button type="button" class="proof-label-chip{% if label.key in photo.label_keys %} is-active{% endif %}" data-label="{{ label.key }}"{% if is_finalized %} disabled{% endif %}>{{ label.name }}</button>
@@ -83,7 +83,9 @@
       </div>
     </div>
     {% empty %}
+    {% if current_filter == 'all' %}
     <p class="proof-empty">{% trans "Все още няма качени снимки от тази сесия." %}</p>
+    {% endif %}
     {% endfor %}
   </div>
   {% if not photos and current_filter != 'all' %}

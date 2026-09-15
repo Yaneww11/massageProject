@@ -733,8 +733,11 @@ class Gallery(models.Model):
         default=0, verbose_name=_('Ред'),
         help_text=_('Определя реда, в който албумите се показват на страницата с галерии.'),
     )
+    # SET_NULL, not CASCADE: this link outlives publishing, and Reservation is
+    # hard-deletable in admin. Cascading would take the published gallery and
+    # every image in it along with the reservation, which never used to happen.
     draft_reservation = models.ForeignKey(
-        'Reservation', on_delete=models.CASCADE, null=True, blank=True,
+        'Reservation', on_delete=models.SET_NULL, null=True, blank=True,
         related_name='draft_galleries', verbose_name=_('Чернова към резервация'),
     )
     published_at = models.DateTimeField(
@@ -840,6 +843,13 @@ class Image(WebPImageFieldsMixin, models.Model):
 
     def __str__(self):
         return self.alt_text or f"Снимка {self.order}"
+
+    @property
+    def marked_thumbnail_path(self):
+        """Cached unwatermarked derivative for the photographer's Marked Photos
+        grid. Keyed by row id, so replacing or deleting the photo has to evict
+        it (see signals)."""
+        return f'marked_thumbnails/{self.pk}.webp'
 
     def clean(self):
         super().clean()
