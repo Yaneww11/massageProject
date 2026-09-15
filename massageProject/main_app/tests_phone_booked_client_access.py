@@ -1,4 +1,4 @@
-from django.forms import modelform_factory
+from django.contrib import admin
 from django.test import TestCase
 from django.urls import reverse
 
@@ -6,8 +6,9 @@ from massageProject.main_app.models import BusinessInfo
 
 
 class BusinessInfoPhoneRequiredTest(TestCase):
-    def test_form_rejects_empty_phone(self):
-        form_class = modelform_factory(BusinessInfo, fields=['phone'])
+    def test_admin_form_rejects_empty_phone(self):
+        form_class = admin.site._registry[BusinessInfo].get_form(None)
+        self.assertIn('phone', form_class.base_fields)
         form = form_class(data={'phone': ''})
         self.assertFalse(form.is_valid())
         self.assertIn('phone', form.errors)

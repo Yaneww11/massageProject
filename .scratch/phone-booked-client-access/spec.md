@@ -1,6 +1,6 @@
 # Spec: Tell phone-booked clients how to reach their reservation
 
-Status: done
+Status: done (deploy step outstanding — see migration caveat)
 
 ## Problem
 
@@ -100,6 +100,9 @@ backfill anything. An existing `BusinessInfo` row with `phone=''` keeps that
 value until someone opens and saves it in admin, and until then the message
 renders as "...или ни се обадете на ." Check the production row's `phone` as part
 of this deploy, or the copy ships broken on an existing install.
+
+**Not done.** `populate_db` and `populate_renkart` both seed a phone, and the
+local row has one, so dev is covered. The production row is still unverified.
 
 ## Out of scope
 
