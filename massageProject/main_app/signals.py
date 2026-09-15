@@ -2,14 +2,16 @@ import logging
 
 from django.core.cache import cache
 from django.core.files.storage import default_storage
-from django.db.models.signals import post_save, pre_delete, pre_save
+from django.db.models.signals import post_delete, post_save, pre_delete, pre_save
 from django.dispatch import receiver
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from google.cloud import storage
 import sentry_sdk
 
-from massageProject.main_app.context_processors import BUSINESS_INFO_CACHE_KEY, HOMEPAGE_CACHE_KEY
+from massageProject.main_app.context_processors import (
+    BUSINESS_INFO_CACHE_KEY, HOMEPAGE_CACHE_KEY, SITE_CONFIGURATION_CACHE_KEY,
+)
 from massageProject.main_app.models import BusinessInfo, HomePage, Image, SiteConfiguration
 
 logger = logging.getLogger(__name__)
@@ -172,16 +174,20 @@ def get_old_file_path(instance, field_name):
     return None
 
 
-@receiver(post_save, sender=SiteConfiguration)
+# These caches hold model *instances*, so a deletion has to evict them just as
+# a save does — otherwise the entry outlives its own row. HomePage.gallery is
+# on_delete=CASCADE, so deleting the gallery deletes the HomePage, and the
+# cascade fires post_delete for the HomePage too.
+@receiver([post_save, post_delete], sender=SiteConfiguration)
 def invalidate_site_configuration_cache(sender, **kwargs):
-    cache.delete('site_configuration')
+    cache.delete(SITE_CONFIGURATION_CACHE_KEY)
 
 
-@receiver(post_save, sender=HomePage)
+@receiver([post_save, post_delete], sender=HomePage)
 def invalidate_homepage_cache(sender, **kwargs):
     cache.delete(HOMEPAGE_CACHE_KEY)
 
 
-@receiver(post_save, sender=BusinessInfo)
+@receiver([post_save, post_delete], sender=BusinessInfo)
 def invalidate_business_info_cache(sender, **kwargs):
     cache.delete(BUSINESS_INFO_CACHE_KEY)

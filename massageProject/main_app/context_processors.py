@@ -4,14 +4,19 @@ from massageProject.main_app.models import HomePage, BusinessInfo, SiteConfigura
 
 HOMEPAGE_CACHE_KEY = 'homepage_singleton'
 BUSINESS_INFO_CACHE_KEY = 'business_info_singleton'
+SITE_CONFIGURATION_CACHE_KEY = 'site_configuration'
+
+# Caps cross-worker staleness in a multi-process deploy: the invalidation
+# signals only clear the cache in the worker that handled the write, so every
+# other worker keeps serving its entry until this expires.
+SINGLETON_CACHE_TTL = 60
 
 
 def get_cached_homepage():
     homepage = cache.get(HOMEPAGE_CACHE_KEY)
     if homepage is None:
         homepage = HomePage.get_solo()
-        # Same 60s cross-worker-staleness bound as site_configuration below.
-        cache.set(HOMEPAGE_CACHE_KEY, homepage, 86400)
+        cache.set(HOMEPAGE_CACHE_KEY, homepage, SINGLETON_CACHE_TTL)
     return homepage
 
 
@@ -19,7 +24,7 @@ def get_cached_business_info():
     business_info = cache.get(BUSINESS_INFO_CACHE_KEY)
     if business_info is None:
         business_info = BusinessInfo.objects.first()
-        cache.set(BUSINESS_INFO_CACHE_KEY, business_info, 86400)
+        cache.set(BUSINESS_INFO_CACHE_KEY, business_info, SINGLETON_CACHE_TTL)
     return business_info
 
 
@@ -54,10 +59,8 @@ def admin_branding(request):
 
 
 def site_configuration(request):
-    site_config = cache.get('site_configuration')
+    site_config = cache.get(SITE_CONFIGURATION_CACHE_KEY)
     if site_config is None:
         site_config = SiteConfiguration.get_solo()
-        # 60s bound: caps cross-worker staleness in a multi-process deploy
-        # (the post_save signal only invalidates the worker that saved).
-        cache.set('site_configuration', site_config, 60)
+        cache.set(SITE_CONFIGURATION_CACHE_KEY, site_config, SINGLETON_CACHE_TTL)
     return {'site_config': site_config}

@@ -10,7 +10,6 @@ from PIL import Image as PILImage
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core import mail
-from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
@@ -35,12 +34,6 @@ class ChunkedUploadTestBase(TestCase):
     gallery_field = 'gallery'
 
     def setUp(self):
-        # get_cached_homepage() caches a HomePage instance process-wide for a
-        # day, and TestCase's rollback does not clear it — a stale entry whose
-        # gallery row has been rolled back blows up the home page in whichever
-        # test runs next. Keep this module from inheriting or leaving one.
-        cache.clear()
-        self.addCleanup(cache.clear)
         self.tmp_media = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, self.tmp_media, ignore_errors=True)
         self.storage_override = override_settings(STORAGES={

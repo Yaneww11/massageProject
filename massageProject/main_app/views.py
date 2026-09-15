@@ -129,10 +129,20 @@ class Index(TemplateView):
         services = list(Service.objects.filter(home_page=True)[:3])
         context['services'] = services
         context['featured_has_images'] = bool(services) and all(m.image for m in services)
+        # The cached HomePage can outlive its gallery by up to the cache TTL on
+        # a worker that did not see the invalidation, so a missing gallery
+        # degrades to a page without the carousel rather than a 500.
+        gallery = None
         if context['page']:
-            gallery = context['page'].gallery
-            context['gallery'] = gallery
-            context['gallery_images'] = gallery.images.all()[:3]
+            try:
+                gallery = context['page'].gallery
+            except Gallery.DoesNotExist:
+                logger.warning(
+                    'Cached homepage %s references gallery %s, which no longer exists',
+                    context['page'].pk, context['page'].gallery_id,
+                )
+        context['gallery'] = gallery
+        context['gallery_images'] = gallery.images.all()[:3] if gallery else []
         context['comments'] = Comment.objects.filter(is_reviewed=True).order_by('-created_at')[:10]
         return self.render_to_response(context)
 
