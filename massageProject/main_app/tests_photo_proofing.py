@@ -364,3 +364,46 @@ class DerivativeCacheInvalidationTest(ProofingModelsBase):
         default_storage.save(stale_path, ContentFile(b'stale-bytes'))
         self.image.image.save('new.jpg', SimpleUploadedFile('new.jpg', _make_test_jpeg_bytes()), save=True)
         self.assertFalse(default_storage.exists(stale_path))
+
+
+class ProofSignedUrlTest(TestCase):
+    """The GCS backend's signature is url(name, parameters=None) and forwards
+    `parameters` to blob.generate_signed_url(), so an expiring URL is requested
+    with parameters={'expiration': ...} — not the expire= kwarg that used to be
+    passed here, which raised TypeError on every single request."""
+
+    def test_signed_url_requests_a_fifteen_minute_expiration(self):
+        from massageProject.main_app.views import PROOF_URL_TTL, _signed_proof_url
+
+        backend = mock.Mock()
+        backend.url.return_value = 'https://signed.example/x.jpg'
+        with mock.patch('massageProject.main_app.views.default_storage', backend):
+            url = _signed_proof_url('proof_derivatives/1/abc.jpg')
+
+        self.assertEqual(url, 'https://signed.example/x.jpg')
+        backend.url.assert_called_once_with(
+            'proof_derivatives/1/abc.jpg', parameters={'expiration': PROOF_URL_TTL},
+        )
+        self.assertEqual(PROOF_URL_TTL, timedelta(minutes=15))
+
+    def test_no_warning_logged_when_backend_supports_expiring_urls(self):
+        backend = mock.Mock()
+        backend.url.return_value = 'https://signed.example/x.jpg'
+        from massageProject.main_app.views import _signed_proof_url
+
+        with mock.patch('massageProject.main_app.views.default_storage', backend):
+            with self.assertNoLogs('massageProject.main_app.views', level='WARNING'):
+                _signed_proof_url('proof_derivatives/1/abc.jpg')
+
+    def test_falls_back_to_plain_url_for_backends_without_parameters(self):
+        """Local dev runs FileSystemStorage, whose url() takes no parameters."""
+        from massageProject.main_app.views import _signed_proof_url
+
+        class PlainStorage:
+            def url(self, name):
+                return '/media/' + name
+
+        with mock.patch('massageProject.main_app.views.default_storage', PlainStorage()):
+            with self.assertLogs('massageProject.main_app.views', level='WARNING'):
+                url = _signed_proof_url('proof_derivatives/1/abc.jpg')
+        self.assertEqual(url, '/media/proof_derivatives/1/abc.jpg')

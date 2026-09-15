@@ -855,6 +855,24 @@ def _generate_proof_derivative(image, user, watermark_identifier):
     return path
 
 
+PROOF_URL_TTL = timedelta(minutes=15)
+
+
+def _signed_proof_url(path):
+    """Signed URL for a watermarked client proof, expiring in 15 minutes.
+
+    Scoped to the proofing path on purpose: raising the backend-wide
+    GS_EXPIRATION would also reshape the public marketing image URLs.
+    """
+    try:
+        return default_storage.url(path, parameters={'expiration': PROOF_URL_TTL})
+    except TypeError:
+        # The active storage backend (e.g. local FileSystemStorage in dev) doesn't
+        # support signed/expiring URLs — fall back to its plain url().
+        logger.warning('Storage backend does not support expiring URLs; serving a non-expiring URL for %s', path)
+        return default_storage.url(path)
+
+
 @login_required
 def serve_proof_image(request, token):
     try:
@@ -874,14 +892,7 @@ def serve_proof_image(request, token):
     image, reservation = _get_owned_proofing_image(request, data['image_id'])
     watermark_identifier = f'{request.user.get_full_name() or request.user.phone_number} · #{reservation.pk}'
     path = _generate_proof_derivative(image, request.user, watermark_identifier)
-    try:
-        image_url = default_storage.url(path, expire=300)
-    except TypeError:
-        # The active storage backend (e.g. local FileSystemStorage in dev) doesn't
-        # support signed/expiring URLs — fall back to its plain url().
-        logger.warning('Storage backend does not support expiring URLs; serving a non-expiring URL for %s', path)
-        image_url = default_storage.url(path)
-    return redirect(image_url)
+    return redirect(_signed_proof_url(path))
 
 
 def _reject_if_finalized(reservation):
