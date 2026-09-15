@@ -65,12 +65,7 @@ class BuildReservationIcsTest(TestCase):
         self.assertIn('LOCATION:123 Main St\\, Sofia', content)
 
     def test_location_empty_when_no_business_info(self):
-        from django.core.cache import cache
         BusinessInfo.objects.all().delete()
-        # get_cached_business_info() only invalidates its cache entry on
-        # post_save, not on delete — clear it explicitly so this test doesn't
-        # depend on incidental signal timing from setUp()'s create() call.
-        cache.delete('business_info_singleton')
         content = build_reservation_ics(self.request, self.reservation)
         lines = content.split('\r\n')
         location_line = next(line for line in lines if line.startswith('LOCATION:'))

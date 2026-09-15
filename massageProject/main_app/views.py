@@ -28,7 +28,7 @@ from django.core.cache import cache
 from django.http import HttpResponse, FileResponse, JsonResponse, Http404
 from PIL import Image as PILImage, ImageDraw, ImageFont
 
-from massageProject.main_app.context_processors import get_cached_homepage
+from massageProject.main_app.context_processors import get_homepage
 from massageProject.main_app.emails import send_gallery_ready_email, send_marks_finalized_email, \
     send_final_delivery_email
 from massageProject.main_app.ics import build_reservation_ics
@@ -125,22 +125,11 @@ class Index(TemplateView):
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
         context['is_photographer_website'] = settings.IS_PHOTOGRAPHER_WEBSITE
-        context['page'] = get_cached_homepage()
+        context['page'] = get_homepage()
         services = list(Service.objects.filter(home_page=True)[:3])
         context['services'] = services
         context['featured_has_images'] = bool(services) and all(m.image for m in services)
-        # The cached HomePage can outlive its gallery by up to the cache TTL on
-        # a worker that did not see the invalidation, so a missing gallery
-        # degrades to a page without the carousel rather than a 500.
-        gallery = None
-        if context['page']:
-            try:
-                gallery = context['page'].gallery
-            except Gallery.DoesNotExist:
-                logger.warning(
-                    'Cached homepage %s references gallery %s, which no longer exists',
-                    context['page'].pk, context['page'].gallery_id,
-                )
+        gallery = context['page'].gallery if context['page'] else None
         context['gallery'] = gallery
         context['gallery_images'] = gallery.images.all()[:3] if gallery else []
         context['comments'] = Comment.objects.filter(is_reviewed=True).order_by('-created_at')[:10]
@@ -151,7 +140,7 @@ class PrivacyPolicyView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['page'] = get_cached_homepage()
+        context['page'] = get_homepage()
         return context
 
 class ServicesDashboard(ListView):
@@ -986,7 +975,7 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
             # Studio info and working hours -- business_info is already supplied
             # globally by the admin_branding context processor, no need to
             # re-fetch it here.
-            homepage = get_cached_homepage()
+            homepage = get_homepage()
             context['working_hours'] = list(homepage.business_working_hours.order_by('order')) if homepage else []
 
             # Map of reviewed past reservations {reservation_id: comment}

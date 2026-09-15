@@ -1,7 +1,6 @@
 from django.contrib.admin.sites import AdminSite
 from django.contrib.messages import get_messages
 from django.contrib.messages.storage.fallback import FallbackStorage
-from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.test import RequestFactory, TestCase
 from django.utils import translation
@@ -176,25 +175,15 @@ class SiteConfigurationAdminSaveModelTest(TestCase):
         self.assertEqual(obj.primary_color, '#123456')
 
 
-class SiteConfigurationCacheInvalidationTest(TestCase):
-    def test_save_invalidates_cache_key(self):
-        obj = SiteConfiguration.get_solo()
-        cache.set('site_configuration', obj, None)
-        self.assertIsNotNone(cache.get('site_configuration'))
-
-        obj.primary_color = '#123456'
-        obj.save()
-
-        self.assertIsNone(cache.get('site_configuration'))
-
-
 class SiteConfigurationContextProcessorTest(TestCase):
     def test_site_config_present_in_rendered_page(self):
         response = self.client.get('/bg/')
         self.assertIn('site_config', response.context)
         self.assertIsInstance(response.context['site_config'], SiteConfiguration)
 
-    def test_context_processor_populates_cache(self):
-        cache.delete('site_configuration')
-        self.client.get('/bg/')
-        self.assertIsNotNone(cache.get('site_configuration'))
+    def test_edits_are_visible_on_the_next_render(self):
+        obj = SiteConfiguration.get_solo()
+        obj.primary_color = '#123456'
+        obj.save()
+        response = self.client.get('/bg/')
+        self.assertEqual(response.context['site_config'].primary_color, '#123456')

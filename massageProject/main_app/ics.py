@@ -1,7 +1,7 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from massageProject.main_app.context_processors import get_cached_business_info, get_cached_homepage
+from massageProject.main_app.context_processors import get_business_info, get_homepage
 
 RESERVATION_TIMEZONE = ZoneInfo('Europe/Sofia')
 UTC = ZoneInfo('UTC')
@@ -25,8 +25,8 @@ def _format_ics_datetime(local_date, local_time):
 
 
 def build_reservation_ics(request, reservation):
-    homepage = get_cached_homepage()
-    business_info = get_cached_business_info()
+    homepage = get_homepage()
+    business_info = get_business_info()
 
     dtstart = _format_ics_datetime(reservation.date, reservation.time)
     dtend = _format_ics_datetime(reservation.date, reservation.end_time)
