@@ -27,7 +27,13 @@ from massageProject.main_app.theme import COLOR_PRESETS, contrast_ratio
 # --- Forms ---
 
 class GalleryBulkImageUploadForm(forms.Form):
-    images = MultipleFileField(label=_('Снимки'))
+    images = MultipleFileField(
+        label=_('Снимки'),
+        # This surface is not chunked, so a large single batch will still hit
+        # the request timeout. The photographer workflow is the one built for
+        # a whole gallery at once.
+        help_text=_('Качвайте на групи по около 20 снимки.'),
+    )
 
 # --- Actions ---
 
@@ -269,29 +275,38 @@ class GalleryAdmin(ModelAdmin, TabbedTranslationAdmin):
         if request.method == 'POST':
             form = GalleryBulkImageUploadForm(request.POST, request.FILES)
             if form.is_valid():
-                max_order = gallery.images.aggregate(Max('order'))['order__max']
-                next_order = (max_order + 1) if max_order is not None else 0
-                uploaded = 0
-                for uploaded_file in form.cleaned_data['images']:
-                    try:
-                        image_validator.clean(uploaded_file)
-                        image = Image(gallery=gallery, image=uploaded_file, order=next_order)
-                        image.full_clean()
-                        image.save()
-                    except ValidationError as exc:
-                        messages.error(
-                            request,
-                            _('Пропусната %(name)s: %(error)s') % {
-                                'name': uploaded_file.name,
-                                'error': '; '.join(exc.messages),
-                            },
-                        )
-                        continue
-                    uploaded += 1
-                    next_order += 1
-                if uploaded:
-                    messages.success(request, _('Качени %(count)d снимки.') % {'count': uploaded})
-                return redirect('admin:main_app_gallery_change', gallery.pk)
+                # Album and homepage galleries are curated here, so this is the
+                # only place their cap can be enforced. Checked once against the
+                # gallery's current count, before any partial write.
+                cap = gallery.image_cap
+                if gallery.images.count() + len(form.cleaned_data['images']) > cap:
+                    form.add_error('images', _(
+                        'Галерията може да съдържа най-много %(cap)d снимки.'
+                    ) % {'cap': cap})
+                else:
+                    max_order = gallery.images.aggregate(Max('order'))['order__max']
+                    next_order = (max_order + 1) if max_order is not None else 0
+                    uploaded = 0
+                    for uploaded_file in form.cleaned_data['images']:
+                        try:
+                            image_validator.clean(uploaded_file)
+                            image = Image(gallery=gallery, image=uploaded_file, order=next_order)
+                            image.full_clean()
+                            image.save()
+                        except ValidationError as exc:
+                            messages.error(
+                                request,
+                                _('Пропусната %(name)s: %(error)s') % {
+                                    'name': uploaded_file.name,
+                                    'error': '; '.join(exc.messages),
+                                },
+                            )
+                            continue
+                        uploaded += 1
+                        next_order += 1
+                    if uploaded:
+                        messages.success(request, _('Качени %(count)d снимки.') % {'count': uploaded})
+                    return redirect('admin:main_app_gallery_change', gallery.pk)
         else:
             form = GalleryBulkImageUploadForm()
 

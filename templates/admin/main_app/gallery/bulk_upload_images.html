@@ -26,6 +26,9 @@
             </label>
             {{ form.images }}
         </div>
+        {% if form.images.help_text %}
+            <p class="gallery-bulk-hint">{{ form.images.help_text }}</p>
+        {% endif %}
         {% if form.images.errors %}
             <p class="gallery-bulk-error">{{ form.images.errors.0 }}</p>
         {% endif %}

@@ -208,3 +208,42 @@ class ImageProcessingTest(TestCase):
         upload = _make_uploaded_image('photo.jpg')
         image = Image.objects.create(gallery=self.gallery, image=upload)
         self.assertEqual(image.crop_position, Image.CROP_CENTER)
+
+
+class GalleryBulkUploadCapTest(GalleryBulkUploadAdminTest):
+    """Ticket 05 — album and homepage galleries are curated in the admin, so
+    the 50-image cap has to be enforced there or it does not exist."""
+
+    def _fill_to(self, count):
+        Image.objects.bulk_create([
+            Image(gallery=self.gallery, order=i, image=f'gallery/photos/f{i}.webp')
+            for i in range(count)
+        ])
+
+    def test_upload_that_would_exceed_the_album_cap_is_refused(self):
+        self._fill_to(Gallery.IMAGE_CAPS[Gallery.TYPE_ALBUM] - 1)
+        response = self.client.post(self.url, {
+            'images': [_make_uploaded_image('a.jpg'), _make_uploaded_image('b.jpg')],
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.gallery.images.count(), Gallery.IMAGE_CAPS[Gallery.TYPE_ALBUM] - 1)
+
+    def test_upload_that_exactly_reaches_the_cap_is_accepted(self):
+        self._fill_to(Gallery.IMAGE_CAPS[Gallery.TYPE_ALBUM] - 1)
+        response = self.client.post(self.url, {'images': [_make_uploaded_image('a.jpg')]})
+        self.assertRedirects(response, self.change_url)
+        self.assertEqual(self.gallery.images.count(), Gallery.IMAGE_CAPS[Gallery.TYPE_ALBUM])
+
+    def test_proofing_gallery_keeps_the_larger_cap_in_admin(self):
+        gallery = Gallery.objects.create(gallery_type=Gallery.TYPE_PROOFING)
+        url = reverse('admin:main_app_gallery_bulk_upload_images', args=[gallery.pk])
+        Image.objects.bulk_create([
+            Image(gallery=gallery, order=i, image=f'gallery/photos/p{i}.webp')
+            for i in range(Gallery.IMAGE_CAPS[Gallery.TYPE_ALBUM] + 5)
+        ])
+        response = self.client.post(url, {'images': [_make_uploaded_image('a.jpg')]})
+        self.assertRedirects(response, reverse('admin:main_app_gallery_change', args=[gallery.pk]))
+
+    def test_form_carries_the_batch_size_note(self):
+        response = self.client.get(self.url)
+        self.assertContains(response, 'по около 20')

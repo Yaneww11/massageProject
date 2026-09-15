@@ -33,6 +33,12 @@
 
 .gallery-bulk-error { color: #b3261e; font-size: 0.85rem; margin: 0 0 1rem; }
 
+.gallery-bulk-hint {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    opacity: 0.75;
+}
+
 .gallery-bulk-preview-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
