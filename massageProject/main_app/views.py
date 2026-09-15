@@ -560,6 +560,13 @@ class GalleryUploadBaseView(PhotographerModeMixin, LoginRequiredMixin, TemplateV
             )
             if self.uses_labels:
                 _create_photo_labels(gallery, label_formset)
+        elif self.uses_labels and not gallery.images.exists():
+            # Resuming a draft that never got a photo: the photographer may
+            # have come back to correct the labels, so honour what they just
+            # submitted. Once photos exist the labels are already attached to
+            # the client's marks and are left alone.
+            gallery.photo_labels.all().delete()
+            _create_photo_labels(gallery, label_formset)
         return gallery, None
 
     def _step_create(self, request):
@@ -664,22 +671,17 @@ class GalleryUploadBaseView(PhotographerModeMixin, LoginRequiredMixin, TemplateV
         """Plain (non-JS) form submit: the same create -> chunk -> publish path
         in one request. Fine for a handful of images; a large gallery needs the
         browser to drive the steps."""
-        gallery, error = self._create_draft(request)
-        if error:
-            upload_form = self.form_class(
-                request.POST, request.FILES, reservation_queryset=self._reservation_queryset(),
-            )
-            upload_form.is_valid()
-            label_formset = ProofingLabelFormSet(request.POST, prefix='labels') if self.uses_labels else None
-            if label_formset is not None:
-                label_formset.is_valid()
-            return self._invalid(upload_form, label_formset)
-
+        # Validate before creating anything: a rejected submit must not leave
+        # an empty draft sitting in the photographer's resume list.
         upload_form = self.form_class(
             request.POST, request.FILES, reservation_queryset=self._reservation_queryset(),
         )
         label_formset = ProofingLabelFormSet(request.POST, prefix='labels') if self.uses_labels else None
         if not upload_form.is_valid() or (self.uses_labels and not label_formset.is_valid()):
+            return self._invalid(upload_form, label_formset)
+
+        gallery, error = self._create_draft(request)
+        if error:
             return self._invalid(upload_form, label_formset)
 
         saved, _skipped, errors, chunk_error = self._append_chunk(

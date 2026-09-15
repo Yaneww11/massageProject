@@ -474,3 +474,32 @@ class FinalGalleryChunkedUploadTest(ChunkedUploadTestBase):
         response = self.send_chunk(gallery_id, [_uploaded('a.jpg')])
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Image.objects.filter(gallery_id=gallery_id).count(), 0)
+
+
+class SingleShotValidationTest(ChunkedUploadTestBase):
+    def test_plain_post_with_no_files_leaves_no_orphan_draft(self):
+        response = self.client.post(self.url, {
+            'reservation': self.reservation.pk,
+            'labels-TOTAL_FORMS': '3', 'labels-INITIAL_FORMS': '0',
+            'labels-MIN_NUM_FORMS': '0', 'labels-MAX_NUM_FORMS': '1000',
+            'labels-0-name': '', 'labels-1-name': '', 'labels-2-name': '',
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(
+            Gallery.objects.filter(draft_reservation=self.reservation).exists(),
+            'a rejected submit must not leave a draft behind',
+        )
+
+    def test_relabelling_an_empty_draft_replaces_the_labels(self):
+        first = self.new_draft_id(labels=['За печат'])
+        second = self.new_draft_id(labels=['За албум'])
+        self.assertEqual(first, second)
+        names = list(Gallery.objects.get(pk=first).photo_labels.values_list('name', flat=True))
+        self.assertEqual(names, ['За албум'])
+
+    def test_labels_are_left_alone_once_the_draft_has_photos(self):
+        gallery_id = self.new_draft_id(labels=['За печат'])
+        self.send_chunk(gallery_id, [_uploaded('a.jpg')])
+        self.new_draft_id(labels=['За албум'])
+        names = list(Gallery.objects.get(pk=gallery_id).photo_labels.values_list('name', flat=True))
+        self.assertEqual(names, ['За печат'])
