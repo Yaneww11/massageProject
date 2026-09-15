@@ -354,8 +354,39 @@ def _resolve_photo_workflow_scope(user):
     return None, None
 
 
-class ProofingGalleryUploadView(PhotographerModeMixin, LoginRequiredMixin, TemplateView):
-    template_name = 'pages/proofing_gallery_upload.html'
+def _save_uploaded_images(request, gallery, uploaded_files, start_order=0):
+    """Convert and store each uploaded file, reporting per-file failures to the
+    photographer as messages rather than failing the whole batch. Returns how
+    many were saved."""
+    image_validator = django_forms.ImageField()
+    saved = 0
+    for offset, uploaded_file in enumerate(uploaded_files):
+        try:
+            image_validator.clean(uploaded_file)
+            image = Image(gallery=gallery, image=uploaded_file, order=start_order + offset)
+            image.full_clean()
+            image.save()
+        except ValidationError as exc:
+            messages.error(request, _('Пропусната %(name)s: %(error)s') % {
+                'name': uploaded_file.name, 'error': '; '.join(exc.messages),
+            })
+            continue
+        saved += 1
+    return saved
+
+
+class GalleryUploadBaseView(PhotographerModeMixin, LoginRequiredMixin, TemplateView):
+    """Shared plumbing for the photographer's two gallery upload workflows.
+
+    Proofing and final uploads differ only in which gallery type they create,
+    which reservations are eligible, whether photo labels are collected, and
+    which client email goes out.
+    """
+    gallery_type = None
+    form_class = None
+    reservation_field = None
+    page_title = None
+    uses_labels = False
 
     def _load_scope(self):
         is_staff_mode, specialist = _resolve_photo_workflow_scope(self.request.user)
@@ -364,24 +395,36 @@ class ProofingGalleryUploadView(PhotographerModeMixin, LoginRequiredMixin, Templ
         self.is_staff_mode = is_staff_mode
         self.specialist = specialist
 
+    def _eligible_reservations(self):
+        raise NotImplementedError
+
     def _reservation_queryset(self):
-        qs = Reservation.objects.filter(gallery__isnull=True).select_related('specialist', 'service', 'user')
+        qs = self._eligible_reservations().select_related('specialist', 'service', 'user')
         if not self.is_staff_mode:
             qs = qs.filter(specialist=self.specialist)
         return qs.order_by('-date', '-time')
 
+    def _send_client_email(self, request, reservation):
+        raise NotImplementedError
+
+    def _success_message(self, count):
+        raise NotImplementedError
+
+    def _email_failed_message(self, count):
+        raise NotImplementedError
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['title'] = _('Качване на галерия за преглед')
+        context['title'] = self.page_title
         if 'upload_form' not in context:
             initial = {}
             reservation_id = self.request.GET.get('reservation_id')
             if reservation_id:
                 initial['reservation'] = reservation_id
-            context['upload_form'] = ProofingGalleryUploadForm(
+            context['upload_form'] = self.form_class(
                 reservation_queryset=self._reservation_queryset(), initial=initial,
             )
-        if 'label_formset' not in context:
+        if self.uses_labels and 'label_formset' not in context:
             context['label_formset'] = ProofingLabelFormSet(prefix='labels')
         return context
 
@@ -389,71 +432,86 @@ class ProofingGalleryUploadView(PhotographerModeMixin, LoginRequiredMixin, Templ
         self._load_scope()
         return super().get(request, *args, **kwargs)
 
+    def _invalid(self, upload_form, label_formset):
+        extra = {'label_formset': label_formset} if self.uses_labels else {}
+        return self.render_to_response(self.get_context_data(upload_form=upload_form, **extra))
+
     def post(self, request, *args, **kwargs):
         self._load_scope()
-        upload_form = ProofingGalleryUploadForm(
+        upload_form = self.form_class(
             request.POST, request.FILES, reservation_queryset=self._reservation_queryset(),
         )
-        label_formset = ProofingLabelFormSet(request.POST, prefix='labels')
+        label_formset = ProofingLabelFormSet(request.POST, prefix='labels') if self.uses_labels else None
 
-        if upload_form.is_valid() and label_formset.is_valid():
-            reservation = upload_form.cleaned_data['reservation']
-            gallery = Gallery.objects.create(gallery_type=Gallery.TYPE_PROOFING)
-            image_validator = django_forms.ImageField()
-            uploaded = 0
-            for order, uploaded_file in enumerate(upload_form.cleaned_data['images']):
-                try:
-                    image_validator.clean(uploaded_file)
-                    image = Image(gallery=gallery, image=uploaded_file, order=order)
-                    image.full_clean()
-                    image.save()
-                except ValidationError as exc:
-                    messages.error(request, _('Пропусната %(name)s: %(error)s') % {
-                        'name': uploaded_file.name, 'error': '; '.join(exc.messages),
-                    })
-                    continue
-                uploaded += 1
+        if not upload_form.is_valid() or (self.uses_labels and not label_formset.is_valid()):
+            return self._invalid(upload_form, label_formset)
 
-            if uploaded == 0:
-                gallery.delete()
-                messages.error(request, _('Нито една снимка не беше качена успешно.'))
-                return self.render_to_response(
-                    self.get_context_data(upload_form=upload_form, label_formset=label_formset)
-                )
+        reservation = upload_form.cleaned_data['reservation']
+        gallery = Gallery.objects.create(gallery_type=self.gallery_type)
+        uploaded = _save_uploaded_images(request, gallery, upload_form.cleaned_data['images'])
 
-            label_order = 0
-            for label_form in label_formset:
-                if not label_form.cleaned_data:
-                    continue
-                name = label_form.cleaned_data.get('name')
-                if name:
-                    PhotoLabel.objects.create(gallery=gallery, name=name, order=label_order)
-                    label_order += 1
+        if uploaded == 0:
+            gallery.delete()
+            messages.error(request, _('Нито една снимка не беше качена успешно.'))
+            return self._invalid(upload_form, label_formset)
 
-            reservation.gallery = gallery
+        if self.uses_labels:
+            _create_photo_labels(gallery, label_formset)
+
+        setattr(reservation, self.reservation_field, gallery)
+        update_fields = [self.reservation_field]
+        if self.uses_labels:
             reservation.need_client_review = True
-            try:
-                reservation.save(update_fields=['gallery', 'need_client_review'])
-            except ValidationError as exc:
-                gallery.delete()
-                messages.error(request, _('Резервацията не можа да бъде обновена: %(error)s') % {
-                    'error': '; '.join(exc.messages),
-                })
-                return self.render_to_response(
-                    self.get_context_data(upload_form=upload_form, label_formset=label_formset)
-                )
+            update_fields.append('need_client_review')
+        try:
+            reservation.save(update_fields=update_fields)
+        except ValidationError as exc:
+            gallery.delete()
+            messages.error(request, _('Резервацията не можа да бъде обновена: %(error)s') % {
+                'error': '; '.join(exc.messages),
+            })
+            return self._invalid(upload_form, label_formset)
 
-            if not send_gallery_ready_email(request, reservation):
-                messages.warning(request, _(
-                    'Галерията е качена успешно (%(count)d снимки), но имейлът до клиента не бе изпратен.'
-                ) % {'count': uploaded})
-            else:
-                messages.success(request, _('Галерията е качена успешно (%(count)d снимки).') % {'count': uploaded})
-            return redirect('profile_page')
+        if self._send_client_email(request, reservation):
+            messages.success(request, self._success_message(uploaded))
+        else:
+            messages.warning(request, self._email_failed_message(uploaded))
+        return redirect('profile_page')
 
-        return self.render_to_response(
-            self.get_context_data(upload_form=upload_form, label_formset=label_formset)
-        )
+
+def _create_photo_labels(gallery, label_formset):
+    order = 0
+    for label_form in label_formset:
+        if not label_form.cleaned_data:
+            continue
+        name = label_form.cleaned_data.get('name')
+        if name:
+            PhotoLabel.objects.create(gallery=gallery, name=name, order=order)
+            order += 1
+
+
+class ProofingGalleryUploadView(GalleryUploadBaseView):
+    template_name = 'pages/proofing_gallery_upload.html'
+    gallery_type = Gallery.TYPE_PROOFING
+    form_class = ProofingGalleryUploadForm
+    reservation_field = 'gallery'
+    page_title = _('Качване на галерия за преглед')
+    uses_labels = True
+
+    def _eligible_reservations(self):
+        return Reservation.objects.filter(gallery__isnull=True)
+
+    def _send_client_email(self, request, reservation):
+        return send_gallery_ready_email(request, reservation)
+
+    def _success_message(self, count):
+        return _('Галерията е качена успешно (%(count)d снимки).') % {'count': count}
+
+    def _email_failed_message(self, count):
+        return _(
+            'Галерията е качена успешно (%(count)d снимки), но имейлът до клиента не бе изпратен.'
+        ) % {'count': count}
+
 
 
 def _get_owned_reservation_for_photo_workflow(request, reservation_id):
@@ -568,92 +626,30 @@ def download_marked_photos_zip(request, reservation_id):
     return _zip_images_response(images, f'marked-photos-reservation-{reservation.pk}.zip')
 
 
-class FinalGalleryUploadView(PhotographerModeMixin, LoginRequiredMixin, TemplateView):
+class FinalGalleryUploadView(GalleryUploadBaseView):
     template_name = 'pages/final_gallery_upload.html'
+    gallery_type = Gallery.TYPE_FINAL
+    form_class = FinalGalleryUploadForm
+    reservation_field = 'final_gallery'
+    page_title = _('Качване на финална галерия')
 
-    def _load_scope(self):
-        is_staff_mode, specialist = _resolve_photo_workflow_scope(self.request.user)
-        if is_staff_mode is None:
-            raise PermissionDenied
-        self.is_staff_mode = is_staff_mode
-        self.specialist = specialist
-
-    def _reservation_queryset(self):
-        qs = Reservation.objects.filter(
+    def _eligible_reservations(self):
+        return Reservation.objects.filter(
             proofing_finalized_at__isnull=False, final_gallery__isnull=True,
-        ).select_related('specialist', 'service', 'user')
-        if not self.is_staff_mode:
-            qs = qs.filter(specialist=self.specialist)
-        return qs.order_by('-date', '-time')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['title'] = _('Качване на финална галерия')
-        if 'upload_form' not in context:
-            initial = {}
-            reservation_id = self.request.GET.get('reservation_id')
-            if reservation_id:
-                initial['reservation'] = reservation_id
-            context['upload_form'] = FinalGalleryUploadForm(
-                reservation_queryset=self._reservation_queryset(), initial=initial,
-            )
-        return context
-
-    def get(self, request, *args, **kwargs):
-        self._load_scope()
-        return super().get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        self._load_scope()
-        upload_form = FinalGalleryUploadForm(
-            request.POST, request.FILES, reservation_queryset=self._reservation_queryset(),
         )
 
-        if upload_form.is_valid():
-            reservation = upload_form.cleaned_data['reservation']
-            gallery = Gallery.objects.create(gallery_type=Gallery.TYPE_FINAL)
-            image_validator = django_forms.ImageField()
-            uploaded = 0
-            for order, uploaded_file in enumerate(upload_form.cleaned_data['images']):
-                try:
-                    image_validator.clean(uploaded_file)
-                    image = Image(gallery=gallery, image=uploaded_file, order=order)
-                    image.full_clean()
-                    image.save()
-                except ValidationError as exc:
-                    messages.error(request, _('Пропусната %(name)s: %(error)s') % {
-                        'name': uploaded_file.name, 'error': '; '.join(exc.messages),
-                    })
-                    continue
-                uploaded += 1
+    def _send_client_email(self, request, reservation):
+        return send_final_delivery_email(request, reservation)
 
-            if uploaded == 0:
-                gallery.delete()
-                messages.error(request, _('Нито една снимка не беше качена успешно.'))
-                return self.render_to_response(self.get_context_data(upload_form=upload_form))
+    def _success_message(self, count):
+        return _(
+            'Финалната галерия е качена и доставена успешно (%(count)d снимки).'
+        ) % {'count': count}
 
-            reservation.final_gallery = gallery
-            try:
-                reservation.save(update_fields=['final_gallery'])
-            except ValidationError as exc:
-                gallery.delete()
-                messages.error(request, _('Резервацията не можа да бъде обновена: %(error)s') % {
-                    'error': '; '.join(exc.messages),
-                })
-                return self.render_to_response(self.get_context_data(upload_form=upload_form))
-
-            if send_final_delivery_email(request, reservation):
-                messages.success(
-                    request,
-                    _('Финалната галерия е качена и доставена успешно (%(count)d снимки).') % {'count': uploaded},
-                )
-            else:
-                messages.warning(request, _(
-                    'Финалната галерия е качена успешно (%(count)d снимки), но имейлът до клиента не бе изпратен.'
-                ) % {'count': uploaded})
-            return redirect('profile_page')
-
-        return self.render_to_response(self.get_context_data(upload_form=upload_form))
+    def _email_failed_message(self, count):
+        return _(
+            'Финалната галерия е качена успешно (%(count)d снимки), но имейлът до клиента не бе изпратен.'
+        ) % {'count': count}
 
 
 def _get_owned_final_gallery_reservation(request, reservation_id):
