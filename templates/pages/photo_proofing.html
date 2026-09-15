@@ -17,19 +17,19 @@
         {% else %}
           {% trans "Демонстрационна галерия" %} &middot;
         {% endif %}
-        <span id="proof-header-count">0</span> / {{ photos|length }} {% trans "маркирани" %}
+        <span id="proof-header-count">{{ marked_total }}</span> / {{ total_photos }} {% trans "маркирани" %}
       </p>
     </div>
     <div class="proof-filter-bar" role="tablist" aria-label="{% trans 'Филтър на снимки' %}">
-      <button type="button" class="proof-filter-btn is-active" data-filter="all" role="tab" aria-selected="true">
-        {% trans "Всички" %} <span class="proof-filter-count" data-count-for="all">{{ photos|length }}</span>
-      </button>
-      <button type="button" class="proof-filter-btn" data-filter="marked" role="tab" aria-selected="false">
-        {% trans "Маркирани" %} <span class="proof-filter-count" data-count-for="marked">0</span>
-      </button>
-      <button type="button" class="proof-filter-btn" data-filter="finalized" role="tab" aria-selected="false">
-        {% trans "Финализирани" %} <span class="proof-filter-count" data-count-for="finalized">0</span>
-      </button>
+      <a href="?filter=all" class="proof-filter-btn{% if current_filter == 'all' %} is-active{% endif %}" role="tab" aria-selected="{% if current_filter == 'all' %}true{% else %}false{% endif %}">
+        {% trans "Всички" %} <span class="proof-filter-count" data-count-for="all">{{ total_photos }}</span>
+      </a>
+      <a href="?filter=marked" class="proof-filter-btn{% if current_filter == 'marked' %} is-active{% endif %}" role="tab" aria-selected="{% if current_filter == 'marked' %}true{% else %}false{% endif %}">
+        {% trans "Маркирани" %} <span class="proof-filter-count" data-count-for="marked">{% if is_finalized %}0{% else %}{{ marked_total }}{% endif %}</span>
+      </a>
+      <a href="?filter=finalized" class="proof-filter-btn{% if current_filter == 'finalized' %} is-active{% endif %}" role="tab" aria-selected="{% if current_filter == 'finalized' %}true{% else %}false{% endif %}">
+        {% trans "Финализирани" %} <span class="proof-filter-count" data-count-for="finalized">{% if is_finalized %}{{ marked_total }}{% else %}0{% endif %}</span>
+      </a>
     </div>
   </header>
 
@@ -47,13 +47,13 @@
     {% for photo in photos %}
     <div class="proof-tile{% if photo.is_marked %} is-marked{% endif %}{% if photo.comment %} has-comment{% endif %}{% if is_finalized and photo.is_marked %} is-finalized{% endif %}"
          data-photo-id="{{ photo.id }}"
-         data-caption="{% trans 'Кадър' %} {{ forloop.counter }}"
+         data-caption="{% trans 'Кадър' %} {{ forloop.counter0|add:page_obj.start_index }}"
          data-comment="{{ photo.comment }}"
          tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
          role="gridcell">
       <div class="proof-tile-frame">
         <div class="proof-photo-wrap">
-          <img src="{{ photo.url }}" alt="{{ photo.alt }}" class="proof-tile-img" draggable="false">
+          <img src="{{ photo.url }}" alt="{{ photo.alt }}" class="proof-tile-img" draggable="false" loading="lazy">
           <div class="proof-watermark" aria-hidden="true">
             {% for i in "123456" %}<span>{{ watermark_identifier }}</span>{% endfor %}
           </div>
@@ -73,7 +73,7 @@
           </button>
         </div>
         <div class="proof-tile-footer">
-          <span class="proof-filename">{% trans "Кадър" %} {{ forloop.counter }}</span>
+          <span class="proof-filename">{% trans "Кадър" %} {{ forloop.counter0|add:page_obj.start_index }}</span>
           <div class="proof-label-row">
             {% for label in labels_config %}
             <button type="button" class="proof-label-chip{% if label.key in photo.label_keys %} is-active{% endif %}" data-label="{{ label.key }}"{% if is_finalized %} disabled{% endif %}>{{ label.name }}</button>
@@ -86,12 +86,28 @@
     <p class="proof-empty">{% trans "Все още няма качени снимки от тази сесия." %}</p>
     {% endfor %}
   </div>
-  <p class="proof-empty-filtered" hidden>{% trans "Няма снимки, отговарящи на този филтър." %}</p>
+  {% if not photos and current_filter != 'all' %}
+  <p class="proof-empty-filtered">{% trans "Няма снимки, отговарящи на този филтър." %}</p>
+  {% endif %}
 
-  {% if photos %}
+  {% if page_obj.has_other_pages %}
+  <nav class="proof-pagination" aria-label="{% trans 'Страници със снимки' %}">
+    {% if page_obj.has_previous %}
+    <a class="proof-page-link" href="?filter={{ current_filter }}&amp;page={{ page_obj.previous_page_number }}" rel="prev">{% trans "Назад" %}</a>
+    {% endif %}
+    <span class="proof-page-status">
+      {% blocktrans with current=page_obj.number total=page_obj.paginator.num_pages %}Страница {{ current }} от {{ total }}{% endblocktrans %}
+    </span>
+    {% if page_obj.has_next %}
+    <a class="proof-page-link" href="?filter={{ current_filter }}&amp;page={{ page_obj.next_page_number }}" rel="next">{% trans "Напред" %}</a>
+    {% endif %}
+  </nav>
+  {% endif %}
+
+  {% if total_photos %}
       <div class="proof-sticky-bar">
         <div class="proof-sticky-counts">
-          <span><strong id="proof-marked-count">0</strong> / {{ photos|length }} {% trans "маркирани" %}</span>
+          <span><strong id="proof-marked-count">{{ marked_total }}</strong> / {{ total_photos }} {% trans "маркирани" %}</span>
           <span class="proof-compare-indicator" id="proof-compare-indicator" hidden>
             &middot; <button type="button" id="proof-compare-open" class="proof-link-btn" disabled>{% trans "Сравни избраните" %} (<span id="proof-compare-count">0</span>/2)</button>
           </span>
@@ -108,7 +124,7 @@
       <div class="proof-modal-head">
         <h2 class="proof-modal-title" id="proof-finalize-title">{% trans "Потвърдете избора си" %}</h2>
         <p class="proof-modal-sub">
-          {% trans "Избрахте" %} <strong id="proof-finalize-summary-count">0</strong> {% trans "от" %} {{ photos|length }} {% trans "снимки за професионална обработка." %}
+          {% trans "Избрахте" %} <strong id="proof-finalize-summary-count">{{ marked_total }}</strong> {% trans "от" %} {{ total_photos }} {% trans "снимки за професионална обработка." %}
         </p>
       </div>
       <div class="proof-modal-body" id="proof-finalize-list"></div>
@@ -158,6 +174,7 @@
 <script>
 (function () {
   const NOTE_INDICATOR = "{% trans 'Има бележка' %}";
+  const MORE_MARKED_TEXT = "{% trans '+ още {count} маркирани на други страници' %}";
 
   const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
   {% get_current_language as CURRENT_LANGUAGE %}
@@ -174,10 +191,12 @@
   const grid = document.getElementById('proof-grid');
   if (!grid) return;
   const tiles = Array.from(grid.querySelectorAll('.proof-tile'));
-  const totalCount = tiles.length;
+  // Gallery-wide, not page-wide: the grid only holds the current page's tiles,
+  // so every count has to be seeded from the server and moved by delta.
+  const totalCount = {{ total_photos }};
+  let markedTotal = {{ marked_total }};
 
   let finalized = {{ is_finalized|yesno:"true,false" }};
-  let currentFilter = 'all';
   const compareSet = [];
   const comments = new Map();
 
@@ -186,8 +205,6 @@
   const countAllEl = document.querySelector('[data-count-for="all"]');
   const countMarkedEl = document.querySelector('[data-count-for="marked"]');
   const countFinalizedEl = document.querySelector('[data-count-for="finalized"]');
-  const filterButtons = Array.from(document.querySelectorAll('.proof-filter-btn'));
-  const emptyFilteredEl = document.querySelector('.proof-empty-filtered');
 
   const finalizeOpenBtn = document.getElementById('proof-finalize-open');
   const finalizeModal = document.getElementById('proof-finalize-modal');
@@ -215,16 +232,12 @@
   function findTile(id) { return tiles.find((t) => t.dataset.photoId === id); }
 
   function refreshCounts() {
-    const markedTiles = tiles.filter(isMarked);
-    const markedNum = finalized ? 0 : markedTiles.length;
-    const finalizedNum = finalized ? markedTiles.length : 0;
-
-    headerCountEl.textContent = markedTiles.length;
-    markedCountEl.textContent = markedTiles.length;
+    headerCountEl.textContent = markedTotal;
+    markedCountEl.textContent = markedTotal;
     countAllEl.textContent = totalCount;
-    countMarkedEl.textContent = markedNum;
-    countFinalizedEl.textContent = finalizedNum;
-    finalizeOpenBtn.disabled = markedTiles.length === 0 || finalized;
+    countMarkedEl.textContent = finalized ? 0 : markedTotal;
+    countFinalizedEl.textContent = finalized ? markedTotal : 0;
+    finalizeOpenBtn.disabled = markedTotal === 0 || finalized;
   }
 
   function refreshLabelChips() {
@@ -233,34 +246,21 @@
     });
   }
 
-  function applyFilter() {
-    tiles.forEach((tile) => {
-      const marked = isMarked(tile);
-      let visible = true;
-      if (currentFilter === 'marked') visible = marked && !finalized;
-      else if (currentFilter === 'finalized') visible = marked && finalized;
-      tile.hidden = !visible;
-    });
-    const anyVisible = tiles.some((t) => !t.hidden);
-    emptyFilteredEl.hidden = anyVisible || totalCount === 0;
-    resetRovingTabindex();
-  }
-
   function toggleMark(tile) {
     if (finalized) return;
     const id = tile.dataset.photoId;
     tile.classList.toggle('is-marked');
+    markedTotal += isMarked(tile) ? 1 : -1;
     tile.querySelector('.proof-mark-btn').setAttribute('aria-pressed', String(isMarked(tile)));
     refreshCounts();
     refreshLabelChips();
-    applyFilter();
     postJson(`${LANG_PREFIX}/profile/photos/${id}/mark/`).then(({ ok, data }) => {
       if (ok && data.success) return;
       tile.classList.toggle('is-marked');
+      markedTotal += isMarked(tile) ? 1 : -1;
       tile.querySelector('.proof-mark-btn').setAttribute('aria-pressed', String(isMarked(tile)));
       refreshCounts();
       refreshLabelChips();
-      applyFilter();
       window.alert(data.error || "{% trans 'Възникна грешка. Опитайте отново.' %}");
     });
   }
@@ -398,19 +398,9 @@
     });
   });
 
-  filterButtons.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      filterButtons.forEach((b) => { b.classList.remove('is-active'); b.setAttribute('aria-selected', 'false'); });
-      btn.classList.add('is-active');
-      btn.setAttribute('aria-selected', 'true');
-      currentFilter = btn.dataset.filter;
-      applyFilter();
-    });
-  });
-
   finalizeOpenBtn.addEventListener('click', () => {
     const marked = tiles.filter(isMarked);
-    finalizeSummaryCount.textContent = marked.length;
+    finalizeSummaryCount.textContent = markedTotal;
     finalizeList.innerHTML = '';
     marked.forEach((tile) => {
       const img = tile.querySelector('img');
@@ -443,6 +433,12 @@
       row.appendChild(meta);
       finalizeList.appendChild(row);
     });
+    if (markedTotal > marked.length) {
+      const more = document.createElement('p');
+      more.className = 'proof-summary-more';
+      more.textContent = MORE_MARKED_TEXT.replace('{count}', markedTotal - marked.length);
+      finalizeList.appendChild(more);
+    }
     finalizeModal.hidden = false;
   });
   finalizeCancelBtn.addEventListener('click', () => { finalizeModal.hidden = true; });
@@ -460,7 +456,6 @@
       finalizeOpenBtn.hidden = true;
       refreshLabelChips();
       refreshCounts();
-      applyFilter();
     }
     postJson(`${LANG_PREFIX}/profile/photos/finalize/`).then(({ ok, data }) => {
       if (!ok || !data.success) {
@@ -539,7 +534,7 @@
   });
 
   refreshCounts();
-  applyFilter();
+  resetRovingTabindex();
 })();
 </script>
 {% endblock %}

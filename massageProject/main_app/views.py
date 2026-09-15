@@ -16,6 +16,7 @@ from django.core import signing
 from django.core.exceptions import PermissionDenied
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+from django.core.paginator import Paginator
 from django.http.request import validate_host
 from django.utils import timezone
 from django.utils.translation import gettext as _
@@ -934,6 +935,10 @@ def _reject_if_finalized(reservation):
     return None
 
 
+PROOF_PAGE_SIZE = 60
+PROOF_FILTERS = ('all', 'marked', 'finalized')
+
+
 class PhotoProofingGallery(LoginRequiredMixin, TemplateView):
     template_name = 'pages/photo_proofing.html'
 
@@ -942,14 +947,35 @@ class PhotoProofingGallery(LoginRequiredMixin, TemplateView):
         user = self.request.user
 
         reservation = _get_current_proofing_reservation(user)
+        is_finalized = reservation.is_proofing_finalized if reservation else False
+        current_filter = self.request.GET.get('filter', 'all')
+        if current_filter not in PROOF_FILTERS:
+            current_filter = 'all'
 
         if reservation:
+            images = reservation.gallery.images.all()
+            total_photos = images.count()
+            marked_total = ImageProof.objects.filter(
+                image__gallery=reservation.gallery, is_marked=True,
+            ).count()
+
+            # A photo counts as "marked" only while proofing is open, and as
+            # "finalized" only once it is closed — the two tabs are the same
+            # set of images seen before and after finalizing.
+            if current_filter == 'marked':
+                images = images.filter(proof__is_marked=True) if not is_finalized else images.none()
+            elif current_filter == 'finalized':
+                images = images.filter(proof__is_marked=True) if is_finalized else images.none()
+
+            paginator = Paginator(images, PROOF_PAGE_SIZE)
+            page_obj = paginator.get_page(self.request.GET.get('page'))
+
             proofs = {
                 p.image_id: p for p in
-                ImageProof.objects.filter(image__gallery=reservation.gallery).prefetch_related('labels')
+                ImageProof.objects.filter(image__in=page_obj.object_list).prefetch_related('labels')
             }
             photos = []
-            for img in reservation.gallery.images.all():
+            for img in page_obj.object_list:
                 proof = proofs.get(img.pk)
                 photos.append({
                     'id': img.pk,
@@ -968,11 +994,18 @@ class PhotoProofingGallery(LoginRequiredMixin, TemplateView):
             photos = []
             labels_config = []
             watermark_identifier = ''
+            page_obj = None
+            total_photos = 0
+            marked_total = 0
 
         context['title'] = _('Проверка на снимки')
         context['reservation'] = reservation
-        context['is_finalized'] = reservation.is_proofing_finalized if reservation else False
+        context['is_finalized'] = is_finalized
         context['photos'] = photos
+        context['page_obj'] = page_obj
+        context['total_photos'] = total_photos
+        context['marked_total'] = marked_total
+        context['current_filter'] = current_filter
         context['watermark_identifier'] = watermark_identifier
         context['labels_config'] = labels_config
         return context

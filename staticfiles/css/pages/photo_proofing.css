@@ -78,6 +78,8 @@
     border: none;
     background: transparent;
     cursor: pointer;
+    display: inline-block;
+    text-decoration: none;
     font-family: var(--font-main);
     font-size: var(--fs-sm);
     font-weight: 600;
@@ -437,13 +439,56 @@
     cursor: not-allowed;
 }
 
+.proof-empty {
+    grid-column: 1 / -1;
+}
+
 .proof-empty,
 .proof-empty-filtered {
-    grid-column: 1 / -1;
     text-align: center;
     padding: 3rem 1rem;
     color: var(--text-muted);
     font-size: var(--fs-base);
+}
+
+/* ── Pagination ──────────────────────────────────────────── */
+
+.proof-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.proof-page-link {
+    font-family: var(--font-main);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    padding: 0.5em 1.2em;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    color: var(--text-main);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.proof-page-link:hover {
+    background: var(--primary-color);
+    color: var(--on-primary);
+}
+
+.proof-page-status {
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+}
+
+.proof-summary-more {
+    padding: 0.85rem 1.5rem;
+    margin: 0;
+    font-size: var(--fs-xs);
+    color: var(--text-muted);
 }
 
 /* ── Sticky review & finalize bar ────────────────────────── */

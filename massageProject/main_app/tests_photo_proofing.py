@@ -407,3 +407,87 @@ class ProofSignedUrlTest(TestCase):
             with self.assertLogs('massageProject.main_app.views', level='WARNING'):
                 url = _signed_proof_url('proof_derivatives/1/abc.jpg')
         self.assertEqual(url, '/media/proof_derivatives/1/abc.jpg')
+
+
+class ProofingPaginationTest(ProofingModelsBase):
+    """A 400-photo gallery used to emit 400 <img> tags with no lazy-loading and
+    no pagination, firing 400 concurrent requests at two workers."""
+
+    PAGE_SIZE = 60
+
+    def setUp(self):
+        super().setUp()
+        self.client = Client()
+        self.client.force_login(self.user)
+        # self.image (order 0) already exists on the gallery; add 79 more.
+        self.images = [self.image] + [
+            Image.objects.create(gallery=self.gallery, order=i, image=f'gallery/photos/p{i}.webp')
+            for i in range(1, 80)
+        ]
+        self.total = len(self.images)
+
+    def _mark(self, image):
+        ImageProof.objects.create(image=image, is_marked=True)
+
+    def test_first_page_holds_only_one_page_of_photos(self):
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertEqual(len(response.context['photos']), self.PAGE_SIZE)
+        self.assertTrue(response.context['page_obj'].has_next())
+
+    def test_second_page_holds_the_remainder(self):
+        response = self.client.get(reverse('photo_proofing'), {'page': 2})
+        self.assertEqual(len(response.context['photos']), self.total - self.PAGE_SIZE)
+        self.assertFalse(response.context['page_obj'].has_next())
+
+    def test_photos_lazy_load(self):
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertContains(response, 'loading="lazy"')
+
+    def test_totals_are_gallery_wide_not_page_scoped(self):
+        for image in self.images[:70]:
+            self._mark(image)
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertEqual(response.context['total_photos'], self.total)
+        # 70 marked, but only 60 photos are on this page — the count must not
+        # collapse to what the page happens to contain.
+        self.assertEqual(response.context['marked_total'], 70)
+
+    def test_frame_numbering_continues_across_pages(self):
+        response = self.client.get(reverse('photo_proofing'), {'page': 2})
+        self.assertEqual(response.context['page_obj'].start_index(), self.PAGE_SIZE + 1)
+        self.assertContains(response, 'Кадър %d' % (self.PAGE_SIZE + 1))
+
+    def test_marked_filter_spans_the_whole_gallery_not_just_page_one(self):
+        """A photo marked at position 75 must show up on page 1 of the marked
+        filter — the bug that page-scoped client-side filtering would cause."""
+        late_image = self.images[75]
+        self._mark(late_image)
+        response = self.client.get(reverse('photo_proofing'), {'filter': 'marked'})
+        ids = [p['id'] for p in response.context['photos']]
+        self.assertEqual(ids, [late_image.pk])
+
+    def test_finalized_filter_is_empty_while_proofing_is_open(self):
+        self._mark(self.images[0])
+        response = self.client.get(reverse('photo_proofing'), {'filter': 'finalized'})
+        self.assertEqual(response.context['photos'], [])
+
+    def test_marked_filter_is_empty_once_finalized(self):
+        self._mark(self.images[0])
+        self.reservation.finalize_proofing()
+        self.reservation.need_client_review = True
+        self.reservation.save(update_fields=['need_client_review'])
+        response = self.client.get(reverse('photo_proofing'), {'filter': 'marked'})
+        self.assertEqual(response.context['photos'], [])
+        response = self.client.get(reverse('photo_proofing'), {'filter': 'finalized'})
+        self.assertEqual(len(response.context['photos']), 1)
+
+    def test_marking_a_photo_on_a_later_page_still_works(self):
+        late_image = self.images[75]
+        response = self.client.post(reverse('photo_proofing_mark', args=[late_image.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()['is_marked'])
+
+    def test_out_of_range_page_falls_back_to_the_last_page(self):
+        response = self.client.get(reverse('photo_proofing'), {'page': 99})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['page_obj'].number, 2)
