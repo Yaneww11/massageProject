@@ -6,7 +6,7 @@ from PIL import Image as PILImage, ImageOps
 from django.core.files.base import ContentFile
 from django.db import models, transaction
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxLengthValidator, MinValueValidator, RegexValidator
+from django.core.validators import MaxLengthValidator, RegexValidator
 from django.db.models import JSONField
 from django.utils import timezone
 from django.utils.html import strip_tags
@@ -844,14 +844,6 @@ class PhotoLabel(models.Model):
             'Името на етикета, който клиентът вижда и може да прикачи към снимки при '
             'преглед на снимките от своята резервация. Показва се и на специалиста в '
             'изгледа "Маркирани снимки".'
-        ),
-    )
-    cap = models.PositiveIntegerField(
-        validators=[MinValueValidator(1)],
-        verbose_name=_('Максимален брой'),
-        help_text=_(
-            'Максимален брой снимки, които клиентът може да маркира с този етикет при '
-            'преглед на снимките от своята резервация.'
         ),
     )
     order = models.PositiveIntegerField(

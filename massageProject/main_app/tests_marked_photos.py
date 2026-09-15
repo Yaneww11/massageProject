@@ -86,7 +86,7 @@ class MarkedPhotosTestBase(TestCase):
         self.unmarked_image = Image.objects.create(
             gallery=self.gallery, order=1, image=_make_uploaded_image('unmarked.jpg', 'blue'),
         )
-        self.label = PhotoLabel.objects.create(gallery=self.gallery, name='За печат', cap=5, order=0)
+        self.label = PhotoLabel.objects.create(gallery=self.gallery, name='За печат', order=0)
         proof = ImageProof.objects.create(image=self.marked_image, is_marked=True, comment='crop tighter')
         proof.labels.add(self.label)
 

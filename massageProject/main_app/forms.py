@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator, MinValueValidator
+from django.core.validators import RegexValidator
 from django.utils.translation import gettext_lazy as _
 
 from massageProject.main_app.mixins import DisableFieldMixin
@@ -146,22 +146,5 @@ class ProofingLabelForm(forms.Form):
         max_length=100, required=False, label=_('Етикет'),
         widget=forms.TextInput(attrs={'class': 'form-textarea'}),
     )
-    cap = forms.IntegerField(
-        required=False, validators=[MinValueValidator(1)], label=_('Максимален брой'),
-        widget=forms.NumberInput(attrs={'class': 'form-textarea'}),
-    )
-
-    def clean(self):
-        cleaned = super().clean()
-        name = cleaned.get('name')
-        cap = cleaned.get('cap')
-        if name and not cap:
-            raise ValidationError(
-                _('Въведете максимален брой за етикета "%(name)s".') % {'name': name}
-            )
-        if cap and not name:
-            raise ValidationError(_('Въведете име за етикета.'))
-        return cleaned
-
 
 ProofingLabelFormSet = forms.formset_factory(ProofingLabelForm, extra=3)

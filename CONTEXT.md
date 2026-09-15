@@ -13,7 +13,7 @@ One client's proofing state for a single Image — whether it's marked as a favo
 _Avoid_: proof, selection
 
 **PhotoLabel**:
-A named, capped-count category (e.g. "prints") a client can attach to Images during Photo Proofing. Only a limited number of Images may carry a given label.
+A named category (e.g. "prints") a client can attach to Images during Photo Proofing, and which the specialist reads afterwards in Marked Photos. Any number of Images may carry a given label — labels sort the client's marks into groups, they do not ration them.
 _Avoid_: tag, category
 
 **Finalizing**:

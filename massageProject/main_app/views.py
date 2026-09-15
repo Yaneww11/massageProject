@@ -425,9 +425,8 @@ class ProofingGalleryUploadView(PhotographerModeMixin, LoginRequiredMixin, Templ
                 if not label_form.cleaned_data:
                     continue
                 name = label_form.cleaned_data.get('name')
-                cap = label_form.cleaned_data.get('cap')
-                if name and cap:
-                    PhotoLabel.objects.create(gallery=gallery, name=name, cap=cap, order=label_order)
+                if name:
+                    PhotoLabel.objects.create(gallery=gallery, name=name, order=label_order)
                     label_order += 1
 
             reservation.gallery = gallery
@@ -917,7 +916,7 @@ class PhotoProofingGallery(LoginRequiredMixin, TemplateView):
                     'label_keys': [label.pk for label in proof.labels.all()] if proof else [],
                 })
             labels_config = [
-                {'key': label.pk, 'name': label.name, 'cap': label.cap}
+                {'key': label.pk, 'name': label.name}
                 for label in reservation.gallery.photo_labels.all()
             ]
             watermark_identifier = f'{user.get_full_name() or user.phone_number} · #{reservation.pk}'
@@ -959,9 +958,6 @@ def toggle_photo_label(request, image_id, label_id):
     proof, _created = ImageProof.objects.get_or_create(image=image)
     is_active = label in proof.labels.all()
     if not is_active:
-        current_count = ImageProof.objects.filter(image__gallery=reservation.gallery, labels=label).count()
-        if current_count >= label.cap:
-            return JsonResponse({'success': False, 'error': _('Достигнат е максималният брой за този етикет.')}, status=400)
         proof.labels.add(label)
     else:
         proof.labels.remove(label)

@@ -95,13 +95,11 @@ class ProofingGalleryUploadViewTest(TestCase):
             'labels-MAX_NUM_FORMS': '1000',
         }
         if labels:
-            for i, (name, cap) in enumerate(labels):
+            for i, name in enumerate(labels):
                 data[f'labels-{i}-name'] = name
-                data[f'labels-{i}-cap'] = cap
         else:
             for i in range(3):
                 data[f'labels-{i}-name'] = ''
-                data[f'labels-{i}-cap'] = ''
         return self.client.post(self.url, data)
 
     def test_specialist_can_upload_gallery_to_own_reservation(self):
@@ -147,15 +145,15 @@ class ProofingGalleryUploadViewTest(TestCase):
         self.other_reservation.refresh_from_db()
         self.assertIsNotNone(self.other_reservation.gallery_id)
 
-    def test_labels_and_caps_are_created(self):
+    def test_labels_are_created(self):
         self.client.force_login(self.specialist_user)
         self._post(
             self.reservation, [_make_uploaded_image('a.jpg')],
-            labels=[('За печат', '3'), ('Албум', '10')],
+            labels=['За печат', 'Албум'],
         )
         self.reservation.refresh_from_db()
         labels = list(self.reservation.gallery.photo_labels.order_by('order'))
-        self.assertEqual([(l.name, l.cap) for l in labels], [('За печат', 3), ('Албум', 10)])
+        self.assertEqual([(l.name, l.order) for l in labels], [('За печат', 0), ('Албум', 1)])
 
     def test_gallery_ready_email_sent_to_client(self):
         self.client.force_login(self.specialist_user)

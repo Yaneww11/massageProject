@@ -244,7 +244,7 @@ class ImageInline(TabularInline):
 class PhotoLabelInline(TabularInline):
     model = PhotoLabel
     extra = 1
-    fields = ('name', 'cap', 'order')
+    fields = ('name', 'order')
 
 
 @admin.register(Gallery)

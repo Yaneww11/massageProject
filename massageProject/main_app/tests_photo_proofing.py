@@ -1,6 +1,5 @@
 from datetime import time as time_cls, timedelta
 
-from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
 
@@ -60,13 +59,8 @@ class ReservationProofingFieldsTest(ProofingModelsBase):
 
 
 class PhotoLabelModelTest(ProofingModelsBase):
-    def test_cap_must_be_at_least_one(self):
-        label = PhotoLabel(gallery=self.gallery, name='За печат', cap=0, order=0)
-        with self.assertRaises(ValidationError):
-            label.full_clean()
-
     def test_valid_label_saves(self):
-        label = PhotoLabel.objects.create(gallery=self.gallery, name='За печат', cap=5, order=0)
+        label = PhotoLabel.objects.create(gallery=self.gallery, name='За печат', order=0)
         self.assertEqual(str(label), 'За печат')
 
 
@@ -78,8 +72,8 @@ class ImageProofModelTest(ProofingModelsBase):
         self.assertEqual(list(proof.labels.all()), [])
 
     def test_can_attach_multiple_labels(self):
-        label_a = PhotoLabel.objects.create(gallery=self.gallery, name='За печат', cap=5, order=0)
-        label_b = PhotoLabel.objects.create(gallery=self.gallery, name='Албум', cap=10, order=1)
+        label_a = PhotoLabel.objects.create(gallery=self.gallery, name='За печат', order=0)
+        label_b = PhotoLabel.objects.create(gallery=self.gallery, name='Албум', order=1)
         proof = ImageProof.objects.create(image=self.image, is_marked=True)
         proof.labels.add(label_a, label_b)
         self.assertEqual(set(proof.labels.all()), {label_a, label_b})
@@ -131,7 +125,7 @@ class PhotoProofingGalleryContextTest(ProofingModelsBase):
         super().setUp()
         self.client = Client()
         self.client.force_login(self.user)
-        self.label = PhotoLabel.objects.create(gallery=self.gallery, name='За печат', cap=5, order=0)
+        self.label = PhotoLabel.objects.create(gallery=self.gallery, name='За печат', order=0)
 
     def test_unfinalized_reservation_context(self):
         response = self.client.get(reverse('photo_proofing'))
@@ -177,7 +171,7 @@ class ProofingEndpointsTest(ProofingModelsBase):
         super().setUp()
         self.client = Client()
         self.client.force_login(self.user)
-        self.label = PhotoLabel.objects.create(gallery=self.gallery, name='За печат', cap=1, order=0)
+        self.label = PhotoLabel.objects.create(gallery=self.gallery, name='За печат', order=0)
         self.other_user = CustomUser.objects.create_user(
             phone_number='0888111113', email='other@example.com', password='pass12345',
         )
@@ -200,16 +194,16 @@ class ProofingEndpointsTest(ProofingModelsBase):
         response = self.client.post(reverse('photo_proofing_mark', args=[self.image.pk]))
         self.assertEqual(response.status_code, 403)
 
-    def test_label_toggle_respects_cap(self):
+    def test_label_can_be_attached_to_every_photo(self):
         second_image = Image.objects.create(gallery=self.gallery, order=1, alt_text='Photo 2', image='gallery/test2.jpg')
         url_1 = reverse('photo_proofing_label', args=[self.image.pk, self.label.pk])
         url_2 = reverse('photo_proofing_label', args=[second_image.pk, self.label.pk])
         self.client.post(reverse('photo_proofing_mark', args=[self.image.pk]))
         self.client.post(reverse('photo_proofing_mark', args=[second_image.pk]))
         self.assertEqual(self.client.post(url_1).status_code, 200)
-        response = self.client.post(url_2)
-        self.assertEqual(response.status_code, 400)
-        self.assertFalse(self.label in ImageProof.objects.get(image=second_image).labels.all())
+        self.assertEqual(self.client.post(url_2).status_code, 200)
+        self.assertIn(self.label, ImageProof.objects.get(image=self.image).labels.all())
+        self.assertIn(self.label, ImageProof.objects.get(image=second_image).labels.all())
 
     def test_comment_save_overwrites(self):
         url = reverse('photo_proofing_comment', args=[self.image.pk])

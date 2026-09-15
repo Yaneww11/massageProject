@@ -76,7 +76,7 @@
           <span class="proof-filename">{% trans "Кадър" %} {{ forloop.counter }}</span>
           <div class="proof-label-row">
             {% for label in labels_config %}
-            <button type="button" class="proof-label-chip{% if label.key in photo.label_keys %} is-active{% endif %}" data-label="{{ label.key }}" data-cap="{{ label.cap }}"{% if is_finalized %} disabled{% endif %}>{{ label.name }}</button>
+            <button type="button" class="proof-label-chip{% if label.key in photo.label_keys %} is-active{% endif %}" data-label="{{ label.key }}"{% if is_finalized %} disabled{% endif %}>{{ label.name }}</button>
             {% endfor %}
           </div>
         </div>
@@ -211,17 +211,6 @@
   const drawerSaveBtn = document.getElementById('proof-drawer-save');
   let drawerPhotoId = null;
 
-  const labelCaps = {};
-  const labelCounts = {};
-  document.querySelectorAll('.proof-label-chip').forEach((chip) => {
-    const key = chip.dataset.label;
-    if (!(key in labelCaps)) {
-      labelCaps[key] = parseInt(chip.dataset.cap, 10);
-      labelCounts[key] = 0;
-    }
-    if (chip.classList.contains('is-active')) labelCounts[key] += 1;
-  });
-
   function isMarked(tile) { return tile.classList.contains('is-marked'); }
   function findTile(id) { return tiles.find((t) => t.dataset.photoId === id); }
 
@@ -240,9 +229,7 @@
 
   function refreshLabelChips() {
     document.querySelectorAll('.proof-label-chip').forEach((chip) => {
-      const key = chip.dataset.label;
-      const active = chip.classList.contains('is-active');
-      chip.disabled = finalized || (!active && labelCounts[key] >= labelCaps[key]);
+      chip.disabled = finalized;
     });
   }
 
@@ -281,16 +268,12 @@
   function toggleLabel(tile, chip) {
     if (finalized || !isMarked(tile)) return;
     const key = chip.dataset.label;
-    const active = chip.classList.contains('is-active');
-    if (!active && labelCounts[key] >= labelCaps[key]) return;
     chip.classList.toggle('is-active');
-    labelCounts[key] += active ? -1 : 1;
     refreshLabelChips();
     const id = tile.dataset.photoId;
     postJson(`${LANG_PREFIX}/profile/photos/${id}/label/${key}/`).then(({ ok, data }) => {
       if (ok && data.success) return;
       chip.classList.toggle('is-active');
-      labelCounts[key] += active ? 1 : -1;
       refreshLabelChips();
       window.alert(data.error || "{% trans 'Възникна грешка. Опитайте отново.' %}");
     });
