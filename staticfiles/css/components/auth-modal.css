@@ -59,6 +59,18 @@
     margin: 0 0 1.5rem;
 }
 
+.auth-modal-note {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--on-primary-light);
+    background: var(--primary-light);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1rem;
+    margin: 0 0 1.5rem;
+}
+
+.auth-modal-note[hidden] { display: none; }
+
 .auth-modal-step[hidden] { display: none; }
 
 .auth-modal-field { margin-bottom: 1.25rem; }

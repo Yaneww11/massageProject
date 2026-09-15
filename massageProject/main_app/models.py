@@ -240,10 +240,10 @@ class BusinessInfo(WebPImageFieldsMixin, models.Model):
     )
     phone = models.CharField(
         max_length=50,
-        blank=True,
         help_text=_(
             'Показва се в профила на клиента и в долния колонтитул (footer) на сайта '
-            'като линк за обаждане.'
+            'като линк за обаждане. Показва се и в подканата за вход, която виждат '
+            'клиенти, записали се по телефона.'
         ),
     )
     email_address = models.EmailField(

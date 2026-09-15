@@ -2,10 +2,11 @@
 {% load i18n %}
 {% block content %}
 <noscript><p>{% trans "Моля, включете JavaScript, за да влезете в профила си." %}</p></noscript>
+{% blocktrans with phone=business_info.phone asvar auth_note %}Резервациите ви са свързани с телефонния номер, с който сте ги направили. Създайте профил с този номер, за да ги видите, или ни се обадете на {{ phone }}.{% endblocktrans %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     if (window.AuthModal) {
-        window.AuthModal.open({ next: "{{ next|escapejs }}" });
+        window.AuthModal.open({ next: "{{ next|escapejs }}", note: "{{ auth_note|escapejs }}" });
     }
 });
 </script>
