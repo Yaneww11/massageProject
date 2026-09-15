@@ -186,3 +186,81 @@ class MarksFinalizedEmailTest(MarkedPhotosTestBase):
         # must not start sending mail as a side effect.
         self.reservation.finalize_proofing()
         self.assertEqual(len(mail.outbox), 0)
+
+
+class MarkedPhotoThumbnailTest(MarkedPhotosTestBase):
+    """The Marked Photos grid used to stream the full-size 2560px WebP through
+    a gunicorn worker for every thumbnail on the page. It now serves a small
+    cached derivative; the download paths still hand over the original."""
+
+    MAX_DIMENSION = 400
+
+    def _thumb_response(self):
+        self.client.force_login(self.specialist_user)
+        return self.client.get(
+            reverse('marked_photo_image', args=[self.reservation.pk, self.marked_image.pk])
+        )
+
+    def test_grid_serves_a_small_derivative_not_the_original(self):
+        response = self._thumb_response()
+        self.assertEqual(response.status_code, 200)
+        with PILImage.open(BytesIO(b''.join(response.streaming_content))) as thumb:
+            self.assertLessEqual(max(thumb.size), self.MAX_DIMENSION)
+        with self.marked_image.image.open('rb') as source:
+            with PILImage.open(source) as original:
+                self.assertGreater(max(original.size), self.MAX_DIMENSION)
+
+    def test_thumbnail_is_generated_once_and_then_served_from_cache(self):
+        from django.core.files.storage import default_storage
+        from massageProject.main_app.views import _marked_thumbnail_path
+
+        self._thumb_response()
+        path = _marked_thumbnail_path(self.marked_image.pk)
+        self.assertTrue(default_storage.exists(path))
+        first_mtime = default_storage.get_modified_time(path)
+        self._thumb_response()
+        self.assertEqual(default_storage.get_modified_time(path), first_mtime)
+
+    def test_thumbnail_carries_no_watermark(self):
+        """A flat-colour source stays flat. Lossy WebP shifts a channel by a
+        point or two; the watermark composite paints white text over the whole
+        frame, which would blow the per-channel spread wide open."""
+        response = self._thumb_response()
+        with PILImage.open(BytesIO(b''.join(response.streaming_content))) as thumb:
+            spread = max(hi - lo for lo, hi in thumb.convert('RGB').getextrema())
+        self.assertLess(spread, 16)
+
+    def test_ownership_is_still_enforced_on_the_thumbnail(self):
+        self.client.force_login(self.other_specialist_user)
+        response = self.client.get(
+            reverse('marked_photo_image', args=[self.reservation.pk, self.marked_image.pk])
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_unmarked_image_has_no_thumbnail(self):
+        self.client.force_login(self.specialist_user)
+        response = self.client.get(
+            reverse('marked_photo_image', args=[self.reservation.pk, self.unmarked_image.pk])
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_individual_download_still_returns_the_full_size_original(self):
+        self.client.force_login(self.specialist_user)
+        response = self.client.get(
+            reverse('marked_photo_download', args=[self.reservation.pk, self.marked_image.pk])
+        )
+        with PILImage.open(BytesIO(b''.join(response.streaming_content))) as full:
+            self.assertGreater(max(full.size), self.MAX_DIMENSION)
+
+    def test_zip_still_contains_full_size_originals(self):
+        self.client.force_login(self.specialist_user)
+        response = self.client.get(reverse('marked_photos_zip', args=[self.reservation.pk]))
+        archive = zipfile.ZipFile(BytesIO(response.content))
+        name = archive.namelist()[0]
+        with PILImage.open(BytesIO(archive.read(name))) as full:
+            self.assertGreater(max(full.size), self.MAX_DIMENSION)
+
+    def test_grid_lazy_loads_thumbnails(self):
+        self.client.force_login(self.specialist_user)
+        response = self.client.get(reverse('marked_photos', args=[self.reservation.pk]))
+        self.assertContains(response, 'loading="lazy"')

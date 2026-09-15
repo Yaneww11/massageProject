@@ -488,13 +488,46 @@ class MarkedPhotosView(PhotographerModeMixin, LoginRequiredMixin, TemplateView):
         return context
 
 
+MARKED_THUMBNAIL_MAX_DIMENSION = 400
+
+
+def _marked_thumbnail_path(image_id):
+    return f'marked_thumbnails/{image_id}.webp'
+
+
+def _generate_marked_thumbnail(image):
+    """Small unwatermarked derivative for the photographer's Marked Photos grid.
+
+    Serving the full-size 2560px original for every tile occupied a worker and
+    pushed ~700 KB per thumbnail. Generated on first request and cached
+    thereafter, mirroring _generate_proof_derivative. No watermark: this page
+    is the photographer's own, not the client's.
+    """
+    path = _marked_thumbnail_path(image.pk)
+    if default_storage.exists(path):
+        return path
+
+    with image.image.open('rb') as source:
+        thumb = PILImage.open(source)
+        thumb.load()
+    thumb.thumbnail(
+        (MARKED_THUMBNAIL_MAX_DIMENSION, MARKED_THUMBNAIL_MAX_DIMENSION), PILImage.LANCZOS,
+    )
+    buffer = BytesIO()
+    thumb.save(buffer, format='WEBP', quality=80)
+    buffer.seek(0)
+    default_storage.save(path, ContentFile(buffer.read()))
+    return path
+
+
 @login_required
 def serve_marked_photo_image(request, reservation_id, image_id):
     if not settings.IS_PHOTOGRAPHER_WEBSITE:
         raise Http404
     reservation = _get_owned_reservation_for_photo_workflow(request, reservation_id)
     image = get_object_or_404(_marked_images_queryset(reservation), pk=image_id)
-    return FileResponse(image.image.open('rb'), content_type='image/webp')
+    path = _generate_marked_thumbnail(image)
+    return FileResponse(default_storage.open(path, 'rb'), content_type='image/webp')
 
 
 @login_required
