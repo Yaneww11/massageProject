@@ -1207,6 +1207,14 @@ class SiteConfiguration(models.Model):
             'специалисти и дните в календара, когато мишката е върху тях.'
         ),
     )
+    active_bg_color = models.CharField(
+        max_length=7, default='#FFFFFF', validators=[_HEX_COLOR_VALIDATOR],
+        verbose_name=_('Фон (активен таб и основен бутон)'),
+        help_text=_(
+            'Фон на активния таб за филтриране по категория и на основния бутон '
+            '"Резервирай" в страницата с услуги.'
+        ),
+    )
 
     font_pair = models.CharField(
         max_length=30, choices=FONT_PAIR_CHOICES, default='playfair_montserrat',

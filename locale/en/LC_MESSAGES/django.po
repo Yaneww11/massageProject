@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-16 12:40+0000\n"
+"POT-Creation-Date: 2026-09-16 19:37+0000\n"
 "PO-Revision-Date: 2026-09-04 06:05+0000\n"
 "Last-Translator: Yane Yanev <admin@admin.com>\n"
 "Language-Team: English\n"
@@ -1301,37 +1301,49 @@ msgstr ""
 "Background of the sign-in and review pop-ups, and of the specialist tiles "
 "and calendar days while the pointer is over them."
 
-#: massageProject/main_app/models.py:1213
+#: massageProject/main_app/models.py:1212
+msgid "Фон (активен таб и основен бутон)"
+msgstr "Background (active tab and primary button)"
+
+#: massageProject/main_app/models.py:1214
+msgid ""
+"Фон на активния таб за филтриране по категория и на основния бутон "
+"\"Резервирай\" в страницата с услуги."
+msgstr ""
+"Background of the active category filter tab and the primary \"Book now\" "
+"button on the services page."
+
+#: massageProject/main_app/models.py:1221
 msgid "Двойка шрифтове"
 msgstr "Font pair"
 
-#: massageProject/main_app/models.py:1214
+#: massageProject/main_app/models.py:1222
 msgid "Шрифт по цялата тема на сайта, използван на всички страници."
 msgstr "Site-wide font choice, used across all pages."
 
-#: massageProject/main_app/models.py:1218
+#: massageProject/main_app/models.py:1226
 msgid "Стил (форми и сенки)"
 msgstr "Style (shapes and shadows)"
 
-#: massageProject/main_app/models.py:1219
+#: massageProject/main_app/models.py:1227
 msgid ""
 "Стил на форми и сенки (заобляне на ъгли, бутони, карти) по цялата тема на "
 "сайта."
 msgstr "Site-wide shape/shadow style (corners, buttons, cards)."
 
-#: massageProject/main_app/models.py:1223
+#: massageProject/main_app/models.py:1231
 msgid "Начален банер"
 msgstr "Hero banner"
 
-#: massageProject/main_app/models.py:1224
+#: massageProject/main_app/models.py:1232
 msgid "Определя кой изглед на банера се използва на началната страница."
 msgstr "Controls which homepage hero layout is used."
 
-#: massageProject/main_app/models.py:1228
+#: massageProject/main_app/models.py:1236
 msgid "Услуга (ед. число)"
 msgstr "Service (singular)"
 
-#: massageProject/main_app/models.py:1229
+#: massageProject/main_app/models.py:1237
 msgid ""
 "Използва се навсякъде, където сайтът се обръща към \"услуга\" — напр. "
 "страницата за резервация и профила на клиента."
@@ -1339,11 +1351,11 @@ msgstr ""
 "Used wherever the site refers to a \"service\" — e.g. the booking page and "
 "profile page."
 
-#: massageProject/main_app/models.py:1232
+#: massageProject/main_app/models.py:1240
 msgid "Услуги (мн. число)"
 msgstr "Services (plural)"
 
-#: massageProject/main_app/models.py:1233
+#: massageProject/main_app/models.py:1241
 msgid ""
 "Използва се навсякъде, където сайтът се обръща към \"услуги\" — напр. "
 "страницата за резервация и профила на клиента."
@@ -1351,11 +1363,11 @@ msgstr ""
 "Used wherever the site refers to \"services\" — e.g. the booking page and "
 "profile page."
 
-#: massageProject/main_app/models.py:1236
+#: massageProject/main_app/models.py:1244
 msgid "Специалист (ед. число)"
 msgstr "Specialist (singular)"
 
-#: massageProject/main_app/models.py:1237
+#: massageProject/main_app/models.py:1245
 msgid ""
 "Използва се навсякъде, където сайтът се обръща към \"специалист\" — напр. "
 "страницата за резервация и профила на клиента."
@@ -1363,11 +1375,11 @@ msgstr ""
 "Used wherever the site refers to a \"specialist\" — e.g. the booking page "
 "and profile page."
 
-#: massageProject/main_app/models.py:1240
+#: massageProject/main_app/models.py:1248
 msgid "Специалисти (мн. число)"
 msgstr "Specialists (plural)"
 
-#: massageProject/main_app/models.py:1241
+#: massageProject/main_app/models.py:1249
 msgid ""
 "Използва се навсякъде, където сайтът се обръща към \"специалисти\" — напр. "
 "страницата за резервация и профила на клиента."
@@ -1375,11 +1387,11 @@ msgstr ""
 "Used wherever the site refers to \"specialists\" — e.g. the booking page and "
 "profile page."
 
-#: massageProject/main_app/models.py:1245
+#: massageProject/main_app/models.py:1253
 msgid "Резервации активни"
 msgstr "Booking enabled"
 
-#: massageProject/main_app/models.py:1247
+#: massageProject/main_app/models.py:1255
 msgid ""
 "Когато е изключено, скрива всички бутони/линкове за резервация по целия сайт "
 "(горно меню, начална страница, страница с услуги, профил на клиента)."
@@ -1387,25 +1399,25 @@ msgstr ""
 "When unchecked, hides all booking buttons/links site-wide (header, homepage, "
 "services page, profile page)."
 
-#: massageProject/main_app/models.py:1252
+#: massageProject/main_app/models.py:1260
 msgid "Коментари активни"
 msgstr "Comments enabled"
 
-#: massageProject/main_app/models.py:1253
+#: massageProject/main_app/models.py:1261
 msgid "Когато е изключено, скрива секцията с отзиви на началната страница."
 msgstr "When unchecked, hides the reviews section on the homepage."
 
-#: massageProject/main_app/models.py:1256
+#: massageProject/main_app/models.py:1264
 msgid "Вход с Google активен"
 msgstr "Google login enabled"
 
-#: massageProject/main_app/models.py:1257
+#: massageProject/main_app/models.py:1265
 msgid "Когато е изключено, скрива опцията \"Вход с Google\" в модала за вход."
 msgstr ""
 "When unchecked, hides the \"Sign in with Google\" option in the login modal."
 
-#: massageProject/main_app/models.py:1261
-#: massageProject/main_app/models.py:1262 massageProject/settings.py:368
+#: massageProject/main_app/models.py:1269
+#: massageProject/main_app/models.py:1270 massageProject/settings.py:368
 msgid "Настройки на сайта"
 msgstr "Site Configuration"
 
@@ -1935,7 +1947,7 @@ msgstr "Upload and deliver"
 msgid "Нашата галерия"
 msgstr "Our Gallery"
 
-#: templates/pages/gallery.html:27 templates/pages/gallery_album.html:24
+#: templates/pages/gallery.html:26 templates/pages/gallery_album.html:24
 msgid "снимки"
 msgstr "photos"
 
@@ -2116,7 +2128,7 @@ msgid "СЛЕДВАЩА РЕЗЕРВАЦИЯ"
 msgstr "NEXT BOOKING"
 
 #: templates/pages/my_profile.html:76 templates/pages/my_profile.html:147
-#: templates/pages/reservation.html:38 templates/pages/services_page.html:306
+#: templates/pages/reservation.html:38 templates/pages/services_page.html:307
 #: templates/partials/featured_with_image.html:12
 #: templates/partials/featured_without_image.html:12
 #: templates/reservation/edit-reservation.html:24
@@ -2124,7 +2136,7 @@ msgid "мин"
 msgstr "min"
 
 #: templates/pages/my_profile.html:78 templates/pages/my_profile.html:147
-#: templates/pages/reservation.html:38 templates/pages/services_page.html:298
+#: templates/pages/reservation.html:38 templates/pages/services_page.html:299
 #: templates/partials/featured_with_image.html:13
 #: templates/partials/featured_without_image.html:11
 msgid "€"
@@ -2271,7 +2283,7 @@ msgid "Филтър на снимки"
 msgstr "Photo filter"
 
 #: templates/pages/photo_proofing.html:25
-#: templates/pages/services_page.html:281
+#: templates/pages/services_page.html:282
 #: templates/partials/specialist_reservations_table.html:17
 #: templates/partials/specialist_reservations_table.html:27
 #: templates/partials/specialist_reservations_table.html:36
@@ -2632,43 +2644,43 @@ msgstr "Evening"
 msgid "Изпращане..."
 msgstr "Sending..."
 
-#: templates/pages/services_page.html:265 templates/partials/header.html:30
+#: templates/pages/services_page.html:266 templates/partials/header.html:30
 #: templates/partials/header.html:124
 msgid "Начало"
 msgstr "Home"
 
-#: templates/pages/services_page.html:267
+#: templates/pages/services_page.html:268
 msgid "УСЛУГИ"
 msgstr "SERVICES"
 
-#: templates/pages/services_page.html:268
+#: templates/pages/services_page.html:269
 msgid "Всички наши услуги"
 msgstr "All our services"
 
-#: templates/pages/services_page.html:269
+#: templates/pages/services_page.html:270
 msgid ""
 "Открийте пълния списък с нашите услуги — всяка е съобразена с вашето тяло и "
 "нужди."
 msgstr ""
 "Discover our full list of services — each tailored to your body and needs."
 
-#: templates/pages/services_page.html:319
-#: templates/pages/services_page.html:321
+#: templates/pages/services_page.html:320
+#: templates/pages/services_page.html:322
 #: templates/partials/featured_with_image.html:23
 #: templates/partials/featured_with_image.html:25
 msgid "Научете повече"
 msgstr "Learn more"
 
-#: templates/pages/services_page.html:320
+#: templates/pages/services_page.html:321
 #: templates/partials/featured_with_image.html:24
 msgid "Покажи по-малко"
 msgstr "Show less"
 
-#: templates/pages/services_page.html:323
+#: templates/pages/services_page.html:324
 msgid "Резервирай"
 msgstr "Book now"
 
-#: templates/pages/services_page.html:332
+#: templates/pages/services_page.html:333
 msgid "Няма услуги в тази категория."
 msgstr "No services in this category."
 

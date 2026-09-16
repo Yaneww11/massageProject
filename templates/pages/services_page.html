@@ -11,6 +11,7 @@
     --svc-page-bg:      var(--bg-light);
     --svc-card-bg:      var(--bg-paper);
     --svc-border:       var(--border-color);
+    --svc-active-bg:    var(--active-bg-color);
     --svc-text-head:    var(--text-main);
     --svc-text-body:    var(--text-main);
     --svc-text-muted:   var(--text-muted);
@@ -83,9 +84,9 @@
   }
   .svc-tab:hover { border-color: var(--svc-primary); color: var(--svc-primary); }
   .svc-tab.is-active {
-    background: var(--svc-primary);
+    background: var(--svc-active-bg);
     border-color: var(--svc-primary);
-    color: var(--white);
+    color: var(--svc-primary);
     font-weight: 600;
   }
 
@@ -139,7 +140,7 @@
   /* ── Price badge ── */
   .svc-price-badge {
     position: absolute; top: 14px; right: 14px;
-    background: rgba(255,255,255,.96);
+    background: var(--active-bg-color);
     border-radius: var(--svc-radius-pill);
     padding: 5px 16px;
     font-family: var(--font-heading);
@@ -233,9 +234,9 @@
     color: var(--white);
   }
   .svc-btn--primary {
-    background: var(--svc-primary);
+    background: var(--svc-active-bg);
     border-color: var(--svc-primary);
-    color: var(--white);
+    color: var(--svc-primary);
   }
   .svc-btn--primary:hover {
     background: var(--svc-primary-h);

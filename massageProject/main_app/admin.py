@@ -369,7 +369,7 @@ class SiteConfigurationAdmin(ModelAdmin, TabbedTranslationAdmin):
         'primary_color', 'primary_light_color', 'secondary_color',
         'accent_color', 'background_color', 'text_color', 'text_muted_color',
         'border_color', 'surface_sunken_color', 'surface_paper_color',
-        'surface_raised_color',
+        'surface_raised_color', 'active_bg_color',
     )
 
     CONTRAST_PAIRS = (
@@ -385,7 +385,7 @@ class SiteConfigurationAdmin(ModelAdmin, TabbedTranslationAdmin):
             'primary_color', 'primary_light_color', 'secondary_color',
             'accent_color', 'background_color', 'text_color', 'text_muted_color',
             'border_color', 'surface_sunken_color', 'surface_paper_color',
-            'surface_raised_color',
+            'surface_raised_color', 'active_bg_color',
         )}),
         (_('Типография и стил'), {'fields': ('font_pair', 'style_preset', 'hero_variant')}),
         (_('Терминология'), {'fields': (
