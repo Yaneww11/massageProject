@@ -6,7 +6,7 @@ from PIL import Image as PILImage, ImageOps
 from django.core.files.base import ContentFile
 from django.db import models, transaction
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxLengthValidator, MinValueValidator, RegexValidator
+from django.core.validators import MaxLengthValidator, RegexValidator
 from django.db.models import JSONField
 from django.utils import timezone
 from django.utils.html import strip_tags
@@ -240,10 +240,10 @@ class BusinessInfo(WebPImageFieldsMixin, models.Model):
     )
     phone = models.CharField(
         max_length=50,
-        blank=True,
         help_text=_(
             'Показва се в профила на клиента и в долния колонтитул (footer) на сайта '
-            'като линк за обаждане.'
+            'като линк за обаждане. Показва се и в подканата за вход, която виждат '
+            'клиенти, записали се по телефона.'
         ),
     )
     email_address = models.EmailField(
@@ -686,6 +686,15 @@ class Gallery(models.Model):
         (TYPE_FINAL, _('Финална галерия')),
     ]
 
+    # A client session runs to a few hundred frames; a 400-slide homepage
+    # carousel or album is a mistake, not a use case.
+    IMAGE_CAPS = {
+        TYPE_HOMEPAGE: 50,
+        TYPE_ALBUM: 50,
+        TYPE_PROOFING: 400,
+        TYPE_FINAL: 400,
+    }
+
     gallery_type = models.CharField(
         max_length=20, choices=TYPE_CHOICES, default=TYPE_ALBUM,
         verbose_name=_('Тип галерия'),
@@ -708,9 +717,8 @@ class Gallery(models.Model):
     description = models.TextField(
         blank=True, verbose_name=_('Описание'),
         help_text=_(
-            'За албуми: показва се на собствената страница на албума, а за първия по ред '
-            'албум — и в плочката му на страницата с галерии. За началната страница: '
-            'показва се като заглавие на секцията с галерия.'
+            'За албуми: показва се на собствената страница на албума. За началната '
+            'страница: показва се като заглавие на секцията с галерия.'
         ),
     )
     slug = models.SlugField(
@@ -723,6 +731,16 @@ class Gallery(models.Model):
     order = models.PositiveIntegerField(
         default=0, verbose_name=_('Ред'),
         help_text=_('Определя реда, в който албумите се показват на страницата с галерии.'),
+    )
+    # SET_NULL, not CASCADE: this link outlives publishing, and Reservation is
+    # hard-deletable in admin. Cascading would take the published gallery and
+    # every image in it along with the reservation, which never used to happen.
+    draft_reservation = models.ForeignKey(
+        'Reservation', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='draft_galleries', verbose_name=_('Чернова към резервация'),
+    )
+    published_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_('Публикувана на'),
     )
 
     class Meta:
@@ -754,6 +772,14 @@ class Gallery(models.Model):
     @property
     def photo_count(self):
         return self.images.count()
+
+    @property
+    def image_cap(self):
+        return self.IMAGE_CAPS[self.gallery_type]
+
+    @property
+    def is_published(self):
+        return self.published_at is not None
 
 
 class Image(WebPImageFieldsMixin, models.Model):
@@ -796,6 +822,11 @@ class Image(WebPImageFieldsMixin, models.Model):
         max_length=255, blank=True,
         help_text=_('Използва се като алтернативен текст (alt) за тази снимка.'),
     )
+    # convert_image_field_to_webp() rewrites `image.name` to .webp and the
+    # stored size becomes the WebP size, so a resumed upload has nothing left
+    # to recognise an already-uploaded file by unless it is captured here.
+    source_name = models.CharField(max_length=255, blank=True, verbose_name=_('Име на файла при качване'))
+    source_size = models.PositiveBigIntegerField(null=True, blank=True, verbose_name=_('Размер при качване'))
     order = models.PositiveIntegerField(
         default=0, verbose_name=_('Ред'),
         help_text=_(
@@ -811,6 +842,13 @@ class Image(WebPImageFieldsMixin, models.Model):
 
     def __str__(self):
         return self.alt_text or f"Снимка {self.order}"
+
+    @property
+    def marked_thumbnail_path(self):
+        """Cached unwatermarked derivative for the photographer's Marked Photos
+        grid. Keyed by row id, so replacing or deleting the photo has to evict
+        it (see signals)."""
+        return f'marked_thumbnails/{self.pk}.webp'
 
     def clean(self):
         super().clean()
@@ -844,14 +882,6 @@ class PhotoLabel(models.Model):
             'Името на етикета, който клиентът вижда и може да прикачи към снимки при '
             'преглед на снимките от своята резервация. Показва се и на специалиста в '
             'изгледа "Маркирани снимки".'
-        ),
-    )
-    cap = models.PositiveIntegerField(
-        validators=[MinValueValidator(1)],
-        verbose_name=_('Максимален брой'),
-        help_text=_(
-            'Максимален брой снимки, които клиентът може да маркира с този етикет при '
-            'преглед на снимките от своята резервация.'
         ),
     )
     order = models.PositiveIntegerField(

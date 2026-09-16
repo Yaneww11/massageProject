@@ -1,31 +1,17 @@
-from django.core.cache import cache
-
 from massageProject.main_app.models import HomePage, BusinessInfo, SiteConfiguration
 
-HOMEPAGE_CACHE_KEY = 'homepage_singleton'
-BUSINESS_INFO_CACHE_KEY = 'business_info_singleton'
+
+def get_homepage():
+    return HomePage.get_solo()
 
 
-def get_cached_homepage():
-    homepage = cache.get(HOMEPAGE_CACHE_KEY)
-    if homepage is None:
-        homepage = HomePage.get_solo()
-        # Same 60s cross-worker-staleness bound as site_configuration below.
-        cache.set(HOMEPAGE_CACHE_KEY, homepage, 86400)
-    return homepage
-
-
-def get_cached_business_info():
-    business_info = cache.get(BUSINESS_INFO_CACHE_KEY)
-    if business_info is None:
-        business_info = BusinessInfo.objects.first()
-        cache.set(BUSINESS_INFO_CACHE_KEY, business_info, 86400)
-    return business_info
+def get_business_info():
+    return BusinessInfo.objects.first()
 
 
 def admin_branding(request):
     try:
-        homepage = get_cached_homepage()
+        homepage = get_homepage()
         brand_name = homepage.brand_name_plain
         brand_name_html = homepage.brand_name
         brand_logo = homepage.logo.url if homepage.logo else None
@@ -40,7 +26,7 @@ def admin_branding(request):
     request.brand_logo = brand_logo
 
     try:
-        business_info = get_cached_business_info()
+        business_info = get_business_info()
     except Exception:
         business_info = None
 
@@ -54,10 +40,4 @@ def admin_branding(request):
 
 
 def site_configuration(request):
-    site_config = cache.get('site_configuration')
-    if site_config is None:
-        site_config = SiteConfiguration.get_solo()
-        # 60s bound: caps cross-worker staleness in a multi-process deploy
-        # (the post_save signal only invalidates the worker that saved).
-        cache.set('site_configuration', site_config, 60)
-    return {'site_config': site_config}
+    return {'site_config': SiteConfiguration.get_solo()}

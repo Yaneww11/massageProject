@@ -1,24 +1,39 @@
 import logging
 
-from django.core.cache import cache
 from django.core.files.storage import default_storage
-from django.db.models.signals import post_save, pre_delete, pre_save
+from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from google.cloud import storage
 import sentry_sdk
 
-from massageProject.main_app.context_processors import BUSINESS_INFO_CACHE_KEY, HOMEPAGE_CACHE_KEY
-from massageProject.main_app.models import BusinessInfo, HomePage, Image, SiteConfiguration
+from massageProject.main_app.models import Image
 
 logger = logging.getLogger(__name__)
 
 
+def _delete_image_derivatives(image):
+    """Every cached derivative of one Image: the per-user watermarked proofs and
+    the photographer's Marked Photos thumbnail. Both are keyed by row id, so
+    they survive a replaced or deleted photo unless evicted here."""
+    prefix = f'proof_derivatives/{image.pk}/'
+    try:
+        _, filenames = default_storage.listdir(prefix)
+    except (FileNotFoundError, NotADirectoryError):
+        filenames = []
+    for filename in filenames:
+        default_storage.delete(prefix + filename)
+
+    thumbnail = image.marked_thumbnail_path
+    if default_storage.exists(thumbnail):
+        default_storage.delete(thumbnail)
+
+
 @receiver(pre_save, sender=Image)
 def clear_proof_derivatives_on_image_change(sender, instance, **kwargs):
-    """Photo proofing derivatives are cached per (image, user); if an admin replaces
-    the original file, stale derivatives must be cleared so they regenerate."""
+    """Derivatives are cached against the row, so replacing the original file
+    must clear them or the stale ones keep being served."""
     if not instance.pk:
         return
     try:
@@ -29,13 +44,14 @@ def clear_proof_derivatives_on_image_change(sender, instance, **kwargs):
     new_name = instance.image.name if instance.image else None
     if old_name == new_name:
         return
-    prefix = f'proof_derivatives/{instance.pk}/'
-    try:
-        _, filenames = default_storage.listdir(prefix)
-    except (FileNotFoundError, NotADirectoryError):
-        return
-    for filename in filenames:
-        default_storage.delete(prefix + filename)
+    _delete_image_derivatives(instance)
+
+
+@receiver(pre_delete, sender=Image)
+def clear_proof_derivatives_on_image_delete(sender, instance, **kwargs):
+    """Otherwise the derivatives are orphaned in the bucket forever — nothing
+    else references them once the row is gone."""
+    _delete_image_derivatives(instance)
 
 
 UserModel = get_user_model()
@@ -170,18 +186,3 @@ def get_old_file_path(instance, field_name):
             'operation': 'get_old_file_path'
         })
     return None
-
-
-@receiver(post_save, sender=SiteConfiguration)
-def invalidate_site_configuration_cache(sender, **kwargs):
-    cache.delete('site_configuration')
-
-
-@receiver(post_save, sender=HomePage)
-def invalidate_homepage_cache(sender, **kwargs):
-    cache.delete(HOMEPAGE_CACHE_KEY)
-
-
-@receiver(post_save, sender=BusinessInfo)
-def invalidate_business_info_cache(sender, **kwargs):
-    cache.delete(BUSINESS_INFO_CACHE_KEY)

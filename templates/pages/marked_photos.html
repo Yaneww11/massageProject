@@ -23,7 +23,7 @@
     <div class="marked-photos-grid">
       {% for image in marked_images %}
       <div class="marked-photo-card">
-        <img src="{% url 'marked_photo_image' reservation.pk image.pk %}" alt="{{ image.alt_text }}" class="marked-photo-thumb">
+        <img src="{% url 'marked_photo_image' reservation.pk image.pk %}" alt="{{ image.alt_text }}" class="marked-photo-thumb" loading="lazy">
         <div class="marked-photo-body">
           {% with labels=image.proof.labels.all %}
           {% if labels %}

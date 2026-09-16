@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block content %}
 <section class="profile-page">
@@ -12,7 +12,12 @@
       </div>
     </div>
 
-    <form method="post" enctype="multipart/form-data" class="gallery-upload-form">
+    {% include "partials/gallery/draft_list.html" %}
+
+    <form method="post" enctype="multipart/form-data" class="gallery-upload-form"
+          id="chunked-gallery-upload-form"
+          data-chunk-size="{{ chunk_size }}"
+          data-done-url="{% url 'profile_page' %}">
       {% csrf_token %}
 
       {% if upload_form.non_field_errors %}
@@ -35,7 +40,7 @@
 
       <div class="form-group">
         <span class="profile-eyebrow">{% trans "ЕТИКЕТИ ЗА ПРЕГЛЕД" %}</span>
-        <p class="section-subtitle">{% trans "По избор: задайте етикети (напр. „за печат“) и максималния брой снимки, които клиентът може да маркира с всеки." %}</p>
+        <p class="section-subtitle">{% trans "По избор: задайте етикети (напр. „за печат“), с които клиентът може да маркира снимки." %}</p>
         {{ label_formset.management_form }}
         {% if label_formset.non_form_errors %}
         <div class="alert alert-danger">
@@ -50,19 +55,19 @@
               {{ label_form.name }}
               {% if label_form.name.errors %}<div class="error-message">{{ label_form.name.errors }}</div>{% endif %}
             </div>
-            <div class="form-group">
-              <label class="form-label">{% trans "Максимален брой" %}</label>
-              {{ label_form.cap }}
-              {% if label_form.cap.errors %}<div class="error-message">{{ label_form.cap.errors }}</div>{% endif %}
-            </div>
             {% if label_form.non_field_errors %}<div class="error-message">{{ label_form.non_field_errors }}</div>{% endif %}
           </div>
           {% endfor %}
         </div>
       </div>
 
-      <button type="submit" class="btn-primary-profile">{% trans "Качете галерията" %}</button>
+      <p class="form-hint">{% blocktrans %}Снимките се качват на групи по {{ chunk_size }} и стават видими за клиента едва след като качването приключи.{% endblocktrans %}</p>
+
+      {% include "partials/gallery/chunked_upload_ui.html" %}
+
+      <button type="submit" class="btn-primary-profile" id="chunked-upload-submit">{% trans "Качете галерията" %}</button>
     </form>
   </div>
 </section>
+<script src="{% static 'js/chunked-gallery-upload.js' %}" defer></script>
 {% endblock %}

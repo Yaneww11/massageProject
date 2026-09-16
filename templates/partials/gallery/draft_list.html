@@ -1,0 +1,21 @@
+{% load i18n %}
+{% if drafts %}
+<div class="gallery-draft-list">
+  <span class="profile-eyebrow">{% trans "НЕЗАВЪРШЕНИ КАЧВАНИЯ" %}</span>
+  <p class="section-subtitle">{% trans "Прекъснато качване. Изберете същата резервация и същите файлове — вече качените се пропускат." %}</p>
+  <ul class="gallery-draft-items">
+    {% for draft in drafts %}
+    <li class="gallery-draft-item">
+      <span class="gallery-draft-label">
+        {{ draft.draft_reservation.date|date:"d.m.Y" }} &middot;
+        {{ draft.draft_reservation.user.get_full_name|default:draft.draft_reservation.user.phone_number }}
+        &middot; {% blocktrans count counter=draft.image_count %}{{ counter }} снимка{% plural %}{{ counter }} снимки{% endblocktrans %}
+      </span>
+      <button type="button" class="btn-outline gallery-draft-discard" data-gallery-id="{{ draft.pk }}">
+        {% trans "Изтрий черновата" %}
+      </button>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}

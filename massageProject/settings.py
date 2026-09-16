@@ -273,6 +273,12 @@ LOGIN_REDIRECT_URL = reverse_lazy('reservation_page')
 LOGOUT_REDIRECT_URL = reverse_lazy('index')
 IS_PHOTOGRAPHER_WEBSITE = env.bool('IS_PHOTOGRAPHER_WEBSITE', default=False)
 
+# Images per chunked-upload request. Conversion is single-threaded and ~1s per
+# 24MP frame, so this is the knob that keeps a request inside the gunicorn
+# timeout. Sized against a contended 2-vCPU box, not a dev machine — retune
+# there, not here.
+GALLERY_UPLOAD_CHUNK_SIZE = env.int('GALLERY_UPLOAD_CHUNK_SIZE', default=6)
+
 # Email Configuration
 EMAIL_BACKEND = env('EMAIL_BACKEND', default='massageProject.accounts.email_backend.GmailBackend')
 EMAIL_HOST = env('EMAIL_HOST', default='')

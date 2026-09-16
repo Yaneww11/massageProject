@@ -98,7 +98,8 @@ class Command(BaseCommand):
             defaults={
                 'description': 'A sanctuary of peace and relaxation. Our studio offers a wide range of therapeutic massages in a tranquil environment.',
                 'main_image': 'business/massage_studio.jpg',
-                'address': 'ul. "Tsar Ivan Asen II" 12, 1124 Sofia, Bulgaria'
+                'address': 'ul. "Tsar Ivan Asen II" 12, 1124 Sofia, Bulgaria',
+                'phone': '0888123456'
             }
         )
         if created:

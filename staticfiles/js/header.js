@@ -121,8 +121,6 @@
     if (overlay) {
         overlay.querySelectorAll('a').forEach(function (link) {
             link.addEventListener('click', function () {
-                // Auth-modal triggers stay put; they open a dialog of their own.
-                if (link.hasAttribute('data-auth-modal-trigger')) return;
                 closeOverlay();
             });
         });

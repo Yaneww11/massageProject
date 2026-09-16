@@ -8,6 +8,8 @@
     {% csrf_token %}
     <div class="cf-turnstile" id="auth-turnstile" data-sitekey="{{ turnstile_site_key }}" data-size="invisible" data-callback="authModalTurnstileCallback"></div>
 
+    <p class="auth-modal-note" id="auth-modal-note" hidden></p>
+
     <div class="auth-modal-step" data-step="email">
       <h2 class="auth-modal-title">{% trans "Влезте или се регистрирайте" %}</h2>
       <p class="auth-modal-subtitle">{% trans "Трябва да потвърдим Вашия имейл, за да продължите." %}</p>
@@ -118,6 +120,7 @@
     var choiceCodeBtn = document.getElementById('auth-choice-code');
 
     var passwordEmailLabel = document.getElementById('auth-password-email');
+    var note = document.getElementById('auth-modal-note');
     var passwordInput = document.getElementById('auth-password-input');
     var passwordError = document.getElementById('auth-password-error');
     var passwordContinueBtn = document.getElementById('auth-password-continue');
@@ -181,6 +184,8 @@
         var googleNext = document.getElementById('auth-google-next');
         if (googleNext) googleNext.value = state.next;
         state.email = '';
+        note.textContent = opts.note || '';
+        note.hidden = !opts.note;
         emailInput.value = '';
         emailError.textContent = '';
         codeDigits.forEach(function (d) { d.value = ''; });
@@ -194,6 +199,8 @@
     function close() {
         overlay.classList.remove('open');
         overlay.setAttribute('aria-hidden', 'true');
+        note.textContent = '';
+        note.hidden = true;
     }
 
     closeBtn.addEventListener('click', close);

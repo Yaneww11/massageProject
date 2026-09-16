@@ -11,6 +11,8 @@ VENV_DIR="${VENV_DIR:-$REPO_DIR/venv}"
 GUNICORN_PID_FILE="${GUNICORN_PID_FILE:-$REPO_DIR/gunicorn.pid}"
 GUNICORN_BIND="${GUNICORN_BIND:-127.0.0.1:8000}"
 GUNICORN_WORKERS="${GUNICORN_WORKERS:-2}"
+GUNICORN_THREADS="${GUNICORN_THREADS:-4}"
+GUNICORN_TIMEOUT="${GUNICORN_TIMEOUT:-60}"
 WATCHDOG_LOG="$REPO_DIR/gunicorn-watchdog.log"
 HEARTBEAT_FILE="$REPO_DIR/gunicorn-watchdog.heartbeat"
 
@@ -54,6 +56,9 @@ fi
 nohup "$VENV_DIR/bin/gunicorn" massageProject.wsgi:application \
     --bind "$GUNICORN_BIND" \
     --workers "$GUNICORN_WORKERS" \
+    --worker-class gthread \
+    --threads "$GUNICORN_THREADS" \
+    --timeout "$GUNICORN_TIMEOUT" \
     --pid "$GUNICORN_PID_FILE" \
     --daemon \
     --log-file "$REPO_DIR/gunicorn.log" \
