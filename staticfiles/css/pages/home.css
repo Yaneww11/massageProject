@@ -825,9 +825,16 @@
     .hp-svc-row { grid-template-columns: auto 1fr; }
     .hp-svc-meta { display: none; }
 
-    .hp-review-card { flex: 0 0 100%; }
-    .hp-reviews-outer { gap: 0.5rem; }
-    .hp-carousel-arrow { width: 36px; height: 36px; font-size: 1.25rem; }
+    .hp-reviews-header { margin-bottom: 2rem; }
+    .hp-review-card { flex: 0 0 100%; padding: 1.75rem 1.5rem; }
+    .hp-reviews-outer { gap: 0; }
+    .hp-carousel-arrow { display: none; }
+    .hp-stars { margin-bottom: 1rem; }
+    .hp-review-quote { margin-bottom: 1.25rem; }
+    .hp-review-divider { margin-bottom: 1.25rem; }
+    .hp-review-dots { margin-top: 1.5rem; }
+    .hp-dot { width: 10px; height: 10px; border-radius: 5px; }
+    .hp-dot.active { width: 28px; }
 
     .hp-gallery-grid {
         grid-template-columns: 1fr;
