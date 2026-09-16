@@ -25,8 +25,16 @@ A signed, time-limited, watermarked copy of an Image shown to a client during Ph
 _Avoid_: preview, thumbnail
 
 **Proofing Gallery**:
-The Gallery attached to a Reservation (`Reservation.gallery`) that the client reviews during Photo Proofing.
+The Gallery attached to a Reservation (`Reservation.gallery`) that the client reviews during Photo Proofing. A Gallery only becomes a Proofing Gallery once it has been Published; before that it is a Draft Gallery.
 _Avoid_: the gallery, reservation gallery
+
+**Draft Gallery**:
+A Gallery whose images are still being uploaded — not yet attached to its Reservation, and never seen by the client. Uploading hundreds of images takes many requests, so a Gallery exists in this state for minutes at a time, and can be abandoned and resumed. Becomes a Proofing Gallery or Final Gallery on Publishing.
+_Avoid_: unfinished gallery, pending gallery, incomplete upload
+
+**Publishing**:
+The step that ends a Draft Gallery: it attaches the Gallery to its Reservation and notifies the client. Separate from uploading, and the only thing that emails the client — so a half-uploaded gallery never announces itself.
+_Avoid_: finishing upload, completing the gallery
 
 **Final Gallery**:
 The Gallery attached to a Reservation (`Reservation.final_gallery`) holding the specialist's edited, delivered Images — created only after Finalizing, separate from the Proofing Gallery.
