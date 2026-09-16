@@ -101,7 +101,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  padding: var(--space-lg);
+  padding: var(--space-md) var(--space-lg);
 }
 
 .gal-tile__count {
@@ -125,19 +125,21 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  margin-top: var(--space-sm);
+  margin-top: 0;
+  max-height: 0;
+  overflow: hidden;
   font-family: var(--font-main);
   font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--white);
   opacity: 0;
-  transform: translateY(6px);
-  transition: opacity var(--transition), transform var(--transition);
+  transition: opacity var(--transition), max-height var(--transition), margin-top var(--transition);
 }
 
 .gal-tile:hover .gal-tile__hint {
   opacity: 1;
-  transform: translateY(0);
+  max-height: 2rem;
+  margin-top: var(--space-sm);
 }
 
 .gal-tile__hint svg {
