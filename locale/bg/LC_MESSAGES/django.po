@@ -1748,21 +1748,6 @@ msgstr ""
 msgid "Ако не сте поискали смяна на паролата, можете да игнорирате този имейл."
 msgstr ""
 
-#: templates/emails/verification_email.txt:3
-msgid ""
-"Благодарим Ви, че се регистрирахте. Моля, потвърдете имейл адреса си, като "
-"отворите следния линк:"
-msgstr ""
-
-#: templates/emails/verification_email.txt:7
-msgid ""
-"Ако не сте се регистрирали в нашия сайт, можете да игнорирате този имейл."
-msgstr ""
-
-#: templates/emails/verification_email_subject.txt:1
-msgid "Потвърдете своя имейл адрес"
-msgstr ""
-
 #: templates/pages/about.html:6
 msgid "ЗА НАС"
 msgstr "ЗА МЕН"
