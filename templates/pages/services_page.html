@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static i18n translation_extras %}
+{% load static i18n translation_extras bleach_tags %}
 
 {% block content %}
 <style>
@@ -199,12 +199,14 @@
     from { opacity: 0; transform: translateY(-5px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .svc-accordion p {
-    margin: 0;
+  .svc-desc-full {
     font-family: var(--font-main);
     font-size: 14px; color: var(--svc-text-body);
     line-height: 1.7;
   }
+  .svc-desc-full > * { margin: 0 0 0.75em; }
+  .svc-desc-full > :last-child { margin-bottom: 0; }
+  .svc-desc-full ul, .svc-desc-full ol { padding-left: 1.25em; }
 
   /* ── Card footer buttons ── */
   .svc-card__footer {
@@ -310,7 +312,7 @@
             <p class="svc-card__desc">{{ m.short_description }}</p>
 
             <div class="svc-accordion" id="acc-{{ m.pk }}">
-              <p>{{ m.description }}</p>
+              <div class="svc-desc-full">{{ m.description|bleach }}</div>
             </div>
 
             <div class="svc-card__footer">

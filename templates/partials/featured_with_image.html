@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n bleach_tags %}
 <div class="hp-feat-list">
     {% for m in services %}
     <article class="hp-feat-row hp-reveal">
@@ -13,7 +13,7 @@
                 <span class="hp-feat-price">{{ m.price }} {% trans "€" %}</span>
             </div>
             <div class="hp-feat-accordion" id="acc-{{ m.pk }}">
-                <p>{{ m.description }}</p>
+                <div class="hp-feat-desc-full">{{ m.description|bleach }}</div>
             </div>
             <div class="hp-feat-actions">
                 <button

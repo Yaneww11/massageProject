@@ -200,13 +200,17 @@
 
 .hp-svc-accordion.is-open { display: block; }
 
-.hp-svc-accordion p {
+.hp-svc-desc-full {
     margin: 0 0 1rem;
     color: var(--text-muted);
     max-width: 640px;
     font-size: 0.95rem;
     line-height: 1.6;
 }
+
+.hp-svc-desc-full > * { margin: 0 0 0.75em; }
+.hp-svc-desc-full > :last-child { margin-bottom: 0; }
+.hp-svc-desc-full ul, .hp-svc-desc-full ol { padding-left: 1.25em; }
 
 /* ================================================================
    SERVICES — featured editorial (image variant)
@@ -322,13 +326,16 @@
 
 .hp-feat-accordion.is-open { display: block; }
 
-.hp-feat-accordion p {
-    margin: 0;
+.hp-feat-desc-full {
     color: var(--text-muted);
     max-width: 420px;
     font-size: 0.95rem;
     line-height: 1.6;
 }
+
+.hp-feat-desc-full > * { margin: 0 0 0.75em; }
+.hp-feat-desc-full > :last-child { margin-bottom: 0; }
+.hp-feat-desc-full ul, .hp-feat-desc-full ol { padding-left: 1.25em; }
 
 .hp-feat-actions {
     display: flex;
