@@ -360,8 +360,8 @@
       paneImg.src = img.src;
       paneImg.alt = img.alt;
       paneImg.draggable = false;
-      paneImg.addEventListener('contextmenu', (e) => e.preventDefault());
-      paneImg.addEventListener('dragstart', (e) => e.preventDefault());
+      pane.addEventListener('contextmenu', (e) => e.preventDefault());
+      pane.addEventListener('dragstart', (e) => e.preventDefault());
       const footer = document.createElement('div');
       footer.className = 'proof-compare-pane-footer';
       footer.textContent = tile.dataset.caption;
