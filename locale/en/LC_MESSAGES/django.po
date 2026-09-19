@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-19 09:34+0000\n"
+"POT-Creation-Date: 2026-09-19 11:07+0000\n"
 "PO-Revision-Date: 2026-09-04 06:05+0000\n"
 "Last-Translator: Yane Yanev <admin@admin.com>\n"
 "Language-Team: English\n"
@@ -1973,7 +1973,7 @@ msgstr "The album has no photos yet."
 msgid "Увеличена снимка"
 msgstr "Enlarged photo"
 
-#: templates/pages/gallery_album.html:57 templates/pages/my_profile.html:277
+#: templates/pages/gallery_album.html:57 templates/pages/my_profile.html:289
 #: templates/pages/photo_proofing.html:152
 #: templates/pages/photo_proofing.html:161 templates/partials/auth_modal.html:7
 #: templates/partials/header.html:105
@@ -2010,7 +2010,7 @@ msgstr "What our clients say"
 
 #: templates/pages/home.html:62 templates/pages/home.html:64
 #: templates/pages/home.html:111 templates/pages/my_profile.html:204
-#: templates/pages/my_profile.html:278
+#: templates/pages/my_profile.html:290
 msgid "Оставете мнение"
 msgstr "Leave a review"
 
@@ -2026,7 +2026,7 @@ msgstr "Next"
 msgid "Отзив"
 msgstr "Review"
 
-#: templates/pages/home.html:115 templates/pages/my_profile.html:284
+#: templates/pages/home.html:115 templates/pages/my_profile.html:296
 msgid "Оценка"
 msgstr "Rating"
 
@@ -2238,27 +2238,39 @@ msgstr "WORKING HOURS"
 msgid "КОНТАКТИ"
 msgstr "CONTACTS"
 
-#: templates/pages/my_profile.html:263
+#: templates/pages/my_profile.html:264
+msgid "ГАЛЕРИИ"
+msgstr "GALLERIES"
+
+#: templates/pages/my_profile.html:265
+msgid "Качване на галерии"
+msgstr "Upload galleries"
+
+#: templates/pages/my_profile.html:266
+msgid "Изпратете кадри за преглед или финалните обработени снимки."
+msgstr "Send proofing shots or the final edited photos."
+
+#: templates/pages/my_profile.html:270
 msgid "Качи галерия за преглед"
 msgstr "Upload Proofing Gallery"
 
-#: templates/pages/my_profile.html:264
+#: templates/pages/my_profile.html:273
 msgid "Качи финална галерия"
 msgstr "Upload Final Gallery"
 
-#: templates/pages/my_profile.html:295
+#: templates/pages/my_profile.html:307
 msgid "Вашето мнение"
 msgstr "Your review"
 
-#: templates/pages/my_profile.html:297
+#: templates/pages/my_profile.html:309
 msgid "Споделете своите впечатления..."
 msgstr "Share your impressions..."
 
-#: templates/pages/my_profile.html:299
+#: templates/pages/my_profile.html:311
 msgid "Изпратете"
 msgstr "Submit"
 
-#: templates/pages/my_profile.html:357
+#: templates/pages/my_profile.html:369
 msgid "Грешка при изпращане."
 msgstr "An error occurred while submitting."
 

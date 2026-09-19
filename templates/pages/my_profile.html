@@ -258,10 +258,22 @@
 
     {% else %}
     {% if is_photographer_website %}
-    <div class="section-header-row">
-      <div></div>
-      <a href="{% url 'proofing_gallery_upload' %}" class="btn-primary-profile">{% trans "Качи галерия за преглед" %}</a>
-      <a href="{% url 'final_gallery_upload' %}" class="btn-outline-profile">{% trans "Качи финална галерия" %}</a>
+    <div class="gallery-upload-section">
+      <div class="section-header-row">
+        <div>
+          <span class="profile-eyebrow">{% trans "ГАЛЕРИИ" %}</span>
+          <h2 class="section-title">{% trans "Качване на галерии" %}</h2>
+          <p class="section-subtitle">{% trans "Изпратете кадри за преглед или финалните обработени снимки." %}</p>
+        </div>
+        <div class="header-actions">
+          <a href="{% url 'proofing_gallery_upload' %}" class="btn-primary-profile">
+            <i class="fas fa-images" aria-hidden="true"></i>{% trans "Качи галерия за преглед" %}
+          </a>
+          <a href="{% url 'final_gallery_upload' %}" class="btn-outline-profile">
+            <i class="fas fa-check-circle" aria-hidden="true"></i>{% trans "Качи финална галерия" %}
+          </a>
+        </div>
+      </div>
     </div>
     {% endif %}
     {% include "partials/specialist_reservations_table.html" %}

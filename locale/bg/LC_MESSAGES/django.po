@@ -5,13 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-<<<<<<< HEAD
-"POT-Creation-Date: 2026-09-16 19:37+0000\n"
-"PO-Revision-Date: 2026-09-16 19:56+0000\n"
-=======
-"POT-Creation-Date: 2026-09-19 09:34+0000\n"
+"POT-Creation-Date: 2026-09-19 11:07+0000\n"
 "PO-Revision-Date: 2026-09-04 06:03+0000\n"
->>>>>>> fe5b05960ba49766f3d60fe410064b458d04770d
 "Last-Translator: Yane Yanev <admin@admin.com>\n"
 "Language-Team: Bulgarian\n"
 "Language: bg\n"
@@ -1903,7 +1898,7 @@ msgstr "Албумът все още няма добавени снимки."
 msgid "Увеличена снимка"
 msgstr "Увеличена снимка"
 
-#: templates/pages/gallery_album.html:57 templates/pages/my_profile.html:277
+#: templates/pages/gallery_album.html:57 templates/pages/my_profile.html:289
 #: templates/pages/photo_proofing.html:152
 #: templates/pages/photo_proofing.html:161
 #: templates/partials/auth_modal.html:7 templates/partials/header.html:105
@@ -1940,7 +1935,7 @@ msgstr ""
 
 #: templates/pages/home.html:62 templates/pages/home.html:64
 #: templates/pages/home.html:111 templates/pages/my_profile.html:204
-#: templates/pages/my_profile.html:278
+#: templates/pages/my_profile.html:290
 msgid "Оставете мнение"
 msgstr "Оставете мнение"
 
@@ -1956,7 +1951,7 @@ msgstr ""
 msgid "Отзив"
 msgstr ""
 
-#: templates/pages/home.html:115 templates/pages/my_profile.html:284
+#: templates/pages/home.html:115 templates/pages/my_profile.html:296
 msgid "Оценка"
 msgstr ""
 
@@ -2169,27 +2164,39 @@ msgstr "РАБОТНО ВРЕМЕ"
 msgid "КОНТАКТИ"
 msgstr "КОНТАКТИ"
 
-#: templates/pages/my_profile.html:263
+#: templates/pages/my_profile.html:264
+msgid "ГАЛЕРИИ"
+msgstr "ГАЛЕРИИ"
+
+#: templates/pages/my_profile.html:265
+msgid "Качване на галерии"
+msgstr "Качване на галерии"
+
+#: templates/pages/my_profile.html:266
+msgid "Изпратете кадри за преглед или финалните обработени снимки."
+msgstr "Изпратете кадри за преглед или финалните обработени снимки."
+
+#: templates/pages/my_profile.html:270
 msgid "Качи галерия за преглед"
 msgstr "Качи галерия за преглед"
 
-#: templates/pages/my_profile.html:264
+#: templates/pages/my_profile.html:273
 msgid "Качи финална галерия"
 msgstr "Качи финална галерия"
 
-#: templates/pages/my_profile.html:295
+#: templates/pages/my_profile.html:307
 msgid "Вашето мнение"
 msgstr "Вашето мнение"
 
-#: templates/pages/my_profile.html:297
+#: templates/pages/my_profile.html:309
 msgid "Споделете своите впечатления..."
 msgstr "Споделете своите впечатления..."
 
-#: templates/pages/my_profile.html:299
+#: templates/pages/my_profile.html:311
 msgid "Изпратете"
 msgstr "Изпратете"
 
-#: templates/pages/my_profile.html:357
+#: templates/pages/my_profile.html:369
 msgid "Грешка при изпращане."
 msgstr "Грешка при изпращане."
 
@@ -2582,7 +2589,9 @@ msgstr "Всички наши услуги"
 msgid ""
 "Открийте пълния списък с нашите услуги — всяка е съобразена с вашето тяло и "
 "нужди."
-msgstr "[empty]"
+msgstr ""
+"Открийте пълния списък с нашите услуги — всяка е съобразена с вашето тяло и "
+"нужди."
 
 #: templates/pages/services_page.html:322
 #: templates/pages/services_page.html:324
