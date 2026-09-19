@@ -132,6 +132,14 @@ class ServiceAdmin(ModelAdmin, TabbedTranslationAdmin):
         (_('Медия и Видимост'), {'fields': ('image', 'home_page', 'group')}),
     )
 
+    RICH_TEXT_FIELDS = ('description', 'description_bg', 'description_en')
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super().formfield_for_dbfield(db_field, request, **kwargs)
+        if db_field.name in self.RICH_TEXT_FIELDS:
+            formfield.widget = WysiwygWidget()
+        return formfield
+
     def display_image(self, obj):
         if obj.image:
             return format_html('<img src="{}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;" />', obj.image.url)

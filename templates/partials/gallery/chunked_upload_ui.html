@@ -1,6 +1,6 @@
 {% load i18n %}
-{# Progress + status for the chunked uploader; the plain form submit still
-   works without JavaScript, so nothing here is required for correctness. #}
+{% comment %}Progress + status for the chunked uploader; the plain form submit still
+   works without JavaScript, so nothing here is required for correctness.{% endcomment %}
 <div class="chunked-upload-progress" id="chunked-upload-progress" hidden>
   <div class="chunked-upload-bar"><div class="chunked-upload-bar-fill" id="chunked-upload-progress-bar"></div></div>
   <p class="chunked-upload-status" id="chunked-upload-status" aria-live="polite"></p>

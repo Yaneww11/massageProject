@@ -5,12 +5,26 @@
    See docs/header-redesign-color-mapping.md
    ========================================================================== */
 
+/* Fixed, not sticky: a sticky header stays in normal flow, so the compact
+   state's 28px height drop (accent + shorter bar) resized the content above the
+   viewport and Chrome's scroll anchoring corrected scrollTop back under the
+   `y > 8` threshold — an oscillation that only settled at the very top of the
+   page. Out of flow, the document height no longer reacts to the compact state;
+   `main` holds the space instead. */
 .site-header {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 1000;
     background-color: var(--bg-paper);
     transition: transform 0.22s ease-out, box-shadow 0.22s ease-out;
+}
+
+/* Constant stand-in for the header's expanded height (4px accent + 88px bar),
+   so page content never shifts when the header compacts. */
+main {
+    padding-top: 92px;
 }
 
 /* Hidden after a downward scroll, restored on scroll-up. */
@@ -559,6 +573,11 @@
 /* --- Mobile layout -------------------------------------------------------- */
 
 @media (max-width: 940px) {
+    /* No accent and a bar that is 64px in both states. */
+    main {
+        padding-top: 64px;
+    }
+
     .site-header__accent {
         display: none;
     }

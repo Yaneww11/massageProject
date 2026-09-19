@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n bleach_tags %}
 <div class="hp-svc-list">
     {% for m in services %}
     <div class="hp-svc-row hp-reveal" data-svc-toggle="{{ m.pk }}" role="button" tabindex="0" aria-expanded="false" aria-controls="svc-acc-{{ m.pk }}">
@@ -12,7 +12,7 @@
             <span class="hp-svc-dur">{{ m.duration_in_minutes }} {% trans "мин" %}</span>
         </div>
         <div class="hp-svc-accordion" id="svc-acc-{{ m.pk }}">
-            <p>{{ m.description }}</p>
+            <div class="hp-svc-desc-full">{{ m.description|bleach }}</div>
             {% if site_config.booking_enabled %}
             <a href="{% url 'reservation_page' %}?service={{ m.pk }}" class="btn btn-primary hp-svc-book" data-auth-modal-link>{% trans "Запазете час" %}</a>
             {% endif %}
