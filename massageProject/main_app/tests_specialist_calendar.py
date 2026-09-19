@@ -117,8 +117,10 @@ class ProfilePageTemplateRenderingTest(TestCase):
     def test_client_role_renders_existing_sections_not_table(self):
         self.client.force_login(self.plain_user)
         response = self.client.get(reverse('profile_page'))
-        self.assertContains(response, 'proof-teaser-card')
+        self.assertContains(response, 'profile-stats')
         self.assertNotContains(response, 'reservations-table-section')
+        # No delivered photos to review, so the proofing teaser stays hidden.
+        self.assertNotContains(response, 'proof-teaser-card')
 
     def test_specialist_role_renders_table_not_client_sections(self):
         self.client.force_login(self.specialist_user)

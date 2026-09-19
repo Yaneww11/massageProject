@@ -135,19 +135,22 @@ class PhotoProofingGalleryContextTest(ProofingModelsBase):
         self.assertEqual(photo['comment'], '')
         self.assertEqual(response.context['labels_config'][0]['key'], self.label.pk)
 
-    def test_reservation_not_flagged_for_review_shows_empty_state(self):
+    def test_reservation_not_flagged_for_review_redirects_to_profile(self):
         self.reservation.need_client_review = False
         self.reservation.save(update_fields=['need_client_review'])
         response = self.client.get(reverse('photo_proofing'))
-        self.assertIsNone(response.context['reservation'])
-        self.assertEqual(response.context['photos'], [])
+        self.assertRedirects(response, reverse('profile_page'))
+
+    def test_gallery_without_images_redirects_to_profile(self):
+        self.image.delete()
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertRedirects(response, reverse('profile_page'))
 
     def test_finalizing_hides_reservation_from_next_visit(self):
         self.client.post(reverse('photo_proofing_mark', args=[self.image.pk]))
         self.client.post(reverse('photo_proofing_finalize'))
         response = self.client.get(reverse('photo_proofing'))
-        self.assertIsNone(response.context['reservation'])
-        self.assertEqual(response.context['photos'], [])
+        self.assertRedirects(response, reverse('profile_page'))
 
     def test_finalized_reservation_context_reflects_marks_and_labels(self):
         proof = ImageProof.objects.create(image=self.image, is_marked=True, comment='crop tighter')
@@ -164,6 +167,55 @@ class PhotoProofingGalleryContextTest(ProofingModelsBase):
         self.assertTrue(photo['is_marked'])
         self.assertEqual(photo['comment'], 'crop tighter')
         self.assertEqual(photo['label_keys'], [self.label.pk])
+
+
+class ProfileProofTeaserTest(ProofingModelsBase):
+    """The profile page only advertises photo proofing when there is
+    something to review."""
+
+    def setUp(self):
+        super().setUp()
+        self.client = Client()
+        self.client.force_login(self.user)
+
+    def test_teaser_shown_when_photos_await_review(self):
+        response = self.client.get(reverse('profile_page'))
+        self.assertContains(response, 'proof-teaser-card')
+
+    def test_teaser_hidden_when_review_is_not_requested(self):
+        self.reservation.need_client_review = False
+        self.reservation.save(update_fields=['need_client_review'])
+        response = self.client.get(reverse('profile_page'))
+        self.assertNotContains(response, 'proof-teaser-card')
+
+    def test_teaser_hidden_when_gallery_has_no_images(self):
+        self.image.delete()
+        response = self.client.get(reverse('profile_page'))
+        self.assertNotContains(response, 'proof-teaser-card')
+
+    def test_newer_empty_gallery_does_not_hide_an_older_reviewable_one(self):
+        empty_gallery = Gallery.objects.create(gallery_type=Gallery.TYPE_PROOFING)
+        Reservation.objects.create(
+            user=self.user, service=self.service, specialist=self.specialist,
+            date=self.future_monday + timedelta(days=7), time=time_cls(11, 0),
+            gallery=empty_gallery, need_client_review=True,
+        )
+        response = self.client.get(reverse('profile_page'))
+        self.assertContains(response, 'proof-teaser-card')
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertEqual(response.context['reservation'], self.reservation)
+
+    def test_teaser_hidden_after_finalizing(self):
+        self.client.post(reverse('photo_proofing_mark', args=[self.image.pk]))
+        self.client.post(reverse('photo_proofing_finalize'))
+        response = self.client.get(reverse('profile_page'))
+        self.assertNotContains(response, 'proof-teaser-card')
+
+    def test_finalizing_leaves_a_success_message_for_the_profile_page(self):
+        self.client.post(reverse('photo_proofing_mark', args=[self.image.pk]))
+        self.client.post(reverse('photo_proofing_finalize'))
+        response = self.client.get(reverse('profile_page'))
+        self.assertContains(response, 'Изборът ви е финализиран')
 
 
 class ProofingEndpointsTest(ProofingModelsBase):

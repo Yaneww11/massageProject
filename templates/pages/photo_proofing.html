@@ -447,24 +447,16 @@
   finalizeModal.addEventListener('click', (e) => { if (e.target === finalizeModal) finalizeModal.hidden = true; });
 
   finalizeConfirmBtn.addEventListener('click', () => {
-    function applyLocally() {
-      finalized = true;
-      tiles.forEach((tile) => {
-        if (isMarked(tile)) tile.classList.add('is-finalized');
-        tile.querySelector('.proof-mark-btn').disabled = true;
-        tile.querySelector('.proof-compare-btn').disabled = true;
-      });
-      finalizeModal.hidden = true;
-      finalizeOpenBtn.hidden = true;
-      refreshLabelChips();
-      refreshCounts();
-    }
+    finalizeConfirmBtn.disabled = true;
     postJson(`${LANG_PREFIX}/profile/photos/finalize/`).then(({ ok, data }) => {
       if (!ok || !data.success) {
+        finalizeConfirmBtn.disabled = false;
         window.alert((data && data.error) || "{% trans 'Възникна грешка. Опитайте отново.' %}");
         return;
       }
-      applyLocally();
+      finalizeModal.hidden = true;
+      // Proofing is closed now, so this page has nothing left to show.
+      window.location.href = `${LANG_PREFIX}/profile/`;
     });
   });
 

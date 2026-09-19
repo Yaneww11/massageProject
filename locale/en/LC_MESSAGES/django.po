@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-19 11:07+0000\n"
+"POT-Creation-Date: 2026-09-19 11:48+0000\n"
 "PO-Revision-Date: 2026-09-04 06:05+0000\n"
 "Last-Translator: Yane Yanev <admin@admin.com>\n"
 "Language-Team: English\n"
@@ -1514,7 +1514,7 @@ msgstr "No connection to the server."
 #: templates/pages/photo_proofing.html:266
 #: templates/pages/photo_proofing.html:280
 #: templates/pages/photo_proofing.html:396
-#: templates/pages/photo_proofing.html:464 templates/partials/auth_modal.html:3
+#: templates/pages/photo_proofing.html:454 templates/partials/auth_modal.html:3
 msgid "Възникна грешка. Опитайте отново."
 msgstr "An error occurred. Please try again."
 
@@ -1596,37 +1596,41 @@ msgstr ""
 msgid "Управление на резервации"
 msgstr "Reservation Management"
 
-#: massageProject/main_app/views.py:1183
+#: massageProject/main_app/views.py:1206
 msgid "Прегледът е финализиран."
 msgstr "The review has been finalized."
 
-#: massageProject/main_app/views.py:1261
+#: massageProject/main_app/views.py:1282
 msgid "Проверка на снимки"
 msgstr "Photo review"
 
-#: massageProject/main_app/views.py:1313
+#: massageProject/main_app/views.py:1334
 msgid "Бележката не може да надвишава 2000 символа."
 msgstr "The note cannot exceed 2000 characters."
 
-#: massageProject/main_app/views.py:1327
+#: massageProject/main_app/views.py:1348
 msgid "Прегледът вече е финализиран."
 msgstr "The review has already been finalized."
 
-#: massageProject/main_app/views.py:1330
+#: massageProject/main_app/views.py:1351
 msgid "Маркирайте поне една снимка."
 msgstr "Mark at least one photo."
 
-#: massageProject/main_app/views.py:1356
+#: massageProject/main_app/views.py:1353
+msgid "Изборът ви е финализиран. Благодарим ви!"
+msgstr "Your selection has been finalized. Thank you!"
+
+#: massageProject/main_app/views.py:1378
 msgid "Не можете да променяте резервация по-малко от 24 часа преди часа."
 msgstr ""
 "You cannot modify a reservation less than 24 hours before the appointment."
 
-#: massageProject/main_app/views.py:1384
+#: massageProject/main_app/views.py:1406
 msgid "Не можете да отменяте резервация по-малко от 24 часа преди часа."
 msgstr ""
 "You cannot cancel a reservation less than 24 hours before the appointment."
 
-#: massageProject/main_app/views.py:1393
+#: massageProject/main_app/views.py:1415
 msgid "Резервацията беше отменена успешно."
 msgstr "The reservation was successfully cancelled."
 
