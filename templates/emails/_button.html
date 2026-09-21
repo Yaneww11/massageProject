@@ -1,0 +1,8 @@
+{% comment %}Table-wrapped so Outlook, which ignores padding on inline anchors, still renders a full-size button. Expects `url` and `label`.{% endcomment %}
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 8px;">
+  <tr>
+    <td align="center" bgcolor="{{ site_config.background_color|default:'#0A0A0B' }}" style="border-radius:4px;">
+      <a href="{{ url }}" style="display:inline-block; padding:14px 30px; font-family:Arial, Helvetica, sans-serif; font-size:15px; font-weight:bold; line-height:1; color:{{ site_config.primary_color|default:'#EDEAE4' }}; text-decoration:none; border-radius:4px;">{{ label }}</a>
+    </td>
+  </tr>
+</table>

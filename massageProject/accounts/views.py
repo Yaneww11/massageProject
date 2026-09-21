@@ -1,7 +1,12 @@
+from django.conf import settings
+from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.views import PasswordResetView
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
+
+from massageProject.main_app.email_context import email_branding, site_language
 
 
 class AuthEntryView(TemplateView):
@@ -21,6 +26,25 @@ class AuthEntryView(TemplateView):
         return context
 
 
+class BrandedPasswordResetForm(PasswordResetForm):
+    """Django's PasswordResetForm builds its own message with no reply_to
+    hook, so the site's configured reply address can only be applied by
+    rebuilding the message here."""
+
+    def send_mail(self, subject_template_name, email_template_name, context,
+                  from_email, to_email, html_email_template_name=None):
+        subject = ''.join(render_to_string(subject_template_name, context).splitlines())
+        body = render_to_string(email_template_name, context)
+
+        site_config = context.get('site_config')
+        reply_to = [site_config.email_reply_to] if site_config and site_config.email_reply_to else None
+
+        message = EmailMultiAlternatives(subject, body, from_email, [to_email], reply_to=reply_to)
+        if html_email_template_name is not None:
+            message.attach_alternative(render_to_string(html_email_template_name, context), 'text/html')
+        message.send()
+
+
 class BrandedPasswordResetView(PasswordResetView):
     template_name = 'registration/password_reset_form.html'
     email_template_name = 'emails/password_reset_email.txt'
@@ -28,25 +52,22 @@ class BrandedPasswordResetView(PasswordResetView):
     subject_template_name = 'emails/password_reset_subject.txt'
     success_url = reverse_lazy('password_reset_done')
 
+    form_class = BrandedPasswordResetForm
+
     @property
     def from_email(self):
         from email.utils import formataddr
 
-        from django.conf import settings
-        from massageProject.main_app.models import HomePage
-
-        homepage = HomePage.get_solo()
-        brand_name = homepage.brand_name_plain if homepage else _('Relax & Health')
-        return formataddr((str(brand_name), settings.DEFAULT_FROM_EMAIL))
+        return formataddr((str(email_branding()['brand_name']), settings.DEFAULT_FROM_EMAIL))
 
     @property
     def extra_email_context(self):
-        from massageProject.main_app.models import HomePage, BusinessInfo
+        return email_branding()
 
-        homepage = HomePage.get_solo()
-        business_info = BusinessInfo.objects.first()
-
-        return {
-            'brand_name': homepage.brand_name_plain if homepage else _('Relax & Health'),
-            'business_info': business_info,
-        }
+    def form_valid(self, form):
+        """Django builds and sends this email inside form.save(), so the
+        language override has to wrap the whole call -- otherwise the subject,
+        bodies and reset link follow the browsing visitor's language rather
+        than the site's."""
+        with site_language():
+            return super().form_valid(form)

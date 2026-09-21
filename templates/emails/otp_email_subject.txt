@@ -1,1 +1,1 @@
-{% load i18n %}{% trans "Ваш код за потвърждение" %}
+{% load i18n %}{% blocktrans %}{{ code }} е вашият код за вход{% endblocktrans %}

@@ -1,3 +1,4 @@
+import html
 import os
 import re
 from io import BytesIO
@@ -1065,7 +1066,7 @@ class HomePage(WebPImageFieldsMixin, models.Model):
     @property
     def brand_name_plain(self):
         text = re.sub(r'<(?:br|/p|/div|/h[1-6]|/li)[^>]*>', ' ', self.brand_name or '')
-        return ' '.join(strip_tags(text).split())
+        return ' '.join(html.unescape(strip_tags(text)).split())
 
     def __str__(self):
         return self.brand_name_plain
@@ -1289,6 +1290,33 @@ class SiteConfiguration(models.Model):
         help_text=_(
             'Фон на активния таб за филтриране по категория и на основния бутон '
             '"Резервирай" в страницата с услуги.'
+        ),
+    )
+
+    email_logo = models.ImageField(
+        upload_to='branding/', null=True, blank=True,
+        verbose_name=_('Лого за имейлите'),
+        help_text=_(
+            'Показва се в горната част на всички имейли до клиентите (код за вход, '
+            'смяна на паролата, готова галерия, финални снимки). Ако е празно, вместо '
+            'лого се изписва името на сайта. Препоръчителна ширина до 320px.'
+        ),
+    )
+    email_reply_to = models.EmailField(
+        blank=True,
+        verbose_name=_('Имейл за отговори'),
+        help_text=_(
+            'Адресът, на който пристигат отговорите, когато клиент натисне "Отговор" '
+            'на имейл от сайта. Ако е празно, отговорите отиват на адреса, от който '
+            'се изпращат имейлите.'
+        ),
+    )
+    email_signature = models.CharField(
+        max_length=200, blank=True,
+        verbose_name=_('Подпис в имейлите'),
+        help_text=_(
+            'Кратък завършващ ред, който се показва след основния текст на всички '
+            'имейли до клиентите — например "С поздрави, екипът на студиото".'
         ),
     )
 

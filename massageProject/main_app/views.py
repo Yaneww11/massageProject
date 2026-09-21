@@ -436,7 +436,7 @@ class GalleryUploadBaseView(PhotographerModeMixin, LoginRequiredMixin, TemplateV
             qs = qs.filter(specialist=self.specialist)
         return qs.order_by('-date', '-time')
 
-    def _send_client_email(self, request, reservation):
+    def _send_client_email(self, reservation):
         raise NotImplementedError
 
     def _success_message(self, count):
@@ -662,7 +662,7 @@ class GalleryUploadBaseView(PhotographerModeMixin, LoginRequiredMixin, TemplateV
 
         gallery.published_at = timezone.now()
         gallery.save(update_fields=['published_at'])
-        return None, self._send_client_email(request, reservation)
+        return None, self._send_client_email(reservation)
 
     def _step_publish(self, request):
         gallery = self._get_draft(request.POST.get('gallery_id'), allow_published=True)
@@ -758,8 +758,8 @@ class ProofingGalleryUploadView(GalleryUploadBaseView):
     def _eligible_reservations(self):
         return Reservation.objects.filter(gallery__isnull=True)
 
-    def _send_client_email(self, request, reservation):
-        return send_gallery_ready_email(request, reservation)
+    def _send_client_email(self, reservation):
+        return send_gallery_ready_email(reservation)
 
     def _success_message(self, count):
         return _('Галерията е качена успешно (%(count)d снимки).') % {'count': count}
@@ -891,8 +891,8 @@ class FinalGalleryUploadView(GalleryUploadBaseView):
             proofing_finalized_at__isnull=False, final_gallery__isnull=True,
         )
 
-    def _send_client_email(self, request, reservation):
-        return send_final_delivery_email(request, reservation)
+    def _send_client_email(self, reservation):
+        return send_final_delivery_email(reservation)
 
     def _success_message(self, count):
         return _(
@@ -1352,7 +1352,7 @@ def finalize_photo_proofing(request):
     reservation.finalize_proofing()
     messages.success(request, _('Изборът ви е финализиран. Благодарим ви!'))
     if settings.IS_PHOTOGRAPHER_WEBSITE:
-        send_marks_finalized_email(request, reservation)
+        send_marks_finalized_email(reservation)
     # The unmarked photos are not purged here: that is ~4 storage round trips
     # per image, which on a full gallery outlasts the worker timeout. The
     # reservation is left purge-pending (proofs_purged_at NULL) and the
