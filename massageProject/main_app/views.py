@@ -1353,6 +1353,10 @@ def finalize_photo_proofing(request):
     messages.success(request, _('Изборът ви е финализиран. Благодарим ви!'))
     if settings.IS_PHOTOGRAPHER_WEBSITE:
         send_marks_finalized_email(request, reservation)
+    # The unmarked photos are not purged here: that is ~4 storage round trips
+    # per image, which on a full gallery outlasts the worker timeout. The
+    # reservation is left purge-pending (proofs_purged_at NULL) and the
+    # purge_unmarked_proofs management command clears it from cron.
     return JsonResponse({'success': True})
 
 

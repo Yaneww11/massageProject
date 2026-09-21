@@ -5,7 +5,7 @@ from io import BytesIO
 from PIL import Image as PILImage, ImageOps
 from django.core.files.base import ContentFile
 from django.db import models, transaction
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import MaxLengthValidator, RegexValidator
 from django.db.models import JSONField
 from django.utils import timezone
@@ -433,6 +433,11 @@ class Reservation(models.Model):
             'като заключена за преглед.'
         ),
     )
+    # Audit/internal: NULL means the unmarked proofs are still waiting for the
+    # purge_unmarked_proofs command. Backfilled to proofing_finalized_at for
+    # reservations that were already finalised when the purge was introduced,
+    # so the command never sweeps that backlog.
+    proofs_purged_at = models.DateTimeField(null=True, blank=True)
     # Custom Managers
     class ReservationQuerySet(models.QuerySet):
         def active(self):
@@ -588,6 +593,38 @@ class Reservation(models.Model):
         self.need_client_review = True
         self.save(update_fields=['proofing_finalized_at', 'need_client_review'])
 
+    def _unmarked_proofs(self):
+        if not self.gallery_id:
+            return Image.objects.none()
+        return Image.objects.filter(gallery_id=self.gallery_id).exclude(proof__is_marked=True)
+
+    def unmarked_proof_count(self):
+        return self._unmarked_proofs().count()
+
+    def purge_unmarked_proofs(self):
+        """Drop the frames the client did not keep, so the reservation's bucket
+        folder is left holding only their choice. Deleting the rows is what
+        clears storage: the pre_delete receivers in signals.py remove each
+        original and its cached derivatives. Idempotent — a second run finds
+        nothing left to delete. Returns the number of rows removed.
+
+        Note this is one-way: unlock_proofing() still reopens the review, but
+        only over the photos that survived.
+        """
+        unmarked = self._unmarked_proofs()
+        _total, per_model = unmarked.delete()
+        deleted = per_model.get(Image._meta.label, 0)
+        # .update(), not save(): save() runs full_clean(), and clean()'s
+        # working-hours and overlap checks are not transition-gated, so an
+        # active reservation whose specialist's hours have since changed would
+        # raise here — after the rows are already gone. That leaves the stamp
+        # NULL and the cron command retrying a finished purge every hour,
+        # forever. This column is audit-only and needs no validation.
+        purged_at = timezone.now()
+        Reservation.all_objects.filter(pk=self.pk).update(proofs_purged_at=purged_at)
+        self.proofs_purged_at = purged_at
+        return deleted
+
     @property
     def is_finals_delivered(self):
         return self.finals_delivered_at is not None
@@ -687,6 +724,14 @@ class Gallery(models.Model):
         (TYPE_FINAL, _('Финална галерия')),
     ]
 
+    # The per-reservation bucket folder each gallery type is filed under.
+    # Types absent from here have no reservation of their own and stay on the
+    # shared `gallery/photos/` path.
+    RESERVATION_SUBFOLDERS = {
+        TYPE_PROOFING: 'proofing',
+        TYPE_FINAL: 'final',
+    }
+
     # A client session runs to a few hundred frames; a 400-slide homepage
     # carousel or album is a mistake, not a use case.
     IMAGE_CAPS = {
@@ -767,6 +812,19 @@ class Gallery(models.Model):
         return self.title or f"{_('Галерия')} {self.id}"
 
     @property
+    def reservation_id(self):
+        """The reservation this gallery belongs to, published link first and the
+        draft link as the fallback — an upload happens while the gallery is
+        still a draft, before either `Reservation.gallery` or
+        `Reservation.final_gallery` points at it."""
+        for link in ('reservations', 'final_gallery_reservation'):
+            try:
+                return getattr(self, link).pk
+            except ObjectDoesNotExist:
+                continue
+        return self.draft_reservation_id
+
+    @property
     def cover(self):
         return self.images.order_by('order').first()
 
@@ -781,6 +839,23 @@ class Gallery(models.Model):
     @property
     def is_published(self):
         return self.published_at is not None
+
+
+def gallery_image_upload_to(instance, filename):
+    """Reservation galleries get a folder of their own, so the photographer can
+    see one client's shoot as one folder in the bucket — and so that folder
+    holds nothing but the frames the client kept once the unmarked ones are
+    purged at finalisation. Everything else (homepage, albums) stays on the
+    shared path it has always used.
+
+    Runs on the very first save, when `instance.pk` is still None, so the key
+    can only be derived from the gallery — which is always assigned by then.
+    """
+    subfolder = Gallery.RESERVATION_SUBFOLDERS.get(instance.gallery.gallery_type)
+    reservation_id = instance.gallery.reservation_id if subfolder else None
+    if reservation_id is None:
+        return f'gallery/photos/{filename}'
+    return f'reservations/{reservation_id}/{subfolder}/{filename}'
 
 
 class Image(WebPImageFieldsMixin, models.Model):
@@ -801,7 +876,7 @@ class Image(WebPImageFieldsMixin, models.Model):
         verbose_name=_('Галерия'),
     )
     image = models.ImageField(
-        upload_to='gallery/photos/',
+        upload_to=gallery_image_upload_to,
         help_text=_(
             'Показва се в секцията с галерия на началната страница, или на страницата на '
             'албума (и като корична снимка на албума на страницата с галерии, ако е '
