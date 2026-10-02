@@ -288,6 +288,10 @@ EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='webmaster@localhost')
 
+# Absolute base URL used to build links inside emails, which are rendered
+# outside of any request/response cycle.
+SITE_URL = env('SITE_URL', default='http://localhost:8000').rstrip('/')
+
 GMAIL_API_CLIENT_ID = env('GMAIL_API_CLIENT_ID', default='')
 GMAIL_API_CLIENT_SECRET = env('GMAIL_API_CLIENT_SECRET', default='')
 GMAIL_API_REFRESH_TOKEN = env('GMAIL_API_REFRESH_TOKEN', default='')

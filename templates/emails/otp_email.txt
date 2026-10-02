@@ -5,3 +5,11 @@
 
 {% trans "Кодът е валиден 10 минути." %}
 {% trans "Ако не сте поискали този код, можете да игнорирате този имейл." %}
+{% autoescape off %}{% if site_config.email_signature %}
+{{ site_config.email_signature }}
+{% endif %}
+--
+{{ brand_name }}{% if business_info.address %}
+{{ business_info.address }}{% endif %}{% if business_info.phone %}
+{{ business_info.phone }}{% endif %}{% if business_info.email_address %}
+{{ business_info.email_address }}{% endif %}{% endautoescape %}

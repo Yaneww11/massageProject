@@ -401,6 +401,7 @@ class SiteConfigurationAdmin(ModelAdmin, TabbedTranslationAdmin):
             'specialist_singular', 'specialist_plural',
         )}),
         (_('Функционалности'), {'fields': ('booking_enabled', 'comments_enabled', 'google_login_enabled')}),
+        (_('Имейли'), {'fields': ('email_logo', 'email_reply_to', 'email_signature')}),
     )
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):

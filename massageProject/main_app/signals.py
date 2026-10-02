@@ -3,9 +3,7 @@ import logging
 from django.core.files.storage import default_storage
 from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
-from django.conf import settings
 from django.contrib.auth import get_user_model
-from google.cloud import storage
 import sentry_sdk
 
 from massageProject.main_app.models import Image
@@ -25,9 +23,9 @@ def _delete_image_derivatives(image):
     for filename in filenames:
         default_storage.delete(prefix + filename)
 
-    thumbnail = image.marked_thumbnail_path
-    if default_storage.exists(thumbnail):
-        default_storage.delete(thumbnail)
+    # No exists() guard: delete() on a missing key is a no-op on both backends,
+    # and the extra round trip is paid once per image in a few-hundred-image purge.
+    default_storage.delete(image.marked_thumbnail_path)
 
 
 @receiver(pre_save, sender=Image)
@@ -126,43 +124,24 @@ def delete_image_on_model_delete(sender, instance, **kwargs):
 
 def delete_file_from_gcs(file_path):
     """
-    Delete a file from Google Cloud Storage
-    """
-    if not file_path:
-        return
+    Delete a stored file through the configured storage backend.
 
-    if not hasattr(settings, 'GS_BUCKET_NAME') or not settings.GS_BUCKET_NAME:
+    Goes through `default_storage` rather than a hand-rolled GCS client: that is
+    one request instead of an exists()+delete() pair on a client rebuilt per
+    file, and it reuses the backend's connection. Purging a finalised proofing
+    gallery runs this a few hundred times in a row, which the old path could
+    not do inside a request.
+    """
+    if not file_path or not file_path.strip():
         return
 
     try:
-        # Initialize GCS client
-        client = storage.Client(credentials=settings.GS_CREDENTIALS, project=settings.GS_CREDENTIALS.project_id)
-        bucket = client.bucket(settings.GS_BUCKET_NAME)
-
-        # Remove the media URL prefix if present
-        if file_path.startswith(settings.MEDIA_URL):
-            file_path = file_path[len(settings.MEDIA_URL):]
-
-        # Remove leading slash if present
-        if file_path.startswith('/'):
-            file_path = file_path[1:]
-
-        # Skip if file_path is empty after cleaning
-        if not file_path.strip():
-            return
-
-        # Get the blob and delete it
-        blob = bucket.blob(file_path)
-        if blob.exists():
-            blob.delete()
-        else:
-            pass
-
+        default_storage.delete(file_path)
     except Exception as e:
+        logger.warning('Could not delete stored file %s', file_path, exc_info=True)
         sentry_sdk.capture_exception(e, extra={
             'file_path': file_path,
             'operation': 'delete_file_from_gcs',
-            'bucket_name': getattr(settings, 'GS_BUCKET_NAME', 'unknown')
         })
 
 

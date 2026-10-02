@@ -2,3 +2,11 @@
 
 {% trans "Финалните, обработени снимки от вашата сесия са готови. Изтеглете ги от следния защитен линк:" %}
 {{ download_url }}
+{% autoescape off %}{% if site_config.email_signature %}
+{{ site_config.email_signature }}
+{% endif %}
+--
+{{ brand_name }}{% if business_info.address %}
+{{ business_info.address }}{% endif %}{% if business_info.phone %}
+{{ business_info.phone }}{% endif %}{% if business_info.email_address %}
+{{ business_info.email_address }}{% endif %}{% endautoescape %}

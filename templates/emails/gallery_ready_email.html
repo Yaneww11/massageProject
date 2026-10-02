@@ -1,10 +1,8 @@
 {% extends "emails/base_email.html" %}
 {% load i18n %}
-{% block subject %}{% trans "Вашата галерия за преглед е готова" %}{% endblock %}
+{% block subject %}{% trans "Снимките ви са готови за преглед" %}{% endblock %}
 {% block content %}
-<h1 style="font-family:'Playfair Display', Georgia, serif; font-size:22px; color:#4A3728; margin:0 0 16px;">{% blocktrans %}Здравейте, {{ client_name }}{% endblocktrans %}</h1>
-<p style="font-size:15px; line-height:1.6; margin:0 0 24px;">{% trans "Вашите снимки от сесията са готови за преглед. Маркирайте любимите си кадри, прикачете етикети и оставете бележки." %}</p>
-<p style="text-align:center; margin:0 0 24px;">
-  <a href="{{ review_url }}" style="display:inline-block; background-color:#4A3728; color:#FFFFFF; text-decoration:none; font-size:15px; font-weight:600; padding:14px 28px; border-radius:8px;">{% trans "Прегледайте снимките си" %}</a>
-</p>
+<h1 style="font-family:Georgia, 'Times New Roman', serif; font-size:21px; line-height:1.35; font-weight:normal; color:#1A1A1A; margin:0 0 18px;">{% blocktrans %}Здравейте, {{ client_name }}{% endblocktrans %}</h1>
+<p style="font-family:Arial, Helvetica, sans-serif; font-size:15px; line-height:1.65; color:#33332F; margin:0 0 26px;">{% trans "Вашите снимки от сесията са готови за преглед. Маркирайте любимите си кадри, прикачете етикети и оставете бележки." %}</p>
+{% include "emails/_button.html" with url=review_url label=_("Прегледайте снимките си") %}
 {% endblock %}
