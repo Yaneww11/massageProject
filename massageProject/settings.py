@@ -354,7 +354,7 @@ UNFOLD = {
                         "link": reverse_lazy("admin:main_app_service_changelist"),
                     },
                     {
-                        "title": _("Терапевти"),
+                        "title": _("Служители"),
                         "icon": "person",
                         "link": reverse_lazy("admin:main_app_specialist_changelist"),
                     },
@@ -364,7 +364,7 @@ UNFOLD = {
                         "link": reverse_lazy("admin:main_app_workinghours_changelist"),
                     },
                     {
-                        "title": _("Обекти"),
+                        "title": _("За мен"),
                         "icon": "location_on",
                         "link": reverse_lazy("admin:main_app_businessinfo_changelist"),
                     },

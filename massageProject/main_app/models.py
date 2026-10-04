@@ -142,8 +142,8 @@ class Service(WebPImageFieldsMixin, models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = _('Масаж')
-        verbose_name_plural = _('Масажи')
+        verbose_name = _('Услуга')
+        verbose_name_plural = _('Услуги')
 
     def clean(self):
         if self.home_page:

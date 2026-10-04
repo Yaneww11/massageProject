@@ -120,7 +120,7 @@ class ServiceGroupAdmin(ModelAdmin, TabbedTranslationAdmin):
 
 @admin.register(Service)
 class ServiceAdmin(ModelAdmin, TabbedTranslationAdmin):
-    list_display = ('name', 'price', 'duration_in_minutes', 'home_page', 'group')
+    list_display = ('name', 'price', 'duration_in_minutes', 'home_page', 'group', 'updated_at')
     search_fields = ('name', 'short_description')
     list_filter = ('home_page', 'group', 'price', 'duration_in_minutes')
     list_editable = ('price', 'duration_in_minutes', 'home_page')
@@ -129,7 +129,7 @@ class ServiceAdmin(ModelAdmin, TabbedTranslationAdmin):
     fieldsets = (
         (_('Основна информация'), {'fields': ('name', 'short_description', 'description')}),
         (_('Цена и Продължителност'), {'fields': ('price', 'duration_in_minutes')}),
-        (_('Медия и Видимост'), {'fields': ('image', 'home_page', 'group')}),
+        (_('Медия и Видимост'), {'fields': ('image', 'home_page', 'group', 'updated_at')}),
     )
 
     RICH_TEXT_FIELDS = ('description', 'description_bg', 'description_en')
