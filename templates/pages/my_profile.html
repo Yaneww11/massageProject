@@ -7,18 +7,20 @@
   <div class="profile-container">
 
     <!-- Hero -->
-    <div class="profile-hero">
-      <div class="profile-avatar">
-        {% if user.first_name and user.last_name %}
-          {{ user.first_name.0|upper }}{{ user.last_name.0|upper }}
-        {% endif %}
-      </div>
-      <div class="profile-hero-text">
-        <span class="profile-eyebrow">{% trans "МОИТЕ ЧАСОВЕ" %}</span>
-        <h1 class="profile-greeting">{% trans "Здравейте," %} {{ user.first_name }}</h1>
-        <p class="profile-subtitle">{% trans "Преглеждайте, променяйте или отменяйте своите часове на едно място." %}</p>
-      </div>
-    </div>
+    {% if role == "client" %}
+        <div class="profile-hero">
+          <div class="profile-avatar">
+            {% if user.first_name and user.last_name %}
+              {{ user.first_name.0|upper }}{{ user.last_name.0|upper }}
+            {% endif %}
+          </div>
+          <div class="profile-hero-text">
+            <span class="profile-eyebrow">{% trans "МОИТЕ ЧАСОВЕ" %}</span>
+            <h1 class="profile-greeting">{% trans "Здравейте," %} {{ user.first_name }}</h1>
+            <p class="profile-subtitle">{% trans "Преглеждайте, променяйте или отменяйте своите часове на едно място." %}</p>
+          </div>
+        </div>
+    {% endif %}
 
     {% if role == 'client' %}
     <!-- Photo proofing entry point -->
