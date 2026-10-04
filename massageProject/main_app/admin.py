@@ -125,6 +125,7 @@ class ServiceAdmin(ModelAdmin, TabbedTranslationAdmin):
     list_filter = ('home_page', 'group', 'price', 'duration_in_minutes')
     list_editable = ('price', 'duration_in_minutes', 'home_page')
     list_filter_sheet = True
+    readonly_fields = ('updated_at',)
 
     fieldsets = (
         (_('Основна информация'), {'fields': ('name', 'short_description', 'description')}),
