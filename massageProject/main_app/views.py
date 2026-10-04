@@ -756,7 +756,7 @@ class ProofingGalleryUploadView(GalleryUploadBaseView):
     uses_labels = True
 
     def _eligible_reservations(self):
-        return Reservation.objects.filter(gallery__isnull=True)
+        return Reservation.objects.filter(gallery__isnull=True, date__lte=timezone.localdate())
 
     def _send_client_email(self, reservation):
         return send_gallery_ready_email(reservation)

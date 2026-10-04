@@ -631,6 +631,10 @@ class Reservation(models.Model):
         return self.finals_delivered_at is not None
 
     @property
+    def is_future_date(self):
+        return self.date > timezone.localdate()
+
+    @property
     def phase(self):
         """Derived, not-stored photo-workflow stage, highest priority first.
         Falls through to the plain booking status once no photo workflow has

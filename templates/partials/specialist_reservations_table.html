@@ -88,7 +88,7 @@
           </td>
           {% if is_photographer_website %}
           <td class="action-cell" data-label="">
-            {% if not r.gallery_id %}
+            {% if not r.gallery_id and not r.is_future_date %}
             <a href="{% url 'proofing_gallery_upload' %}?reservation_id={{ r.pk }}" class="btn-action-edit">{% trans "Качи галерия" %}</a>
             {% endif %}
             {% if r.proofing_finalized_at %}

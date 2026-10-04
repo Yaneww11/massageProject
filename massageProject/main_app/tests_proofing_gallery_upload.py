@@ -186,3 +186,32 @@ class ProofingGalleryUploadViewTest(TestCase):
         active_reservation.refresh_from_db()
         self.assertIsNone(active_reservation.gallery_id)
         self.assertEqual(Gallery.objects.filter(gallery_type=Gallery.TYPE_PROOFING).count(), 0)
+
+    def _make_reservation_future(self):
+        # update() bypasses Reservation.clean(), which would demand working hours.
+        Reservation.objects.filter(pk=self.reservation.pk).update(
+            date=timezone.localdate() + timedelta(days=1),
+        )
+        self.reservation.refresh_from_db()
+
+    def test_future_reservation_is_not_offered_in_upload_form(self):
+        self._make_reservation_future()
+        self.client.force_login(self.specialist_user)
+        response = self.client.get(self.url)
+        self.assertNotIn(self.reservation, response.context['upload_form'].fields['reservation'].queryset)
+
+    def test_future_reservation_upload_is_rejected(self):
+        self._make_reservation_future()
+        self.client.force_login(self.specialist_user)
+        response = self._post(self.reservation, [_make_uploaded_image('a.jpg')])
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context['upload_form'].is_valid())
+        self.reservation.refresh_from_db()
+        self.assertIsNone(self.reservation.gallery_id)
+
+    def test_profile_table_hides_upload_button_for_future_reservation(self):
+        self._make_reservation_future()
+        self.client.force_login(self.staff_user)
+        response = self.client.get(reverse('profile_page'))
+        self.assertNotContains(response, f'?reservation_id={self.reservation.pk}')
+        self.assertContains(response, f'?reservation_id={self.other_reservation.pk}')
