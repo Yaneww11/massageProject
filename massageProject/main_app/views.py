@@ -126,7 +126,7 @@ class Index(TemplateView):
         context = self.get_context_data(**kwargs)
         context['is_photographer_website'] = settings.IS_PHOTOGRAPHER_WEBSITE
         context['page'] = get_homepage()
-        services = list(Service.objects.filter(home_page=True)[:3])
+        services = list(Service.objects.filter(home_page=True).order_by('-updated_at')[:3])
         context['services'] = services
         context['featured_has_images'] = bool(services) and all(m.image for m in services)
         gallery = context['page'].gallery if context['page'] else None

@@ -139,6 +139,7 @@ class Service(WebPImageFieldsMixin, models.Model):
         verbose_name=_('Група'),
         help_text=_('Определя под кой таб-категория е класирана услугата на страницата с услуги.'),
     )
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = _('Масаж')
