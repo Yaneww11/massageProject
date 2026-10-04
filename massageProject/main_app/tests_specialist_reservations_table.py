@@ -304,3 +304,63 @@ class PhaseQueryModelTest(TestCase):
                         other_reservation.pk, matched_pks,
                         f'phase_query({phase_value!r}) wrongly matched a {other_phase!r} reservation',
                     )
+
+
+@override_settings(IS_PHOTOGRAPHER_WEBSITE=True)
+class TableFinalsDeliveredHiddenByDefaultTest(SpecialistReservationsTableTestBase):
+    def setUp(self):
+        super().setUp()
+        self.delivered = self._make_reservation(
+            self.specialist, self.client_maria, self.service_a, self.past_monday, time_cls(9, 0),
+            gallery=Gallery.objects.create(gallery_type=Gallery.TYPE_PROOFING),
+            proofing_finalized_at=timezone.now(),
+            final_gallery=Gallery.objects.create(gallery_type=Gallery.TYPE_FINAL),
+            finals_delivered_at=timezone.now(),
+        )
+        self.finals_ready = self._make_reservation(
+            self.specialist, self.client_georgi, self.service_a, self.past_monday, time_cls(10, 0),
+            gallery=Gallery.objects.create(gallery_type=Gallery.TYPE_PROOFING),
+            proofing_finalized_at=timezone.now(),
+            final_gallery=Gallery.objects.create(gallery_type=Gallery.TYPE_FINAL),
+        )
+
+    def test_specialist_table_hides_delivered_by_default(self):
+        self.client.force_login(self.specialist_user)
+        reservations = self.client.get(reverse('profile_page')).context['reservations']
+        self.assertNotIn(self.delivered, reservations)
+        self.assertIn(self.finals_ready, reservations)
+
+    def test_staff_table_hides_delivered_by_default(self):
+        self.client.force_login(self.staff_user)
+        reservations = self.client.get(reverse('profile_page')).context['reservations']
+        self.assertNotIn(self.delivered, reservations)
+        self.assertIn(self.finals_ready, reservations)
+
+    def test_delivered_phase_filter_shows_them(self):
+        self.client.force_login(self.specialist_user)
+        response = self.client.get(
+            reverse('profile_page'), {'phase': Reservation.PHASE_FINALS_DELIVERED},
+        )
+        self.assertEqual(list(response.context['reservations']), [self.delivered])
+        # The filter is the only way back to them, so the option must be offered.
+        self.assertIn(
+            Reservation.PHASE_FINALS_DELIVERED,
+            {value for value, _label in response.context['phase_choices']},
+        )
+
+    def test_delivered_stays_hidden_under_other_filters(self):
+        self.client.force_login(self.specialist_user)
+        response = self.client.get(reverse('profile_page'), {'q': 'Maria'})
+        self.assertNotIn(self.delivered, response.context['reservations'])
+
+    def test_invalid_phase_falls_back_to_default_hiding(self):
+        self.client.force_login(self.specialist_user)
+        response = self.client.get(reverse('profile_page'), {'phase': 'nonsense'})
+        self.assertEqual(response.context['selected_phase'], '')
+        self.assertNotIn(self.delivered, response.context['reservations'])
+
+    @override_settings(IS_PHOTOGRAPHER_WEBSITE=False)
+    def test_non_photographer_site_hides_nothing(self):
+        self.client.force_login(self.specialist_user)
+        reservations = self.client.get(reverse('profile_page')).context['reservations']
+        self.assertIn(self.delivered, reservations)

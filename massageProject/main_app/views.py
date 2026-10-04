@@ -1009,6 +1009,8 @@ def _build_reservations_table_context(request, base_qs, is_staff):
             qs = qs.filter(phase_q)
         else:
             selected_phase = ''
+    if is_photographer and not selected_phase:
+        qs = qs.exclude(Reservation.phase_query(Reservation.PHASE_FINALS_DELIVERED))
 
     date_from = request.GET.get('date_from', '')
     if date_from:
