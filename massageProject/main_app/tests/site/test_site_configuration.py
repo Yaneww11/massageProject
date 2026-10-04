@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.admin.sites import AdminSite
 from django.contrib.messages import get_messages
 from django.contrib.messages.storage.fallback import FallbackStorage
@@ -74,6 +75,10 @@ class SiteConfigurationValidationTest(TestCase):
 
 
 class SiteConfigurationTerminologyTranslationTest(TestCase):
+    def tearDown(self):
+        super().tearDown()
+        translation.activate(settings.LANGUAGE_CODE)
+
     def test_terminology_fields_are_per_language(self):
         obj = SiteConfiguration.get_solo()
         obj.service_plural_bg = 'услуги'

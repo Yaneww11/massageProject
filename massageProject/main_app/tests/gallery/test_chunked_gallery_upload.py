@@ -7,6 +7,7 @@ from datetime import time as time_cls, timedelta
 from io import BytesIO
 
 from PIL import Image as PILImage
+from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from unittest import mock
@@ -564,6 +565,10 @@ class ReviewFindingsTest(ChunkedUploadTestBase):
 
 
 class UploadPageTitleLocaleTest(ChunkedUploadTestBase):
+    def tearDown(self):
+        super().tearDown()
+        translation.activate(settings.LANGUAGE_CODE)
+
     def test_title_follows_the_request_language(self):
         """Finding 3: page_title was evaluated once at class-definition time
         with eager gettext, freezing it to whichever locale was active then."""

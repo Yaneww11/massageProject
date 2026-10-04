@@ -10,7 +10,7 @@ class InactiveUserLoginTest(TestCase):
     Regression test: deactivating a logged-in user must invalidate their
     existing session on their very next request. The credential-flow
     variants of this test class (inactive user + correct/wrong password via
-    the login view) moved to tests_login_password_view.py when the
+    the login view) moved to test_login_password_view.py when the
     full-page login view was replaced by the auth modal's login-password/
     endpoint.
     """
