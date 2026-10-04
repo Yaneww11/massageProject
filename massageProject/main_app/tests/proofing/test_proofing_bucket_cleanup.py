@@ -12,23 +12,12 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
-from PIL import Image as PILImage
 
 from massageProject.accounts.models import CustomUser
 from massageProject.main_app.models import (
     Gallery, Image, ImageProof, Reservation, Service, Specialist, WorkingHours,
 )
-
-
-def _jpeg_bytes(size=(800, 800)):
-    buffer = io.BytesIO()
-    PILImage.new('RGB', size, 'red').save(buffer, format='JPEG')
-    buffer.seek(0)
-    return buffer.read()
-
-
-def _upload(name='frame.jpg'):
-    return SimpleUploadedFile(name, _jpeg_bytes(), content_type='image/jpeg')
+from massageProject.main_app.tests.helpers import make_uploaded_jpeg
 
 
 def _run_purge(*args):
@@ -81,7 +70,7 @@ class BucketLayoutBase(TestCase):
         )
 
     def _add_image(self, gallery, order=0, name='frame.jpg'):
-        image = Image(gallery=gallery, image=_upload(name), order=order)
+        image = Image(gallery=gallery, image=make_uploaded_jpeg(name), order=order)
         image.save()
         return image
 

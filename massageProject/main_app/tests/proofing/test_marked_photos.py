@@ -8,7 +8,6 @@ from PIL import Image as PILImage
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core import mail
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -17,13 +16,7 @@ from massageProject.accounts.models import CustomUser
 from massageProject.main_app.models import Gallery, Image, ImageProof, PhotoLabel, Reservation, Service, Specialist
 
 
-def _make_uploaded_image(name='photo.jpg', color='red'):
-    buffer = BytesIO()
-    PILImage.new('RGB', (800, 800), color=color).save(buffer, format='JPEG')
-    buffer.seek(0)
-    return SimpleUploadedFile(name, buffer.read(), content_type='image/jpeg')
-
-
+from massageProject.main_app.tests.helpers import make_uploaded_jpeg
 @override_settings(IS_PHOTOGRAPHER_WEBSITE=True)
 class MarkedPhotosTestBase(TestCase):
     def setUp(self):
@@ -81,10 +74,10 @@ class MarkedPhotosTestBase(TestCase):
 
         self.gallery = Gallery.objects.create(gallery_type=Gallery.TYPE_PROOFING)
         self.marked_image = Image.objects.create(
-            gallery=self.gallery, order=0, image=_make_uploaded_image('marked.jpg', 'red'),
+            gallery=self.gallery, order=0, image=make_uploaded_jpeg('marked.jpg', color='red'),
         )
         self.unmarked_image = Image.objects.create(
-            gallery=self.gallery, order=1, image=_make_uploaded_image('unmarked.jpg', 'blue'),
+            gallery=self.gallery, order=1, image=make_uploaded_jpeg('unmarked.jpg', color='blue'),
         )
         self.label = PhotoLabel.objects.create(gallery=self.gallery, name='За печат', order=0)
         proof = ImageProof.objects.create(image=self.marked_image, is_marked=True, comment='crop tighter')
@@ -282,7 +275,7 @@ class MarkedThumbnailInvalidationTest(MarkedPhotosTestBase):
         path = self.marked_image.marked_thumbnail_path
         self.assertTrue(default_storage.exists(path))
 
-        self.marked_image.image = _make_uploaded_image('replacement.jpg', 'green')
+        self.marked_image.image = make_uploaded_jpeg('replacement.jpg', color='green')
         self.marked_image.save()
         self.assertFalse(
             default_storage.exists(path),

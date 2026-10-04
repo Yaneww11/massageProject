@@ -1,13 +1,10 @@
 import shutil
 import tempfile
 from datetime import time as time_cls, timedelta
-from io import BytesIO
 
-from PIL import Image as PILImage
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core import mail
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -16,13 +13,7 @@ from massageProject.accounts.models import CustomUser
 from massageProject.main_app.models import Gallery, Reservation, Service, Specialist, WorkingHours
 
 
-def _make_uploaded_image(name='photo.jpg', size=(800, 800)):
-    buffer = BytesIO()
-    PILImage.new('RGB', size, color='red').save(buffer, format='JPEG')
-    buffer.seek(0)
-    return SimpleUploadedFile(name, buffer.read(), content_type='image/jpeg')
-
-
+from massageProject.main_app.tests.helpers import make_uploaded_jpeg
 @override_settings(IS_PHOTOGRAPHER_WEBSITE=True)
 class ProofingGalleryUploadViewTest(TestCase):
     def setUp(self):
@@ -104,7 +95,7 @@ class ProofingGalleryUploadViewTest(TestCase):
 
     def test_specialist_can_upload_gallery_to_own_reservation(self):
         self.client.force_login(self.specialist_user)
-        response = self._post(self.reservation, [_make_uploaded_image('a.jpg'), _make_uploaded_image('b.jpg')])
+        response = self._post(self.reservation, [make_uploaded_jpeg('a.jpg'), make_uploaded_jpeg('b.jpg')])
         self.assertRedirects(response, reverse('profile_page'))
         self.reservation.refresh_from_db()
         self.assertIsNotNone(self.reservation.gallery_id)
@@ -114,7 +105,7 @@ class ProofingGalleryUploadViewTest(TestCase):
 
     def test_specialist_cannot_upload_to_another_specialists_reservation(self):
         self.client.force_login(self.specialist_user)
-        response = self._post(self.other_reservation, [_make_uploaded_image('a.jpg')])
+        response = self._post(self.other_reservation, [make_uploaded_jpeg('a.jpg')])
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context['upload_form'].is_valid())
         self.other_reservation.refresh_from_db()
@@ -133,14 +124,14 @@ class ProofingGalleryUploadViewTest(TestCase):
 
     def test_staff_can_upload_on_behalf_of_specialist_with_login(self):
         self.client.force_login(self.staff_user)
-        response = self._post(self.reservation, [_make_uploaded_image('a.jpg')])
+        response = self._post(self.reservation, [make_uploaded_jpeg('a.jpg')])
         self.assertRedirects(response, reverse('profile_page'))
         self.reservation.refresh_from_db()
         self.assertIsNotNone(self.reservation.gallery_id)
 
     def test_staff_can_upload_on_behalf_of_specialist_without_login(self):
         self.client.force_login(self.staff_user)
-        response = self._post(self.other_reservation, [_make_uploaded_image('a.jpg')])
+        response = self._post(self.other_reservation, [make_uploaded_jpeg('a.jpg')])
         self.assertRedirects(response, reverse('profile_page'))
         self.other_reservation.refresh_from_db()
         self.assertIsNotNone(self.other_reservation.gallery_id)
@@ -148,7 +139,7 @@ class ProofingGalleryUploadViewTest(TestCase):
     def test_labels_are_created(self):
         self.client.force_login(self.specialist_user)
         self._post(
-            self.reservation, [_make_uploaded_image('a.jpg')],
+            self.reservation, [make_uploaded_jpeg('a.jpg')],
             labels=['За печат', 'Албум'],
         )
         self.reservation.refresh_from_db()
@@ -157,7 +148,7 @@ class ProofingGalleryUploadViewTest(TestCase):
 
     def test_gallery_ready_email_sent_to_client(self):
         self.client.force_login(self.specialist_user)
-        self._post(self.reservation, [_make_uploaded_image('a.jpg')])
+        self._post(self.reservation, [make_uploaded_jpeg('a.jpg')])
         self.assertEqual(len(mail.outbox), 1)
         email = mail.outbox[0]
         self.assertEqual(email.to, [self.client_user.email])
@@ -181,7 +172,7 @@ class ProofingGalleryUploadViewTest(TestCase):
         WorkingHours.objects.filter(specialist=self.specialist, day_of_week=0).delete()
 
         self.client.force_login(self.specialist_user)
-        response = self._post(active_reservation, [_make_uploaded_image('a.jpg')])
+        response = self._post(active_reservation, [make_uploaded_jpeg('a.jpg')])
         self.assertEqual(response.status_code, 200)
         active_reservation.refresh_from_db()
         self.assertIsNone(active_reservation.gallery_id)
@@ -203,7 +194,7 @@ class ProofingGalleryUploadViewTest(TestCase):
     def test_future_reservation_upload_is_rejected(self):
         self._make_reservation_future()
         self.client.force_login(self.specialist_user)
-        response = self._post(self.reservation, [_make_uploaded_image('a.jpg')])
+        response = self._post(self.reservation, [make_uploaded_jpeg('a.jpg')])
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context['upload_form'].is_valid())
         self.reservation.refresh_from_db()

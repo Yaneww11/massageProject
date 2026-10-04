@@ -1,6 +1,9 @@
 from datetime import time
+from io import BytesIO
 
+from PIL import Image as PILImage
 from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 
 from massageProject.accounts.models import CustomUser
@@ -41,3 +44,10 @@ class BugFixTestBase(TestCase):
 
     def login(self):
         self.client.force_login(self.user)
+
+
+def make_uploaded_jpeg(name='photo.jpg', size=(800, 800), color='red'):
+    buffer = BytesIO()
+    PILImage.new('RGB', size, color=color).save(buffer, format='JPEG')
+    buffer.seek(0)
+    return SimpleUploadedFile(name, buffer.read(), content_type='image/jpeg')

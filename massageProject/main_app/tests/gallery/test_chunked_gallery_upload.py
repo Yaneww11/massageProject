@@ -4,9 +4,7 @@ import json
 import shutil
 import tempfile
 from datetime import time as time_cls, timedelta
-from io import BytesIO
 
-from PIL import Image as PILImage
 from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
@@ -23,13 +21,7 @@ from massageProject.main_app.views import ProofingGalleryUploadView
 from massageProject.main_app.models import (
     Gallery, Image, Reservation, Service, Specialist,
 )
-
-
-def _uploaded(name='photo.jpg', size=(800, 800), color='red'):
-    buffer = BytesIO()
-    PILImage.new('RGB', size, color=color).save(buffer, format='JPEG')
-    buffer.seek(0)
-    return SimpleUploadedFile(name, buffer.read(), content_type='image/jpeg')
+from massageProject.main_app.tests.helpers import make_uploaded_jpeg
 
 
 @override_settings(IS_PHOTOGRAPHER_WEBSITE=True)
@@ -157,21 +149,21 @@ class DraftCreationTest(ChunkedUploadTestBase):
 class ChunkAppendTest(ChunkedUploadTestBase):
     def test_chunk_appends_images_to_the_draft(self):
         gallery_id = self.new_draft_id()
-        response = self.send_chunk(gallery_id, [_uploaded('a.jpg'), _uploaded('b.jpg')])
+        response = self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg'), make_uploaded_jpeg('b.jpg')])
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['saved'], 2)
         self.assertEqual(Image.objects.filter(gallery_id=gallery_id).count(), 2)
 
     def test_order_continues_across_chunks(self):
         gallery_id = self.new_draft_id()
-        self.send_chunk(gallery_id, [_uploaded('a.jpg'), _uploaded('b.jpg')])
-        self.send_chunk(gallery_id, [_uploaded('c.jpg'), _uploaded('d.jpg')])
+        self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg'), make_uploaded_jpeg('b.jpg')])
+        self.send_chunk(gallery_id, [make_uploaded_jpeg('c.jpg'), make_uploaded_jpeg('d.jpg')])
         orders = list(Image.objects.filter(gallery_id=gallery_id).order_by('order').values_list('order', flat=True))
         self.assertEqual(orders, [0, 1, 2, 3])
 
     def test_chunk_records_the_source_filename_and_size(self):
         gallery_id = self.new_draft_id()
-        upload = _uploaded('holiday.jpg')
+        upload = make_uploaded_jpeg('holiday.jpg')
         expected_size = upload.size
         self.send_chunk(gallery_id, [upload])
         image = Image.objects.get(gallery_id=gallery_id)
@@ -183,22 +175,22 @@ class ChunkAppendTest(ChunkedUploadTestBase):
 
     def test_chunk_larger_than_the_configured_size_is_rejected(self):
         gallery_id = self.new_draft_id()
-        response = self.send_chunk(gallery_id, [_uploaded(f'{i}.jpg') for i in range(7)])
+        response = self.send_chunk(gallery_id, [make_uploaded_jpeg(f'{i}.jpg') for i in range(7)])
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Image.objects.filter(gallery_id=gallery_id).count(), 0)
 
     def test_another_specialist_cannot_append_to_this_draft(self):
         gallery_id = self.new_draft_id()
         self.client.force_login(self.other_specialist_user)
-        response = self.send_chunk(gallery_id, [_uploaded('a.jpg')])
+        response = self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg')])
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Image.objects.filter(gallery_id=gallery_id).count(), 0)
 
     def test_cannot_append_to_a_published_gallery(self):
         gallery_id = self.new_draft_id()
-        self.send_chunk(gallery_id, [_uploaded('a.jpg')])
+        self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg')])
         self.publish(gallery_id)
-        response = self.send_chunk(gallery_id, [_uploaded('b.jpg')])
+        response = self.send_chunk(gallery_id, [make_uploaded_jpeg('b.jpg')])
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Image.objects.filter(gallery_id=gallery_id).count(), 1)
 
@@ -206,7 +198,7 @@ class ChunkAppendTest(ChunkedUploadTestBase):
 class PublishTest(ChunkedUploadTestBase):
     def test_publish_attaches_the_gallery_and_sends_exactly_one_email(self):
         gallery_id = self.new_draft_id()
-        self.send_chunk(gallery_id, [_uploaded('a.jpg')])
+        self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg')])
         response = self.publish(gallery_id)
         self.assertEqual(response.status_code, 200)
         self.reservation.refresh_from_db()
@@ -216,7 +208,7 @@ class PublishTest(ChunkedUploadTestBase):
 
     def test_publishing_twice_does_not_send_a_second_email(self):
         gallery_id = self.new_draft_id()
-        self.send_chunk(gallery_id, [_uploaded('a.jpg')])
+        self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg')])
         self.publish(gallery_id)
         self.publish(gallery_id)
         self.assertEqual(len(mail.outbox), 1)
@@ -231,7 +223,7 @@ class PublishTest(ChunkedUploadTestBase):
 
     def test_another_specialist_cannot_publish_this_draft(self):
         gallery_id = self.new_draft_id()
-        self.send_chunk(gallery_id, [_uploaded('a.jpg')])
+        self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg')])
         self.client.force_login(self.other_specialist_user)
         response = self.publish(gallery_id)
         self.assertEqual(response.status_code, 400)
@@ -247,7 +239,7 @@ class CapTest(ChunkedUploadTestBase):
             Image(gallery=gallery, order=i, image=f'gallery/photos/f{i}.webp')
             for i in range(gallery.image_cap - 1)
         ])
-        response = self.send_chunk(gallery_id, [_uploaded('a.jpg'), _uploaded('b.jpg')])
+        response = self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg'), make_uploaded_jpeg('b.jpg')])
         self.assertEqual(response.status_code, 400)
         self.assertEqual(gallery.images.count(), gallery.image_cap - 1)
 
@@ -258,7 +250,7 @@ class CapTest(ChunkedUploadTestBase):
             Image(gallery=gallery, order=i, image=f'gallery/photos/f{i}.webp')
             for i in range(gallery.image_cap - 1)
         ])
-        response = self.send_chunk(gallery_id, [_uploaded('a.jpg')])
+        response = self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg')])
         self.assertEqual(response.status_code, 200)
         self.assertEqual(gallery.images.count(), gallery.image_cap)
 
@@ -276,7 +268,7 @@ class SingleShotStillWorksTest(ChunkedUploadTestBase):
     def test_plain_form_post_uploads_and_publishes(self):
         response = self.client.post(self.url, {
             'reservation': self.reservation.pk,
-            'images': [_uploaded('a.jpg'), _uploaded('b.jpg')],
+            'images': [make_uploaded_jpeg('a.jpg'), make_uploaded_jpeg('b.jpg')],
             'labels-TOTAL_FORMS': '3', 'labels-INITIAL_FORMS': '0',
             'labels-MIN_NUM_FORMS': '0', 'labels-MAX_NUM_FORMS': '1000',
             'labels-0-name': '', 'labels-1-name': '', 'labels-2-name': '',
@@ -295,7 +287,7 @@ class ResumeTest(ChunkedUploadTestBase):
 
     def test_create_reports_what_the_draft_already_holds(self):
         gallery_id = self.new_draft_id()
-        self.send_chunk(gallery_id, [_uploaded('a.jpg'), _uploaded('b.jpg')])
+        self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg'), make_uploaded_jpeg('b.jpg')])
         payload = self.create_draft().json()
         self.assertEqual(payload['gallery_id'], gallery_id)
         uploaded = {(entry['name'], entry['size']) for entry in payload['uploaded']}
@@ -303,7 +295,7 @@ class ResumeTest(ChunkedUploadTestBase):
 
     def test_resending_an_already_uploaded_file_is_skipped_not_duplicated(self):
         gallery_id = self.new_draft_id()
-        first = _uploaded('a.jpg')
+        first = make_uploaded_jpeg('a.jpg')
         self.send_chunk(gallery_id, [first])
         again = SimpleUploadedFile('a.jpg', first.file.getvalue(), content_type='image/jpeg')
         response = self.send_chunk(gallery_id, [again])
@@ -313,13 +305,13 @@ class ResumeTest(ChunkedUploadTestBase):
 
     def test_a_different_file_with_the_same_name_is_still_uploaded(self):
         gallery_id = self.new_draft_id()
-        self.send_chunk(gallery_id, [_uploaded('DSC_0001.jpg', size=(800, 800), color='red')])
-        self.send_chunk(gallery_id, [_uploaded('DSC_0001.jpg', size=(900, 900), color='blue')])
+        self.send_chunk(gallery_id, [make_uploaded_jpeg('DSC_0001.jpg', size=(800, 800), color='red')])
+        self.send_chunk(gallery_id, [make_uploaded_jpeg('DSC_0001.jpg', size=(900, 900), color='blue')])
         self.assertEqual(Image.objects.filter(gallery_id=gallery_id).count(), 2)
 
     def test_a_partial_draft_survives_and_finishes_on_resume(self):
         gallery_id = self.new_draft_id()
-        batch = [_uploaded(f'{i}.jpg') for i in range(4)]
+        batch = [make_uploaded_jpeg(f'{i}.jpg') for i in range(4)]
         self.send_chunk(gallery_id, batch[:2])
         # ...connection dies here; the photographer reselects the same folder.
         resumed = [SimpleUploadedFile(f.name, f.file.getvalue(), content_type='image/jpeg') for f in batch]
@@ -331,28 +323,28 @@ class ResumeTest(ChunkedUploadTestBase):
 
     def test_photographer_sees_their_own_unpublished_drafts(self):
         gallery_id = self.new_draft_id()
-        self.send_chunk(gallery_id, [_uploaded('a.jpg')])
+        self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg')])
         response = self.client.get(self.url)
         drafts = response.context['drafts']
         self.assertEqual([d.pk for d in drafts], [gallery_id])
 
     def test_a_published_gallery_is_no_longer_listed_as_a_draft(self):
         gallery_id = self.new_draft_id()
-        self.send_chunk(gallery_id, [_uploaded('a.jpg')])
+        self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg')])
         self.publish(gallery_id)
         response = self.client.get(self.url)
         self.assertEqual(list(response.context['drafts']), [])
 
     def test_another_specialists_draft_is_not_listed(self):
         gallery_id = self.new_draft_id()
-        self.send_chunk(gallery_id, [_uploaded('a.jpg')])
+        self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg')])
         self.client.force_login(self.other_specialist_user)
         response = self.client.get(self.url)
         self.assertEqual(list(response.context['drafts']), [])
 
     def test_photographer_can_delete_an_abandoned_draft(self):
         gallery_id = self.new_draft_id()
-        self.send_chunk(gallery_id, [_uploaded('a.jpg')])
+        self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg')])
         response = self.client.post(self.url, {'step': 'discard', 'gallery_id': gallery_id})
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Gallery.objects.filter(pk=gallery_id).exists())
@@ -367,7 +359,7 @@ class ResumeTest(ChunkedUploadTestBase):
 
     def test_a_published_gallery_cannot_be_discarded(self):
         gallery_id = self.new_draft_id()
-        self.send_chunk(gallery_id, [_uploaded('a.jpg')])
+        self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg')])
         self.publish(gallery_id)
         response = self.client.post(self.url, {'step': 'discard', 'gallery_id': gallery_id})
         self.assertEqual(response.status_code, 400)
@@ -387,7 +379,7 @@ class LargeGalleryUploadTest(ChunkedUploadTestBase):
 
     def _tiny(self, index):
         # Small enough to convert fast, large enough to clear Image.MIN_DIMENSION.
-        return _uploaded(f'DSC_{index:04d}.jpg', size=(600, 600))
+        return make_uploaded_jpeg(f'DSC_{index:04d}.jpg', size=(600, 600))
 
     def test_a_full_gallery_uploads_in_chunks_and_publishes_once(self):
         chunk_size = 6
@@ -440,8 +432,8 @@ class FinalGalleryChunkedUploadTest(ChunkedUploadTestBase):
 
     def test_chunks_then_publish_delivers_once(self):
         gallery_id = self.new_draft_id()
-        self.send_chunk(gallery_id, [_uploaded('a.jpg'), _uploaded('b.jpg')])
-        self.send_chunk(gallery_id, [_uploaded('c.jpg')])
+        self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg'), make_uploaded_jpeg('b.jpg')])
+        self.send_chunk(gallery_id, [make_uploaded_jpeg('c.jpg')])
         self.assertEqual(mail.outbox, [])
         self.publish(gallery_id)
         self.reservation.refresh_from_db()
@@ -451,14 +443,14 @@ class FinalGalleryChunkedUploadTest(ChunkedUploadTestBase):
 
     def test_publishing_twice_does_not_deliver_twice(self):
         gallery_id = self.new_draft_id()
-        self.send_chunk(gallery_id, [_uploaded('a.jpg')])
+        self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg')])
         self.publish(gallery_id)
         self.publish(gallery_id)
         self.assertEqual(len(mail.outbox), 1)
 
     def test_resume_skips_already_uploaded_files(self):
         gallery_id = self.new_draft_id()
-        first = _uploaded('a.jpg')
+        first = make_uploaded_jpeg('a.jpg')
         self.send_chunk(gallery_id, [first])
         again = SimpleUploadedFile('a.jpg', first.file.getvalue(), content_type='image/jpeg')
         response = self.send_chunk(gallery_id, [again])
@@ -468,7 +460,7 @@ class FinalGalleryChunkedUploadTest(ChunkedUploadTestBase):
     def test_another_specialist_cannot_append_to_this_draft(self):
         gallery_id = self.new_draft_id()
         self.client.force_login(self.other_specialist_user)
-        response = self.send_chunk(gallery_id, [_uploaded('a.jpg')])
+        response = self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg')])
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Image.objects.filter(gallery_id=gallery_id).count(), 0)
 
@@ -496,7 +488,7 @@ class SingleShotValidationTest(ChunkedUploadTestBase):
 
     def test_labels_are_left_alone_once_the_draft_has_photos(self):
         gallery_id = self.new_draft_id(labels=['За печат'])
-        self.send_chunk(gallery_id, [_uploaded('a.jpg')])
+        self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg')])
         self.new_draft_id(labels=['За албум'])
         names = list(Gallery.objects.get(pk=gallery_id).photo_labels.values_list('name', flat=True))
         self.assertEqual(names, ['За печат'])
@@ -509,7 +501,7 @@ class ReviewFindingsTest(ChunkedUploadTestBase):
         draft behind."""
         response = self.client.post(self.url, {
             'reservation': self.reservation.pk,
-            'images': [_uploaded(f'{i}.jpg') for i in range(7)],
+            'images': [make_uploaded_jpeg(f'{i}.jpg') for i in range(7)],
             'labels-TOTAL_FORMS': '3', 'labels-INITIAL_FORMS': '0',
             'labels-MIN_NUM_FORMS': '0', 'labels-MAX_NUM_FORMS': '1000',
             'labels-0-name': '', 'labels-1-name': '', 'labels-2-name': '',
@@ -534,10 +526,10 @@ class ReviewFindingsTest(ChunkedUploadTestBase):
             Image(gallery=gallery, order=i, image=f'gallery/photos/f{i}.webp')
             for i in range(gallery.image_cap - 2)
         ])
-        already = _uploaded('dup.jpg')
+        already = make_uploaded_jpeg('dup.jpg')
         self.send_chunk(gallery_id, [already])
         resend = SimpleUploadedFile('dup.jpg', already.file.getvalue(), content_type='image/jpeg')
-        response = self.send_chunk(gallery_id, [resend, _uploaded('new.jpg')])
+        response = self.send_chunk(gallery_id, [resend, make_uploaded_jpeg('new.jpg')])
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(response.json()['skipped'], 1)
         self.assertEqual(gallery.images.count(), gallery.image_cap)
@@ -546,14 +538,14 @@ class ReviewFindingsTest(ChunkedUploadTestBase):
         """Also-noted: _single_shot's rollback deleted the draft even when it
         had been built up by earlier chunked sessions."""
         gallery_id = self.new_draft_id()
-        self.send_chunk(gallery_id, [_uploaded('earlier.jpg')])
+        self.send_chunk(gallery_id, [make_uploaded_jpeg('earlier.jpg')])
         with mock.patch.object(
             ProofingGalleryUploadView, '_publish_draft',
             return_value=('boom', False),
         ):
             self.client.post(self.url, {
                 'reservation': self.reservation.pk,
-                'images': [_uploaded('later.jpg')],
+                'images': [make_uploaded_jpeg('later.jpg')],
                 'labels-TOTAL_FORMS': '3', 'labels-INITIAL_FORMS': '0',
                 'labels-MIN_NUM_FORMS': '0', 'labels-MAX_NUM_FORMS': '1000',
                 'labels-0-name': '', 'labels-1-name': '', 'labels-2-name': '',
@@ -588,7 +580,7 @@ class ReservationDeletionTest(ChunkedUploadTestBase):
         """draft_reservation outlives publishing, so cascading it would take
         the delivered gallery and every image with the reservation."""
         gallery_id = self.new_draft_id()
-        self.send_chunk(gallery_id, [_uploaded('a.jpg')])
+        self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg')])
         self.publish(gallery_id)
         self.reservation.delete()
         gallery = Gallery.objects.filter(pk=gallery_id).first()

@@ -13,6 +13,7 @@ from django.urls import reverse
 from massageProject.main_app.models import Gallery, Image
 
 
+from massageProject.main_app.tests.helpers import make_uploaded_jpeg
 class GalleryCleanTest(TestCase):
     def test_second_homepage_gallery_is_rejected(self):
         Gallery.objects.create(gallery_type=Gallery.TYPE_HOMEPAGE, title='Home')
@@ -63,13 +64,6 @@ class GalleryViewsTest(TestCase):
         self.assertEqual(response.status_code, 404)
 
 
-def _make_uploaded_image(name='photo.jpg', size=(800, 800)):
-    buffer = BytesIO()
-    PILImage.new('RGB', size, color='red').save(buffer, format='JPEG')
-    buffer.seek(0)
-    return SimpleUploadedFile(name, buffer.read(), content_type='image/jpeg')
-
-
 def _make_uploaded_image_with_orientation(name, size, orientation):
     buffer = BytesIO()
     img = PILImage.new('RGB', size, color='blue')
@@ -112,7 +106,7 @@ class GalleryBulkUploadAdminTest(TestCase):
         self.assertContains(response, '<form')
 
     def test_post_multiple_valid_images_creates_rows_in_order(self):
-        files = [_make_uploaded_image(f'photo{i}.jpg') for i in range(3)]
+        files = [make_uploaded_jpeg(f'photo{i}.jpg') for i in range(3)]
         response = self.client.post(self.url, {'images': files})
         self.assertRedirects(response, self.change_url)
         images = list(self.gallery.images.order_by('order'))
@@ -121,14 +115,14 @@ class GalleryBulkUploadAdminTest(TestCase):
         self.assertTrue(all(img.alt_text == '' for img in images))
 
     def test_next_order_continues_after_existing_images_regardless_of_gaps(self):
-        Image.objects.create(gallery=self.gallery, image=_make_uploaded_image('existing.jpg'), order=7)
-        response = self.client.post(self.url, {'images': [_make_uploaded_image('new.jpg')]})
+        Image.objects.create(gallery=self.gallery, image=make_uploaded_jpeg('existing.jpg'), order=7)
+        response = self.client.post(self.url, {'images': [make_uploaded_jpeg('new.jpg')]})
         self.assertRedirects(response, self.change_url)
         new_image = self.gallery.images.order_by('-order').first()
         self.assertEqual(new_image.order, 8)
 
     def test_post_skips_invalid_file_and_uploads_the_rest(self):
-        good = _make_uploaded_image('good.jpg')
+        good = make_uploaded_jpeg('good.jpg')
         bad = SimpleUploadedFile('bad.txt', b'not an image', content_type='text/plain')
         response = self.client.post(self.url, {'images': [good, bad]})
         self.assertRedirects(response, self.change_url)
@@ -174,19 +168,19 @@ class ImageProcessingTest(TestCase):
         self.gallery = Gallery.objects.create(gallery_type=Gallery.TYPE_ALBUM, title='Studio', slug='studio')
 
     def test_large_image_is_downscaled_to_max_dimension(self):
-        upload = _make_uploaded_image('big.jpg', size=(4000, 3000))
+        upload = make_uploaded_jpeg('big.jpg', size=(4000, 3000))
         image = Image.objects.create(gallery=self.gallery, image=upload)
         with PILImage.open(image.image.path) as saved:
             self.assertEqual(max(saved.size), 2560)
 
     def test_image_within_limits_is_not_upscaled(self):
-        upload = _make_uploaded_image('small_ok.jpg', size=(800, 800))
+        upload = make_uploaded_jpeg('small_ok.jpg', size=(800, 800))
         image = Image.objects.create(gallery=self.gallery, image=upload)
         with PILImage.open(image.image.path) as saved:
             self.assertEqual(saved.size, (800, 800))
 
     def test_uploaded_image_is_converted_to_webp(self):
-        upload = _make_uploaded_image('photo.jpg', size=(800, 800))
+        upload = make_uploaded_jpeg('photo.jpg', size=(800, 800))
         image = Image.objects.create(gallery=self.gallery, image=upload)
         self.assertTrue(image.image.name.endswith('.webp'))
         with PILImage.open(image.image.path) as saved:
@@ -199,13 +193,13 @@ class ImageProcessingTest(TestCase):
             self.assertEqual(saved.size, (800, 1200))
 
     def test_image_below_minimum_dimension_is_rejected(self):
-        upload = _make_uploaded_image('tiny.jpg', size=(300, 300))
+        upload = make_uploaded_jpeg('tiny.jpg', size=(300, 300))
         image = Image(gallery=self.gallery, image=upload)
         with self.assertRaises(ValidationError):
             image.full_clean()
 
     def test_crop_position_defaults_to_center(self):
-        upload = _make_uploaded_image('photo.jpg')
+        upload = make_uploaded_jpeg('photo.jpg')
         image = Image.objects.create(gallery=self.gallery, image=upload)
         self.assertEqual(image.crop_position, Image.CROP_CENTER)
 
@@ -223,14 +217,14 @@ class GalleryBulkUploadCapTest(GalleryBulkUploadAdminTest):
     def test_upload_that_would_exceed_the_album_cap_is_refused(self):
         self._fill_to(Gallery.IMAGE_CAPS[Gallery.TYPE_ALBUM] - 1)
         response = self.client.post(self.url, {
-            'images': [_make_uploaded_image('a.jpg'), _make_uploaded_image('b.jpg')],
+            'images': [make_uploaded_jpeg('a.jpg'), make_uploaded_jpeg('b.jpg')],
         })
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.gallery.images.count(), Gallery.IMAGE_CAPS[Gallery.TYPE_ALBUM] - 1)
 
     def test_upload_that_exactly_reaches_the_cap_is_accepted(self):
         self._fill_to(Gallery.IMAGE_CAPS[Gallery.TYPE_ALBUM] - 1)
-        response = self.client.post(self.url, {'images': [_make_uploaded_image('a.jpg')]})
+        response = self.client.post(self.url, {'images': [make_uploaded_jpeg('a.jpg')]})
         self.assertRedirects(response, self.change_url)
         self.assertEqual(self.gallery.images.count(), Gallery.IMAGE_CAPS[Gallery.TYPE_ALBUM])
 
@@ -241,7 +235,7 @@ class GalleryBulkUploadCapTest(GalleryBulkUploadAdminTest):
             Image(gallery=gallery, order=i, image=f'gallery/photos/p{i}.webp')
             for i in range(Gallery.IMAGE_CAPS[Gallery.TYPE_ALBUM] + 5)
         ])
-        response = self.client.post(url, {'images': [_make_uploaded_image('a.jpg')]})
+        response = self.client.post(url, {'images': [make_uploaded_jpeg('a.jpg')]})
         self.assertRedirects(response, reverse('admin:main_app_gallery_change', args=[gallery.pk]))
 
     def test_form_carries_the_batch_size_note(self):

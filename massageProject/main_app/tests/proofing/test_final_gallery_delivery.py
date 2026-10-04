@@ -2,27 +2,22 @@ import shutil
 import tempfile
 import zipfile
 from datetime import time as time_cls, timedelta
+from functools import partial
 from io import BytesIO
 from unittest import mock
 
-from PIL import Image as PILImage
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core import mail
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
 from massageProject.accounts.models import CustomUser
 from massageProject.main_app.models import Gallery, Reservation, Service, Specialist
+from massageProject.main_app.tests.helpers import make_uploaded_jpeg
 
-
-def _make_uploaded_image(name='photo.jpg', size=(400, 300), color='green'):
-    buffer = BytesIO()
-    PILImage.new('RGB', size, color=color).save(buffer, format='JPEG')
-    buffer.seek(0)
-    return SimpleUploadedFile(name, buffer.read(), content_type='image/jpeg')
+_make_uploaded_image = partial(make_uploaded_jpeg, size=(400, 300), color='green')
 
 
 @override_settings(IS_PHOTOGRAPHER_WEBSITE=True)
