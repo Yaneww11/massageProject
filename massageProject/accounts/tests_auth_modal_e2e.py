@@ -99,3 +99,20 @@ class ExistingUserBookingAuthFlowTest(TestCase):
         profile_resp = self.client.get(reverse('profile_page'))
         self.assertTrue(profile_resp.wsgi_request.user.is_authenticated)
         self.assertEqual(profile_resp.wsgi_request.user.pk, self.user.pk)
+
+
+class MenuLoginRedirectTargetTest(TestCase):
+    """The generic auth-modal triggers (Вход/Регистрация, "Оставете мнение")
+    send the visitor to the profile after login; only the book-now links pass
+    the reservation page as their own destination."""
+
+    def test_generic_trigger_targets_the_profile_even_when_booking_is_enabled(self):
+        response = self.client.get(reverse('index'))
+        content = response.content.decode()
+        self.assertIn("openAuthModal('%s')" % reverse('profile_page'), content)
+        self.assertNotIn("openAuthModal('%s')" % reverse('reservation_page'), content)
+
+    def test_book_now_cta_still_carries_the_reservation_page(self):
+        response = self.client.get(reverse('index'))
+        content = response.content.decode()
+        self.assertIn('href="%s" class="site-cta" data-auth-modal-link' % reverse('reservation_page'), content)

@@ -310,6 +310,9 @@
       </div>
       <button type="submit" class="btn-primary-profile btn-full">{% trans "Изпратете" %}</button>
     </form>
+    <p class="review-modal-success" id="profile-review-success">
+      {% trans "Благодарим! Вашето мнение ще бъде публикувано след преглед." %}
+    </p>
   </div>
 </div>
 
@@ -319,6 +322,7 @@
   var closeBtn = document.getElementById('profile-review-close');
   var form = document.getElementById('profile-review-form');
   var ratingInput = document.getElementById('profile-review-rating');
+  var successMsg = document.getElementById('profile-review-success');
   var stars = document.querySelectorAll('#profile-star-input .star-btn');
 
   function setStars(val) {
@@ -335,6 +339,8 @@
       document.getElementById('profile-review-service').textContent = btn.dataset.service || '';
       document.getElementById('profile-review-content').value = '';
       setStars(5);
+      form.style.display = '';
+      successMsg.style.display = 'none';
       modal.style.display = 'flex';
     });
   });
@@ -363,8 +369,9 @@
       body: data
     }).then(function (r) { return r.json(); }).then(function (res) {
       if (res.success) {
-        modal.style.display = 'none';
-        location.reload();
+        form.style.display = 'none';
+        successMsg.style.display = 'block';
+        setTimeout(function () { location.reload(); }, 3000);
       } else {
         alert(res.error || '{% trans "Грешка при изпращане." %}');
       }

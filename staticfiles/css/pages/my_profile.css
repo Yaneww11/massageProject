@@ -686,6 +686,14 @@
     box-shadow: var(--shadow-lg);
 }
 
+.review-modal-success {
+    display: none;
+    text-align: center;
+    padding: 1.5rem 0 0.5rem;
+    color: var(--primary-color);
+    line-height: 1.6;
+}
+
 .modal-close {
     position: absolute;
     top: 1rem;

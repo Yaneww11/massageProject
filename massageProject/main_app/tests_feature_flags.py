@@ -105,9 +105,9 @@ class BookingEnabledUIHidingTest(TestCase):
         response = self.client.get('/bg/')
         content = response.content.decode()
         self.assertNotIn("{% url 'reservation_page' %}", content)  # sanity: raw tag never leaks
-        # Note: the reservation URL may still legitimately appear inside the
-        # universal auth-modal-trigger script (used as the post-login redirect
-        # target) — only the visible hero CTA link itself must be hidden.
+        # Note: the universal auth-modal-trigger script always redirects to the
+        # profile after login, so the reservation URL no longer appears there —
+        # only the visible hero CTA link itself must be hidden.
         self.assertNotIn('class="btn btn-primary btn-lg" data-auth-modal-link', content)
 
     def test_profile_reservation_actions_hidden_when_disabled(self):

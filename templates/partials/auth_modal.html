@@ -6,7 +6,7 @@
   <div class="auth-modal">
     <button type="button" class="auth-modal-close" id="auth-modal-close" aria-label="{% trans "Затвори" %}">&times;</button>
     {% csrf_token %}
-    <div class="cf-turnstile" id="auth-turnstile" data-sitekey="{{ turnstile_site_key }}" data-size="invisible" data-callback="authModalTurnstileCallback"></div>
+    <div class="cf-turnstile" id="auth-turnstile" data-sitekey="{{ turnstile_site_key }}" data-callback="authModalTurnstileCallback"></div>
 
     <p class="auth-modal-note" id="auth-modal-note" hidden></p>
 
