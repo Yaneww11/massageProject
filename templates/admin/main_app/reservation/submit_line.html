@@ -1,0 +1,18 @@
+{% extends "admin/submit_line.html" %}
+{% load i18n unfold %}
+
+{% block submit-row %}
+    {% if show_save and request.user.is_superuser %}
+        {% component "unfold/components/button.html" with submit=1 form=opts.model_name|add:"_form" name="_save_without_validation" variant="danger" class="w-full lg:w-auto" %}
+            {% trans "Запази без валидация" %}
+        {% endcomponent %}
+        <script>
+            document.querySelector('button[name="_save_without_validation"]').addEventListener('click', function (event) {
+                if (!confirm("{% filter escapejs %}{% trans 'Резервацията ще бъде запазена без проверка за работно време, застъпване, почивки и останалите правила. Продължаване?' %}{% endfilter %}")) {
+                    event.preventDefault();
+                }
+            });
+        </script>
+    {% endif %}
+    {{ block.super }}
+{% endblock %}

@@ -1,13 +1,15 @@
 import csv
+import json
 from django import forms
 from django.contrib import admin, messages
+from django.contrib.admin.models import LogEntry
 from django.core.exceptions import ValidationError
 from django.db.models import Max
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.html import format_html
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext, gettext_lazy as _
 from datetime import date
 
 from unfold.admin import ModelAdmin, TabularInline
@@ -225,6 +227,29 @@ class ReservationAdmin(ModelAdmin):
             kwargs['queryset'] = unused.distinct()
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
+    def _saves_without_validation(self, request):
+        return request.user.is_superuser and '_save_without_validation' in request.POST
+
+    def get_form(self, request, obj=None, **kwargs):
+        form_class = super().get_form(request, obj, **kwargs)
+        if not self._saves_without_validation(request):
+            return form_class
+
+        class SkipValidationForm(form_class):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.instance._skip_validation = True
+
+        return SkipValidationForm
+
+    def construct_change_message(self, request, form, formsets, add=False):
+        message = super().construct_change_message(request, form, formsets, add)
+        if not self._saves_without_validation(request):
+            return message
+        rendered = LogEntry(change_message=json.dumps(message)).get_change_message()
+        note = gettext('Запазено без валидация')
+        return f'{rendered} ({note})'.strip()
+
     def save_model(self, request, obj, form, change):
         if 'status' in form.changed_data:
             # Route through the model's own change_status() so audit
@@ -232,6 +257,8 @@ class ReservationAdmin(ModelAdmin):
             obj.change_status(obj.status, user=request.user)
         else:
             super().save_model(request, obj, form, change)
+        if self._saves_without_validation(request):
+            messages.warning(request, _('Резервацията е запазена без валидация.'))
 
 @admin.register(Comment)
 class CommentAdmin(ModelAdmin):

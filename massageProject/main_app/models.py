@@ -473,6 +473,14 @@ class Reservation(models.Model):
         self._loaded_service_id = self.service_id
         self._loaded_final_gallery_id = self.final_gallery_id
         self._loaded_finals_delivered_at = self.finals_delivered_at
+        # Set by the admin's superuser-only "save without validation" button
+        # to bypass full_clean() in both the admin form and save().
+        self._skip_validation = False
+
+    def full_clean(self, *args, **kwargs):
+        if self._skip_validation:
+            return
+        super().full_clean(*args, **kwargs)
 
     @property
     def end_time(self):
