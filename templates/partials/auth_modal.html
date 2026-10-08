@@ -139,6 +139,23 @@
     var registerMiddleName = document.getElementById('auth-register-middle-name');
     var registerError = document.getElementById('auth-register-error');
     var registerSubmitBtn = document.getElementById('auth-register-submit');
+    var registerInputs = {
+        first_name: registerFirstName,
+        last_name: registerLastName,
+        phone_number: registerPhone,
+        password: registerPassword,
+        date_of_birth: registerDob,
+    };
+    function clearRegisterInvalid() {
+        Object.keys(registerInputs).forEach(function (name) {
+            registerInputs[name].classList.remove('is-invalid');
+        });
+    }
+    Object.keys(registerInputs).forEach(function (name) {
+        registerInputs[name].addEventListener('input', function () {
+            this.classList.remove('is-invalid');
+        });
+    });
 
     var state = { email: '', next: '' };
     var turnstileToken = '';
@@ -301,6 +318,7 @@
                 registerDob.value = '';
                 registerMiddleName.value = '';
                 registerError.textContent = '';
+                clearRegisterInvalid();
                 showStep('register');
             }
         }).catch(function () {
@@ -311,6 +329,7 @@
 
     registerSubmitBtn.addEventListener('click', function () {
         registerError.textContent = '';
+        clearRegisterInvalid();
         registerSubmitBtn.disabled = true;
         post('{% url "auth_register" %}', {
             first_name: registerFirstName.value,
@@ -327,6 +346,9 @@
             if (res.data.success) { finishAuth(res.data.redirect); return; }
             if (res.data.errors) {
                 var firstField = Object.keys(res.data.errors)[0];
+                Object.keys(res.data.errors).forEach(function (name) {
+                    if (registerInputs[name]) { registerInputs[name].classList.add('is-invalid'); }
+                });
                 registerError.textContent = firstField ? res.data.errors[firstField][0] : (res.data.error || '');
             } else {
                 registerError.textContent = res.data.error || '';

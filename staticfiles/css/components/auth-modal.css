@@ -112,6 +112,7 @@
 }
 
 .auth-modal-input:focus { border-color: var(--accent-color); }
+.auth-modal-input.is-invalid { border-color: var(--error); }
 
 .auth-modal-error {
     color: var(--error);
