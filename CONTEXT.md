@@ -47,3 +47,7 @@ _Avoid_: selections, picks, client selections
 **Final Delivery**:
 The one-way action of emailing the client a secure link to their Final Gallery once the specialist has uploaded it. Timestamped by `finals_delivered_at`.
 _Avoid_: sending finals
+
+**Time Off**:
+A one-off period (a start and end moment, spanning hours or whole days) during which a Specialist is unavailable even though it falls inside their regular WorkingHours. No new Reservation can be booked or rescheduled into it, by anyone; it cannot be created over an existing active Reservation. Clients see its slots simply as unavailable, never the reason. Recurring unavailability is a WorkingHours change, not Time Off.
+_Avoid_: offline, holiday, block, absence (in code)

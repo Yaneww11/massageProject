@@ -19,7 +19,7 @@ from massageProject.main_app.models import (
     Service, Image, Gallery, HomePage,
     BusinessInfo, Specialist, WorkingHours, Reservation, Comment,
     BusinessWorkingHours, ServiceGroup,
-    SiteConfiguration, PhotoLabel,
+    SiteConfiguration, PhotoLabel, TimeOff,
 )
 from massageProject.main_app.forms import MultipleFileField
 from massageProject.main_app.theme import COLOR_PRESETS, contrast_ratio
@@ -164,6 +164,17 @@ class WorkingHoursAdmin(ModelAdmin):
     def get_day_display(self, obj):
         return dict(WorkingHours.DAYS_OF_WEEK).get(obj.day_of_week)
     get_day_display.short_description = _('Ден')
+
+@admin.register(TimeOff)
+class TimeOffAdmin(ModelAdmin):
+    list_display = ('specialist', 'start', 'end', 'note', 'created_by')
+    list_filter = ('specialist',)
+    readonly_fields = ('created_by', 'created_at')
+
+    def save_model(self, request, obj, form, change):
+        if not change:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
 
 @admin.register(Reservation)
 class ReservationAdmin(ModelAdmin):

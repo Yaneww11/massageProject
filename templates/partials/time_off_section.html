@@ -1,0 +1,136 @@
+{% load i18n %}
+<details class="time-off-section"{% if time_off_entries or time_off_form.is_bound %} open{% endif %}>
+  <summary class="time-off-summary">
+    <i class="fas fa-chevron-right time-off-chevron" aria-hidden="true"></i>
+    <h2 class="section-title">{% trans "Отсъствия" %}</h2>
+    <span class="time-off-count">{{ time_off_entries|length }}</span>
+  </summary>
+
+  <div class="time-off-body">
+    <div class="time-off-intro">
+      <p class="time-off-hint">{% trans "Часовете в тези периоди не се предлагат на клиентите за резервация." %}</p>
+      <button type="button" class="btn-primary-profile" id="time-off-open">
+        <i class="fas fa-plus" aria-hidden="true"></i>{% trans "Добави отсъствие" %}
+      </button>
+    </div>
+
+    {% if time_off_entries %}
+    <ul class="time-off-list">
+      {% for entry in time_off_entries %}
+      <li class="time-off-item{% if entry.is_ongoing %} is-ongoing{% endif %}">
+        <div class="time-off-main">
+          <span class="time-off-period">{{ entry.period_display }}</span>
+          {% if entry.is_ongoing %}<span class="time-off-now">{% trans "В момента" %}</span>{% endif %}
+          {% if role == 'staff' %}<span class="time-off-who">{{ entry.specialist.name }}</span>{% endif %}
+          {% if entry.note %}<span class="time-off-note">{{ entry.note }}</span>{% endif %}
+        </div>
+        <form method="post" action="{% url 'time_off_delete' entry.pk %}" class="time-off-delete"
+              data-confirm="{% trans 'Да изтрием ли това отсъствие?' %}">
+          {% csrf_token %}
+          <button type="submit" class="time-off-delete-btn" aria-label="{% trans 'Изтрий отсъствието' %} {{ entry.period_display }}">
+            <i class="fas fa-trash-alt" aria-hidden="true"></i><span>{% trans "Изтрий" %}</span>
+          </button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty-state-msg">{% trans "Няма предстоящи отсъствия." %}</p>
+    {% endif %}
+  </div>
+</details>
+
+<div id="time-off-modal" class="review-modal-overlay" style="display:none;" aria-modal="true" role="dialog"
+     aria-labelledby="time-off-modal-title"{% if time_off_form.is_bound %} data-open-on-load{% endif %}>
+  <div class="review-modal-content time-off-modal-content">
+    <button type="button" class="modal-close" id="time-off-close" aria-label="{% trans 'Затвори' %}">&times;</button>
+    <h3 class="modal-title" id="time-off-modal-title">{% trans "Ново отсъствие" %}</h3>
+
+    <form method="post" action="{% url 'time_off_create' %}" id="time-off-form" novalidate>
+      {% csrf_token %}
+      {% if time_off_form.non_field_errors %}
+      <div class="time-off-errors" role="alert">
+        {% for error in time_off_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+      </div>
+      {% endif %}
+
+      {% if time_off_form.specialist %}
+      <div class="form-group">
+        <label class="form-label" for="{{ time_off_form.specialist.id_for_label }}">{{ site_config.specialist_singular|capfirst }}</label>
+        {{ time_off_form.specialist }}
+        {% for error in time_off_form.specialist.errors %}<p class="time-off-field-error">{{ error }}</p>{% endfor %}
+      </div>
+      {% endif %}
+
+      <div class="time-off-pair">
+        {% for field in time_off_form %}{% if field.name == 'start_date' or field.name == 'end_date' %}
+        <div class="form-group">
+          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% for error in field.errors %}<p class="time-off-field-error">{{ error }}</p>{% endfor %}
+        </div>
+        {% endif %}{% endfor %}
+      </div>
+
+      <label class="time-off-all-day" for="{{ time_off_form.all_day.id_for_label }}">
+        {{ time_off_form.all_day }}
+        <span>{{ time_off_form.all_day.label }}</span>
+      </label>
+
+      <div class="time-off-pair" id="time-off-times">
+        {% for field in time_off_form %}{% if field.name == 'start_time' or field.name == 'end_time' %}
+        <div class="form-group">
+          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+        </div>
+        {% endif %}{% endfor %}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="{{ time_off_form.note.id_for_label }}">{{ time_off_form.note.label }}</label>
+        {{ time_off_form.note }}
+        <p class="time-off-field-hint">{% trans "Вижда се само от вас и персонала." %}</p>
+      </div>
+
+      <button type="submit" class="btn-primary-profile btn-full">{% trans "Добави отсъствие" %}</button>
+    </form>
+  </div>
+</div>
+
+<script>
+(function () {
+  var modal = document.getElementById('time-off-modal');
+  var allDay = document.getElementById('{{ time_off_form.all_day.id_for_label }}');
+  var times = document.getElementById('time-off-times');
+  var startDate = document.getElementById('{{ time_off_form.start_date.id_for_label }}');
+  var endDate = document.getElementById('{{ time_off_form.end_date.id_for_label }}');
+
+  function openModal() { modal.style.display = 'flex'; startDate.focus(); }
+  function closeModal() { modal.style.display = 'none'; }
+  function syncTimes() { times.hidden = allDay.checked; }
+
+  document.getElementById('time-off-open').addEventListener('click', openModal);
+  document.getElementById('time-off-close').addEventListener('click', closeModal);
+  modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && modal.style.display !== 'none') closeModal();
+  });
+
+  allDay.addEventListener('change', syncTimes);
+  syncTimes();
+
+  // A one-day absence is the common case: follow the start date until the
+  // end date is set to something later.
+  startDate.addEventListener('change', function () {
+    if (!endDate.value || endDate.value < startDate.value) endDate.value = startDate.value;
+  });
+
+  document.querySelectorAll('.time-off-delete').forEach(function (form) {
+    form.addEventListener('submit', function (e) {
+      if (!window.confirm(form.dataset.confirm)) e.preventDefault();
+    });
+  });
+
+  if (modal.hasAttribute('data-open-on-load')) openModal();
+})();
+</script>

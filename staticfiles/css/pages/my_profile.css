@@ -1130,3 +1130,229 @@
     color: var(--text-muted);
     margin: 0;
 }
+
+/* ── Time Off ("Отсъствия") ──────────────────────────── */
+.time-off-section {
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1.5rem;
+}
+
+.time-off-summary {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    list-style: none;
+    padding: 0.25rem 0;
+}
+
+.time-off-summary::-webkit-details-marker {
+    display: none;
+}
+
+.time-off-summary:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 4px;
+    border-radius: var(--radius-sm);
+}
+
+.time-off-summary .section-title {
+    margin: 0;
+}
+
+.time-off-chevron {
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+    transition: transform 0.2s ease;
+}
+
+.time-off-section[open] .time-off-chevron {
+    transform: rotate(90deg);
+}
+
+.time-off-count {
+    min-width: 1.6rem;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    background: var(--bg-light);
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    text-align: center;
+}
+
+.time-off-intro {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin: 0.75rem 0 1.25rem;
+}
+
+.time-off-hint {
+    margin: 0;
+    max-width: 60ch;
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+}
+
+.time-off-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.time-off-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    border-left: 3px solid var(--border-color);
+}
+
+.time-off-item + .time-off-item {
+    border-top: 1px solid var(--border-color);
+}
+
+.time-off-item.is-ongoing {
+    border-left-color: var(--primary-color);
+    background: var(--bg-raised);
+}
+
+.time-off-main {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.9rem;
+    min-width: 0;
+}
+
+.time-off-period {
+    font-family: var(--font-heading);
+    font-size: var(--fs-base);
+    color: var(--text-main);
+    font-variant-numeric: tabular-nums;
+}
+
+.time-off-now {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.time-off-who {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.time-off-note {
+    flex-basis: 100%;
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+}
+
+.time-off-delete {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.time-off-delete-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.75rem;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-family: var(--font-main);
+    font-size: var(--fs-xs);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.time-off-delete-btn:hover,
+.time-off-delete-btn:focus-visible {
+    color: var(--error);
+    border-color: var(--error);
+    outline: none;
+}
+
+.time-off-modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.time-off-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 1rem;
+}
+
+.time-off-pair[hidden] {
+    display: none;
+}
+
+.time-off-all-day {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    font-size: var(--fs-sm);
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.time-off-all-day input {
+    accent-color: var(--primary-color);
+    width: 1.05rem;
+    height: 1.05rem;
+}
+
+.time-off-errors {
+    margin-bottom: 1.25rem;
+    padding: 0.75rem 1rem;
+    border-left: 3px solid var(--error);
+    background: var(--error-light);
+    color: var(--text-main);
+    font-size: var(--fs-sm);
+}
+
+.time-off-errors p {
+    margin: 0;
+}
+
+.time-off-field-error {
+    margin: 0.35rem 0 0;
+    color: var(--error);
+    font-size: var(--fs-xs);
+}
+
+.time-off-field-hint {
+    margin: 0.35rem 0 0;
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+}
+
+@media (max-width: 480px) {
+    .time-off-item {
+        align-items: flex-start;
+    }
+    .time-off-delete-btn span {
+        display: none;
+    }
+    .time-off-pair {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .time-off-chevron {
+        transition: none;
+    }
+}

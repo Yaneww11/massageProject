@@ -556,6 +556,15 @@ class Reservation(models.Model):
                 }
             )
 
+        # Time Off — gated like the lead time check, so an unrelated edit on an
+        # already-booked reservation isn't blocked by Time Off added later.
+        if is_new_or_rescheduled and TimeOff.objects.filter(
+            specialist_id=self.specialist_id,
+            start__lt=timezone.make_aware(end_dt),
+            end__gt=timezone.make_aware(start_dt),
+        ).exists():
+            raise ValidationError(_("%(name)s отсъства в избрания час.") % {'name': self.specialist.name})
+
         # 3. Overlap check
         existing_reservations = Reservation.objects.select_related('service').filter(
             specialist=self.specialist,
@@ -717,6 +726,111 @@ class Reservation(models.Model):
 
     def __str__(self):
         return f"{self.service.name} - {self.date} {self.time.strftime('%H:%M')}"
+
+
+class TimeOff(models.Model):
+    specialist = models.ForeignKey(
+        Specialist,
+        on_delete=models.CASCADE,
+        related_name='time_off',
+        help_text=_('Показва се в секция „Отсъствия“ в профила на терапевта и на персонала.'),
+    )
+    start = models.DateTimeField(
+        help_text=_(
+            'Начало на отсъствието (на кръгъл час или половин час). Показва се в секция '
+            '„Отсъствия“ в профила; часовете в този период не се предлагат на клиентите за резервация.'
+        ),
+    )
+    end = models.DateTimeField(
+        help_text=_(
+            'Край на отсъствието (на кръгъл час или половин час). Показва се в секция '
+            '„Отсъствия“ в профила; часовете в този период не се предлагат на клиентите за резервация.'
+        ),
+    )
+    note = models.CharField(
+        max_length=255,
+        blank=True,
+        default='',
+        help_text=_(
+            'Лична бележка — показва се само в секция „Отсъствия“ в профила на терапевта и '
+            'на персонала, никога на клиентите.'
+        ),
+    )
+    created_by = models.ForeignKey(
+        'accounts.CustomUser',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='time_off_created',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['start']
+        verbose_name = _('Отсъствие')
+        verbose_name_plural = _('Отсъствия')
+
+    def clean(self):
+        if not (self.specialist_id and self.start and self.end):
+            return
+
+        if self.end <= self.start:
+            raise ValidationError(_('Краят на отсъствието трябва да е след началото.'))
+
+        for moment in (self.start, self.end):
+            if moment.minute not in (0, 30) or moment.second or moment.microsecond:
+                raise ValidationError(_('Началото и краят трябва да са на кръгъл час или половин час.'))
+
+        # Only on create: there is no edit, and an entry whose end has since
+        # passed must stay re-savable (e.g. a note fix in the admin).
+        if self.pk is None and self.end <= timezone.now():
+            raise ValidationError(_('Краят на отсъствието трябва да е в бъдещето.'))
+
+        candidates = Reservation.objects.select_related('service').filter(
+            specialist_id=self.specialist_id,
+            status=Reservation.STATUS_ACTIVE,
+            date__range=(timezone.localtime(self.start).date(), timezone.localtime(self.end).date()),
+        ).order_by('date', 'time')
+        clashes = []
+        for res in candidates:
+            res_start = timezone.make_aware(datetime.combine(res.date, res.time))
+            res_end = res_start + timedelta(minutes=res.service.duration_in_minutes)
+            if res_start < self.end and res_end > self.start:
+                clashes.append(f"{res.date:%d.%m.%Y} {res.time:%H:%M} ({res.service.name})")
+        if clashes:
+            raise ValidationError(
+                _('Отсъствието се застъпва с активни резервации: %(clashes)s.') % {'clashes': '; '.join(clashes)}
+            )
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            # Same lock as Reservation.save(), so a booking and a Time Off for
+            # the same specialist can't both pass their clash checks at once.
+            Specialist.objects.select_for_update().get(pk=self.specialist_id)
+            self.full_clean()
+            super().save(*args, **kwargs)
+
+    @property
+    def is_ongoing(self):
+        return self.start <= timezone.now() < self.end
+
+    @property
+    def period_display(self):
+        """"12.10.2026", "12.10.2026 - 16.10.2026" for whole days (as created
+        with "all day"), "12.10.2026, 12:00 - 14:00" within one day, else the
+        full start and end moments."""
+        start, end = timezone.localtime(self.start), timezone.localtime(self.end)
+        if start.time() == end.time() == datetime.min.time():
+            last_day = (end - timedelta(days=1)).date()
+            if last_day == start.date():
+                return f"{start:%d.%m.%Y}"
+            return f"{start:%d.%m.%Y} - {last_day:%d.%m.%Y}"
+        if start.date() == end.date():
+            return f"{start:%d.%m.%Y}, {start:%H:%M} - {end:%H:%M}"
+        return f"{start:%d.%m.%Y %H:%M} - {end:%d.%m.%Y %H:%M}"
+
+    def __str__(self):
+        return f"{self.specialist.name}: {timezone.localtime(self.start):%d.%m.%Y %H:%M} - {timezone.localtime(self.end):%d.%m.%Y %H:%M}"
 
 class Gallery(models.Model):
     TYPE_HOMEPAGE = 'homepage'

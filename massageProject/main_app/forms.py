@@ -1,10 +1,13 @@
+from datetime import datetime, time, timedelta
+
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from massageProject.main_app.mixins import DisableFieldMixin
-from massageProject.main_app.models import Reservation, Comment
+from massageProject.main_app.models import Reservation, Comment, Specialist, TimeOff
 
 
 class MultipleFileInput(forms.ClearableFileInput):
@@ -116,6 +119,57 @@ class CommentForm(forms.ModelForm):
             'class': 'form-control',
             'placeholder': _('Твоя коментар'),
         })
+
+
+TIME_OFF_TIME_CHOICES = [('', '—')] + [
+    (f'{h:02d}:{m:02d}', f'{h:02d}:{m:02d}') for h in range(24) for m in (0, 30)
+]
+
+
+class TimeOffForm(forms.ModelForm):
+    """Dates + optional 30-minute times, turned into the model's start/end.
+    Pass `specialist` to fix the entry to that Specialist (specialist role);
+    without it the form offers a Specialist dropdown (staff role)."""
+    start_date = forms.DateField(label=_('От дата'), widget=forms.DateInput(attrs={'type': 'date'}))
+    end_date = forms.DateField(label=_('До дата'), widget=forms.DateInput(attrs={'type': 'date'}))
+    all_day = forms.BooleanField(label=_('Цели дни'), required=False)
+    start_time = forms.ChoiceField(label=_('От час'), choices=TIME_OFF_TIME_CHOICES, required=False)
+    end_time = forms.ChoiceField(label=_('До час'), choices=TIME_OFF_TIME_CHOICES, required=False)
+
+    class Meta:
+        model = TimeOff
+        fields = ['specialist', 'note']
+        labels = {'note': _('Бележка (по избор)')}
+
+    def __init__(self, *args, specialist=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if specialist is not None:
+            del self.fields['specialist']
+            self.instance.specialist = specialist
+        else:
+            self.fields['specialist'].queryset = Specialist.objects.order_by('name')
+        for field in self.fields.values():
+            field.error_messages['required'] = _('Полето е задължително.')
+            if not isinstance(field, forms.BooleanField):
+                field.widget.attrs.setdefault('class', 'form-textarea')
+
+    def clean(self):
+        cleaned = super().clean()
+        start_date, end_date = cleaned.get('start_date'), cleaned.get('end_date')
+        if not (start_date and end_date):
+            return cleaned
+        if cleaned.get('all_day'):
+            start = datetime.combine(start_date, time.min)
+            end = datetime.combine(end_date + timedelta(days=1), time.min)
+        else:
+            start_time, end_time = cleaned.get('start_time'), cleaned.get('end_time')
+            if not (start_time and end_time):
+                raise ValidationError(_('Изберете начален и краен час или отметнете „Цели дни“.'))
+            start = datetime.combine(start_date, datetime.strptime(start_time, '%H:%M').time())
+            end = datetime.combine(end_date, datetime.strptime(end_time, '%H:%M').time())
+        self.instance.start = timezone.make_aware(start)
+        self.instance.end = timezone.make_aware(end)
+        return cleaned
 
 
 class ProofingGalleryUploadForm(forms.Form):

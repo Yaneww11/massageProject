@@ -5,7 +5,8 @@ from massageProject.main_app.views import Index, ServicesDashboard, ReservationP
     submit_comment, GalleryView, GalleryAlbumView, PhotoProofingGallery, mark_photo, toggle_photo_label, \
     save_photo_comment, finalize_photo_proofing, serve_proof_image, download_reservation_ics, \
     ProofingGalleryUploadView, MarkedPhotosView, serve_marked_photo_image, download_marked_photo, \
-    download_marked_photos_zip, FinalGalleryUploadView, serve_final_gallery_image, download_final_gallery
+    download_marked_photos_zip, FinalGalleryUploadView, serve_final_gallery_image, download_final_gallery, \
+    TimeOffCreateView, delete_time_off
 
 urlpatterns = [
     path('', Index.as_view(), name='index'),
@@ -17,6 +18,8 @@ urlpatterns = [
     path('comments/', AllCommentsView.as_view(), name='all_comments'),
     path('submit-comment/', submit_comment, name='submit_comment'),
     path('profile/', ProfilePage.as_view(), name='profile_page'),
+    path('profile/time-off/add/', TimeOffCreateView.as_view(), name='time_off_create'),
+    path('profile/time-off/<int:pk>/delete/', delete_time_off, name='time_off_delete'),
     path('profile/reservations/<int:reservation_id>/calendar/', download_reservation_ics, name='reservation_calendar_ics'),
     path('profile/gallery-upload/', ProofingGalleryUploadView.as_view(), name='proofing_gallery_upload'),
     path('profile/reservations/<int:reservation_id>/marked-photos/', MarkedPhotosView.as_view(), name='marked_photos'),

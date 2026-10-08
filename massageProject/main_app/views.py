@@ -34,11 +34,11 @@ from massageProject.main_app.emails import send_gallery_ready_email, send_marks_
 from massageProject.main_app.ics import build_reservation_ics
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
     ReservationDeleteForm, CommentForm, UserNameForm, ProofingGalleryUploadForm, \
-    ProofingLabelFormSet, FinalGalleryUploadForm
+    ProofingLabelFormSet, FinalGalleryUploadForm, TimeOffForm
 from massageProject.main_app.mixins import BookingEnabledMixin, booking_enabled_required, \
     CommentsEnabledMixin, comments_enabled_required, PhotographerModeMixin
 from massageProject.main_app.models import Service, Specialist, Reservation, Comment, WorkingHours, ServiceGroup, \
-    Gallery, Image, ImageProof, PhotoLabel
+    Gallery, Image, ImageProof, PhotoLabel, TimeOff
 
 logger = logging.getLogger(__name__)
 
@@ -84,6 +84,13 @@ def check_availability(request):
         status=Reservation.STATUS_ACTIVE
     )
 
+    # 4. Time Off overlapping the day — shown to the client as plain 'taken'
+    time_off = list(TimeOff.objects.filter(
+        specialist=specialist,
+        start__lt=timezone.make_aware(datetime.combine(date_obj + timedelta(days=1), datetime.min.time())),
+        end__gt=timezone.make_aware(datetime.combine(date_obj, datetime.min.time())),
+    ))
+
     while current_dt + duration <= end_dt:
         slot_time = current_dt.time()
         slot_end_dt = current_dt + duration
@@ -106,6 +113,12 @@ def check_availability(request):
                     is_available = False
                     reason = 'taken'
                     break
+
+            slot_start_aware = timezone.make_aware(current_dt)
+            slot_end_aware = timezone.make_aware(slot_end_dt)
+            if is_available and any(t.start < slot_end_aware and t.end > slot_start_aware for t in time_off):
+                is_available = False
+                reason = 'taken'
 
         slots.append({
             'time': slot_time.strftime('%H:%M'),
@@ -946,12 +959,14 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
             context['specialists'] = list(Specialist.objects.order_by('name'))
             base_qs = Reservation.objects.all()
             context.update(_build_reservations_table_context(self.request, base_qs, is_staff=True))
+            context.update(_build_time_off_context(None, kwargs.get('time_off_form')))
         elif specialist_link and user.has_perm('main_app.view_specialist_reservations'):
             context['role'] = 'specialist'
             # _("график") is nested in an f-string; makemessages can't extract it — the .po/.mo entries for it are maintained by hand.
             context['title'] = f'{user.get_full_name()} - {_("график")}'
             base_qs = Reservation.objects.filter(specialist=specialist_link)
             context.update(_build_reservations_table_context(self.request, base_qs, is_staff=False))
+            context.update(_build_time_off_context(specialist_link, kwargs.get('time_off_form')))
         else:
             context['role'] = 'client'
             user_qs = Reservation.objects.filter(user=user)
@@ -1066,6 +1081,55 @@ def _build_reservations_table_context(request, base_qs, is_staff):
         'specialist_id': specialist_id,
         'query': query,
     }
+
+
+def _time_off_scope(user):
+    """The Specialist whose Time Off `user` may manage, or None for staff
+    (any Specialist). Anyone else is refused."""
+    if user.has_perm('main_app.view_all_reservations'):
+        return None
+    specialist = getattr(user, 'specialist_profile', None)
+    if specialist and user.has_perm('main_app.view_specialist_reservations'):
+        return specialist
+    raise PermissionDenied
+
+
+def _build_time_off_context(specialist, form=None):
+    """Upcoming/ongoing Time Off for the profile page's "Отсъствия" section.
+    `specialist` None means staff: every Specialist's entries."""
+    entries = TimeOff.objects.filter(end__gt=timezone.now()).select_related('specialist')
+    if specialist is not None:
+        entries = entries.filter(specialist=specialist)
+    return {
+        'time_off_entries': list(entries),
+        'time_off_form': form or TimeOffForm(specialist=specialist),
+    }
+
+
+class TimeOffCreateView(ProfilePage):
+    """Invalid submissions re-render the whole profile page with the bound
+    form, so the errors show inside the reopened modal."""
+    http_method_names = ['post']
+
+    def post(self, request, *args, **kwargs):
+        form = TimeOffForm(request.POST, specialist=_time_off_scope(request.user))
+        if form.is_valid():
+            time_off = form.save(commit=False)
+            time_off.created_by = request.user
+            time_off.save()
+            messages.success(request, _('Отсъствието беше добавено.'))
+            return redirect('profile_page')
+        return self.render_to_response(self.get_context_data(time_off_form=form))
+
+
+@login_required
+@require_POST
+def delete_time_off(request, pk: int):
+    specialist = _time_off_scope(request.user)
+    entries = TimeOff.objects.all() if specialist is None else TimeOff.objects.filter(specialist=specialist)
+    get_object_or_404(entries, pk=pk).delete()
+    messages.success(request, _('Отсъствието беше изтрито.'))
+    return redirect('profile_page')
 
 
 @login_required
