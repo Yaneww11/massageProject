@@ -375,6 +375,7 @@
                             setTimeout(closeModal, 3000);
                         } else {
                             submitBtn.disabled = false;
+                            alert(data.error || '{% trans "Грешка при изпращане." %}');
                         }
                     })
                     .catch(function () { submitBtn.disabled = false; });

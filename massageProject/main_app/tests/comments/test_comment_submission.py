@@ -31,6 +31,19 @@ class SubmitCommentAuthTest(BugFixTestBase):
         self.assertEqual(comment.author, 'John Doe')
         self.assertEqual(comment.user, self.user)
 
+    def test_user_without_name_is_refused_and_email_never_becomes_author(self):
+        self.user.first_name = ''
+        self.user.last_name = ''
+        self.user.phone_number = None
+        self.user.save()
+        self.login()
+        response = self.client.post(
+            reverse('submit_comment'), {'content': 'Great service', 'rating': 5}
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(response.json()['success'])
+        self.assertEqual(Comment.objects.count(), 0)
+
 
 class SubmitCommentRateLimitTest(BugFixTestBase):
     """B09 — one comment per IP per 60 seconds."""

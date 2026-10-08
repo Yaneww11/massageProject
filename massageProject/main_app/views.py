@@ -293,7 +293,7 @@ class AboutPage(TemplateView):
             comment = form.save(commit=False)
             if user.is_authenticated:
                 comment.user = user
-                comment.author = user.get_full_name() or user.phone_number or user.email
+                comment.author = user.get_full_name()
             comment.save()
             messages.success(request, _('Вашият коментар е изпратен успешно и ще бъде публикуван след преглед.'))
             return redirect('about_page')
@@ -330,10 +330,13 @@ def submit_comment(request):
     if len(content) > 2000:
         return JsonResponse({'success': False, 'error': _('Мнението не може да надвишава 2000 символа.')}, status=400)
 
-    comment = Comment(content=content, rating=rating, is_reviewed=False)
     user = request.user
+    if not (user.first_name and user.last_name):
+        return JsonResponse({'success': False, 'error': _('Моля, въведете име и фамилия чрез формата за мнение на страница „За нас“, преди да публикувате мнение.')}, status=400)
+
+    comment = Comment(content=content, rating=rating, is_reviewed=False)
     comment.user = user
-    comment.author = user.get_full_name() or user.phone_number or user.email
+    comment.author = user.get_full_name()
     reservation_id = request.POST.get('reservation_id')
     if reservation_id:
         try:
