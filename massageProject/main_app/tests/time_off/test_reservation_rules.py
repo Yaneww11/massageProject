@@ -65,3 +65,34 @@ class ReservationBlockedByTimeOffTest(TimeOffTestBase):
         with self.assertRaises(ValidationError) as ctx:
             self._book(12)
         self.assertIn(self.specialist.name, ' '.join(ctx.exception.messages))
+
+
+class ReservationSwitchIntoTimeOffTest(TimeOffTestBase):
+    """Moving an existing booking into Time Off by changing who or what is
+    booked, rather than when, is still a reschedule into it."""
+
+    def setUp(self):
+        super().setUp()
+        self.other = Specialist.objects.create(name='Other', description='d', phone_number='0888000111', email='o@e.com')
+        WorkingHours.objects.create(specialist=self.other, day_of_week=self.day.weekday(), start_time=time(9), end_time=time(17))
+
+    def test_switching_to_specialist_with_time_off_refused(self):
+        reservation = Reservation.objects.create(
+            user=self.user, service=self.service, specialist=self.other, date=self.day, time=time(12),
+        )
+        self.make_time_off(aware(self.day, 12), aware(self.day, 14))
+        reservation.specialist = self.specialist
+        with self.assertRaises(ValidationError):
+            reservation.save()
+
+    def test_switching_to_longer_service_reaching_time_off_refused(self):
+        from massageProject.main_app.models import Service
+        reservation = Reservation.objects.create(
+            user=self.user, service=self.service, specialist=self.specialist, date=self.day, time=time(11),
+        )
+        self.make_time_off(aware(self.day, 12), aware(self.day, 14))
+        reservation.service = Service.objects.create(
+            name='Long', description='d', price=80, duration_in_minutes=120, short_description='s',
+        )
+        with self.assertRaises(ValidationError):
+            reservation.save()

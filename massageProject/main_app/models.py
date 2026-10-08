@@ -469,6 +469,8 @@ class Reservation(models.Model):
         self._loaded_date = self.date
         self._loaded_time = self.time
         self._loaded_status = self.status
+        self._loaded_specialist_id = self.specialist_id
+        self._loaded_service_id = self.service_id
         self._loaded_final_gallery_id = self.final_gallery_id
         self._loaded_finals_delivered_at = self.finals_delivered_at
 
@@ -558,7 +560,14 @@ class Reservation(models.Model):
 
         # Time Off — gated like the lead time check, so an unrelated edit on an
         # already-booked reservation isn't blocked by Time Off added later.
-        if is_new_or_rescheduled and TimeOff.objects.filter(
+        # Switching specialist or service also moves the booking into a
+        # different stretch of someone's time, so it counts as a reschedule.
+        moved = (
+            is_new_or_rescheduled
+            or self.specialist_id != self._loaded_specialist_id
+            or self.service_id != self._loaded_service_id
+        )
+        if moved and TimeOff.objects.filter(
             specialist_id=self.specialist_id,
             start__lt=timezone.make_aware(end_dt),
             end__gt=timezone.make_aware(start_dt),
