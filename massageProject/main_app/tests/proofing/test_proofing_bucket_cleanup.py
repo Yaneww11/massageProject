@@ -301,3 +301,84 @@ class PurgeCommandTest(BucketLayoutBase):
         _run_purge()
         self.reservation.refresh_from_db()
         self.assertIsNotNone(self.reservation.proofs_purged_at)
+
+
+def _run_thumbnail_purge(*args):
+    out = io.StringIO()
+    with patch('massageProject.main_app.management.commands.purge_marked_thumbnails.logger'):
+        call_command('purge_marked_thumbnails', *args, stdout=out)
+    return out.getvalue()
+
+
+class PurgeMarkedThumbnailsTest(BucketLayoutBase):
+    """Marked rows are never deleted, so their cached thumbnail outlives the
+    photographer's need for it. Once the reservation is cancelled or its finals
+    are delivered, the command clears it."""
+
+    def setUp(self):
+        super().setUp()
+        self.marked = self._add_image(self.proofing_gallery, name='keep.jpg')
+        ImageProof.objects.create(image=self.marked, is_marked=True)
+        self.thumbnail = self.marked.marked_thumbnail_path
+        default_storage.save(self.thumbnail, SimpleUploadedFile('t.webp', b'x'))
+
+    def _deliver_finals(self):
+        final = Gallery.objects.create(
+            gallery_type=Gallery.TYPE_FINAL, draft_reservation=self.reservation,
+        )
+        Reservation.all_objects.filter(pk=self.reservation.pk).update(
+            final_gallery=final, finals_delivered_at=timezone.now(),
+        )
+
+    def test_active_reservation_keeps_its_thumbnails(self):
+        _run_thumbnail_purge()
+        self.assertTrue(default_storage.exists(self.thumbnail))
+
+    def test_finals_ready_but_not_delivered_keeps_its_thumbnails(self):
+        final = Gallery.objects.create(
+            gallery_type=Gallery.TYPE_FINAL, draft_reservation=self.reservation,
+        )
+        Reservation.all_objects.filter(pk=self.reservation.pk).update(final_gallery=final)
+        _run_thumbnail_purge()
+        self.assertTrue(default_storage.exists(self.thumbnail))
+
+    def test_deleted_reservation_loses_its_thumbnails(self):
+        Reservation.all_objects.filter(pk=self.reservation.pk).update(
+            status=Reservation.STATUS_DELETED,
+        )
+        _run_thumbnail_purge()
+        self.assertFalse(default_storage.exists(self.thumbnail))
+
+    def test_finals_delivered_reservation_loses_its_thumbnails(self):
+        self._deliver_finals()
+        _run_thumbnail_purge()
+        self.assertFalse(default_storage.exists(self.thumbnail))
+
+    def test_the_photos_themselves_are_kept(self):
+        self._deliver_finals()
+        _run_thumbnail_purge()
+        self.assertTrue(default_storage.exists(self.marked.image.name))
+        self.assertTrue(Image.objects.filter(pk=self.marked.pk).exists())
+
+    def test_other_reservations_thumbnails_are_untouched(self):
+        other_gallery = Gallery.objects.create(gallery_type=Gallery.TYPE_PROOFING)
+        Reservation.objects.create(
+            user=self.user, service=self.service, specialist=self.specialist,
+            date=self.reservation.date, time=time_cls(14, 0), gallery=other_gallery,
+        )
+        other = self._add_image(other_gallery, name='other.jpg')
+        default_storage.save(other.marked_thumbnail_path, SimpleUploadedFile('t.webp', b'x'))
+        self._deliver_finals()
+        _run_thumbnail_purge()
+        self.assertTrue(default_storage.exists(other.marked_thumbnail_path))
+
+    def test_dry_run_reports_without_deleting(self):
+        self._deliver_finals()
+        output = _run_thumbnail_purge('--dry-run')
+        self.assertTrue(default_storage.exists(self.thumbnail))
+        self.assertIn('1 thumbnail(s) to purge', output)
+
+    def test_empty_folder_is_a_no_op(self):
+        default_storage.delete(self.thumbnail)
+        output = _run_thumbnail_purge()
+        self.assertIn('Purged 0 thumbnail(s)', output)
