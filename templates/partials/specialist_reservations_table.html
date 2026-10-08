@@ -80,7 +80,7 @@
           <td data-label="{% trans 'ЧАС' %}">{{ r.time|time:"H:i" }}</td>
           <td data-label="{% trans 'УСЛУГА' %}">{{ r.service.name }}</td>
           {% if role == 'staff' %}<td data-label="{{ site_config.specialist_singular|capfirst }}">{{ r.specialist.name }}</td>{% endif %}
-          <td data-label="{% trans 'КЛИЕНТ' %}">{{ r.user.get_full_name|default:r.user.phone_number }}</td>
+          <td data-label="{% trans 'КЛИЕНТ' %}">{{ r.user.get_full_name|default:r.user.phone_number|default:r.user.email }}</td>
           <td data-label="{% trans 'СТАТУС' %}">
             <span class="phase-badge phase-{{ r.phase }}">
               {% if is_photographer_website %}{{ r.phase_display }}{% else %}{{ r.get_status_display }}{% endif %}

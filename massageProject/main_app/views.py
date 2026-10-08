@@ -293,7 +293,7 @@ class AboutPage(TemplateView):
             comment = form.save(commit=False)
             if user.is_authenticated:
                 comment.user = user
-                comment.author = user.get_full_name() or user.phone_number
+                comment.author = user.get_full_name() or user.phone_number or user.email
             comment.save()
             messages.success(request, _('Вашият коментар е изпратен успешно и ще бъде публикуван след преглед.'))
             return redirect('about_page')
@@ -333,7 +333,7 @@ def submit_comment(request):
     comment = Comment(content=content, rating=rating, is_reviewed=False)
     user = request.user
     comment.user = user
-    comment.author = user.get_full_name() or str(user.phone_number)
+    comment.author = user.get_full_name() or user.phone_number or user.email
     reservation_id = request.POST.get('reservation_id')
     if reservation_id:
         try:
@@ -1262,7 +1262,7 @@ def serve_proof_image(request, token):
             raise PermissionDenied
 
     image, reservation = _get_owned_proofing_image(request, data['image_id'])
-    watermark_identifier = f'{request.user.get_full_name() or request.user.phone_number} · #{reservation.pk}'
+    watermark_identifier = f'{request.user.get_full_name() or request.user.phone_number or request.user.email} · #{reservation.pk}'
     path = _generate_proof_derivative(image, request.user, watermark_identifier)
     return redirect(_signed_proof_url(path))
 
@@ -1343,7 +1343,7 @@ class PhotoProofingGallery(LoginRequiredMixin, TemplateView):
             {'key': label.pk, 'name': label.name}
             for label in reservation.gallery.photo_labels.all()
         ]
-        watermark_identifier = f'{user.get_full_name() or user.phone_number} · #{reservation.pk}'
+        watermark_identifier = f'{user.get_full_name() or user.phone_number or user.email} · #{reservation.pk}'
 
         context['title'] = _('Проверка на снимки')
         context['reservation'] = reservation

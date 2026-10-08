@@ -510,11 +510,9 @@ class Reservation(models.Model):
                 )
             })
 
-        # Use _id to avoid RelatedObjectDoesNotExist if the field is not set
         if not all([self.service_id, self.specialist_id, self.date, self.time]):
             return
 
-        # 0. Only validate Active reservations for overlaps
         if self.status != self.STATUS_ACTIVE:
             return
 
@@ -1297,7 +1295,7 @@ class Comment(models.Model):
         if self.author:
             return self.author
         if self.user_id:
-            return self.user.get_full_name() or str(self.user.phone_number)
+            return self.user.get_full_name() or self.user.phone_number or self.user.email
         return 'Клиент'
 
 

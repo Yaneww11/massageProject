@@ -75,6 +75,7 @@ class BookingRegistrationForm(PhoneClaimFormMixin, forms.ModelForm):
         self._email = email
         self.fields['first_name'].required = True
         self.fields['last_name'].required = True
+        self.fields['phone_number'].required = True
         self.fields['date_of_birth'].required = False
         self.fields['phone_number'].widget.attrs.update({'placeholder': '0899999999'})
         for field in self.fields.values():

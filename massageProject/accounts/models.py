@@ -26,6 +26,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     phone_number = models.CharField(
         max_length=15,
         unique=True,
+        null=True,
+        blank=True,
         validators=[
             RegexValidator(
                 regex=r'^(\+359|0)?8[789]\d{7}$',

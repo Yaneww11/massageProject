@@ -8,7 +8,7 @@
     <li class="gallery-draft-item">
       <span class="gallery-draft-label">
         {{ draft.draft_reservation.date|date:"d.m.Y" }} &middot;
-        {{ draft.draft_reservation.user.get_full_name|default:draft.draft_reservation.user.phone_number }}
+        {{ draft.draft_reservation.user.get_full_name|default:draft.draft_reservation.user.phone_number|default:draft.draft_reservation.user.email }}
         &middot; {% blocktrans count counter=draft.image_count %}{{ counter }} снимка{% plural %}{{ counter }} снимки{% endblocktrans %}
       </span>
       <button type="button" class="btn-outline gallery-draft-discard" data-gallery-id="{{ draft.pk }}">

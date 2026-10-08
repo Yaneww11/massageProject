@@ -71,3 +71,9 @@ class BookingRegistrationFormTest(TestCase):
         form = BookingRegistrationForm(data=data, email='weakpass@example.com')
         self.assertFalse(form.is_valid())
         self.assertIn('password', form.errors)
+
+    def test_phone_number_is_required(self):
+        data = {**self.VALID_DATA, 'phone_number': ''}
+        form = BookingRegistrationForm(data=data, email='nophone@example.com')
+        self.assertFalse(form.is_valid())
+        self.assertIn('phone_number', form.errors)

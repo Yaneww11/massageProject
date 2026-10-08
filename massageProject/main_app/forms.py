@@ -182,7 +182,7 @@ class ProofingGalleryUploadForm(forms.Form):
             self.fields['reservation'].queryset = reservation_queryset
         self.fields['reservation'].label_from_instance = lambda r: (
             f"{r.specialist.name} — {r.date} {r.time.strftime('%H:%M')} — {r.service.name} — "
-            f"{r.user.get_full_name() or r.user.phone_number}"
+            f"{r.user.get_full_name() or r.user.phone_number or r.user.email}"
         )
         self.fields['reservation'].widget.attrs.update({'class': 'form-textarea'})
         self.fields['images'].widget.attrs.update({'class': 'form-textarea'})

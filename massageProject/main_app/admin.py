@@ -199,7 +199,7 @@ class ReservationAdmin(ModelAdmin):
     )
 
     def get_client_name(self, obj):
-        return obj.user.get_full_name() or obj.user.phone_number
+        return obj.user.get_full_name() or obj.user.phone_number or obj.user.email
     get_client_name.short_description = _('Клиент')
 
     def phase_badge(self, obj):

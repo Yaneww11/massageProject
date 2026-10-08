@@ -20,7 +20,7 @@ def _send_reservation_email(template_prefix, to_email, context):
 
 
 def _client_name(reservation):
-    return reservation.user.get_full_name() or str(reservation.user.phone_number)
+    return reservation.user.get_full_name() or reservation.user.phone_number or reservation.user.email
 
 
 def send_gallery_ready_email(reservation):
