@@ -34,9 +34,9 @@ On photographer-mode sites, build the missing half of the gallery workflow end t
 16. As staff, I want to view and download a client's marked photos on behalf of a specialist without a login account, so that they aren't blocked from the workflow.
 17. As a photographer, I want to upload a Final Gallery of finished, edited photos to a specific reservation, so that I can deliver the completed work to the client.
 18. As a photographer, I want the Final Gallery upload to accept my already-edited images without being rejected for size or cropped for display, so that the proofing-preview rules (built for a different purpose) don't get in my way.
-19. As a client, I want to be emailed as soon as my final photos are uploaded, with a secure link to download them, so that I don't have to keep checking my account.
-20. As a client, I want my final photos to also appear in my own profile under the relevant reservation, so that I can find them again later even if I lose the email.
-21. As a client, I want the final-photo download link to work reliably regardless of how large the gallery is, so that a big wedding gallery doesn't fail to arrive because of an email attachment size limit.
+19. As a client, I want to be emailed as soon as my final photos are uploaded, with a secure link to download them, so that I don't have to keep checking my account. **[Superseded by `.scratch/final-zip-email-delivery/spec.md` and ADR 0005: finals are now a ZIP attached to the email, nothing is stored.]**
+20. As a client, I want my final photos to also appear in my own profile under the relevant reservation, so that I can find them again later even if I lose the email. **[Superseded by `.scratch/final-zip-email-delivery/spec.md` and ADR 0005: finals are now a ZIP attached to the email, nothing is stored.]**
+21. As a client, I want the final-photo download link to work reliably regardless of how large the gallery is, so that a big wedding gallery doesn't fail to arrive because of an email attachment size limit. **[Superseded by `.scratch/final-zip-email-delivery/spec.md` and ADR 0005: finals are now a ZIP attached to the email, nothing is stored.]**
 22. As a specialist or staff member, I want a reservation's current stage in the photo workflow (e.g. gallery uploaded, awaiting client review, editing in progress, finals delivered) shown as a clear badge, so that I can tell what state any given booking is in at a glance.
 23. As a specialist or staff member, I want to filter the reservations table by that same phase, so that I can find, for example, every reservation currently waiting on me to upload finals.
 24. As a photographer, I want to only be able to upload a Final Gallery after the client has finalized their marks, so that I can't accidentally skip a step and deliver before I know what to edit.
@@ -83,6 +83,7 @@ Priority order, highest first: finals delivered → final photos ready (uploaded
 - Downloads are plain authenticated, ownership-checked access to the original files — no watermarking and no signed short-lived derivative generation, since that machinery exists specifically to deter piracy of unpurchased proofing previews and doesn't apply to a specialist downloading their own client's marked originals.
 
 **Final Gallery upload + delivery** (new — nothing like this exists today)
+> Superseded by `.scratch/final-zip-email-delivery/spec.md` and `docs/adr/0005-final-photos-delivered-as-email-zip-attachment.md`.
 - Specialist (or staff, on their behalf) uploads a Final Gallery to a reservation once the client has finalized their marks.
 - On successful upload, the client is emailed a secure download link (not an attachment — galleries can be far larger than typical attachment limits), and the Final Gallery becomes visible in the client's own profile page under that reservation.
 - The download link uses the same plain authenticated, ownership-checked access pattern as the Marked Photos downloads (not the watermarked/signed-derivative pattern used for live proofing preview), since finals are a one-time deliverable rather than a repeatedly re-viewed preview.
