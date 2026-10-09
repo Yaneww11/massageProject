@@ -6,7 +6,7 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] With the Gmail service mocked, `messages().send` is called with a `media_body` of mimetype `message/rfc822` and with no `raw` key.
 - [ ] The uploaded bytes match the message exactly, including any attachment.

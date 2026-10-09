@@ -1,3 +1,4 @@
+import email
 from unittest.mock import MagicMock, patch
 
 from django.core.mail import EmailMultiAlternatives
@@ -37,7 +38,31 @@ class GmailBackendTest(TestCase):
         mock_service.users.return_value.messages.return_value.send.assert_called_once()
         _, kwargs = mock_service.users.return_value.messages.return_value.send.call_args
         self.assertEqual(kwargs['userId'], 'me')
-        self.assertIn('raw', kwargs['body'])
+        self.assertNotIn('raw', kwargs)
+        self.assertEqual(kwargs['body'], {})
+        self.assertEqual(kwargs['media_body'].mimetype(), 'message/rfc822')
+        self.assertTrue(kwargs['media_body'].resumable())
+
+    def test_uploaded_bytes_match_message_including_attachment(self):
+        backend = GmailBackend()
+        message = EmailMultiAlternatives('Subject', 'Body', 'from@example.com', ['to@example.com'])
+        payload = bytes(range(256)) * 50
+        message.attach('final.zip', payload, 'application/zip')
+
+        built = message.message()  # Date and Message-ID differ on every call
+        message.message = lambda: built
+
+        mock_service = MagicMock()
+        with patch('massageProject.accounts.email_backend.googleapiclient.discovery.build', return_value=mock_service):
+            backend.send_messages([message])
+
+        _, kwargs = mock_service.users.return_value.messages.return_value.send.call_args
+        media = kwargs['media_body']
+        uploaded = media.getbytes(0, media.size())
+        self.assertEqual(uploaded, built.as_bytes())
+        parsed = email.message_from_bytes(uploaded)
+        attachment = [p for p in parsed.walk() if p.get_filename() == 'final.zip'][0]
+        self.assertEqual(attachment.get_payload(decode=True), payload)
 
     def test_send_messages_raises_by_default_on_api_error(self):
         backend = GmailBackend()

@@ -1,9 +1,10 @@
-import base64
+from io import BytesIO
 
 import google.oauth2.credentials
 import googleapiclient.discovery
 from django.conf import settings
 from django.core.mail.backends.base import BaseEmailBackend
+from googleapiclient.http import MediaIoBaseUpload
 
 
 class GmailBackend(BaseEmailBackend):
@@ -63,12 +64,16 @@ class GmailBackend(BaseEmailBackend):
         return sent_count
 
     def _send(self, email_message):
-        raw_message = base64.urlsafe_b64encode(
-            email_message.message().as_bytes()
-        ).decode()
+        # The media-upload route accepts messages up to 35 MB; the JSON `raw`
+        # route has no documented limit and rejects large attachments.
+        media = MediaIoBaseUpload(
+            BytesIO(email_message.message().as_bytes()),
+            mimetype='message/rfc822',
+            resumable=True,
+        )
         try:
             self.service.users().messages().send(
-                userId=self.user_id, body={'raw': raw_message}
+                userId=self.user_id, body={}, media_body=media
             ).execute()
         except Exception:
             if not self.fail_silently:
