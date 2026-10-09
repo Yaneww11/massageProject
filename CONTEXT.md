@@ -51,3 +51,11 @@ _Avoid_: sending finals
 **Time Off**:
 A one-off period (a start and end moment, spanning hours or whole days) during which a Specialist is unavailable even though it falls inside their regular WorkingHours. No new Reservation can be booked or rescheduled into it, by anyone; it cannot be created over an existing active Reservation. Clients see its slots simply as unavailable, never the reason. Recurring unavailability is a WorkingHours change, not Time Off.
 _Avoid_: offline, holiday, block, absence (in code)
+
+**Upcoming Reservation**:
+A Reservation whose date and time are at or after the current moment, whatever its status. A time-based split, used to order the staff/specialist reservations table.
+_Avoid_: active reservation (that is the `active` status, not a point in time)
+
+**Past Reservation**:
+A Reservation whose date and time are before the current moment, whatever its status — including an `active` one nobody has closed yet. Not the same as the statuses `completed` / `no_show`.
+_Avoid_: completed reservation, history

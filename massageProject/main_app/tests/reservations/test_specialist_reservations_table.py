@@ -364,3 +364,76 @@ class TableFinalsDeliveredHiddenByDefaultTest(SpecialistReservationsTableTestBas
         self.client.force_login(self.specialist_user)
         reservations = self.client.get(reverse('profile_page')).context['reservations']
         self.assertIn(self.delivered, reservations)
+
+
+class TablePaginationTest(SpecialistReservationsTableTestBase):
+    """15 rows per page over the one upcoming-then-past sequence."""
+
+    def setUp(self):
+        super().setUp()
+        # 10 one-hour slots per Monday (08:00-18:00): 10 upcoming + 10 past = 20 rows.
+        self.upcoming = [
+            self._make_reservation(
+                self.specialist, self.client_maria, self.service_a, self.future_monday, time_cls(8 + i, 0),
+                status=Reservation.STATUS_ACTIVE,
+            )
+            for i in range(10)
+        ]
+        self.past = [
+            self._make_reservation(
+                self.specialist, self.client_georgi, self.service_a, self.past_monday, time_cls(17 - i, 0),
+            )
+            for i in range(10)
+        ]
+        self.client.force_login(self.specialist_user)
+
+    def test_first_page_has_fifteen_rows_starting_with_soonest_upcoming(self):
+        response = self.client.get(reverse('profile_page'))
+        self.assertEqual(list(response.context['reservations']), self.upcoming + self.past[:5])
+        self.assertEqual(response.context['page_obj'].paginator.count, 20)
+
+    def test_second_page_continues_the_sequence(self):
+        response = self.client.get(reverse('profile_page'), {'page': 2})
+        self.assertEqual(list(response.context['reservations']), self.past[5:])
+
+    def test_out_of_range_page_falls_back_to_last_page(self):
+        response = self.client.get(reverse('profile_page'), {'page': 99})
+        self.assertEqual(response.context['page_obj'].number, 2)
+
+    def test_non_numeric_page_falls_back_to_first_page(self):
+        response = self.client.get(reverse('profile_page'), {'page': 'abc'})
+        self.assertEqual(response.context['page_obj'].number, 1)
+
+    def test_pager_links_keep_the_filters(self):
+        response = self.client.get(reverse('profile_page'), {'service_id': self.service_a.pk})
+        self.assertContains(response, f'service_id={self.service_a.pk}&amp;page=2')
+
+    def test_filtered_results_are_paginated(self):
+        response = self.client.get(reverse('profile_page'), {'q': 'Georgi', 'page': 2})
+        # 10 Georgi rows fit on one page, so page 2 clamps to page 1.
+        self.assertEqual(list(response.context['reservations']), self.past)
+
+    def test_staff_table_is_paginated_too(self):
+        self.client.logout()
+        self.client.force_login(self.staff_user)
+        response = self.client.get(reverse('profile_page'))
+        self.assertEqual(len(response.context['reservations']), 15)
+        self.assertTrue(response.context['page_obj'].has_next())
+
+    def test_ajax_request_returns_only_the_table_partial(self):
+        response = self.client.get(
+            reverse('profile_page'), {'page': 2}, headers={'X-Requested-With': 'XMLHttpRequest'},
+        )
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        self.assertTrue(content.strip().startswith('<div class="reservations-table-section"'))
+        self.assertNotIn('<html', content)
+        self.assertEqual(list(response.context['reservations']), self.past[5:])
+
+    def test_ajax_header_from_a_client_still_gets_the_full_page(self):
+        plain_user = CustomUser.objects.create_user(
+            phone_number='0888600011', email='plain-ajax@example.com', password='pass12345',
+        )
+        self.client.force_login(plain_user)
+        response = self.client.get(reverse('profile_page'), headers={'X-Requested-With': 'XMLHttpRequest'})
+        self.assertContains(response, '<html')

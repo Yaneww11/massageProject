@@ -54,7 +54,7 @@
     <div class="filter-actions">
       <button type="submit" class="btn-primary-profile">{% trans "Филтрирай" %}</button>
       {% if selected_phase or date_from or date_to or service_id or query or specialist_id %}
-      <a href="{{ request.path }}" class="btn-outline-profile">{% trans "Изчисти филтрите" %}</a>
+      <a href="{{ request.path }}" class="btn-outline-profile js-table-nav">{% trans "Изчисти филтрите" %}</a>
       {% endif %}
     </div>
   </form>
@@ -104,6 +104,24 @@
       </tbody>
     </table>
   </div>
+  <nav class="table-pagination" aria-label="{% trans 'Страници с резервации' %}">
+    <span class="table-pagination-count">
+      {% blocktrans with start=page_obj.start_index end=page_obj.end_index total=page_obj.paginator.count %}Показани {{ start }}–{{ end }} от {{ total }}{% endblocktrans %}
+    </span>
+    {% if page_obj.has_other_pages %}
+    <div class="table-pagination-links">
+      {% if page_obj.has_previous %}
+      <a class="btn-outline-profile js-table-nav" href="?{% if filter_query %}{{ filter_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" rel="prev">{% trans "Назад" %}</a>
+      {% endif %}
+      <span class="table-pagination-current">
+        {% blocktrans with current=page_obj.number total=page_obj.paginator.num_pages %}Страница {{ current }} от {{ total }}{% endblocktrans %}
+      </span>
+      {% if page_obj.has_next %}
+      <a class="btn-outline-profile js-table-nav" href="?{% if filter_query %}{{ filter_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}" rel="next">{% trans "Напред" %}</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </nav>
   {% else %}
   <p class="empty-state-msg">{% trans "Няма резервации, отговарящи на филтрите." %}</p>
   {% endif %}
