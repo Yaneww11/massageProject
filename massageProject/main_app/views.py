@@ -865,6 +865,31 @@ class FinalGalleryUploadView(PhotographerModeMixin, LoginRequiredMixin, Template
             ])
 
 
+@login_required
+@require_POST
+def mark_finals_delivered(request, reservation_id):
+    """Stamp finals as delivered by hand (photos handed over in person). Sends no email."""
+    if not settings.IS_PHOTOGRAPHER_WEBSITE:
+        raise Http404
+    reservation = _get_owned_reservation_for_photo_workflow(request, reservation_id)
+    if reservation.finals_delivered_at:
+        messages.info(request, _('Финалните снимки вече са отбелязани като предадени.'))
+    else:
+        reservation.finals_delivered_at = timezone.now()
+        try:
+            reservation.save()
+        except ValidationError as exc:
+            messages.error(request, ' '.join(exc.messages))
+        else:
+            messages.success(request, _('Финалните снимки са отбелязани като предадени.'))
+    # Only a querystring is carried back, never a URL, so this can't redirect off-site.
+    query = request.POST.get('return_query', '')
+    target = reverse('profile_page')
+    if query and not query.startswith(('/', '\\')) and '//' not in query:
+        target += '?' + query
+    return redirect(target)
+
+
 def _get_owned_reservation_for_photo_workflow(request, reservation_id):
     """Ownership + role check shared by the Marked Photos view and its
     downloads: the owning specialist, or staff on behalf of any specialist."""

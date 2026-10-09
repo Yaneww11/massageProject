@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-09 14:22+0000\n"
+"POT-Creation-Date: 2026-10-09 14:30+0000\n"
 "PO-Revision-Date: 2026-09-04 06:05+0000\n"
 "Last-Translator: Yane Yanev <admin@admin.com>\n"
 "Language-Team: English\n"
@@ -452,7 +452,6 @@ msgid "ZIP архивът е повреден. Създайте го отнов�
 msgstr "The ZIP archive is corrupt. Create it again and try once more."
 
 #: massageProject/main_app/forms.py:222
-#| msgid "Кодът е валиден 10 минути."
 msgid "Файлът не е валиден ZIP архив."
 msgstr "The file is not a valid ZIP archive."
 
@@ -467,7 +466,6 @@ msgstr "The ZIP archive must contain only photos. Not allowed: %(name)s"
 
 #: massageProject/main_app/forms.py:237
 #: templates/pages/final_gallery_upload.html:33
-#| msgid "Финални снимки"
 msgid "ZIP архив с финалните снимки"
 msgstr "ZIP archive with the final photos"
 
@@ -1776,17 +1774,14 @@ msgstr ""
 
 #: massageProject/main_app/views.py:822
 #: templates/pages/final_gallery_upload.html:10
-#| msgid "Качване на много снимки"
 msgid "Изпращане на финални снимки"
 msgstr "Send final photos"
 
 #: massageProject/main_app/views.py:852
-#| msgid "Финалните ви снимки са готови за изтегляне"
 msgid "Финалните снимки бяха изпратени на клиента по имейл."
 msgstr "The final photos were emailed to the client."
 
 #: massageProject/main_app/views.py:854
-#| msgid "Възникна грешка. Опитайте отново."
 msgid "Имейлът не бе изпратен. Опитайте отново."
 msgstr "The email could not be sent. Please try again."
 
@@ -1798,58 +1793,68 @@ msgstr ""
 "The client has no email. Hand the photos over in person and mark the "
 "reservation as delivered."
 
-#: massageProject/main_app/views.py:895
+#: massageProject/main_app/views.py:876
+#| msgid "Финалните снимки бяха изпратени на клиента по имейл."
+msgid "Финалните снимки вече са отбелязани като предадени."
+msgstr "The final photos are already marked as delivered."
+
+#: massageProject/main_app/views.py:884
+#| msgid "Финалните ви снимки са прикачени"
+msgid "Финалните снимки са отбелязани като предадени."
+msgstr "The final photos have been marked as delivered."
+
+#: massageProject/main_app/views.py:920
 #: templates/partials/specialist_reservations_table.html:101
 msgid "Маркирани снимки"
 msgstr "Marked Photos"
 
-#: massageProject/main_app/views.py:988
+#: massageProject/main_app/views.py:1013
 msgid "Управление на резервации"
 msgstr "Reservation Management"
 
-#: massageProject/main_app/views.py:1176
+#: massageProject/main_app/views.py:1201
 msgid "Отсъствието беше добавено."
 msgstr "Time off added."
 
-#: massageProject/main_app/views.py:1187
+#: massageProject/main_app/views.py:1212
 msgid "Отсъствието беше изтрито."
 msgstr "Time off deleted."
 
-#: massageProject/main_app/views.py:1328
+#: massageProject/main_app/views.py:1353
 msgid "Прегледът е финализиран."
 msgstr "The review has been finalized."
 
-#: massageProject/main_app/views.py:1404
+#: massageProject/main_app/views.py:1429
 msgid "Проверка на снимки"
 msgstr "Photo review"
 
-#: massageProject/main_app/views.py:1456
+#: massageProject/main_app/views.py:1481
 msgid "Бележката не може да надвишава 2000 символа."
 msgstr "The note cannot exceed 2000 characters."
 
-#: massageProject/main_app/views.py:1470
+#: massageProject/main_app/views.py:1495
 msgid "Прегледът вече е финализиран."
 msgstr "The review has already been finalized."
 
-#: massageProject/main_app/views.py:1473
+#: massageProject/main_app/views.py:1498
 msgid "Маркирайте поне една снимка."
 msgstr "Mark at least one photo."
 
-#: massageProject/main_app/views.py:1475
+#: massageProject/main_app/views.py:1500
 msgid "Изборът ви е финализиран. Благодарим ви!"
 msgstr "Your selection has been finalized. Thank you!"
 
-#: massageProject/main_app/views.py:1504
+#: massageProject/main_app/views.py:1529
 msgid "Не можете да променяте резервация по-малко от 24 часа преди часа."
 msgstr ""
 "You cannot modify a reservation less than 24 hours before the appointment."
 
-#: massageProject/main_app/views.py:1532
+#: massageProject/main_app/views.py:1557
 msgid "Не можете да отменяте резервация по-малко от 24 часа преди часа."
 msgstr ""
 "You cannot cancel a reservation less than 24 hours before the appointment."
 
-#: massageProject/main_app/views.py:1541
+#: massageProject/main_app/views.py:1566
 msgid "Резервацията беше отменена успешно."
 msgstr "The reservation was successfully cancelled."
 
@@ -1931,7 +1936,6 @@ msgstr ""
 
 #: templates/emails/final_delivery_email.html:3
 #: templates/emails/final_delivery_email_subject.txt:1
-#| msgid "Финалните ви снимки са готови за изтегляне"
 msgid "Финалните ви снимки са прикачени"
 msgstr "Your final photos are attached"
 
@@ -1945,7 +1949,6 @@ msgstr "Hello, %(client_name)s"
 
 #: templates/emails/final_delivery_email.html:6
 #: templates/emails/final_delivery_email.txt:3
-#| msgid "Финалните, обработени снимки от вашата сесия са готови."
 msgid ""
 "Финалните, обработени снимки от вашата сесия са прикачени към този имейл в "
 "ZIP архив."
@@ -2138,7 +2141,6 @@ msgid "Обратно към За нас"
 msgstr "Back to About Us"
 
 #: templates/pages/final_gallery_upload.html:9
-#| msgid "МАРКИРАНИ СНИМКИ"
 msgid "ФИНАЛНИ СНИМКИ"
 msgstr "FINAL PHOTOS"
 
@@ -2156,12 +2158,10 @@ msgid "Файлът е твърде голям. Максимумът е %(max_mb
 msgstr "The file is too large. The maximum is %(max_mb)s MB."
 
 #: templates/pages/final_gallery_upload.html:17
-#| msgid "Изберете дата."
 msgid "Изберете ZIP архив (.zip)."
 msgstr "Choose a ZIP archive (.zip)."
 
 #: templates/pages/final_gallery_upload.html:39
-#| msgid "Обслужени клиенти"
 msgid "Изпратете на клиента"
 msgstr "Send to client"
 
@@ -2198,6 +2198,7 @@ msgstr "Enlarged photo"
 #: templates/pages/photo_proofing.html:152
 #: templates/pages/photo_proofing.html:161
 #: templates/partials/auth_modal.html:7 templates/partials/header.html:105
+#: templates/partials/specialist_reservations_table.html:136
 #: templates/partials/time_off_section.html:46
 msgid "Затвори"
 msgstr "Close"
@@ -2261,6 +2262,7 @@ msgid "Споделете Вашето преживяване..."
 msgstr "Share your experience..."
 
 #: templates/pages/home.html:129
+#: templates/partials/specialist_reservations_table.html:143
 #: templates/reservation/edit-reservation.html:78
 msgid "Отказ"
 msgstr "Cancel"
@@ -2602,18 +2604,18 @@ msgid "Страници със снимки"
 msgstr "Photo pages"
 
 #: templates/pages/photo_proofing.html:98
-#: templates/partials/specialist_reservations_table.html:120
+#: templates/partials/specialist_reservations_table.html:123
 msgid "Назад"
 msgstr "Previous"
 
 #: templates/pages/photo_proofing.html:101
-#: templates/partials/specialist_reservations_table.html:123
+#: templates/partials/specialist_reservations_table.html:126
 #, python-format
 msgid "Страница %(current)s от %(total)s"
 msgstr "Page %(current)s of %(total)s"
 
 #: templates/pages/photo_proofing.html:104
-#: templates/partials/specialist_reservations_table.html:126
+#: templates/partials/specialist_reservations_table.html:129
 msgid "Напред"
 msgstr "Next"
 
@@ -3157,16 +3159,44 @@ msgstr "Upload gallery"
 msgid "Качи финали"
 msgstr "Upload finals"
 
-#: templates/partials/specialist_reservations_table.html:113
+# admin.py
+#: templates/partials/specialist_reservations_table.html:106
+#| msgid "Маркирай като Завършена"
+msgid "Маркирай като предадени"
+msgstr "Mark as delivered"
+
+#: templates/partials/specialist_reservations_table.html:116
 msgid "Страници с резервации"
 msgstr "Reservation pages"
 
-#: templates/partials/specialist_reservations_table.html:115
+#: templates/partials/specialist_reservations_table.html:118
 #, python-format
 msgid "Показани %(start)s–%(end)s от %(total)s"
 msgstr "Showing %(start)s–%(end)s of %(total)s"
 
-#: templates/partials/specialist_reservations_table.html:132
+# admin.py
+#: templates/partials/specialist_reservations_table.html:137
+#| msgid "Маркирай като Завършена"
+msgid "Маркиране като предадени"
+msgstr "Mark as delivered"
+
+#: templates/partials/specialist_reservations_table.html:138
+#| msgid ""
+#| "Финалните снимки могат да бъдат отбелязани като предадени само след като "
+#| "клиентът е финализирал прегледа на снимките си."
+msgid ""
+"Финалните снимки ще бъдат отбелязани като предадени на клиента. Няма да бъде"
+" изпратен имейл. Продължавате ли?"
+msgstr ""
+"The final photos will be marked as delivered to the client. No email will be"
+" sent. Continue?"
+
+#: templates/partials/specialist_reservations_table.html:142
+#| msgid "Потвърдете"
+msgid "Потвърди"
+msgstr "Confirm"
+
+#: templates/partials/specialist_reservations_table.html:148
 msgid "Няма резервации, отговарящи на филтрите."
 msgstr "No reservations match the filters."
 

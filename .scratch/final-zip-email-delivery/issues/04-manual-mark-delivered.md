@@ -18,7 +18,7 @@
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] The assigned specialist and staff can mark a reservation delivered. `finals_delivered_at` is set and no email is sent.
 - [ ] Another specialist or the client gets 403/404, and GET is not allowed.

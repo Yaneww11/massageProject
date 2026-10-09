@@ -411,6 +411,19 @@
     loadTable(link.href);
   });
 
+  // The confirmation dialog lives inside the swapped section, so it is looked up on every click.
+  document.addEventListener('click', function (e) {
+    var modal = document.querySelector(SECTION + ' #mark-delivered-modal');
+    if (!modal) return;
+    var opener = e.target.closest(SECTION + ' .js-mark-delivered-open');
+    if (opener) {
+      modal.querySelector('form').action = opener.dataset.action;
+      modal.style.display = 'flex';
+    } else if (e.target === modal || e.target.closest('.js-mark-delivered-close')) {
+      modal.style.display = 'none';
+    }
+  });
+
   document.addEventListener('submit', function (e) {
     var form = e.target.closest(SECTION + ' .reservations-filter-bar');
     if (!form) return;
