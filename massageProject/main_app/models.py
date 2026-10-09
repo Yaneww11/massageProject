@@ -396,10 +396,9 @@ class Reservation(models.Model):
             'Кога финалните снимки са предадени на клиента. Когато е попълнено, в профила '
             'на клиента, под съответната резервация, се показва редът „Финалните снимки са '
             'предадени на <дата>“, а в таблицата с резервации на специалиста и персонала '
-            'резервацията се води като доставена и бутоните за качване на финали не се '
-            'показват. Попълва се автоматично при изпращане на финалите по имейл, но може да '
-            'се зададе или изчисти и на ръка тук. Може да се зададе само след като клиентът е '
-            'финализирал прегледа на снимките си.'
+            'резервацията се води като доставена и бутонът „Маркирай като предадени“ не се '
+            'показва. Попълва се от този бутон, но може да се зададе или изчисти и на ръка '
+            'тук. Може да се зададе само след като клиентът е финализирал прегледа на снимките си.'
         ),
     )
 
@@ -426,8 +425,8 @@ class Reservation(models.Model):
             'като заключена за преглед.'
         ),
     )
-    # Audit/internal: NULL means the unmarked proofs are still waiting for the
-    # purge_unmarked_proofs command. Backfilled to proofing_finalized_at for
+    # Audit/internal: NULL means the finalised proofs are still waiting for the
+    # purge_finalized_proofs command. Backfilled to proofing_finalized_at for
     # reservations that were already finalised when the purge was introduced,
     # so the command never sweeps that backlog.
     proofs_purged_at = models.DateTimeField(null=True, blank=True)
@@ -606,25 +605,27 @@ class Reservation(models.Model):
     def unmarked_proof_count(self):
         return self._unmarked_proofs().count()
 
-    def purge_unmarked_proofs(self):
+    def purge_finalized_proofs(self):
         """Drop the frames the client did not keep, so the reservation's bucket
-        folder is left holding only their choice. Deleting the rows is what
-        clears storage: the pre_delete receivers in signals.py remove each
-        original and its cached derivatives. Idempotent — a second run finds
-        nothing left to delete. Returns the number of rows removed.
+        folder is left holding only their choice, and evict the watermarked
+        proof derivatives of the ones they kept — once review is finalised
+        nobody views them. Deleting the unmarked rows is what clears their
+        storage: the pre_delete receivers in signals.py remove each original
+        and its cached derivatives. Idempotent — a second run finds nothing
+        left to delete. Returns the number of rows removed.
 
         Note this is one-way: unlock_proofing() still reopens the review, but
-        only over the photos that survived.
+        only over the photos that survived (their derivatives are regenerated
+        on first view).
         """
+        from massageProject.main_app.signals import _delete_image_derivatives
+
         unmarked = self._unmarked_proofs()
         _total, per_model = unmarked.delete()
         deleted = per_model.get(Image._meta.label, 0)
-        # .update(), not save(): save() runs full_clean(), and clean()'s
-        # working-hours and overlap checks are not transition-gated, so an
-        # active reservation whose specialist's hours have since changed would
-        # raise here — after the rows are already gone. That leaves the stamp
-        # NULL and the cron command retrying a finished purge every hour,
-        # forever. This column is audit-only and needs no validation.
+        if self.gallery_id:
+            for image in Image.objects.filter(gallery_id=self.gallery_id).only('pk'):
+                _delete_image_derivatives(image)
         purged_at = timezone.now()
         Reservation.all_objects.filter(pk=self.pk).update(proofs_purged_at=purged_at)
         self.proofs_purged_at = purged_at
@@ -1019,13 +1020,6 @@ class Image(WebPImageFieldsMixin, models.Model):
 
     def __str__(self):
         return self.alt_text or f"Снимка {self.order}"
-
-    @property
-    def marked_thumbnail_path(self):
-        """Cached unwatermarked derivative for the photographer's Marked Photos
-        grid. Keyed by row id, so replacing or deleting the photo has to evict
-        it (see signals)."""
-        return f'marked_thumbnails/{self.pk}.webp'
 
     def clean(self):
         super().clean()

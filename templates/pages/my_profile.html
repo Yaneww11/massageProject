@@ -197,6 +197,9 @@
             {% endif %}
           </div>
           <div class="history-actions">
+            {% if is_photographer_website and r.finals_delivered_at %}
+            <span class="finals-delivered-note">{% blocktrans with date=r.finals_delivered_at|date:"d.m.Y" %}Финалните снимки са предадени на {{ date }}{% endblocktrans %}</span>
+            {% endif %}
             {% if review %}
             <span class="badge-rated">{% trans "ОЦЕНЕНО" %}</span>
             {% else %}
@@ -205,9 +208,6 @@
                     data-service="{{ r.service.name }}">
               &#9734; {% trans "Оставете мнение" %}
             </button>
-            {% endif %}
-            {% if is_photographer_website and r.finals_delivered_at %}
-            <span class="finals-delivered-note">{% blocktrans with date=r.finals_delivered_at|date:"d.m.Y" %}Финалните снимки са предадени на {{ date }}{% endblocktrans %}</span>
             {% endif %}
             {% if site_config.booking_enabled %}
             <a href="{% url 'reservation_page' %}?service={{ r.service.pk }}" class="btn-outline-sm" data-auth-modal-link>

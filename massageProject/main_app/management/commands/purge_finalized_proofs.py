@@ -10,10 +10,10 @@ logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     help = (
-        'Delete the proofing photos a client did not keep, for every reservation '
-        'finalised since the last run. Meant for cron: purging a full gallery is '
-        'roughly four storage round trips per photo, far too slow to run inside the '
-        'finalise request.'
+        'Delete the proofing photos a client did not keep and the watermarked proof '
+        'derivatives of every photo, for every reservation finalised since the last '
+        'run. Meant for cron: purging a full gallery is roughly four storage round '
+        'trips per photo, far too slow to run inside the finalise request.'
     )
 
     def add_arguments(self, parser):
@@ -39,13 +39,13 @@ class Command(BaseCommand):
                 # gallery must not abandon everyone else queued behind it. The
                 # next run picks it up again, since proofs_purged_at is only
                 # stamped on success.
-                total_images += reservation.purge_unmarked_proofs()
+                total_images += reservation.purge_finalized_proofs()
                 purged += 1
             except Exception as exc:
                 failed += 1
                 logger.warning('Could not purge proofs for reservation %s', reservation.pk, exc_info=True)
                 sentry_sdk.capture_exception(exc, extra={
-                    'reservation_pk': reservation.pk, 'operation': 'purge_unmarked_proofs',
+                    'reservation_pk': reservation.pk, 'operation': 'purge_finalized_proofs',
                 })
 
         if options['dry_run']:

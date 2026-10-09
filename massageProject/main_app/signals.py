@@ -12,9 +12,9 @@ logger = logging.getLogger(__name__)
 
 
 def _delete_image_derivatives(image):
-    """Every cached derivative of one Image: the per-user watermarked proofs and
-    the photographer's Marked Photos thumbnail. Both are keyed by row id, so
-    they survive a replaced or deleted photo unless evicted here."""
+    """Every cached derivative of one Image: the per-user watermarked proofs.
+    They are keyed by row id, so they survive a replaced or deleted photo
+    unless evicted here."""
     prefix = f'proof_derivatives/{image.pk}/'
     try:
         _, filenames = default_storage.listdir(prefix)
@@ -22,10 +22,6 @@ def _delete_image_derivatives(image):
         filenames = []
     for filename in filenames:
         default_storage.delete(prefix + filename)
-
-    # No exists() guard: delete() on a missing key is a no-op on both backends,
-    # and the extra round trip is paid once per image in a few-hundred-image purge.
-    default_storage.delete(image.marked_thumbnail_path)
 
 
 @receiver(pre_save, sender=Image)
