@@ -6,6 +6,7 @@
       <h2 class="section-title">
         {% if role == 'staff' %}{% trans "Всички резервации" %}{% else %}{% trans "Вашите резервации" %}{% endif %}
       </h2>
+      <p class="section-subtitle">{% trans "Първо са предстоящите резервации (най-близките най-отгоре), след тях – изминалите (най-скорошните най-отгоре)." %}</p>
     </div>
   </div>
 
@@ -24,7 +25,12 @@
     <div class="filter-field">
       <label class="form-label" for="filter-phase">{% trans "Статус" %}</label>
       <select id="filter-phase" name="phase" class="form-textarea">
+        {% if is_photographer_website %}
+        <option value="">{% trans "Всички (без финално доставени и не явили се)" %}</option>
+        <option value="all" {% if selected_phase == 'all' %}selected{% endif %}>{% trans "Всички" %}</option>
+        {% else %}
         <option value="">{% trans "Всички" %}</option>
+        {% endif %}
         {% for value, label in phase_choices %}
         <option value="{{ value }}" {% if selected_phase == value %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
@@ -54,7 +60,7 @@
     <div class="filter-actions">
       <button type="submit" class="btn-primary-profile">{% trans "Филтрирай" %}</button>
       {% if selected_phase or date_from or date_to or service_id or query or specialist_id %}
-      <a href="{{ request.path }}" class="btn-outline-profile">{% trans "Изчисти филтрите" %}</a>
+      <a href="{{ request.path }}" class="btn-outline-profile js-table-nav">{% trans "Изчисти филтрите" %}</a>
       {% endif %}
     </div>
   </form>
@@ -104,6 +110,24 @@
       </tbody>
     </table>
   </div>
+  <nav class="table-pagination" aria-label="{% trans 'Страници с резервации' %}">
+    <span class="table-pagination-count">
+      {% blocktrans with start=page_obj.start_index end=page_obj.end_index total=page_obj.paginator.count %}Показани {{ start }}–{{ end }} от {{ total }}{% endblocktrans %}
+    </span>
+    {% if page_obj.has_other_pages %}
+    <div class="table-pagination-links">
+      {% if page_obj.has_previous %}
+      <a class="btn-outline-profile js-table-nav" href="?{% if filter_query %}{{ filter_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}" rel="prev">{% trans "Назад" %}</a>
+      {% endif %}
+      <span class="table-pagination-current">
+        {% blocktrans with current=page_obj.number total=page_obj.paginator.num_pages %}Страница {{ current }} от {{ total }}{% endblocktrans %}
+      </span>
+      {% if page_obj.has_next %}
+      <a class="btn-outline-profile js-table-nav" href="?{% if filter_query %}{{ filter_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}" rel="next">{% trans "Напред" %}</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </nav>
   {% else %}
   <p class="empty-state-msg">{% trans "Няма резервации, отговарящи на филтрите." %}</p>
   {% endif %}

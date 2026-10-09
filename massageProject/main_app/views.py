@@ -1007,6 +1007,22 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
 
         return context
 
+    def render_to_response(self, context, **response_kwargs):
+        # The table's pager and filters fetch just the table, to swap it in place.
+        if (self.request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+                and context['role'] in ('staff', 'specialist')):
+            return self.response_class(
+                request=self.request, template=['partials/specialist_reservations_table.html'],
+                context=context, using=self.template_engine, **response_kwargs,
+            )
+        return super().render_to_response(context, **response_kwargs)
+
+
+RESERVATIONS_TABLE_PAGE_SIZE = 15
+# Photographer-site phase filter value that shows every row, including the
+# finals-delivered and no-show ones the default hides.
+PHASE_FILTER_ALL = 'all'
+
 
 def _build_reservations_table_context(request, base_qs, is_staff):
     """Filterable/sortable reservations table shared by the specialist and
@@ -1021,7 +1037,9 @@ def _build_reservations_table_context(request, base_qs, is_staff):
     phase_choices += [c for c in Reservation.STATUS_CHOICES if c[0] != Reservation.STATUS_DELETED]
 
     selected_phase = request.GET.get('phase', '')
-    if selected_phase:
+    if selected_phase == PHASE_FILTER_ALL and not is_photographer:
+        selected_phase = ''
+    if selected_phase and selected_phase != PHASE_FILTER_ALL:
         phase_q = Reservation.phase_query(selected_phase)
         if phase_q is not None:
             qs = qs.filter(phase_q)
@@ -1029,6 +1047,7 @@ def _build_reservations_table_context(request, base_qs, is_staff):
             selected_phase = ''
     if is_photographer and not selected_phase:
         qs = qs.exclude(Reservation.phase_query(Reservation.PHASE_FINALS_DELIVERED))
+        qs = qs.exclude(Reservation.phase_query(Reservation.STATUS_NOSHOW))
 
     date_from = request.GET.get('date_from', '')
     if date_from:
@@ -1072,9 +1091,16 @@ def _build_reservations_table_context(request, base_qs, is_staff):
     upcoming_q = Q(date__gt=today) | Q(date=today, time__gte=current_time)
     upcoming = list(qs.filter(upcoming_q).order_by('date', 'time'))
     past = list(qs.exclude(upcoming_q).order_by('-date', '-time'))
+    page_obj = Paginator(upcoming + past, RESERVATIONS_TABLE_PAGE_SIZE).get_page(request.GET.get('page'))
+
+    # Querystring of the current filters, for the pager links to carry along.
+    filter_params = request.GET.copy()
+    filter_params.pop('page', None)
 
     return {
-        'reservations': upcoming + past,
+        'reservations': page_obj.object_list,
+        'page_obj': page_obj,
+        'filter_query': filter_params.urlencode(),
         'phase_choices': phase_choices,
         'selected_phase': selected_phase,
         'date_from': date_from,

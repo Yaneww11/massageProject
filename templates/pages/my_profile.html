@@ -384,4 +384,46 @@
 </script>
 {% endif %}
 
+{% if role == 'staff' or role == 'specialist' %}
+<script>
+(function () {
+  // The pager and filters swap just the reservations table in place.
+  // Handlers are delegated on document because the section is replaced each time.
+  var SECTION = '.reservations-table-section';
+
+  function loadTable(url) {
+    var section = document.querySelector(SECTION);
+    if (section.classList.contains('is-loading')) return;
+    section.classList.add('is-loading');
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(function (r) {
+        if (!r.ok || r.redirected) throw new Error(r.status);
+        return r.text();
+      })
+      .then(function (html) {
+        section.outerHTML = html;
+        history.replaceState(null, '', url);
+        var fresh = document.querySelector(SECTION);
+        if (fresh.getBoundingClientRect().top < 0) fresh.scrollIntoView({ behavior: 'smooth' });
+      })
+      .catch(function () { window.location.href = url; });
+  }
+
+  document.addEventListener('click', function (e) {
+    var link = e.target.closest(SECTION + ' .js-table-nav');
+    if (!link) return;
+    e.preventDefault();
+    loadTable(link.href);
+  });
+
+  document.addEventListener('submit', function (e) {
+    var form = e.target.closest(SECTION + ' .reservations-filter-bar');
+    if (!form) return;
+    e.preventDefault();
+    loadTable(location.pathname + '?' + new URLSearchParams(new FormData(form)).toString());
+  });
+})();
+</script>
+{% endif %}
+
 {% endblock %}
