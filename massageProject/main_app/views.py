@@ -22,7 +22,8 @@ from django.utils import timezone
 from django.utils.translation import gettext as _, gettext_lazy as _lazy
 from datetime import datetime, timedelta, date
 from django.db import IntegrityError
-from django.db.models import Count, Max, Q
+from django.db.models import Count, Max, Q, Value
+from django.db.models.functions import Concat
 from django.contrib import messages
 from django.core.cache import cache
 from django.http import HttpResponse, FileResponse, JsonResponse, Http404
@@ -1024,7 +1025,11 @@ def _build_reservations_table_context(request, base_qs, is_staff):
                 specialist_id = ''
 
     query = request.GET.get('q', '').strip()
-    if query:
+    if ' ' in query:
+        qs = qs.annotate(
+            client_full_name=Concat('user__first_name', Value(' '), 'user__last_name')
+        ).filter(client_full_name__icontains=query)
+    elif query:
         qs = qs.filter(
             Q(user__first_name__icontains=query) | Q(user__last_name__icontains=query) |
             Q(user__phone_number__icontains=query)
