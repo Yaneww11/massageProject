@@ -24,8 +24,8 @@ def _run_purge(*args):
     """The command's own progress lines would otherwise interleave with the
     test runner's output. Returns what it wrote."""
     out = io.StringIO()
-    with patch('massageProject.main_app.management.commands.purge_unmarked_proofs.logger'):
-        call_command('purge_unmarked_proofs', *args, stdout=out)
+    with patch('massageProject.main_app.management.commands.purge_finalized_proofs.logger'):
+        call_command('purge_finalized_proofs', *args, stdout=out)
     return out.getvalue()
 
 
@@ -114,7 +114,7 @@ class PurgeUnmarkedProofsTest(BucketLayoutBase):
         ImageProof.objects.create(image=self.unmarked, is_marked=False, comment='no')
 
     def test_purge_keeps_marked_rows_and_drops_the_rest(self):
-        deleted = self.reservation.purge_unmarked_proofs()
+        deleted = self.reservation.purge_finalized_proofs()
         self.assertEqual(deleted, 2)
         self.assertEqual(
             list(self.proofing_gallery.images.values_list('pk', flat=True)), [self.marked.pk],
@@ -123,19 +123,20 @@ class PurgeUnmarkedProofsTest(BucketLayoutBase):
     def test_purge_removes_the_unmarked_originals_from_storage(self):
         unmarked_name = self.unmarked.image.name
         marked_name = self.marked.image.name
-        self.reservation.purge_unmarked_proofs()
+        self.reservation.purge_finalized_proofs()
         self.assertFalse(default_storage.exists(unmarked_name))
         self.assertTrue(default_storage.exists(marked_name))
 
-    def test_purge_removes_the_unmarked_derivatives(self):
-        thumbnail = self.unmarked.marked_thumbnail_path
-        default_storage.save(thumbnail, SimpleUploadedFile('t.webp', b'x'))
-        self.reservation.purge_unmarked_proofs()
-        self.assertFalse(default_storage.exists(thumbnail))
+    def test_purge_evicts_the_kept_photos_proof_derivatives(self):
+        derivative = f'proof_derivatives/{self.marked.pk}/abc.jpg'
+        default_storage.save(derivative, SimpleUploadedFile('d.jpg', b'x'))
+        self.reservation.purge_finalized_proofs()
+        self.assertFalse(default_storage.exists(derivative))
+        self.assertTrue(default_storage.exists(self.marked.image.name))
 
     def test_purge_is_idempotent(self):
-        self.reservation.purge_unmarked_proofs()
-        self.assertEqual(self.reservation.purge_unmarked_proofs(), 0)
+        self.reservation.purge_finalized_proofs()
+        self.assertEqual(self.reservation.purge_finalized_proofs(), 0)
 
     def test_purge_still_stamps_when_the_specialist_hours_no_longer_fit(self):
         """Regression: the stamp used to go through save() -> full_clean(), whose
@@ -144,7 +145,7 @@ class PurgeUnmarkedProofsTest(BucketLayoutBase):
         the stamp stayed NULL and cron retried the finished purge every hour."""
         self.assertEqual(self.reservation.status, Reservation.STATUS_ACTIVE)
         WorkingHours.objects.all().delete()
-        self.reservation.purge_unmarked_proofs()
+        self.reservation.purge_finalized_proofs()
         self.reservation.refresh_from_db()
         self.assertIsNotNone(self.reservation.proofs_purged_at)
         self.assertEqual(
@@ -153,7 +154,7 @@ class PurgeUnmarkedProofsTest(BucketLayoutBase):
 
     def test_purge_stamps_the_reservation_as_done(self):
         self.assertIsNone(self.reservation.proofs_purged_at)
-        self.reservation.purge_unmarked_proofs()
+        self.reservation.purge_finalized_proofs()
         self.reservation.refresh_from_db()
         self.assertIsNotNone(self.reservation.proofs_purged_at)
 
@@ -166,7 +167,6 @@ class PurgeUnmarkedProofsTest(BucketLayoutBase):
             default_storage.save(
                 f'proof_derivatives/{image.pk}/abc.jpg', SimpleUploadedFile('d.jpg', b'x'),
             )
-            default_storage.save(image.marked_thumbnail_path, SimpleUploadedFile('t.webp', b'x'))
 
         backend = type(default_storage._wrapped)
         watched = ('listdir', 'delete', 'exists')
@@ -182,7 +182,7 @@ class PurgeUnmarkedProofsTest(BucketLayoutBase):
         with patch.object(backend, 'listdir', counting('listdir')), \
                 patch.object(backend, 'delete', counting('delete')), \
                 patch.object(backend, 'exists', counting('exists')):
-            purged = self.reservation.purge_unmarked_proofs()
+            purged = self.reservation.purge_finalized_proofs()
 
         self.assertEqual(purged, 2)
         self.assertLessEqual(sum(calls.values()) / purged, 4, dict(calls))
@@ -192,7 +192,7 @@ class PurgeUnmarkedProofsTest(BucketLayoutBase):
             user=self.user, service=self.service, specialist=self.specialist,
             date=self.reservation.date, time=time_cls(14, 0),
         )
-        self.assertEqual(bare.purge_unmarked_proofs(), 0)
+        self.assertEqual(bare.purge_finalized_proofs(), 0)
 
 
 class FinalizePurgesTest(BucketLayoutBase):
@@ -264,7 +264,7 @@ class PurgeCommandTest(BucketLayoutBase):
             date=self.reservation.date, time=time_cls(14, 0), gallery=other_gallery,
         )
         other.finalize_proofing()
-        real_purge = Reservation.purge_unmarked_proofs
+        real_purge = Reservation.purge_finalized_proofs
         broken_pk = self.reservation.pk
 
         def purge_or_fail(reservation):
@@ -273,7 +273,7 @@ class PurgeCommandTest(BucketLayoutBase):
             return real_purge(reservation)
 
         with patch.object(
-            Reservation, 'purge_unmarked_proofs', autospec=True, side_effect=purge_or_fail,
+            Reservation, 'purge_finalized_proofs', autospec=True, side_effect=purge_or_fail,
         ):
             _run_purge()
 
@@ -283,7 +283,7 @@ class PurgeCommandTest(BucketLayoutBase):
     def test_a_failed_reservation_stays_pending_for_the_next_run(self):
         self.reservation.finalize_proofing()
         with patch.object(
-            Reservation, 'purge_unmarked_proofs', side_effect=OSError('bucket down'),
+            Reservation, 'purge_finalized_proofs', side_effect=OSError('bucket down'),
         ):
             _run_purge()
         self.reservation.refresh_from_db()
@@ -291,73 +291,3 @@ class PurgeCommandTest(BucketLayoutBase):
         _run_purge()
         self.reservation.refresh_from_db()
         self.assertIsNotNone(self.reservation.proofs_purged_at)
-
-
-def _run_thumbnail_purge(*args):
-    out = io.StringIO()
-    with patch('massageProject.main_app.management.commands.purge_marked_thumbnails.logger'):
-        call_command('purge_marked_thumbnails', *args, stdout=out)
-    return out.getvalue()
-
-
-class PurgeMarkedThumbnailsTest(BucketLayoutBase):
-    """Marked rows are never deleted, so their cached thumbnail outlives the
-    photographer's need for it. Once the reservation is cancelled or its finals
-    are delivered, the command clears it."""
-
-    def setUp(self):
-        super().setUp()
-        self.marked = self._add_image(self.proofing_gallery, name='keep.jpg')
-        ImageProof.objects.create(image=self.marked, is_marked=True)
-        self.thumbnail = self.marked.marked_thumbnail_path
-        default_storage.save(self.thumbnail, SimpleUploadedFile('t.webp', b'x'))
-
-    def _deliver_finals(self):
-        Reservation.all_objects.filter(pk=self.reservation.pk).update(
-            finals_delivered_at=timezone.now(),
-        )
-
-    def test_active_reservation_keeps_its_thumbnails(self):
-        _run_thumbnail_purge()
-        self.assertTrue(default_storage.exists(self.thumbnail))
-
-    def test_deleted_reservation_loses_its_thumbnails(self):
-        Reservation.all_objects.filter(pk=self.reservation.pk).update(
-            status=Reservation.STATUS_DELETED,
-        )
-        _run_thumbnail_purge()
-        self.assertFalse(default_storage.exists(self.thumbnail))
-
-    def test_finals_delivered_reservation_loses_its_thumbnails(self):
-        self._deliver_finals()
-        _run_thumbnail_purge()
-        self.assertFalse(default_storage.exists(self.thumbnail))
-
-    def test_the_photos_themselves_are_kept(self):
-        self._deliver_finals()
-        _run_thumbnail_purge()
-        self.assertTrue(default_storage.exists(self.marked.image.name))
-        self.assertTrue(Image.objects.filter(pk=self.marked.pk).exists())
-
-    def test_other_reservations_thumbnails_are_untouched(self):
-        other_gallery = Gallery.objects.create(gallery_type=Gallery.TYPE_PROOFING)
-        Reservation.objects.create(
-            user=self.user, service=self.service, specialist=self.specialist,
-            date=self.reservation.date, time=time_cls(14, 0), gallery=other_gallery,
-        )
-        other = self._add_image(other_gallery, name='other.jpg')
-        default_storage.save(other.marked_thumbnail_path, SimpleUploadedFile('t.webp', b'x'))
-        self._deliver_finals()
-        _run_thumbnail_purge()
-        self.assertTrue(default_storage.exists(other.marked_thumbnail_path))
-
-    def test_dry_run_reports_without_deleting(self):
-        self._deliver_finals()
-        output = _run_thumbnail_purge('--dry-run')
-        self.assertTrue(default_storage.exists(self.thumbnail))
-        self.assertIn('1 thumbnail(s) to purge', output)
-
-    def test_empty_folder_is_a_no_op(self):
-        default_storage.delete(self.thumbnail)
-        output = _run_thumbnail_purge()
-        self.assertIn('Purged 0 thumbnail(s)', output)

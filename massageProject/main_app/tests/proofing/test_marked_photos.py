@@ -181,10 +181,9 @@ class MarksFinalizedEmailTest(MarkedPhotosTestBase):
         self.assertEqual(len(mail.outbox), 0)
 
 
-class MarkedPhotoThumbnailTest(MarkedPhotosTestBase):
-    """The Marked Photos grid used to stream the full-size 2560px WebP through
-    a gunicorn worker for every thumbnail on the page. It now serves a small
-    cached derivative; the download paths still hand over the original."""
+class MarkedPhotoImageTest(MarkedPhotosTestBase):
+    """The Marked Photos grid and the download paths all stream the stored
+    original; no second copy of the photo is kept anywhere."""
 
     MAX_DIMENSION = 400
 
@@ -194,33 +193,14 @@ class MarkedPhotoThumbnailTest(MarkedPhotosTestBase):
             reverse('marked_photo_image', args=[self.reservation.pk, self.marked_image.pk])
         )
 
-    def test_grid_serves_a_small_derivative_not_the_original(self):
-        response = self._thumb_response()
-        self.assertEqual(response.status_code, 200)
-        with PILImage.open(BytesIO(b''.join(response.streaming_content))) as thumb:
-            self.assertLessEqual(max(thumb.size), self.MAX_DIMENSION)
-        with self.marked_image.image.open('rb') as source:
-            with PILImage.open(source) as original:
-                self.assertGreater(max(original.size), self.MAX_DIMENSION)
-
-    def test_thumbnail_is_generated_once_and_then_served_from_cache(self):
+    def test_grid_serves_the_stored_original_without_saving_a_copy(self):
         from django.core.files.storage import default_storage
 
-        self._thumb_response()
-        path = self.marked_image.marked_thumbnail_path
-        self.assertTrue(default_storage.exists(path))
-        first_mtime = default_storage.get_modified_time(path)
-        self._thumb_response()
-        self.assertEqual(default_storage.get_modified_time(path), first_mtime)
-
-    def test_thumbnail_carries_no_watermark(self):
-        """A flat-colour source stays flat. Lossy WebP shifts a channel by a
-        point or two; the watermark composite paints white text over the whole
-        frame, which would blow the per-channel spread wide open."""
         response = self._thumb_response()
-        with PILImage.open(BytesIO(b''.join(response.streaming_content))) as thumb:
-            spread = max(hi - lo for lo, hi in thumb.convert('RGB').getextrema())
-        self.assertLess(spread, 16)
+        self.assertEqual(response.status_code, 200)
+        with self.marked_image.image.open('rb') as source:
+            self.assertEqual(b''.join(response.streaming_content), source.read())
+        self.assertFalse(default_storage.exists(f'marked_thumbnails/{self.marked_image.pk}.webp'))
 
     def test_ownership_is_still_enforced_on_the_thumbnail(self):
         self.client.force_login(self.other_specialist_user)
@@ -256,36 +236,3 @@ class MarkedPhotoThumbnailTest(MarkedPhotosTestBase):
         self.client.force_login(self.specialist_user)
         response = self.client.get(reverse('marked_photos', args=[self.reservation.pk]))
         self.assertContains(response, 'loading="lazy"')
-
-
-class MarkedThumbnailInvalidationTest(MarkedPhotosTestBase):
-    """Finding 9: the derivative is keyed only by image id, so nothing evicted
-    it when the underlying photo changed or went away."""
-
-    def _thumb(self):
-        self.client.force_login(self.specialist_user)
-        return self.client.get(
-            reverse('marked_photo_image', args=[self.reservation.pk, self.marked_image.pk])
-        )
-
-    def test_replacing_the_photo_evicts_the_cached_thumbnail(self):
-        from django.core.files.storage import default_storage
-
-        self._thumb()
-        path = self.marked_image.marked_thumbnail_path
-        self.assertTrue(default_storage.exists(path))
-
-        self.marked_image.image = make_uploaded_jpeg('replacement.jpg', color='green')
-        self.marked_image.save()
-        self.assertFalse(
-            default_storage.exists(path),
-            'a replaced photo must not keep serving the old thumbnail',
-        )
-
-    def test_deleting_the_image_removes_its_thumbnail(self):
-        from django.core.files.storage import default_storage
-
-        self._thumb()
-        path = self.marked_image.marked_thumbnail_path
-        self.marked_image.delete()
-        self.assertFalse(default_storage.exists(path))

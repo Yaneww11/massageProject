@@ -5,7 +5,7 @@ from massageProject.main_app.views import Index, ServicesDashboard, ReservationP
     submit_comment, GalleryView, GalleryAlbumView, PhotoProofingGallery, mark_photo, toggle_photo_label, \
     save_photo_comment, finalize_photo_proofing, serve_proof_image, download_reservation_ics, \
     ProofingGalleryUploadView, MarkedPhotosView, serve_marked_photo_image, download_marked_photo, \
-    download_marked_photos_zip, TimeOffCreateView, delete_time_off, FinalGalleryUploadView, \
+    download_marked_photos_zip, TimeOffCreateView, delete_time_off, \
     mark_finals_delivered
 
 urlpatterns = [
@@ -22,7 +22,6 @@ urlpatterns = [
     path('profile/time-off/<int:pk>/delete/', delete_time_off, name='time_off_delete'),
     path('profile/reservations/<int:reservation_id>/calendar/', download_reservation_ics, name='reservation_calendar_ics'),
     path('profile/gallery-upload/', ProofingGalleryUploadView.as_view(), name='proofing_gallery_upload'),
-    path('profile/final-gallery-upload/', FinalGalleryUploadView.as_view(), name='final_gallery_upload'),
     path('profile/reservations/<int:reservation_id>/finals-delivered/', mark_finals_delivered, name='mark_finals_delivered'),
     path('profile/reservations/<int:reservation_id>/marked-photos/', MarkedPhotosView.as_view(), name='marked_photos'),
     path('profile/reservations/<int:reservation_id>/marked-photos/zip/', download_marked_photos_zip, name='marked_photos_zip'),
