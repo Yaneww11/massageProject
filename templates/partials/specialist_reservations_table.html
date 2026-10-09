@@ -99,9 +99,12 @@
             {% endif %}
             {% if r.proofing_finalized_at %}
             <a href="{% url 'marked_photos' r.pk %}" class="btn-action-edit">{% trans "Маркирани снимки" %}</a>
+            {% if r.user.email %}
+            <a href="{% url 'final_gallery_upload' %}?reservation_id={{ r.pk }}" class="btn-action-edit">{% if r.finals_delivered_at %}{% trans "Изпрати отново" %}{% else %}{% trans "Качи финали" %}{% endif %}</a>
             {% endif %}
-            {% if r.proofing_finalized_at and not r.final_gallery_id %}
-            <a href="{% url 'final_gallery_upload' %}?reservation_id={{ r.pk }}" class="btn-action-edit">{% trans "Качи финали" %}</a>
+            {% if not r.finals_delivered_at %}
+            <button type="button" class="btn-action-edit js-mark-delivered-open" data-action="{% url 'mark_finals_delivered' r.pk %}">{% trans "Маркирай като предадени" %}</button>
+            {% endif %}
             {% endif %}
           </td>
           {% endif %}
@@ -128,6 +131,19 @@
     </div>
     {% endif %}
   </nav>
+  <div id="mark-delivered-modal" class="review-modal-overlay" style="display:none;" aria-modal="true" role="dialog" aria-labelledby="mark-delivered-title">
+    <div class="review-modal-content">
+      <button type="button" class="modal-close js-mark-delivered-close" aria-label="{% trans 'Затвори' %}">&times;</button>
+      <h3 class="modal-title" id="mark-delivered-title">{% trans "Маркиране като предадени" %}</h3>
+      <p>{% trans "Финалните снимки ще бъдат отбелязани като предадени на клиента. Няма да бъде изпратен имейл. Продължавате ли?" %}</p>
+      <form method="post" action="" class="js-mark-delivered-form">
+        {% csrf_token %}
+        <input type="hidden" name="return_query" value="{{ request.GET.urlencode }}">
+        <button type="submit" class="btn-primary-profile">{% trans "Потвърди" %}</button>
+        <button type="button" class="btn-outline-profile js-mark-delivered-close">{% trans "Отказ" %}</button>
+      </form>
+    </div>
+  </div>
   {% else %}
   <p class="empty-state-msg">{% trans "Няма резервации, отговарящи на филтрите." %}</p>
   {% endif %}

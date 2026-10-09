@@ -73,7 +73,6 @@
         <div class="bn-block">
           <div class="bn-step-label">
             {% trans "Дата и час" %}
-            <span class="bn-hint">{% trans "Затворено в неделя" %}</span>
           </div>
           <div class="bn-datetime">
             <div id="bn-calendar"></div>
@@ -191,7 +190,7 @@
                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/>
           </svg>
-          {% trans "Безплатно анулиране до 24 часа преди процедурата." %}
+          {% trans "Анулиране е позволено до 24 часа преди процедурата." %}
         </p>
       </aside>
 
@@ -491,7 +490,6 @@ document.addEventListener('DOMContentLoaded', function () {
       const dt  = new Date(year, month, d);
       const iso = toISO(year, month, d);
       const isPast    = dt < today;
-      const isSunday  = dt.getDay() === 0;
       const isToday   = dt.getTime() === today.getTime();
       const isSelected= dateValue.value === iso;
 
@@ -502,7 +500,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (isToday)    btn.classList.add('bn-cal-day--today');
       if (isSelected) btn.classList.add('bn-cal-day--selected');
 
-      if (isPast || isSunday) {
+      if (isPast) {
         btn.disabled = true;
       } else {
         btn.addEventListener('click', () => selectDate(iso, btn));

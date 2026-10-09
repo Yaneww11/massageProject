@@ -1,23 +1,20 @@
 {% extends "base.html" %}
-{% load i18n static %}
+{% load i18n %}
 
 {% block content %}
 <section class="profile-page">
   <div class="profile-container">
     <div class="section-header-row">
       <div>
-        <span class="profile-eyebrow">{% trans "ФИНАЛНА ГАЛЕРИЯ" %}</span>
-        <h1 class="section-title">{% trans "Качване на финална галерия" %}</h1>
-        <p class="section-subtitle">{% trans "Изберете резервация, чийто клиент вече е финализирал прегледа, и качете готовите снимки." %}</p>
+        <span class="profile-eyebrow">{% trans "ФИНАЛНИ СНИМКИ" %}</span>
+        <h1 class="section-title">{% trans "Изпращане на финални снимки" %}</h1>
+        <p class="section-subtitle">{% trans "Изберете резервация и качете ZIP архива с обработените снимки. Той се изпраща на клиента по имейл като прикачен файл и не се запазва на сайта." %}</p>
       </div>
     </div>
 
-    {% include "partials/gallery/draft_list.html" %}
-
-    <form method="post" enctype="multipart/form-data" class="gallery-upload-form"
-          id="chunked-gallery-upload-form"
-          data-chunk-size="{{ chunk_size }}"
-          data-done-url="{% url 'profile_page' %}">
+    <form method="post" enctype="multipart/form-data" class="gallery-upload-form" id="final-zip-upload-form"
+          data-too-large="{% blocktrans %}Файлът е твърде голям. Максимумът е {{ max_mb }} MB.{% endblocktrans %}"
+          data-not-zip="{% trans 'Изберете ZIP архив (.zip).' %}">
       {% csrf_token %}
 
       {% if upload_form.non_field_errors %}
@@ -33,18 +30,31 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="{{ upload_form.images.id_for_label }}">{% trans "Снимки" %}</label>
-        {{ upload_form.images }}
-        {% if upload_form.images.errors %}<div class="error-message">{{ upload_form.images.errors }}</div>{% endif %}
+        <label class="form-label" for="{{ upload_form.zip_file.id_for_label }}">{% trans "ZIP архив с финалните снимки" %}</label>
+        {{ upload_form.zip_file }}
+        <p class="form-hint">{{ upload_form.zip_file.help_text }}</p>
+        <div class="error-message" id="final-zip-client-error" role="alert">{{ upload_form.zip_file.errors }}</div>
       </div>
 
-      <p class="form-hint">{% blocktrans %}Снимките се качват на групи по {{ chunk_size }} и стават видими за клиента едва след като качването приключи.{% endblocktrans %}</p>
-
-      {% include "partials/gallery/chunked_upload_ui.html" %}
-
-      <button type="submit" class="btn-primary-profile" id="chunked-upload-submit">{% trans "Качете и доставете" %}</button>
+      <button type="submit" class="btn-primary-profile">{% trans "Изпратете на клиента" %}</button>
     </form>
   </div>
 </section>
-<script src="{% static 'js/chunked-gallery-upload.js' %}" defer></script>
+<script>
+(function () {
+  var form = document.getElementById('final-zip-upload-form');
+  var input = form.querySelector('input[type=file]');
+  var error = document.getElementById('final-zip-client-error');
+  form.addEventListener('submit', function (event) {
+    var file = input.files[0];
+    var message = '';
+    if (file && !/\.zip$/i.test(file.name)) message = form.dataset.notZip;
+    else if (file && file.size > Number(input.dataset.maxBytes)) message = form.dataset.tooLarge;
+    if (message) {
+      event.preventDefault();
+      error.textContent = message;
+    }
+  });
+})();
+</script>
 {% endblock %}

@@ -34,7 +34,7 @@ from massageProject.main_app.emails import send_gallery_ready_email, send_marks_
 from massageProject.main_app.ics import build_reservation_ics
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
     ReservationDeleteForm, CommentForm, UserNameForm, ProofingGalleryUploadForm, \
-    ProofingLabelFormSet, FinalGalleryUploadForm, TimeOffForm
+    ProofingLabelFormSet, TimeOffForm, FinalZipUploadForm
 from massageProject.main_app.mixins import BookingEnabledMixin, booking_enabled_required, \
     CommentsEnabledMixin, comments_enabled_required, PhotographerModeMixin
 from massageProject.main_app.models import Service, Specialist, Reservation, Comment, WorkingHours, ServiceGroup, \
@@ -787,6 +787,109 @@ class ProofingGalleryUploadView(GalleryUploadBaseView):
 
 
 
+class FinalGalleryUploadView(PhotographerModeMixin, LoginRequiredMixin, TemplateView):
+    """Emails the specialist's finals ZIP to the client. The upload only ever
+    lives in Django's temp upload file; nothing is stored."""
+    template_name = 'pages/final_gallery_upload.html'
+
+    def _accessible(self):
+        qs = Reservation.objects.all()
+        if not self.is_staff_mode:
+            qs = qs.filter(specialist=self.specialist)
+        return qs
+
+    def _eligible(self):
+        return (
+            self._accessible()
+            .filter(proofing_finalized_at__isnull=False)
+            .exclude(user__email='')
+            .select_related('specialist', 'service', 'user')
+            .order_by('-date', '-time')
+        )
+
+    def _load_scope(self):
+        is_staff_mode, specialist = _resolve_photo_workflow_scope(self.request.user)
+        if is_staff_mode is None:
+            raise PermissionDenied
+        self.is_staff_mode = is_staff_mode
+        self.specialist = specialist
+
+    def _form(self, *args, **kwargs):
+        return FinalZipUploadForm(*args, reservation_queryset=self._eligible(), **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = _('Изпращане на финални снимки')
+        context['max_mb'] = settings.FINAL_ZIP_MAX_MB
+        if 'upload_form' not in context:
+            initial = {}
+            reservation_id = self.request.GET.get('reservation_id')
+            if reservation_id:
+                initial['reservation'] = reservation_id
+            context['upload_form'] = self._form(initial=initial)
+        return context
+
+    def get(self, request, *args, **kwargs):
+        self._load_scope()
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self._load_scope()
+        posted_id = request.POST.get('reservation', '')
+        if posted_id.isdigit():
+            owned = self._accessible().filter(pk=posted_id).exists()
+            if not owned and Reservation.objects.filter(pk=posted_id).exists():
+                raise PermissionDenied
+        form = self._form(request.POST, request.FILES)
+        if form.is_valid():
+            reservation = form.cleaned_data['reservation']
+            zip_file = form.cleaned_data['zip_file']
+            try:
+                sent = send_final_delivery_email(reservation, zip_file)
+            finally:
+                zip_file.close()
+            if sent:
+                messages.success(request, _('Финалните снимки бяха изпратени на клиента по имейл.'))
+                return redirect('profile_page')
+            form.add_error(None, _('Имейлът не бе изпратен. Опитайте отново.'))
+        else:
+            self._reject_without_email(form, posted_id)
+        return self.render_to_response(self.get_context_data(upload_form=form))
+
+    def _reject_without_email(self, form, posted_id):
+        """Point at manual delivery when the only thing wrong is a client with no email."""
+        if posted_id.isdigit() and 'reservation' in form.errors and self._accessible().filter(
+                pk=posted_id, proofing_finalized_at__isnull=False, user__email='').exists():
+            form.errors['reservation'] = form.error_class([
+                _('Клиентът няма имейл. Предайте снимките лично и отбележете резервацията като предадена.'),
+            ])
+
+
+@login_required
+@require_POST
+def mark_finals_delivered(request, reservation_id):
+    """Stamp finals as delivered by hand (photos handed over in person). Sends no email."""
+    if not settings.IS_PHOTOGRAPHER_WEBSITE:
+        raise Http404
+    reservation = _get_owned_reservation_for_photo_workflow(request, reservation_id)
+    if reservation.finals_delivered_at:
+        messages.info(request, _('Финалните снимки вече са отбелязани като предадени.'))
+    else:
+        reservation.finals_delivered_at = timezone.now()
+        try:
+            reservation.save()
+        except ValidationError as exc:
+            messages.error(request, ' '.join(exc.messages))
+        else:
+            messages.success(request, _('Финалните снимки са отбелязани като предадени.'))
+    # Only a querystring is carried back, never a URL, so this can't redirect off-site.
+    query = request.POST.get('return_query', '')
+    target = reverse('profile_page')
+    if query and not query.startswith(('/', '\\')) and '//' not in query:
+        target += '?' + query
+    return redirect(target)
+
+
 def _get_owned_reservation_for_photo_workflow(request, reservation_id):
     """Ownership + role check shared by the Marked Photos view and its
     downloads: the owning specialist, or staff on behalf of any specialist."""
@@ -893,57 +996,6 @@ def download_marked_photos_zip(request, reservation_id):
     reservation = _get_owned_reservation_for_photo_workflow(request, reservation_id)
     images = _marked_images_queryset(reservation)
     return _zip_images_response(images, f'marked-photos-reservation-{reservation.pk}.zip')
-
-
-class FinalGalleryUploadView(GalleryUploadBaseView):
-    template_name = 'pages/final_gallery_upload.html'
-    gallery_type = Gallery.TYPE_FINAL
-    form_class = FinalGalleryUploadForm
-    reservation_field = 'final_gallery'
-    page_title = _lazy('Качване на финална галерия')
-
-    def _eligible_reservations(self):
-        return Reservation.objects.filter(
-            proofing_finalized_at__isnull=False, final_gallery__isnull=True,
-        )
-
-    def _send_client_email(self, reservation):
-        return send_final_delivery_email(reservation)
-
-    def _success_message(self, count):
-        return _(
-            'Финалната галерия е качена и доставена успешно (%(count)d снимки).'
-        ) % {'count': count}
-
-    def _email_failed_message(self, count):
-        return _(
-            'Финалната галерия е качена успешно (%(count)d снимки), но имейлът до клиента не бе изпратен.'
-        ) % {'count': count}
-
-
-def _get_owned_final_gallery_reservation(request, reservation_id):
-    reservation = get_object_or_404(Reservation, pk=reservation_id, user=request.user)
-    if not reservation.final_gallery_id:
-        raise Http404
-    return reservation
-
-
-@login_required
-def serve_final_gallery_image(request, reservation_id, image_id):
-    if not settings.IS_PHOTOGRAPHER_WEBSITE:
-        raise Http404
-    reservation = _get_owned_final_gallery_reservation(request, reservation_id)
-    image = get_object_or_404(Image, pk=image_id, gallery=reservation.final_gallery)
-    return FileResponse(image.image.open('rb'), content_type='image/webp')
-
-
-@login_required
-def download_final_gallery(request, reservation_id):
-    if not settings.IS_PHOTOGRAPHER_WEBSITE:
-        raise Http404
-    reservation = _get_owned_final_gallery_reservation(request, reservation_id)
-    images = reservation.final_gallery.images.order_by('order')
-    return _zip_images_response(images, f'final-photos-reservation-{reservation.pk}.zip')
 
 
 class ProfilePage(LoginRequiredMixin, TemplateView):

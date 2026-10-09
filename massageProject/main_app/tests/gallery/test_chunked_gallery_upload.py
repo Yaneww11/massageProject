@@ -258,7 +258,6 @@ class CapTest(ChunkedUploadTestBase):
         self.assertEqual(Gallery.IMAGE_CAPS[Gallery.TYPE_ALBUM], 50)
         self.assertEqual(Gallery.IMAGE_CAPS[Gallery.TYPE_HOMEPAGE], 50)
         self.assertEqual(Gallery.IMAGE_CAPS[Gallery.TYPE_PROOFING], 400)
-        self.assertEqual(Gallery.IMAGE_CAPS[Gallery.TYPE_FINAL], 400)
 
 
 class SingleShotStillWorksTest(ChunkedUploadTestBase):
@@ -408,61 +407,6 @@ class LargeGalleryUploadTest(ChunkedUploadTestBase):
         # The 401st image is refused.
         response = self.send_chunk(gallery_id, [self._tiny(self.IMAGE_COUNT)])
         self.assertEqual(response.status_code, 400)
-
-
-class FinalGalleryChunkedUploadTest(ChunkedUploadTestBase):
-    """The same create -> chunk -> publish path, driven through the final
-    gallery view, which collects no labels and sends the delivery email."""
-    url_name = 'final_gallery_upload'
-    gallery_field = 'final_gallery'
-
-    def _prepare_reservation(self):
-        self.reservation.proofing_finalized_at = timezone.now()
-        self.reservation.save(update_fields=['proofing_finalized_at'])
-
-    def create_draft(self, reservation=None, labels=()):
-        return self.client.post(self.url, {
-            'step': 'create', 'reservation': (reservation or self.reservation).pk,
-        })
-
-    def test_draft_is_a_final_gallery_and_sends_no_email(self):
-        gallery = Gallery.objects.get(pk=self.new_draft_id())
-        self.assertEqual(gallery.gallery_type, Gallery.TYPE_FINAL)
-        self.assertEqual(mail.outbox, [])
-
-    def test_chunks_then_publish_delivers_once(self):
-        gallery_id = self.new_draft_id()
-        self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg'), make_uploaded_jpeg('b.jpg')])
-        self.send_chunk(gallery_id, [make_uploaded_jpeg('c.jpg')])
-        self.assertEqual(mail.outbox, [])
-        self.publish(gallery_id)
-        self.reservation.refresh_from_db()
-        self.assertEqual(self.reservation.final_gallery_id, gallery_id)
-        self.assertEqual(self.reservation.final_gallery.images.count(), 3)
-        self.assertEqual(len(mail.outbox), 1)
-
-    def test_publishing_twice_does_not_deliver_twice(self):
-        gallery_id = self.new_draft_id()
-        self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg')])
-        self.publish(gallery_id)
-        self.publish(gallery_id)
-        self.assertEqual(len(mail.outbox), 1)
-
-    def test_resume_skips_already_uploaded_files(self):
-        gallery_id = self.new_draft_id()
-        first = make_uploaded_jpeg('a.jpg')
-        self.send_chunk(gallery_id, [first])
-        again = SimpleUploadedFile('a.jpg', first.file.getvalue(), content_type='image/jpeg')
-        response = self.send_chunk(gallery_id, [again])
-        self.assertEqual(response.json()['skipped'], 1)
-        self.assertEqual(Image.objects.filter(gallery_id=gallery_id).count(), 1)
-
-    def test_another_specialist_cannot_append_to_this_draft(self):
-        gallery_id = self.new_draft_id()
-        self.client.force_login(self.other_specialist_user)
-        response = self.send_chunk(gallery_id, [make_uploaded_jpeg('a.jpg')])
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(Image.objects.filter(gallery_id=gallery_id).count(), 0)
 
 
 class SingleShotValidationTest(ChunkedUploadTestBase):
