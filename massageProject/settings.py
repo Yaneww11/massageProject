@@ -287,8 +287,6 @@ EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='webmaster@localhost')
-# Largest finals ZIP the specialist may upload. ~20.5 MB once base64-encoded, under the 25 MB per-message limit of Gmail and others.
-FINAL_ZIP_MAX_MB = 15
 
 # Absolute base URL used to build links inside emails, which are rendered
 # outside of any request/response cycle.

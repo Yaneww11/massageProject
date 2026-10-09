@@ -75,6 +75,7 @@
           <th>{% trans "УСЛУГА" %}</th>
           {% if role == 'staff' %}<th>{{ site_config.specialist_singular|capfirst }}</th>{% endif %}
           <th>{% trans "КЛИЕНТ" %}</th>
+          <th>{% trans "ТЕЛЕФОН" %}</th>
           <th>{% trans "СТАТУС" %}</th>
           {% if is_photographer_website %}<th></th>{% endif %}
         </tr>
@@ -87,6 +88,7 @@
           <td data-label="{% trans 'УСЛУГА' %}">{{ r.service.name }}</td>
           {% if role == 'staff' %}<td data-label="{{ site_config.specialist_singular|capfirst }}">{{ r.specialist.name }}</td>{% endif %}
           <td data-label="{% trans 'КЛИЕНТ' %}">{{ r.user.get_full_name|default:r.user.phone_number|default:r.user.email }}</td>
+          <td data-label="{% trans 'ТЕЛЕФОН' %}">{{ r.user.phone_number|default:"—" }}</td>
           <td data-label="{% trans 'СТАТУС' %}">
             <span class="phase-badge phase-{{ r.phase }}">
               {% if is_photographer_website %}{{ r.phase_display }}{% else %}{{ r.get_status_display }}{% endif %}
@@ -99,9 +101,6 @@
             {% endif %}
             {% if r.proofing_finalized_at %}
             <a href="{% url 'marked_photos' r.pk %}" class="btn-action-edit">{% trans "Маркирани снимки" %}</a>
-            {% if r.user.email %}
-            <a href="{% url 'final_gallery_upload' %}?reservation_id={{ r.pk }}" class="btn-action-edit">{% if r.finals_delivered_at %}{% trans "Изпрати отново" %}{% else %}{% trans "Качи финали" %}{% endif %}</a>
-            {% endif %}
             {% if not r.finals_delivered_at %}
             <button type="button" class="btn-action-edit js-mark-delivered-open" data-action="{% url 'mark_finals_delivered' r.pk %}">{% trans "Маркирай като предадени" %}</button>
             {% endif %}

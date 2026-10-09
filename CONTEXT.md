@@ -45,7 +45,7 @@ The specialist-facing view of the Images a client marked as favorite during Phot
 _Avoid_: selections, picks, client selections
 
 **Final Delivery**:
-The one-way action of emailing the client a secure link to their Final Gallery once the specialist has uploaded it. Timestamped by `finals_delivered_at`.
+The one-way action of recording that the specialist has handed the final photos to the client outside the site. Timestamped by `finals_delivered_at`.
 _Avoid_: sending finals
 
 **Time Off**:

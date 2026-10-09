@@ -2,6 +2,8 @@
 
 Supersedes the final-gallery part of ADR 0004.
 
+**Amended:** the ZIP upload page and the delivery email have been removed. The site no longer sends final photos at all; the specialist hands them over outside the site and records it with "Маркирай като предадени", which sets `finals_delivered_at`. The rest of this ADR (finals not stored, `final_gallery` removed) still holds. The upload and email sections below are kept as history.
+
 Final photos are no longer stored. The specialist uploads one `.zip` (at most `FINAL_ZIP_MAX_MB = 15`). Django validates it, attaches it byte for byte to the delivery email, and discards it after the request. `Reservation.finals_delivered_at` is the only stored trace. Staff or the assigned specialist can also set it by hand when photos were handed over another way. `Reservation.final_gallery` and `Gallery.TYPE_FINAL` are removed, along with the finals exception in `Image.clean()`. Existing final galleries are purged by `purge_final_galleries` before the migration that drops the field.
 
 We chose this over keeping finals in GCS (the WebP gallery of ADR 0004, or a stored original ZIP behind a signed URL) for three reasons:
