@@ -6,6 +6,7 @@
       <h2 class="section-title">
         {% if role == 'staff' %}{% trans "Всички резервации" %}{% else %}{% trans "Вашите резервации" %}{% endif %}
       </h2>
+      <p class="section-subtitle">{% trans "Първо са предстоящите резервации (най-близките най-отгоре), след тях – изминалите (най-скорошните най-отгоре)." %}</p>
     </div>
   </div>
 
@@ -24,7 +25,12 @@
     <div class="filter-field">
       <label class="form-label" for="filter-phase">{% trans "Статус" %}</label>
       <select id="filter-phase" name="phase" class="form-textarea">
+        {% if is_photographer_website %}
+        <option value="">{% trans "Всички (без финално доставени и не явили се)" %}</option>
+        <option value="all" {% if selected_phase == 'all' %}selected{% endif %}>{% trans "Всички" %}</option>
+        {% else %}
         <option value="">{% trans "Всички" %}</option>
+        {% endif %}
         {% for value, label in phase_choices %}
         <option value="{{ value }}" {% if selected_phase == value %}selected{% endif %}>{{ label }}</option>
         {% endfor %}

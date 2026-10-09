@@ -1019,6 +1019,9 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
 
 
 RESERVATIONS_TABLE_PAGE_SIZE = 15
+# Photographer-site phase filter value that shows every row, including the
+# finals-delivered and no-show ones the default hides.
+PHASE_FILTER_ALL = 'all'
 
 
 def _build_reservations_table_context(request, base_qs, is_staff):
@@ -1034,7 +1037,9 @@ def _build_reservations_table_context(request, base_qs, is_staff):
     phase_choices += [c for c in Reservation.STATUS_CHOICES if c[0] != Reservation.STATUS_DELETED]
 
     selected_phase = request.GET.get('phase', '')
-    if selected_phase:
+    if selected_phase == PHASE_FILTER_ALL and not is_photographer:
+        selected_phase = ''
+    if selected_phase and selected_phase != PHASE_FILTER_ALL:
         phase_q = Reservation.phase_query(selected_phase)
         if phase_q is not None:
             qs = qs.filter(phase_q)
@@ -1042,6 +1047,7 @@ def _build_reservations_table_context(request, base_qs, is_staff):
             selected_phase = ''
     if is_photographer and not selected_phase:
         qs = qs.exclude(Reservation.phase_query(Reservation.PHASE_FINALS_DELIVERED))
+        qs = qs.exclude(Reservation.phase_query(Reservation.STATUS_NOSHOW))
 
     date_from = request.GET.get('date_from', '')
     if date_from:

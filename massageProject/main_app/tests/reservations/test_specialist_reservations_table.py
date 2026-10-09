@@ -174,11 +174,13 @@ class TableFilterTest(SpecialistReservationsTableTestBase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['specialist_id'], '')
 
+    @override_settings(IS_PHOTOGRAPHER_WEBSITE=False)
     def test_filter_by_service(self):
         response = self.client.get(reverse('profile_page'), {'service_id': self.service_b.pk})
         reservations = response.context['reservations']
         self.assertEqual(set(reservations), {self.no_show, self.active})
 
+    @override_settings(IS_PHOTOGRAPHER_WEBSITE=False)
     def test_filter_by_client_name_search(self):
         response = self.client.get(reverse('profile_page'), {'q': 'Georgi'})
         reservations = response.context['reservations']
@@ -359,11 +361,44 @@ class TableFinalsDeliveredHiddenByDefaultTest(SpecialistReservationsTableTestBas
         self.assertEqual(response.context['selected_phase'], '')
         self.assertNotIn(self.delivered, response.context['reservations'])
 
-    @override_settings(IS_PHOTOGRAPHER_WEBSITE=False)
-    def test_non_photographer_site_hides_nothing(self):
+    def test_no_show_hidden_by_default(self):
+        no_show = self._make_reservation(
+            self.specialist, self.client_georgi, self.service_a, self.past_monday, time_cls(11, 0),
+            status=Reservation.STATUS_NOSHOW,
+        )
         self.client.force_login(self.specialist_user)
         reservations = self.client.get(reverse('profile_page')).context['reservations']
-        self.assertIn(self.delivered, reservations)
+        self.assertNotIn(no_show, reservations)
+        self.assertIn(self.finals_ready, reservations)
+
+    def test_all_option_shows_delivered_and_no_show(self):
+        no_show = self._make_reservation(
+            self.specialist, self.client_georgi, self.service_a, self.past_monday, time_cls(11, 0),
+            status=Reservation.STATUS_NOSHOW,
+        )
+        self.client.force_login(self.specialist_user)
+        response = self.client.get(reverse('profile_page'), {'phase': 'all'})
+        self.assertEqual(response.context['selected_phase'], 'all')
+        self.assertEqual(set(response.context['reservations']), {self.delivered, self.finals_ready, no_show})
+        self.assertContains(response, '<option value="all" selected>')
+
+    @override_settings(IS_PHOTOGRAPHER_WEBSITE=False)
+    def test_non_photographer_site_hides_nothing(self):
+        no_show = self._make_reservation(
+            self.specialist, self.client_georgi, self.service_a, self.past_monday, time_cls(11, 0),
+            status=Reservation.STATUS_NOSHOW,
+        )
+        self.client.force_login(self.specialist_user)
+        response = self.client.get(reverse('profile_page'))
+        self.assertIn(self.delivered, response.context['reservations'])
+        self.assertIn(no_show, response.context['reservations'])
+        self.assertNotContains(response, 'value="all"')
+
+    @override_settings(IS_PHOTOGRAPHER_WEBSITE=False)
+    def test_non_photographer_site_ignores_all_value(self):
+        self.client.force_login(self.specialist_user)
+        response = self.client.get(reverse('profile_page'), {'phase': 'all'})
+        self.assertEqual(response.context['selected_phase'], '')
 
 
 class TablePaginationTest(SpecialistReservationsTableTestBase):
