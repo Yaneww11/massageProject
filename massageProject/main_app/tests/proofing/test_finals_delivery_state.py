@@ -287,13 +287,12 @@ class OldFinalUrlsAreGoneTest(FinalsStateBase):
         for path in (
             f'/profile/reservations/{self.reservation.pk}/final-gallery/',
             f'/profile/reservations/{self.reservation.pk}/final-gallery/1/',
-            '/profile/final-gallery-upload/',
         ):
             self.assertEqual(self.client.get(path).status_code, 404, path)
 
     def test_url_names_are_removed(self):
         for name, args in (
-            ('final_gallery_download', [1]), ('final_gallery_image', [1, 1]), ('final_gallery_upload', []),
+            ('final_gallery_download', [1]), ('final_gallery_image', [1, 1]),
         ):
             with self.assertRaises(NoReverseMatch):
                 reverse(name, args=args)

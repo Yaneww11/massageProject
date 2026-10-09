@@ -99,6 +99,9 @@
             {% endif %}
             {% if r.proofing_finalized_at %}
             <a href="{% url 'marked_photos' r.pk %}" class="btn-action-edit">{% trans "Маркирани снимки" %}</a>
+            {% if r.user.email %}
+            <a href="{% url 'final_gallery_upload' %}?reservation_id={{ r.pk }}" class="btn-action-edit">{% if r.finals_delivered_at %}{% trans "Изпрати отново" %}{% else %}{% trans "Качи финали" %}{% endif %}</a>
+            {% endif %}
             {% endif %}
           </td>
           {% endif %}

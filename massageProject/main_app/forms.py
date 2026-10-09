@@ -1,6 +1,8 @@
+import zipfile
 from datetime import datetime, time, timedelta
 
 from django import forms
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.utils import timezone
@@ -195,3 +197,67 @@ class ProofingLabelForm(forms.Form):
     )
 
 ProofingLabelFormSet = forms.formset_factory(ProofingLabelForm, extra=3)
+
+
+FINAL_IMAGE_EXTENSIONS = frozenset({
+    'jpg', 'jpeg', 'png', 'tif', 'tiff', 'webp', 'heic', 'dng',
+    'cr2', 'cr3', 'nef', 'arw', 'orf', 'rw2', 'raf', 'srw', 'pef',
+})
+
+
+def _is_zip_junk(name):
+    parts = name.split('/')
+    return name.endswith('/') or parts[0] == '__MACOSX' or parts[-1] == '.DS_Store'
+
+
+def validate_finals_zip(zip_file):
+    """Raises ValidationError unless the upload is a sound ZIP holding only
+    images. Leaves the file rewound for the caller."""
+    try:
+        with zipfile.ZipFile(zip_file) as archive:
+            if archive.testzip() is not None:
+                raise ValidationError(_('ZIP архивът е повреден. Създайте го отново и опитайте пак.'))
+            names = [n for n in archive.namelist() if not _is_zip_junk(n)]
+    except zipfile.BadZipFile:
+        raise ValidationError(_('Файлът не е валиден ZIP архив.'))
+    finally:
+        zip_file.seek(0)
+    if not names:
+        raise ValidationError(_('ZIP архивът не съдържа файлове.'))
+    not_images = [n for n in names if n.rsplit('.', 1)[-1].lower() not in FINAL_IMAGE_EXTENSIONS or '.' not in n]
+    if not_images:
+        raise ValidationError(
+            _('ZIP архивът трябва да съдържа само снимки. Недопустим файл: %(name)s'),
+            params={'name': not_images[0]},
+        )
+
+
+class FinalZipUploadForm(forms.Form):
+    reservation = forms.ModelChoiceField(queryset=Reservation.objects.none(), label=_('Резервация'))
+    zip_file = forms.FileField(label=_('ZIP архив с финалните снимки'))
+
+    def __init__(self, *args, reservation_queryset=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if reservation_queryset is not None:
+            self.fields['reservation'].queryset = reservation_queryset
+        self.fields['reservation'].label_from_instance = lambda r: (
+            f"{r.specialist.name} — {r.date} {r.time.strftime('%H:%M')} — {r.service.name} — "
+            f"{r.user.get_full_name() or r.user.phone_number or r.user.email}"
+        )
+        self.fields['reservation'].widget.attrs.update({'class': 'form-textarea'})
+        self.fields['zip_file'].widget.attrs.update({
+            'class': 'form-textarea', 'accept': '.zip,application/zip',
+            'data-max-bytes': settings.FINAL_ZIP_MAX_MB * 1024 * 1024,
+        })
+        self.fields['zip_file'].help_text = _(
+            'Най-много %(max)d MB. Архивирайте обработените файлове в ZIP, без да ги конвертирате.'
+        ) % {'max': settings.FINAL_ZIP_MAX_MB}
+
+    def clean_zip_file(self):
+        zip_file = self.cleaned_data['zip_file']
+        if zip_file.size > settings.FINAL_ZIP_MAX_MB * 1024 * 1024:
+            raise ValidationError(
+                _('Файлът е твърде голям. Максимумът е %(max)d MB.'), params={'max': settings.FINAL_ZIP_MAX_MB},
+            )
+        validate_finals_zip(zip_file)
+        return zip_file

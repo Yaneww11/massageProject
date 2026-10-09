@@ -24,7 +24,7 @@
 
 **Blocked by:** 01, 02
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] Happy path: one email with one attachment named `final-photos-reservation-<id>.zip`, whose bytes equal the upload. `finals_delivered_at` is stamped. No `Gallery`/`Image` rows are created and nothing is written to storage.
 - [ ] Re-send to a delivered reservation (by email or by hand): the email is sent and `finals_delivered_at` is unchanged.
