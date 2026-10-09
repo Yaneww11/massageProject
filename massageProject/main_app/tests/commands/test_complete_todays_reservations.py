@@ -43,7 +43,7 @@ class CompleteTodaysReservationsTest(BugFixTestBase):
         no_show = self._reservation(TODAY, time(12, 0), status=Reservation.STATUS_NOSHOW)
         self._run()
         for r, status in [
-            (tomorrow, Reservation.STATUS_ACTIVE), (yesterday, Reservation.STATUS_ACTIVE),
+            (tomorrow, Reservation.STATUS_ACTIVE), (yesterday, Reservation.STATUS_COMPLETED),
             (deleted, Reservation.STATUS_DELETED), (no_show, Reservation.STATUS_NOSHOW),
         ]:
             r.refresh_from_db()

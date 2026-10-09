@@ -9,6 +9,7 @@ from django import forms as django_forms
 from django.core.exceptions import ValidationError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
+from django.utils.cache import add_never_cache_headers, patch_vary_headers
 from django.views.generic import TemplateView, ListView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
@@ -956,11 +957,15 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
         # The table's pager and filters fetch just the table, to swap it in place.
         if (self.request.headers.get('X-Requested-With') == 'XMLHttpRequest'
                 and context['role'] in ('staff', 'specialist')):
-            return self.response_class(
+            response = self.response_class(
                 request=self.request, template=['partials/specialist_reservations_table.html'],
                 context=context, using=self.template_engine, **response_kwargs,
             )
-        return super().render_to_response(context, **response_kwargs)
+            add_never_cache_headers(response)
+        else:
+            response = super().render_to_response(context, **response_kwargs)
+        patch_vary_headers(response, ['X-Requested-With'])
+        return response
 
 
 RESERVATIONS_TABLE_PAGE_SIZE = 15
