@@ -100,9 +100,6 @@
             {% if r.proofing_finalized_at %}
             <a href="{% url 'marked_photos' r.pk %}" class="btn-action-edit">{% trans "Маркирани снимки" %}</a>
             {% endif %}
-            {% if r.proofing_finalized_at and not r.final_gallery_id %}
-            <a href="{% url 'final_gallery_upload' %}?reservation_id={{ r.pk }}" class="btn-action-edit">{% trans "Качи финали" %}</a>
-            {% endif %}
           </td>
           {% endif %}
         </tr>

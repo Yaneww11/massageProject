@@ -29,12 +29,11 @@ from django.http import HttpResponse, FileResponse, JsonResponse, Http404
 from PIL import Image as PILImage, ImageDraw, ImageFont
 
 from massageProject.main_app.context_processors import get_homepage
-from massageProject.main_app.emails import send_gallery_ready_email, send_marks_finalized_email, \
-    send_final_delivery_email
+from massageProject.main_app.emails import send_gallery_ready_email, send_marks_finalized_email
 from massageProject.main_app.ics import build_reservation_ics
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
     ReservationDeleteForm, CommentForm, UserNameForm, ProofingGalleryUploadForm, \
-    ProofingLabelFormSet, FinalGalleryUploadForm, TimeOffForm
+    ProofingLabelFormSet, TimeOffForm
 from massageProject.main_app.mixins import BookingEnabledMixin, booking_enabled_required, \
     CommentsEnabledMixin, comments_enabled_required, PhotographerModeMixin
 from massageProject.main_app.models import Service, Specialist, Reservation, Comment, WorkingHours, ServiceGroup, \
@@ -893,57 +892,6 @@ def download_marked_photos_zip(request, reservation_id):
     reservation = _get_owned_reservation_for_photo_workflow(request, reservation_id)
     images = _marked_images_queryset(reservation)
     return _zip_images_response(images, f'marked-photos-reservation-{reservation.pk}.zip')
-
-
-class FinalGalleryUploadView(GalleryUploadBaseView):
-    template_name = 'pages/final_gallery_upload.html'
-    gallery_type = Gallery.TYPE_FINAL
-    form_class = FinalGalleryUploadForm
-    reservation_field = 'final_gallery'
-    page_title = _lazy('Качване на финална галерия')
-
-    def _eligible_reservations(self):
-        return Reservation.objects.filter(
-            proofing_finalized_at__isnull=False, final_gallery__isnull=True,
-        )
-
-    def _send_client_email(self, reservation):
-        return send_final_delivery_email(reservation)
-
-    def _success_message(self, count):
-        return _(
-            'Финалната галерия е качена и доставена успешно (%(count)d снимки).'
-        ) % {'count': count}
-
-    def _email_failed_message(self, count):
-        return _(
-            'Финалната галерия е качена успешно (%(count)d снимки), но имейлът до клиента не бе изпратен.'
-        ) % {'count': count}
-
-
-def _get_owned_final_gallery_reservation(request, reservation_id):
-    reservation = get_object_or_404(Reservation, pk=reservation_id, user=request.user)
-    if not reservation.final_gallery_id:
-        raise Http404
-    return reservation
-
-
-@login_required
-def serve_final_gallery_image(request, reservation_id, image_id):
-    if not settings.IS_PHOTOGRAPHER_WEBSITE:
-        raise Http404
-    reservation = _get_owned_final_gallery_reservation(request, reservation_id)
-    image = get_object_or_404(Image, pk=image_id, gallery=reservation.final_gallery)
-    return FileResponse(image.image.open('rb'), content_type='image/webp')
-
-
-@login_required
-def download_final_gallery(request, reservation_id):
-    if not settings.IS_PHOTOGRAPHER_WEBSITE:
-        raise Http404
-    reservation = _get_owned_final_gallery_reservation(request, reservation_id)
-    images = reservation.final_gallery.images.order_by('order')
-    return _zip_images_response(images, f'final-photos-reservation-{reservation.pk}.zip')
 
 
 class ProfilePage(LoginRequiredMixin, TemplateView):

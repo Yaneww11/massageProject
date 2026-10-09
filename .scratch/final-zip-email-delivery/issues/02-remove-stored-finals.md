@@ -29,7 +29,7 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] `purge_final_galleries --dry-run` deletes nothing and reports the count, ids and how many `finals_ready` reservations are affected.
 - [ ] A real run deletes the final galleries and their images, and calls the storage delete.

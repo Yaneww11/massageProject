@@ -84,10 +84,10 @@ def mark_as_noshow(modeladmin, request, queryset):
 @admin.action(description=_('Отключи прегледа на снимки'))
 def unlock_photo_proofing(modeladmin, request, queryset):
     for reservation in queryset:
-        # A delivered Final Gallery must remain untouched even if a
-        # bookkeeping correction later reopens proofing (story 28) — skip
-        # reservations whose finals are already ready or delivered.
-        if reservation.is_proofing_finalized and not reservation.final_gallery_id:
+        # Delivered finals must remain untouched even if a bookkeeping
+        # correction later reopens proofing (story 28) — skip reservations
+        # whose finals are already delivered.
+        if reservation.is_proofing_finalized and not reservation.finals_delivered_at:
             reservation.unlock_proofing()
 
 # --- Filters ---
@@ -187,7 +187,7 @@ class ReservationAdmin(ModelAdmin):
     actions = [export_reservations_csv, mark_as_completed, mark_as_noshow, unlock_photo_proofing]
     readonly_fields = (
         'updated_at', 'status_updated_at', 'status_updated_by', 'proofing_finalized_at',
-        'finals_delivered_at', 'phase_badge',
+        'phase_badge',
     )
     list_filter_sheet = True
 
@@ -197,7 +197,7 @@ class ReservationAdmin(ModelAdmin):
         (_('Допълнителни бележки'), {'fields': ('additional_text',)}),
         (_('Системен одит'), {'fields': ('updated_at', 'status_updated_at', 'status_updated_by', 'proofing_finalized_at'), 'classes': ('collapse',)}),
         (_('Галерия за преглед'), {'fields': ('gallery', 'need_client_review')}),
-        (_('Финална галерия'), {'fields': ('final_gallery', 'finals_delivered_at', 'phase_badge')}),
+        (_('Финални снимки'), {'fields': ('finals_delivered_at', 'phase_badge')}),
     )
 
     def get_client_name(self, obj):
@@ -211,13 +211,13 @@ class ReservationAdmin(ModelAdmin):
     def get_queryset(self, request):
         return Reservation.all_objects.all()
 
-    GALLERY_FIELD_TYPES = {'gallery': Gallery.TYPE_PROOFING, 'final_gallery': Gallery.TYPE_FINAL}
+    GALLERY_FIELD_TYPES = {'gallery': Gallery.TYPE_PROOFING}
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name in self.GALLERY_FIELD_TYPES:
             unused = Gallery.objects.filter(
                 gallery_type=self.GALLERY_FIELD_TYPES[db_field.name],
-                home_page__isnull=True, reservations__isnull=True, final_gallery_reservation__isnull=True,
+                home_page__isnull=True, reservations__isnull=True,
             )
             object_id = request.resolver_match.kwargs.get('object_id')
             if object_id:

@@ -274,15 +274,9 @@ class PhaseQueryModelTest(TestCase):
             gallery=Gallery.objects.create(gallery_type=Gallery.TYPE_PROOFING),
             proofing_finalized_at=timezone.now(),
         )
-        finals_ready = self._reservation(
-            gallery=Gallery.objects.create(gallery_type=Gallery.TYPE_PROOFING),
-            proofing_finalized_at=timezone.now(),
-            final_gallery=Gallery.objects.create(gallery_type=Gallery.TYPE_FINAL),
-        )
         finals_delivered = self._reservation(
             gallery=Gallery.objects.create(gallery_type=Gallery.TYPE_PROOFING),
             proofing_finalized_at=timezone.now(),
-            final_gallery=Gallery.objects.create(gallery_type=Gallery.TYPE_FINAL),
             finals_delivered_at=timezone.now(),
         )
 
@@ -291,7 +285,6 @@ class PhaseQueryModelTest(TestCase):
             (gallery_uploaded, Reservation.PHASE_GALLERY_UPLOADED),
             (awaiting_review, Reservation.PHASE_AWAITING_REVIEW),
             (editing, Reservation.PHASE_EDITING),
-            (finals_ready, Reservation.PHASE_FINALS_READY),
             (finals_delivered, Reservation.PHASE_FINALS_DELIVERED),
         ]
         for reservation, phase_value in cases:
@@ -316,27 +309,25 @@ class TableFinalsDeliveredHiddenByDefaultTest(SpecialistReservationsTableTestBas
             self.specialist, self.client_maria, self.service_a, self.past_monday, time_cls(9, 0),
             gallery=Gallery.objects.create(gallery_type=Gallery.TYPE_PROOFING),
             proofing_finalized_at=timezone.now(),
-            final_gallery=Gallery.objects.create(gallery_type=Gallery.TYPE_FINAL),
             finals_delivered_at=timezone.now(),
         )
-        self.finals_ready = self._make_reservation(
+        self.awaiting_finals = self._make_reservation(
             self.specialist, self.client_georgi, self.service_a, self.past_monday, time_cls(10, 0),
             gallery=Gallery.objects.create(gallery_type=Gallery.TYPE_PROOFING),
             proofing_finalized_at=timezone.now(),
-            final_gallery=Gallery.objects.create(gallery_type=Gallery.TYPE_FINAL),
         )
 
     def test_specialist_table_hides_delivered_by_default(self):
         self.client.force_login(self.specialist_user)
         reservations = self.client.get(reverse('profile_page')).context['reservations']
         self.assertNotIn(self.delivered, reservations)
-        self.assertIn(self.finals_ready, reservations)
+        self.assertIn(self.awaiting_finals, reservations)
 
     def test_staff_table_hides_delivered_by_default(self):
         self.client.force_login(self.staff_user)
         reservations = self.client.get(reverse('profile_page')).context['reservations']
         self.assertNotIn(self.delivered, reservations)
-        self.assertIn(self.finals_ready, reservations)
+        self.assertIn(self.awaiting_finals, reservations)
 
     def test_delivered_phase_filter_shows_them(self):
         self.client.force_login(self.specialist_user)
@@ -369,7 +360,7 @@ class TableFinalsDeliveredHiddenByDefaultTest(SpecialistReservationsTableTestBas
         self.client.force_login(self.specialist_user)
         reservations = self.client.get(reverse('profile_page')).context['reservations']
         self.assertNotIn(no_show, reservations)
-        self.assertIn(self.finals_ready, reservations)
+        self.assertIn(self.awaiting_finals, reservations)
 
     def test_all_option_shows_delivered_and_no_show(self):
         no_show = self._make_reservation(
@@ -379,7 +370,7 @@ class TableFinalsDeliveredHiddenByDefaultTest(SpecialistReservationsTableTestBas
         self.client.force_login(self.specialist_user)
         response = self.client.get(reverse('profile_page'), {'phase': 'all'})
         self.assertEqual(response.context['selected_phase'], 'all')
-        self.assertEqual(set(response.context['reservations']), {self.delivered, self.finals_ready, no_show})
+        self.assertEqual(set(response.context['reservations']), {self.delivered, self.awaiting_finals, no_show})
         self.assertContains(response, '<option value="all" selected>')
 
     @override_settings(IS_PHOTOGRAPHER_WEBSITE=False)

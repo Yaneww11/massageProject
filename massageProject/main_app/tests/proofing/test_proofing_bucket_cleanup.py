@@ -93,16 +93,6 @@ class UploadPathTest(BucketLayoutBase):
             image.image.name,
         )
 
-    def test_final_gallery_image_lands_in_its_own_subfolder(self):
-        final = Gallery.objects.create(
-            gallery_type=Gallery.TYPE_FINAL, draft_reservation=self.reservation,
-        )
-        image = self._add_image(final)
-        self.assertTrue(
-            image.image.name.startswith(f'reservations/{self.reservation.pk}/final/'),
-            image.image.name,
-        )
-
     def test_album_image_keeps_the_shared_gallery_folder(self):
         album = Gallery.objects.create(gallery_type=Gallery.TYPE_ALBUM, title='Album')
         image = self._add_image(album)
@@ -323,22 +313,11 @@ class PurgeMarkedThumbnailsTest(BucketLayoutBase):
         default_storage.save(self.thumbnail, SimpleUploadedFile('t.webp', b'x'))
 
     def _deliver_finals(self):
-        final = Gallery.objects.create(
-            gallery_type=Gallery.TYPE_FINAL, draft_reservation=self.reservation,
-        )
         Reservation.all_objects.filter(pk=self.reservation.pk).update(
-            final_gallery=final, finals_delivered_at=timezone.now(),
+            finals_delivered_at=timezone.now(),
         )
 
     def test_active_reservation_keeps_its_thumbnails(self):
-        _run_thumbnail_purge()
-        self.assertTrue(default_storage.exists(self.thumbnail))
-
-    def test_finals_ready_but_not_delivered_keeps_its_thumbnails(self):
-        final = Gallery.objects.create(
-            gallery_type=Gallery.TYPE_FINAL, draft_reservation=self.reservation,
-        )
-        Reservation.all_objects.filter(pk=self.reservation.pk).update(final_gallery=final)
         _run_thumbnail_purge()
         self.assertTrue(default_storage.exists(self.thumbnail))
 

@@ -575,6 +575,11 @@
     flex-shrink: 0;
 }
 
+.finals-delivered-note {
+    color: var(--text-muted, inherit);
+    font-size: var(--fs-xs);
+}
+
 .badge-rated {
     display: inline-block;
     padding: 0.25rem 0.75rem;
