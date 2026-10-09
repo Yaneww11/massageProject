@@ -5,7 +5,7 @@ from unittest.mock import patch
 from django.core.management import call_command
 from django.utils import timezone
 
-from massageProject.main_app.models import Reservation
+from massageProject.main_app.models import Reservation, TimeOff
 from massageProject.main_app.tests.helpers import BugFixTestBase
 
 TODAY = date(2026, 10, 9)
@@ -61,3 +61,21 @@ class CompleteTodaysReservationsTest(BugFixTestBase):
         r.refresh_from_db()
         self.assertEqual(r.status, Reservation.STATUS_ACTIVE)
         self.assertIn('1 reservation(s) to complete', output)
+
+    def _time_off(self, start, end):
+        # bulk_create skips clean(), which rejects an end in the past.
+        return TimeOff.objects.bulk_create([TimeOff(specialist=self.specialist, start=start, end=end)])[0]
+
+    def test_deletes_time_off_ended_before_today_only(self, _now):
+        past = self._time_off(timezone.make_aware(datetime(2026, 10, 7, 10)), timezone.make_aware(datetime(2026, 10, 8, 23, 30)))
+        today = self._time_off(timezone.make_aware(datetime(2026, 10, 9, 9)), timezone.make_aware(datetime(2026, 10, 9, 10)))
+        future = self._time_off(timezone.make_aware(datetime(2026, 10, 12, 9)), timezone.make_aware(datetime(2026, 10, 13, 9)))
+        self._run()
+        self.assertEqual(set(TimeOff.objects.all()), {today, future})
+        self.assertFalse(TimeOff.objects.filter(pk=past.pk).exists())
+
+    def test_dry_run_keeps_past_time_off(self, _now):
+        self._time_off(timezone.make_aware(datetime(2026, 10, 7, 10)), timezone.make_aware(datetime(2026, 10, 8, 12)))
+        output = self._run('--dry-run')
+        self.assertEqual(TimeOff.objects.count(), 1)
+        self.assertIn('1 past time off entr(ies) to delete', output)

@@ -1,11 +1,11 @@
 import logging
-from datetime import datetime
+from datetime import datetime, time
 
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 import sentry_sdk
 
-from massageProject.main_app.models import Reservation
+from massageProject.main_app.models import Reservation, TimeOff
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +13,8 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     help = (
         "Mark today's still-active reservations whose appointment has already "
-        'ended as completed. Meant for cron, run in the evening.'
+        'ended as completed and delete time off that ended before today. '
+        'Meant for cron, run in the evening.'
     )
 
     def add_arguments(self, parser):
@@ -31,8 +32,13 @@ class Command(BaseCommand):
             if timezone.make_aware(datetime.combine(r.date, r.end_time)) <= now
         ]
 
+        # Compared against local midnight so the filter is a plain range on `end`.
+        today_start = timezone.make_aware(datetime.combine(now.date(), time.min))
+        past_time_off = TimeOff.objects.filter(end__lt=today_start)
+
         if options['dry_run']:
             self.stdout.write(f'{len(due)} reservation(s) to complete')
+            self.stdout.write(f'{past_time_off.count()} past time off entr(ies) to delete')
             return
 
         completed = failed = 0
@@ -48,3 +54,12 @@ class Command(BaseCommand):
                 })
 
         self.stdout.write(f'Completed {completed} reservation(s), {failed} failed')
+
+        try:
+            deleted, _ = past_time_off.delete()
+        except Exception as exc:
+            logger.warning('Could not delete past time off', exc_info=True)
+            sentry_sdk.capture_exception(exc, extra={'operation': 'complete_todays_reservations'})
+            self.stdout.write('Could not delete past time off')
+            return
+        self.stdout.write(f'Deleted {deleted} past time off entr(ies)')
