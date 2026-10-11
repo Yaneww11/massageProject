@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /* ── Data & elements ─────────────────────────────────── */
   const SERVICES     = JSON.parse(document.getElementById('services-data').textContent);
-  const INITIAL_SPECIALIST = '{{ form.specialist.value|default:"" }}';
+  const INITIAL_SPECIALIST = '{{ form.specialist.value|default:"" }}'{% if specialists|length == 1 %} || '{{ specialists.0.pk }}'{% endif %};
   const INITIAL_DATE    = '{{ form.date.value|date:"Y-m-d"|default:"" }}';
   const INITIAL_TIME    = '{{ form.time.value|default:"" }}';
   const LANG = document.documentElement.lang || 'bg';
