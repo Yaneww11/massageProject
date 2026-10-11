@@ -77,7 +77,7 @@
           <th>{% trans "КЛИЕНТ" %}</th>
           <th>{% trans "ТЕЛЕФОН" %}</th>
           <th>{% trans "СТАТУС" %}</th>
-          {% if is_photographer_website %}<th></th>{% endif %}
+          {% if is_photographer_website %}<th class="action-th">{% trans "ДЕЙСТВИЯ" %}</th>{% endif %}
         </tr>
       </thead>
       <tbody>
@@ -96,14 +96,23 @@
           </td>
           {% if is_photographer_website %}
           <td class="action-cell" data-label="">
-            {% if not r.gallery_id and not r.is_future_date %}
-            <a href="{% url 'proofing_gallery_upload' %}?reservation_id={{ r.pk }}" class="btn-action-edit">{% trans "Качи галерия" %}</a>
-            {% endif %}
+            {# The row's next workflow step is the accent button; secondary actions sit in the ▾ menu. #}
             {% if r.proofing_finalized_at %}
-            <a href="{% url 'marked_photos' r.pk %}" class="btn-action-edit">{% trans "Маркирани снимки" %}</a>
-            {% if not r.finals_delivered_at %}
-            <button type="button" class="btn-action-edit js-mark-delivered-open" data-action="{% url 'mark_finals_delivered' r.pk %}">{% trans "Маркирай като предадени" %}</button>
-            {% endif %}
+            <div class="action-split{% if r.finals_delivered_at %} action-split-ghost{% endif %}">
+              {% if r.finals_delivered_at %}
+              <button type="button" class="action-split-main js-action-menu-toggle" aria-haspopup="menu" aria-expanded="false">{% trans "Действия" %} ▾</button>
+              {% else %}
+              <button type="button" class="action-split-main js-mark-delivered-open" data-action="{% url 'mark_finals_delivered' r.pk %}">{% trans "Маркирай като предадени" %}</button>
+              <button type="button" class="action-split-caret js-action-menu-toggle" aria-haspopup="menu" aria-expanded="false" aria-label="{% trans 'Още действия' %}" title="{% trans 'Още действия' %}">▾</button>
+              {% endif %}
+              <div class="action-menu" role="menu" hidden>
+                <a role="menuitem" href="{% url 'marked_photos' r.pk %}">{% trans "Маркирани снимки" %}</a>
+              </div>
+            </div>
+            {% elif not r.gallery_id and not r.is_future_date %}
+            <div class="action-split">
+              <a href="{% url 'proofing_gallery_upload' %}?reservation_id={{ r.pk }}" class="action-split-main">{% trans "Качи галерия" %}</a>
+            </div>
             {% endif %}
           </td>
           {% endif %}

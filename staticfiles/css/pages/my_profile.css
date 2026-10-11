@@ -507,6 +507,95 @@
     color: var(--error);
 }
 
+/* Reservations table actions: split button (next step + ▾ menu) */
+.bookings-table th.action-th {
+    text-align: right;
+}
+
+.action-split {
+    display: inline-flex;
+}
+
+.action-split-main,
+.action-split-caret {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.9rem;
+    background: var(--accent-color);
+    color: var(--on-accent);
+    border: 1.5px solid var(--accent-color);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-main);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.action-split-main:not(:last-of-type) {
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+}
+
+.action-split-caret {
+    padding: 0.4rem 0.55rem;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    border-left-color: color-mix(in srgb, var(--on-accent) 25%, transparent);
+}
+
+.action-split-main:hover,
+.action-split-caret:hover {
+    filter: brightness(1.08);
+    color: var(--on-accent);
+}
+
+.action-split-main:focus-visible,
+.action-split-caret:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+.action-split-ghost .action-split-main {
+    background: transparent;
+    color: var(--text-main);
+    border-color: var(--border-color);
+}
+
+.action-split-ghost .action-split-main:hover,
+.action-split-ghost .action-split-main[aria-expanded="true"] {
+    background: var(--bg-raised);
+    border-color: var(--secondary-color);
+    color: var(--text-main);
+    filter: none;
+}
+
+/* Fixed (positioned by JS) so the table's horizontal scroll doesn't clip it */
+.action-menu {
+    position: fixed;
+    z-index: 1000;
+    min-width: 12rem;
+    padding: 0.35rem;
+    background: var(--bg-raised);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    text-align: left;
+}
+
+.action-menu a {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm);
+    color: var(--text-main);
+    text-decoration: none;
+}
+
+.action-menu a:hover,
+.action-menu a:focus-visible {
+    background: var(--bg-light);
+    outline: none;
+}
+
 .empty-state-msg {
     color: var(--text-muted);
     font-style: italic;

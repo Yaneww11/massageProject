@@ -424,6 +424,38 @@
     }
   });
 
+  // Row "▾" menus. Fixed-positioned under their toggle so the table's overflow doesn't clip them.
+  function closeActionMenus(except) {
+    document.querySelectorAll(SECTION + ' .action-menu:not([hidden])').forEach(function (menu) {
+      if (menu === except) return;
+      menu.hidden = true;
+      menu.parentElement.querySelector('.js-action-menu-toggle').setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  document.addEventListener('click', function (e) {
+    var toggle = e.target.closest(SECTION + ' .js-action-menu-toggle');
+    if (!toggle) {
+      if (!e.target.closest('.action-menu')) closeActionMenus();
+      return;
+    }
+    var menu = toggle.parentElement.querySelector('.action-menu');
+    closeActionMenus(menu);
+    menu.hidden = !menu.hidden;
+    toggle.setAttribute('aria-expanded', String(!menu.hidden));
+    if (!menu.hidden) {
+      var rect = toggle.getBoundingClientRect();
+      menu.style.top = (rect.bottom + 6) + 'px';
+      menu.style.left = Math.max(8, rect.right - menu.offsetWidth) + 'px';
+      menu.querySelector('a').focus({ preventScroll: true });
+    }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeActionMenus();
+  });
+  window.addEventListener('scroll', function () { closeActionMenus(); }, true);
+
   document.addEventListener('submit', function (e) {
     var form = e.target.closest(SECTION + ' .reservations-filter-bar');
     if (!form) return;
