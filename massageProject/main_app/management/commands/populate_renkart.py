@@ -1,4 +1,6 @@
-from datetime import date, time, timedelta
+from datetime import time, timedelta
+
+from django.utils import timezone
 
 from django.contrib.auth import get_user_model
 
@@ -361,7 +363,7 @@ class Command(BaseCommand):
         fine_art_individual = services_by_name['Fine Art фотосесия - индивидуална']
         large_package = services_by_name['Голям фотопакет']
 
-        today = date.today()
+        today = timezone.localdate()
 
         def next_open_day(d):
             # Reneta is closed Sunday (6) and Monday (0)

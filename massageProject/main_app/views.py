@@ -21,7 +21,7 @@ from django.core.paginator import Paginator
 from django.http.request import validate_host
 from django.utils import timezone
 from django.utils.translation import gettext as _, gettext_lazy as _lazy
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 from django.db import IntegrityError
 from django.db.models import Count, Max, Q, Value
 from django.db.models.functions import Concat
@@ -926,7 +926,7 @@ class ProfilePage(LoginRequiredMixin, TemplateView):
             context['active_reservations'] = active_reservations
             context['past_reservations'] = past_reservations
             context['next_reservation'] = active_reservations[0] if active_reservations else None
-            context['today'] = date.today()
+            context['today'] = timezone.localdate()
 
             context['has_photos_to_review'] = (
                 settings.IS_PHOTOGRAPHER_WEBSITE

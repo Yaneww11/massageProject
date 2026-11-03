@@ -10,7 +10,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.html import format_html
 from django.utils import timezone
 from django.utils.translation import gettext, gettext_lazy as _
-from datetime import date
 
 from unfold.admin import ModelAdmin, TabularInline
 from unfold.contrib.forms.widgets import WysiwygWidget
@@ -104,7 +103,7 @@ class ReservationDateFilter(admin.SimpleListFilter):
         )
 
     def queryset(self, request, queryset):
-        today = date.today()
+        today = timezone.localdate()
         if self.value() == 'today':
             return queryset.filter(date=today)
         if self.value() == 'upcoming':

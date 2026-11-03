@@ -1,4 +1,6 @@
-from datetime import date, time, timedelta
+from datetime import time, timedelta
+
+from django.utils import timezone
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from massageProject.main_app.models import (
@@ -128,7 +130,7 @@ class Command(BaseCommand):
             self.stdout.write(f"Created home page: {home_page.brand_name}")
 
         # 6. Create Reservations
-        today = date.today()
+        today = timezone.localdate()
 
         def next_working_day(d):
             # No specialist has working hours on Sunday (day_of_week=6), and
