@@ -1245,8 +1245,7 @@ def serve_proof_image(request, token):
             raise PermissionDenied
 
     image, reservation = _get_owned_proofing_image(request, data['image_id'])
-    watermark_identifier = f'{request.user.get_full_name() or request.user.phone_number or request.user.email} · #{reservation.pk}'
-    path = _generate_proof_derivative(image, request.user, watermark_identifier)
+    path = _generate_proof_derivative(image, request.user, _proof_watermark_identifier(request.user, reservation))
     return redirect(_signed_proof_url(path))
 
 
@@ -1260,6 +1259,83 @@ PROOF_PAGE_SIZE = 60
 PROOF_FILTERS = ('all', 'marked', 'finalized')
 
 
+def _proof_watermark_identifier(client, reservation):
+    return f'{client.get_full_name() or client.phone_number or client.email} · #{reservation.pk}'
+
+
+def _photo_proofing_context(request, reservation, image_url):
+    """The Photo Proofing page's context for `reservation`, shared by the
+    client's own page and the Client Preview so the two render identically.
+    `image_url(image_id)` gives each photo's URL; watermarks always carry the
+    reservation's client."""
+    client = reservation.user
+    is_finalized = reservation.is_proofing_finalized
+    current_filter = request.GET.get('filter', 'all')
+    if current_filter not in PROOF_FILTERS:
+        current_filter = 'all'
+
+    images = reservation.gallery.images.all()
+    total_photos = images.count()
+    marked_total = ImageProof.objects.filter(
+        image__gallery=reservation.gallery, is_marked=True,
+    ).count()
+
+    # A photo counts as "marked" only while proofing is open, and as
+    # "finalized" only once it is closed — the two tabs are the same
+    # set of images seen before and after finalizing.
+    if current_filter == 'marked':
+        images = images.filter(proof__is_marked=True) if not is_finalized else images.none()
+    elif current_filter == 'finalized':
+        images = images.filter(proof__is_marked=True) if is_finalized else images.none()
+
+    paginator = Paginator(images, PROOF_PAGE_SIZE)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    proofs = {
+        p.image_id: p for p in
+        ImageProof.objects.filter(image__in=page_obj.object_list).prefetch_related('labels')
+    }
+    # "Кадър N" has to name the same photo whichever filter or page the
+    # client is on — a comment that says "Кадър 3" is worthless if the
+    # number is a position within the current page. Cheap: one id-only
+    # pass over the gallery in its display order.
+    frame_numbers = {
+        pk: index
+        for index, pk in enumerate(
+            reservation.gallery.images.values_list('pk', flat=True), start=1,
+        )
+    }
+    photos = []
+    for img in page_obj.object_list:
+        proof = proofs.get(img.pk)
+        photos.append({
+            'id': img.pk,
+            'number': frame_numbers.get(img.pk),
+            'url': image_url(img.pk),
+            'alt': img.alt_text,
+            'is_marked': proof.is_marked if proof else False,
+            'comment': proof.comment if proof else '',
+            'label_keys': [label.pk for label in proof.labels.all()] if proof else [],
+        })
+    labels_config = [
+        {'key': label.pk, 'name': label.name}
+        for label in reservation.gallery.photo_labels.all()
+    ]
+
+    return {
+        'title': _('Проверка на снимки'),
+        'reservation': reservation,
+        'is_finalized': is_finalized,
+        'photos': photos,
+        'page_obj': page_obj,
+        'total_photos': total_photos,
+        'marked_total': marked_total,
+        'current_filter': current_filter,
+        'watermark_identifier': _proof_watermark_identifier(client, reservation),
+        'labels_config': labels_config,
+    }
+
+
 class PhotoProofingGallery(LoginRequiredMixin, TemplateView):
     template_name = 'pages/photo_proofing.html'
 
@@ -1271,74 +1347,51 @@ class PhotoProofingGallery(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user = self.request.user
-
-        reservation = self.reservation
-        is_finalized = reservation.is_proofing_finalized
-        current_filter = self.request.GET.get('filter', 'all')
-        if current_filter not in PROOF_FILTERS:
-            current_filter = 'all'
-
-        images = reservation.gallery.images.all()
-        total_photos = images.count()
-        marked_total = ImageProof.objects.filter(
-            image__gallery=reservation.gallery, is_marked=True,
-        ).count()
-
-        # A photo counts as "marked" only while proofing is open, and as
-        # "finalized" only once it is closed — the two tabs are the same
-        # set of images seen before and after finalizing.
-        if current_filter == 'marked':
-            images = images.filter(proof__is_marked=True) if not is_finalized else images.none()
-        elif current_filter == 'finalized':
-            images = images.filter(proof__is_marked=True) if is_finalized else images.none()
-
-        paginator = Paginator(images, PROOF_PAGE_SIZE)
-        page_obj = paginator.get_page(self.request.GET.get('page'))
-
-        proofs = {
-            p.image_id: p for p in
-            ImageProof.objects.filter(image__in=page_obj.object_list).prefetch_related('labels')
-        }
-        # "Кадър N" has to name the same photo whichever filter or page the
-        # client is on — a comment that says "Кадър 3" is worthless if the
-        # number is a position within the current page. Cheap: one id-only
-        # pass over the gallery in its display order.
-        frame_numbers = {
-            pk: index
-            for index, pk in enumerate(
-                reservation.gallery.images.values_list('pk', flat=True), start=1,
-            )
-        }
-        photos = []
-        for img in page_obj.object_list:
-            proof = proofs.get(img.pk)
-            photos.append({
-                'id': img.pk,
-                'number': frame_numbers.get(img.pk),
-                'url': reverse('photo_proofing_image', args=[_proof_image_token(img.pk, user.pk)]),
-                'alt': img.alt_text,
-                'is_marked': proof.is_marked if proof else False,
-                'comment': proof.comment if proof else '',
-                'label_keys': [label.pk for label in proof.labels.all()] if proof else [],
-            })
-        labels_config = [
-            {'key': label.pk, 'name': label.name}
-            for label in reservation.gallery.photo_labels.all()
-        ]
-        watermark_identifier = f'{user.get_full_name() or user.phone_number or user.email} · #{reservation.pk}'
-
-        context['title'] = _('Проверка на снимки')
-        context['reservation'] = reservation
-        context['is_finalized'] = is_finalized
-        context['photos'] = photos
-        context['page_obj'] = page_obj
-        context['total_photos'] = total_photos
-        context['marked_total'] = marked_total
-        context['current_filter'] = current_filter
-        context['watermark_identifier'] = watermark_identifier
-        context['labels_config'] = labels_config
+        user_pk = self.request.user.pk
+        context.update(_photo_proofing_context(
+            self.request, self.reservation,
+            lambda image_id: reverse('photo_proofing_image', args=[_proof_image_token(image_id, user_pk)]),
+        ))
         return context
+
+
+def _get_client_preview_reservation(request, reservation_id):
+    """A reservation the specialist/staff may open in Client Preview: one
+    they may see, whose client is currently asked to review its Proofing
+    Gallery."""
+    reservation = _get_owned_reservation_for_photo_workflow(request, reservation_id)
+    if not (reservation.gallery_id and reservation.need_client_review):
+        raise Http404
+    return reservation
+
+
+class ClientPreviewView(PhotographerModeMixin, LoginRequiredMixin, TemplateView):
+    """Client Preview: the client's Photo Proofing page, read-only, for the
+    reservation's specialist or staff."""
+    template_name = 'pages/photo_proofing.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        reservation = _get_client_preview_reservation(self.request, self.kwargs['reservation_id'])
+        context.update(_photo_proofing_context(
+            self.request, reservation,
+            lambda image_id: reverse('client_preview_image', args=[reservation.pk, image_id]),
+        ))
+        context['is_preview'] = True
+        return context
+
+
+@login_required
+def serve_client_preview_image(request, reservation_id, image_id):
+    """The client's own Proof Derivative (same file, same watermark), served
+    to the specialist/staff opening Client Preview."""
+    if not settings.IS_PHOTOGRAPHER_WEBSITE:
+        raise Http404
+    reservation = _get_client_preview_reservation(request, reservation_id)
+    image = get_object_or_404(Image, pk=image_id, gallery_id=reservation.gallery_id)
+    client = reservation.user
+    path = _generate_proof_derivative(image, client, _proof_watermark_identifier(client, reservation))
+    return redirect(_signed_proof_url(path))
 
 
 @login_required

@@ -19,6 +19,25 @@
     padding: 0 1.5rem;
 }
 
+/* ── Client Preview bar (specialist/staff, read-only) ──── */
+.proof-preview-bar {
+    background: var(--bg-sunken);
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: var(--fs-sm);
+}
+
+.proof-preview-bar i {
+    color: var(--accent-color);
+    margin-right: 0.35rem;
+}
+
 /* ── Sticky orientation header ──────────────────────────── */
 .proof-header {
     position: sticky;

@@ -36,6 +36,10 @@ _Avoid_: unfinished gallery, pending gallery, incomplete upload
 The step that ends a Draft Gallery: it attaches the Gallery to its Reservation and notifies the client. Separate from uploading, and the only thing that emails the client — so a half-uploaded gallery never announces itself.
 _Avoid_: finishing upload, completing the gallery
 
+**Client Preview**:
+A read-only rendering of Photo Proofing for one Reservation awaiting client review, exactly as its client sees it right now — their marks, PhotoLabels, comments, and Proof Derivatives watermarked with the client's identity — opened by the Reservation's specialist or by staff to check the Proofing Gallery. It can never change ImageProof state or perform Finalizing.
+_Avoid_: impersonation, login as client
+
 **Final Gallery**:
 The Gallery attached to a Reservation (`Reservation.final_gallery`) holding the specialist's edited, delivered Images — created only after Finalizing, separate from the Proofing Gallery.
 _Avoid_: edited photos, deliverables

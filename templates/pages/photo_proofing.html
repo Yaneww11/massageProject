@@ -5,6 +5,13 @@
 <section class="proof-page">
   {% csrf_token %}
 
+  {% if is_preview %}
+  <div class="proof-preview-bar" role="status">
+    <span><i class="far fa-eye" aria-hidden="true"></i> {% trans "Преглед като клиент — само за гледане" %}</span>
+    <a href="{% url 'profile_page' %}" class="btn btn-outline">{% trans "Назад към резервациите" %}</a>
+  </div>
+  {% endif %}
+
   <header class="proof-header">
     <div class="proof-header-info">
       <span class="proof-eyebrow">{% trans "ПРОВЕРКА НА СНИМКИ" %}</span>
@@ -64,7 +71,7 @@
             <i class="far fa-clone" aria-hidden="true"></i>
             <span class="proof-compare-badge"></span>
           </button>
-          <button type="button" class="proof-mark-btn" aria-pressed="{% if photo.is_marked %}true{% else %}false{% endif %}" aria-label="{% trans 'Маркирай като любима' %}"{% if is_finalized %} disabled{% endif %}>
+          <button type="button" class="proof-mark-btn" aria-pressed="{% if photo.is_marked %}true{% else %}false{% endif %}" aria-label="{% trans 'Маркирай като любима' %}"{% if is_finalized or is_preview %} disabled{% endif %}>
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"></circle></svg>
           </button>
           <div class="proof-finalized-ribbon"><i class="fas fa-check" aria-hidden="true"></i> {% trans "Финализирана" %}</div>
@@ -76,7 +83,7 @@
           <span class="proof-filename">{% trans "Кадър" %} {{ photo.number }}</span>
           <div class="proof-label-row">
             {% for label in labels_config %}
-            <button type="button" class="proof-label-chip{% if label.key in photo.label_keys %} is-active{% endif %}" data-label="{{ label.key }}"{% if is_finalized %} disabled{% endif %}>{{ label.name }}</button>
+            <button type="button" class="proof-label-chip{% if label.key in photo.label_keys %} is-active{% endif %}" data-label="{{ label.key }}"{% if is_finalized or is_preview %} disabled{% endif %}>{{ label.name }}</button>
             {% endfor %}
           </div>
         </div>
@@ -167,7 +174,7 @@
     </div>
     <div class="proof-drawer-actions">
       <button type="button" id="proof-drawer-cancel" class="btn btn-outline">{% trans "Откажи" %}</button>
-      <button type="button" id="proof-drawer-save" class="btn btn-primary">{% trans "Запази бележката" %}</button>
+      <button type="button" id="proof-drawer-save" class="btn btn-primary"{% if is_preview %} disabled{% endif %}>{% trans "Запази бележката" %}</button>
     </div>
   </aside>
 
@@ -199,6 +206,9 @@
   let markedTotal = {{ marked_total }};
 
   let finalized = {{ is_finalized|yesno:"true,false" }};
+  // Client Preview: the client's page as they see it, but nothing in it may
+  // change their ImageProofs or finalize on their behalf.
+  const readOnly = {{ is_preview|yesno:"true,false" }};
   const compareSet = [];
   const comments = new Map();
 
@@ -239,17 +249,17 @@
     countAllEl.textContent = totalCount;
     countMarkedEl.textContent = finalized ? 0 : markedTotal;
     countFinalizedEl.textContent = finalized ? markedTotal : 0;
-    finalizeOpenBtn.disabled = markedTotal === 0 || finalized;
+    finalizeOpenBtn.disabled = markedTotal === 0 || finalized || readOnly;
   }
 
   function refreshLabelChips() {
     document.querySelectorAll('.proof-label-chip').forEach((chip) => {
-      chip.disabled = finalized;
+      chip.disabled = finalized || readOnly;
     });
   }
 
   function toggleMark(tile) {
-    if (finalized) return;
+    if (finalized || readOnly) return;
     const id = tile.dataset.photoId;
     tile.classList.toggle('is-marked');
     markedTotal += isMarked(tile) ? 1 : -1;
@@ -268,7 +278,7 @@
   }
 
   function toggleLabel(tile, chip) {
-    if (finalized || !isMarked(tile)) return;
+    if (finalized || readOnly || !isMarked(tile)) return;
     const key = chip.dataset.label;
     chip.classList.toggle('is-active');
     refreshLabelChips();
@@ -314,7 +324,7 @@
     drawerThumb.src = img.src;
     drawerThumb.alt = img.alt;
     drawerTextarea.value = comments.get(drawerPhotoId) || '';
-    drawerTextarea.disabled = finalized;
+    drawerTextarea.disabled = finalized || readOnly;
     drawer.classList.add('is-open');
     drawer.setAttribute('aria-hidden', 'false');
     window.setTimeout(() => drawerTextarea.focus(), 50);
@@ -377,7 +387,7 @@
   drawerCloseBtn.addEventListener('click', closeDrawer);
   drawerCancelBtn.addEventListener('click', closeDrawer);
   drawerSaveBtn.addEventListener('click', () => {
-    if (!drawerPhotoId) return;
+    if (!drawerPhotoId || readOnly) return;
     const tile = findTile(drawerPhotoId);
     const text = drawerTextarea.value.trim();
     function applyLocally() {
@@ -401,6 +411,7 @@
   });
 
   finalizeOpenBtn.addEventListener('click', () => {
+    if (readOnly) return;
     const marked = tiles.filter(isMarked);
     finalizeSummaryCount.textContent = markedTotal;
     finalizeList.innerHTML = '';
@@ -447,6 +458,7 @@
   finalizeModal.addEventListener('click', (e) => { if (e.target === finalizeModal) finalizeModal.hidden = true; });
 
   finalizeConfirmBtn.addEventListener('click', () => {
+    if (readOnly) return;
     finalizeConfirmBtn.disabled = true;
     postJson(`${LANG_PREFIX}/profile/photos/finalize/`).then(({ ok, data }) => {
       if (!ok || !data.success) {
