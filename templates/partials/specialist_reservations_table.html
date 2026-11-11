@@ -109,6 +109,10 @@
                 <a role="menuitem" href="{% url 'marked_photos' r.pk %}">{% trans "Маркирани снимки" %}</a>
               </div>
             </div>
+            {% elif r.gallery_id and r.need_client_review %}
+            <div class="action-split">
+              <a href="{% url 'client_preview' r.pk %}" class="action-split-main">{% trans "Преглед като клиент" %}</a>
+            </div>
             {% elif not r.gallery_id and not r.is_future_date %}
             <div class="action-split">
               <a href="{% url 'proofing_gallery_upload' %}?reservation_id={{ r.pk }}" class="action-split-main">{% trans "Качи галерия" %}</a>
