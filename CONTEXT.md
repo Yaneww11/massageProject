@@ -24,8 +24,12 @@ _Avoid_: submitting, locking
 A signed, time-limited, watermarked copy of an Image shown to a client during Photo Proofing, tied to that specific client's identity. The original Image file is never served directly.
 _Avoid_: preview, thumbnail
 
+**Photo Viewer**:
+The full-screen, one-Image-at-a-time view inside Photo Proofing, opened by clicking an Image in the grid. The client steps through the Proofing Gallery in it and can mark, label, comment on, or pick an Image for comparison without returning to the grid.
+_Avoid_: lightbox, modal, zoom
+
 **Proofing Gallery**:
-The Gallery attached to a Reservation (`Reservation.gallery`) that the client reviews during Photo Proofing. A Gallery only becomes a Proofing Gallery once it has been Published; before that it is a Draft Gallery.
+The Gallery attached to a Reservation (`Reservation.gallery`) that the client reviews during Photo Proofing. A Gallery only becomes a Proofing Gallery once it has been Published; before that it is a Draft Gallery. While the Reservation awaits client review, the specialist or staff may add more Images to it; this sends no email and leaves existing ImageProof state untouched.
 _Avoid_: the gallery, reservation gallery
 
 **Draft Gallery**:

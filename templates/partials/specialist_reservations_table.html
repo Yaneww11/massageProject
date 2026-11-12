@@ -112,6 +112,10 @@
             {% elif r.gallery_id and r.need_client_review %}
             <div class="action-split">
               <a href="{% url 'client_preview' r.pk %}" class="action-split-main">{% trans "Преглед като клиент" %}</a>
+              <button type="button" class="action-split-caret js-action-menu-toggle" aria-haspopup="menu" aria-expanded="false" aria-label="{% trans 'Още действия' %}" title="{% trans 'Още действия' %}">▾</button>
+              <div class="action-menu" role="menu" hidden>
+                <a role="menuitem" href="#" class="js-add-images-open" data-action="{% url 'add_proofing_images' r.pk %}">{% trans "Добави снимки" %}</a>
+              </div>
             </div>
             {% elif not r.gallery_id and not r.is_future_date %}
             <div class="action-split">
@@ -153,6 +157,20 @@
         <input type="hidden" name="return_query" value="{{ request.GET.urlencode }}">
         <button type="submit" class="btn-primary-profile">{% trans "Потвърди" %}</button>
         <button type="button" class="btn-outline-profile js-mark-delivered-close">{% trans "Отказ" %}</button>
+      </form>
+    </div>
+  </div>
+  <div id="add-images-modal" class="review-modal-overlay" style="display:none;" aria-modal="true" role="dialog" aria-labelledby="add-images-title">
+    <div class="review-modal-content">
+      <button type="button" class="modal-close js-add-images-close" aria-label="{% trans 'Затвори' %}">&times;</button>
+      <h3 class="modal-title" id="add-images-title">{% trans "Добавяне на снимки към галерията" %}</h3>
+      <p>{% blocktrans with max=add_images_max %}Изберете до {{ max }} снимки. Те ще се появят в края на галерията на клиента. Няма да бъде изпратен имейл.{% endblocktrans %}</p>
+      <form method="post" action="" enctype="multipart/form-data" class="js-add-images-form">
+        {% csrf_token %}
+        <input type="hidden" name="return_query" value="{{ request.GET.urlencode }}">
+        <p><input type="file" name="images" accept="image/*" multiple required class="form-textarea"></p>
+        <button type="submit" class="btn-primary-profile">{% trans "Качи" %}</button>
+        <button type="button" class="btn-outline-profile js-add-images-close">{% trans "Отказ" %}</button>
       </form>
     </div>
   </div>

@@ -533,7 +533,8 @@
     transition: var(--transition);
 }
 
-.action-split-main:not(:last-of-type) {
+.action-split-main:not(:last-of-type),
+.action-split-main:has(+ .action-split-caret) {
     border-radius: var(--radius-sm) 0 0 var(--radius-sm);
 }
 

@@ -424,6 +424,22 @@
     }
   });
 
+  document.addEventListener('click', function (e) {
+    var modal = document.querySelector(SECTION + ' #add-images-modal');
+    if (!modal) return;
+    var opener = e.target.closest(SECTION + ' .js-add-images-open');
+    if (opener) {
+      e.preventDefault();
+      closeActionMenus();
+      var form = modal.querySelector('form');
+      form.reset();
+      form.action = opener.dataset.action;
+      modal.style.display = 'flex';
+    } else if (e.target === modal || e.target.closest('.js-add-images-close')) {
+      modal.style.display = 'none';
+    }
+  });
+
   // Row "▾" menus. Fixed-positioned under their toggle so the table's overflow doesn't clip them.
   function closeActionMenus(except) {
     document.querySelectorAll(SECTION + ' .action-menu:not([hidden])').forEach(function (menu) {
