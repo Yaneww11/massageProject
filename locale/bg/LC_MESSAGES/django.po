@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: massageProject\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-11 22:31+0200\n"
+"POT-Creation-Date: 2026-11-12 19:03+0200\n"
 "PO-Revision-Date: 2026-10-09 12:46+0000\n"
 "Last-Translator: Yane Yanev <admin@admin.com>\n"
 "Language-Team: Bulgarian\n"
@@ -292,6 +292,7 @@ msgid "Качване на много снимки"
 msgstr "Качване на много снимки"
 
 #: massageProject/main_app/admin.py:330 massageProject/main_app/views.py:630
+#: massageProject/main_app/views.py:836
 #, python-format
 msgid "Галерията може да съдържа най-много %(cap)d снимки."
 msgstr "Галерията може да съдържа най-много %(cap)d снимки."
@@ -1597,10 +1598,10 @@ msgid "Няма връзка със сървъра."
 msgstr "Няма връзка със сървъра."
 
 #: massageProject/main_app/views.py:515 templates/pages/photo_proofing.html:197
-#: templates/pages/photo_proofing.html:276
-#: templates/pages/photo_proofing.html:290
-#: templates/pages/photo_proofing.html:406
-#: templates/pages/photo_proofing.html:466 templates/partials/auth_modal.html:3
+#: templates/pages/photo_proofing.html:284
+#: templates/pages/photo_proofing.html:298
+#: templates/pages/photo_proofing.html:414
+#: templates/pages/photo_proofing.html:474 templates/partials/auth_modal.html:3
 msgid "Възникна грешка. Опитайте отново."
 msgstr "Възникна грешка. Опитайте отново."
 
@@ -1665,56 +1666,96 @@ msgstr "Финалните снимки вече са отбелязани ка�
 msgid "Финалните снимки са отбелязани като предадени."
 msgstr "Финалните снимки са отбелязани като предадени."
 
-#: massageProject/main_app/views.py:843
+#: massageProject/main_app/views.py:828
+msgid ""
+"Снимки могат да се добавят само докато резервацията изчаква преглед от "
+"клиента."
+msgstr ""
+"Снимки могат да се добавят само докато резервацията изчаква преглед от "
+"клиента."
+
+#: massageProject/main_app/views.py:830
+msgid "Изберете поне една снимка."
+msgstr "Изберете поне една снимка."
+
+#: massageProject/main_app/views.py:832
+#, python-format
+msgid "Наведнъж може да се добавят най-много %(count)d снимки."
+msgstr "Наведнъж може да се добавят най-много %(count)d снимки."
+
+#: massageProject/main_app/views.py:856
+#, python-format
+msgid "%(name)s: %(error)s"
+msgstr "%(name)s: %(error)s"
+
+#: massageProject/main_app/views.py:861
+#, python-format
+msgid "Нито една снимка не беше добавена. %(errors)s"
+msgstr "Нито една снимка не беше добавена. %(errors)s"
+
+#: massageProject/main_app/views.py:876
+msgid ""
+"Нито една снимка не беше добавена. Възникна грешка при обработката на "
+"снимките."
+msgstr ""
+"Нито една снимка не беше добавена. Възникна грешка при обработката на "
+"снимките."
+
+#: massageProject/main_app/views.py:879
+#, python-format
+msgid "Добавени снимки: %(count)d."
+msgstr "Добавени снимки: %(count)d."
+
+#: massageProject/main_app/views.py:921
 #: templates/partials/specialist_reservations_table.html:109
 msgid "Маркирани снимки"
 msgstr "Маркирани снимки"
 
-#: massageProject/main_app/views.py:907
+#: massageProject/main_app/views.py:985
 msgid "Управление на резервации"
 msgstr ""
 
-#: massageProject/main_app/views.py:1103
+#: massageProject/main_app/views.py:1182
 msgid "Отсъствието беше добавено."
 msgstr ""
 
-#: massageProject/main_app/views.py:1114
+#: massageProject/main_app/views.py:1193
 msgid "Отсъствието беше изтрито."
 msgstr ""
 
-#: massageProject/main_app/views.py:1254
+#: massageProject/main_app/views.py:1350
 msgid "Прегледът е финализиран."
 msgstr "Прегледът е финализиран."
 
-#: massageProject/main_app/views.py:1326
+#: massageProject/main_app/views.py:1422
 msgid "Проверка на снимки"
 msgstr "Проверка на снимки"
 
-#: massageProject/main_app/views.py:1436
+#: massageProject/main_app/views.py:1532
 msgid "Бележката не може да надвишава 2000 символа."
 msgstr "Бележката не може да надвишава 2000 символа."
 
-#: massageProject/main_app/views.py:1450
+#: massageProject/main_app/views.py:1546
 msgid "Прегледът вече е финализиран."
 msgstr "Прегледът вече е финализиран."
 
-#: massageProject/main_app/views.py:1453
+#: massageProject/main_app/views.py:1549
 msgid "Маркирайте поне една снимка."
 msgstr "Маркирайте поне една снимка."
 
-#: massageProject/main_app/views.py:1455
+#: massageProject/main_app/views.py:1551
 msgid "Изборът ви е финализиран. Благодарим ви!"
 msgstr "Изборът ви е финализиран. Благодарим ви!"
 
-#: massageProject/main_app/views.py:1484
+#: massageProject/main_app/views.py:1580
 msgid "Не можете да променяте резервация по-малко от 24 часа преди часа."
 msgstr ""
 
-#: massageProject/main_app/views.py:1512
+#: massageProject/main_app/views.py:1608
 msgid "Не можете да отменяте резервация по-малко от 24 часа преди часа."
 msgstr ""
 
-#: massageProject/main_app/views.py:1521
+#: massageProject/main_app/views.py:1617
 msgid "Резервацията беше отменена успешно."
 msgstr ""
 
@@ -2003,7 +2044,8 @@ msgstr "Увеличена снимка"
 #: templates/pages/photo_proofing.html:159
 #: templates/pages/photo_proofing.html:168 templates/partials/auth_modal.html:7
 #: templates/partials/header.html:105
-#: templates/partials/specialist_reservations_table.html:148
+#: templates/partials/specialist_reservations_table.html:152
+#: templates/partials/specialist_reservations_table.html:165
 #: templates/partials/time_off_section.html:46
 msgid "Затвори"
 msgstr "Затвори"
@@ -2067,7 +2109,8 @@ msgid "Споделете Вашето преживяване..."
 msgstr ""
 
 #: templates/pages/home.html:129
-#: templates/partials/specialist_reservations_table.html:155
+#: templates/partials/specialist_reservations_table.html:159
+#: templates/partials/specialist_reservations_table.html:173
 #: templates/reservation/edit-reservation.html:78
 msgid "Отказ"
 msgstr "Отказ"
@@ -2413,18 +2456,18 @@ msgid "Страници със снимки"
 msgstr "Страници със снимки"
 
 #: templates/pages/photo_proofing.html:105
-#: templates/partials/specialist_reservations_table.html:135
+#: templates/partials/specialist_reservations_table.html:139
 msgid "Назад"
 msgstr "Назад"
 
 #: templates/pages/photo_proofing.html:108
-#: templates/partials/specialist_reservations_table.html:138
+#: templates/partials/specialist_reservations_table.html:142
 #, python-format
 msgid "Страница %(current)s от %(total)s"
 msgstr "Страница %(current)s от %(total)s"
 
 #: templates/pages/photo_proofing.html:111
-#: templates/partials/specialist_reservations_table.html:141
+#: templates/partials/specialist_reservations_table.html:145
 msgid "Напред"
 msgstr "Напред"
 
@@ -2962,6 +3005,7 @@ msgid "Маркирай като предадени"
 msgstr "Маркирай като предадени"
 
 #: templates/partials/specialist_reservations_table.html:106
+#: templates/partials/specialist_reservations_table.html:115
 msgid "Още действия"
 msgstr "Още действия"
 
@@ -2969,24 +3013,28 @@ msgstr "Още действия"
 msgid "Преглед като клиент"
 msgstr "Преглед като клиент"
 
-#: templates/partials/specialist_reservations_table.html:118
+#: templates/partials/specialist_reservations_table.html:117
+msgid "Добави снимки"
+msgstr "Добави снимки"
+
+#: templates/partials/specialist_reservations_table.html:122
 msgid "Качи галерия"
 msgstr "Качи галерия"
 
-#: templates/partials/specialist_reservations_table.html:128
+#: templates/partials/specialist_reservations_table.html:132
 msgid "Страници с резервации"
 msgstr "Страници с резервации"
 
-#: templates/partials/specialist_reservations_table.html:130
+#: templates/partials/specialist_reservations_table.html:134
 #, python-format
 msgid "Показани %(start)s–%(end)s от %(total)s"
 msgstr "Показани %(start)s–%(end)s от %(total)s"
 
-#: templates/partials/specialist_reservations_table.html:149
+#: templates/partials/specialist_reservations_table.html:153
 msgid "Маркиране като предадени"
 msgstr "Маркиране като предадени"
 
-#: templates/partials/specialist_reservations_table.html:150
+#: templates/partials/specialist_reservations_table.html:154
 msgid ""
 "Финалните снимки ще бъдат отбелязани като предадени на клиента. Няма да бъде "
 "изпратен имейл. Продължавате ли?"
@@ -2994,11 +3042,28 @@ msgstr ""
 "Финалните снимки ще бъдат отбелязани като предадени на клиента. Няма да бъде "
 "изпратен имейл. Продължавате ли?"
 
-#: templates/partials/specialist_reservations_table.html:154
+#: templates/partials/specialist_reservations_table.html:158
 msgid "Потвърди"
 msgstr "Потвърди"
 
-#: templates/partials/specialist_reservations_table.html:160
+#: templates/partials/specialist_reservations_table.html:166
+msgid "Добавяне на снимки към галерията"
+msgstr "Добавяне на снимки към галерията"
+
+#: templates/partials/specialist_reservations_table.html:167
+#, python-format
+msgid ""
+"Изберете до %(max)s снимки. Те ще се появят в края на галерията на клиента. "
+"Няма да бъде изпратен имейл."
+msgstr ""
+"Изберете до %(max)s снимки. Те ще се появят в края на галерията на клиента. "
+"Няма да бъде изпратен имейл."
+
+#: templates/partials/specialist_reservations_table.html:172
+msgid "Качи"
+msgstr "Качи"
+
+#: templates/partials/specialist_reservations_table.html:178
 msgid "Няма резервации, отговарящи на филтрите."
 msgstr "Няма резервации, отговарящи на филтрите."
 
@@ -5527,9 +5592,6 @@ msgstr ""
 #~ msgstr ""
 #~ "Финалната галерия е качена успешно (%(count)d снимки), но имейлът до "
 #~ "клиента не бе изпратен."
-
-#~ msgid "Качване на финална галерия"
-#~ msgstr "Качване на финална галерия"
 
 #~ msgid ""
 #~ "Изберете резервация, чийто клиент вече е финализирал прегледа, и качете "

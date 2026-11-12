@@ -22,7 +22,7 @@ from django.http.request import validate_host
 from django.utils import timezone
 from django.utils.translation import gettext as _, gettext_lazy as _lazy
 from datetime import datetime, timedelta
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.db.models import Count, Max, Q, Value
 from django.db.models.functions import Concat
 from django.contrib import messages
@@ -31,6 +31,7 @@ from django.http import HttpResponse, FileResponse, JsonResponse, Http404
 from PIL import Image as PILImage, ImageDraw, ImageFont
 
 from massageProject.main_app.context_processors import get_homepage
+from massageProject.main_app.signals import delete_file_from_gcs
 from massageProject.main_app.emails import send_gallery_ready_email, send_marks_finalized_email
 from massageProject.main_app.ics import build_reservation_ics
 from massageProject.main_app.forms import ReservationCreateForm, ReservationEditForm, \
@@ -805,6 +806,84 @@ def mark_finals_delivered(request, reservation_id):
             messages.error(request, ' '.join(exc.messages))
         else:
             messages.success(request, _('Финалните снимки са отбелязани като предадени.'))
+    return _redirect_to_profile_table(request)
+
+
+# One plain request, no chunking: kept small so the WebP conversion of the
+# whole batch stays inside the gunicorn timeout (see GALLERY_UPLOAD_CHUNK_SIZE).
+# If production starts timing out, lower this rather than adding chunking.
+ADD_PROOFING_IMAGES_MAX = 10
+
+
+@login_required
+@require_POST
+def add_proofing_images(request, reservation_id):
+    """Append up to ADD_PROOFING_IMAGES_MAX images to the Proofing Gallery of a
+    reservation awaiting client review. All-or-nothing, and sends no email."""
+    if not settings.IS_PHOTOGRAPHER_WEBSITE:
+        raise Http404
+    reservation = _get_owned_reservation_for_photo_workflow(request, reservation_id)
+    uploaded_files = request.FILES.getlist('images')
+    error = None
+    if reservation.phase != Reservation.PHASE_AWAITING_REVIEW:
+        error = _('Снимки могат да се добавят само докато резервацията изчаква преглед от клиента.')
+    elif not uploaded_files:
+        error = _('Изберете поне една снимка.')
+    elif len(uploaded_files) > ADD_PROOFING_IMAGES_MAX:
+        error = _('Наведнъж може да се добавят най-много %(count)d снимки.') % {
+            'count': ADD_PROOFING_IMAGES_MAX,
+        }
+    elif reservation.gallery.images.count() + len(uploaded_files) > reservation.gallery.image_cap:
+        error = _('Галерията може да съдържа най-много %(cap)d снимки.') % {
+            'cap': reservation.gallery.image_cap,
+        }
+
+    images = []
+    if error is None:
+        # Validate every file before storing any, so a rejected batch leaves
+        # the client's gallery exactly as it was.
+        image_validator = django_forms.ImageField()
+        order = _next_image_order(reservation.gallery)
+        errors = []
+        for offset, uploaded_file in enumerate(uploaded_files):
+            image = Image(
+                gallery=reservation.gallery, image=uploaded_file, order=order + offset,
+                source_name=uploaded_file.name, source_size=uploaded_file.size,
+            )
+            try:
+                image_validator.clean(uploaded_file)
+                image.full_clean()
+            except ValidationError as exc:
+                errors.append(_('%(name)s: %(error)s') % {
+                    'name': uploaded_file.name, 'error': '; '.join(exc.messages),
+                })
+            images.append(image)
+        if errors:
+            error = _('Нито една снимка не беше добавена. %(errors)s') % {'errors': ' '.join(errors)}
+
+    if error is None:
+        try:
+            with transaction.atomic():
+                for image in images:
+                    image.save()
+        except Exception:
+            # Validation only reads headers; the WebP conversion in save() is
+            # the first full decode, and storage can fail too. The rows roll
+            # back but stored files don't, so remove whatever was written.
+            logger.exception('Adding images to the gallery of reservation %s failed', reservation.pk)
+            for image in images:
+                if image.image and image.image._committed:
+                    delete_file_from_gcs(image.image.name)
+            error = _('Нито една снимка не беше добавена. Възникна грешка при обработката на снимките.')
+
+    if error is None:
+        messages.success(request, _('Добавени снимки: %(count)d.') % {'count': len(images)})
+    else:
+        messages.error(request, error)
+    return _redirect_to_profile_table(request)
+
+
+def _redirect_to_profile_table(request):
     # Only a querystring is carried back, never a URL, so this can't redirect off-site.
     query = request.POST.get('return_query', '')
     target = reverse('profile_page')
@@ -1063,6 +1142,7 @@ def _build_reservations_table_context(request, base_qs, is_staff):
         'service_id': service_id,
         'specialist_id': specialist_id,
         'query': query,
+        'add_images_max': ADD_PROOFING_IMAGES_MAX,
     }
 
 

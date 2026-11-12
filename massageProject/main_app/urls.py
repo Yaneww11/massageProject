@@ -6,7 +6,7 @@ from massageProject.main_app.views import Index, ServicesDashboard, ReservationP
     save_photo_comment, finalize_photo_proofing, serve_proof_image, download_reservation_ics, \
     ProofingGalleryUploadView, MarkedPhotosView, serve_marked_photo_image, download_marked_photo, \
     download_marked_photos_zip, TimeOffCreateView, delete_time_off, \
-    mark_finals_delivered, ClientPreviewView, serve_client_preview_image
+    mark_finals_delivered, add_proofing_images, ClientPreviewView, serve_client_preview_image
 
 urlpatterns = [
     path('', Index.as_view(), name='index'),
@@ -23,6 +23,7 @@ urlpatterns = [
     path('profile/reservations/<int:reservation_id>/calendar/', download_reservation_ics, name='reservation_calendar_ics'),
     path('profile/gallery-upload/', ProofingGalleryUploadView.as_view(), name='proofing_gallery_upload'),
     path('profile/reservations/<int:reservation_id>/finals-delivered/', mark_finals_delivered, name='mark_finals_delivered'),
+    path('profile/reservations/<int:reservation_id>/add-images/', add_proofing_images, name='add_proofing_images'),
     path('profile/reservations/<int:reservation_id>/marked-photos/', MarkedPhotosView.as_view(), name='marked_photos'),
     path('profile/reservations/<int:reservation_id>/marked-photos/zip/', download_marked_photos_zip, name='marked_photos_zip'),
     path('profile/reservations/<int:reservation_id>/marked-photos/<int:image_id>/', serve_marked_photo_image, name='marked_photo_image'),
