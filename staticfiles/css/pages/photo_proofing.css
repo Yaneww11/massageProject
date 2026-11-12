@@ -122,9 +122,9 @@
 
 /* ── Protection notice ───────────────────────────────────── */
 .proof-protection-note {
-    max-width: 1200px;
+    max-width: 1680px;
     margin: 1rem auto 0;
-    padding: 0 1.5rem;
+    padding: 0 clamp(12px, 2.5vw, 32px);
     font-size: var(--fs-xs);
     color: var(--text-muted);
     display: flex;
@@ -138,9 +138,9 @@
 
 /* ── Keyboard hint ────────────────────────────────────────  */
 .proof-kbd-hint {
-    max-width: 1200px;
+    max-width: 1680px;
     margin: 0.35rem auto 0;
-    padding: 0 1.5rem;
+    padding: 0 clamp(12px, 2.5vw, 32px);
     font-size: var(--fs-xs);
     color: var(--text-muted);
 }
@@ -158,17 +158,47 @@
     .proof-kbd-hint { display: none; }
 }
 
-/* ── Grid & proof-sleeve tiles ───────────────────────────── */
+/* ── Justified grid of uncropped photos ──────────────────── */
+/* CSS-only justified rows: every tile starts at its photo's width at the
+   target row height (--proof-row-h) and grows in proportion to its aspect
+   ratio (--proof-ar, set per tile; 4:5 when the dimensions are unknown), so
+   all photos in a row end up the same height. The ::after filler soaks up
+   the free space of the last row so it is not stretched. */
 .proof-grid {
-    max-width: 1200px;
+    --proof-row-h: 300px;
+    --proof-gap: 10px;
+    max-width: 1680px;
     margin: 0 auto;
-    padding: 1.5rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-    gap: 1.75rem;
+    padding: clamp(12px, 2.5vw, 32px);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem var(--proof-gap);
+}
+
+.proof-grid::after {
+    content: "";
+    flex-grow: 1000000;
+}
+
+@media (max-width: 1200px) {
+    .proof-grid { --proof-row-h: 250px; }
+}
+
+@media (max-width: 960px) {
+    .proof-grid { --proof-row-h: 220px; --proof-gap: 8px; }
+}
+
+@media (max-width: 600px) {
+    .proof-grid { --proof-row-h: 190px; --proof-gap: 6px; row-gap: 0.5rem; }
 }
 
 .proof-tile {
+    --proof-ar: 0.8;
+    flex-grow: calc(var(--proof-ar) * 100);
+    flex-basis: calc(var(--proof-ar) * var(--proof-row-h));
+    /* A tile left alone on a row may grow, but not into a huge photo. */
+    max-width: min(100%, calc(var(--proof-ar) * var(--proof-row-h) * 1.5));
+    min-width: 0;
     outline: none;
     animation: proof-tile-in 0.5s ease both;
     animation-delay: calc(var(--proof-i, 0) * 40ms);
@@ -185,50 +215,32 @@
 
 .proof-tile[hidden] { display: none; }
 
-.proof-tile:focus-visible .proof-tile-frame {
-    box-shadow: 0 0 0 3px var(--accent-color), var(--shadow-md);
+.proof-tile:focus-visible .proof-photo-wrap {
+    box-shadow: 0 0 0 3px var(--accent-color);
 }
 
+/* No horizontal chrome around the photo: any fixed padding or border here
+   would make portraits and landscapes in one row differ in height. */
 .proof-tile-frame {
     position: relative;
-    background: var(--bg-paper);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: 8px 8px 0;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-}
-
-/* Perforated proof-sheet edge */
-.proof-tile-frame::before {
-    content: "";
-    position: absolute;
-    top: -1px;
-    left: 12px;
-    right: 12px;
-    height: 1px;
-    background-image: repeating-linear-gradient(
-        to right,
-        var(--border-color) 0 6px,
-        transparent 6px 12px
-    );
-}
-
-.proof-tile.is-marked .proof-tile-frame {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
-}
-
-.proof-tile.is-finalized .proof-tile-frame {
-    border-color: var(--success);
 }
 
 .proof-photo-wrap {
     position: relative;
-    border-radius: calc(var(--radius-md) - 3px) calc(var(--radius-md) - 3px) 0 0;
+    border-radius: var(--radius-sm);
     overflow: hidden;
-    aspect-ratio: 4 / 5;
+    aspect-ratio: var(--proof-ar);
+    background: var(--bg-sunken);
     cursor: pointer;
+    transition: var(--transition);
+}
+
+.proof-tile.is-marked .proof-photo-wrap {
+    box-shadow: 0 0 0 2px var(--accent-color);
+}
+
+.proof-tile.is-finalized .proof-photo-wrap {
+    box-shadow: 0 0 0 2px var(--success);
 }
 
 .proof-tile-img {
@@ -241,33 +253,14 @@
     pointer-events: none;
 }
 
-/* Repeating traceable watermark */
-.proof-watermark {
-    position: absolute;
-    inset: -20%;
-    display: flex;
-    flex-wrap: wrap;
-    align-content: space-around;
-    justify-content: space-around;
-    transform: rotate(-18deg);
-    pointer-events: none;
-    user-select: none;
-    overflow: hidden;
-}
-
-.proof-watermark span {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    white-space: nowrap;
-    color: rgba(255, 255, 255, 0.55);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
-}
-
-/* Grease-pencil circle annotation, drawn on when marked */
+/* Grease-pencil circle around the frame number, drawn on when marked */
 .proof-grease-circle {
     position: absolute;
-    inset: 6%;
+    top: -6px;
+    left: -9px;
+    width: calc(100% + 18px);
+    height: calc(100% + 12px);
+    overflow: visible;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -278,12 +271,12 @@
 .proof-grease-circle path {
     fill: none;
     stroke: var(--accent-color);
-    stroke-width: 3;
+    stroke-width: 2.2;
     stroke-linecap: round;
-    stroke-dasharray: 340;
-    stroke-dashoffset: 340;
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25));
-    transition: stroke-dashoffset 0.5s ease;
+    stroke-dasharray: 320;
+    stroke-dashoffset: 320;
+    vector-effect: non-scaling-stroke;
+    transition: stroke-dashoffset 0.45s ease;
 }
 
 .proof-tile.is-marked .proof-grease-circle path { stroke-dashoffset: 0; }
@@ -416,18 +409,24 @@
 .proof-tile.is-finalized .proof-finalized-ribbon { display: flex; }
 .proof-tile.is-finalized .proof-compare-btn { display: none; }
 
-/* Footer: filename + labels */
+/* Footer: frame number + labels */
 .proof-tile-footer {
-    padding: 0.6rem 0.35rem 0.75rem;
+    padding: 0.5rem 2px 0;
+    min-width: 0;
 }
 
 .proof-filename {
-    display: block;
+    position: relative;
+    display: inline-block;
     font-size: var(--fs-xs);
     color: var(--text-muted);
     font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    padding: 0 0.35rem;
     margin-bottom: 0.4rem;
 }
+
+.proof-tile.is-marked .proof-filename { color: var(--text-main); }
 
 .proof-label-row {
     display: none;
@@ -461,7 +460,7 @@
 }
 
 .proof-empty {
-    grid-column: 1 / -1;
+    flex-basis: 100%;
 }
 
 .proof-empty,
@@ -972,4 +971,11 @@
 
 @media (max-width: 560px) {
     .proof-teaser-card { flex-wrap: wrap; }
+}
+
+/* Printing the page is not a way to get a copy of the photos. */
+@media print {
+    .proof-page img {
+        visibility: hidden;
+    }
 }

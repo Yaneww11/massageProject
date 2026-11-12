@@ -1410,6 +1410,9 @@ def _photo_proofing_context(request, reservation, image_url):
             'number': frame_numbers.get(img.pk),
             'url': image_url(img.pk),
             'alt': img.alt_text,
+            # Drives the uncropped tile; None (dimensions not yet recorded)
+            # makes the tile fall back to a 4:5 crop.
+            'aspect_ratio': round(img.width / img.height, 4) if img.width and img.height else None,
             'is_marked': proof.is_marked if proof else False,
             'comment': proof.comment if proof else '',
             'label_keys': [label.pk for label in proof.labels.all()] if proof else [],

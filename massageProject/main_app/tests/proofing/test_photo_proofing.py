@@ -611,3 +611,39 @@ class ProofFrameNumberingTest(ProofingModelsBase):
         Image.objects.filter(pk=self.images[1].pk).update(order=99)
         numbers = self._numbers()
         self.assertEqual(sorted(numbers.values()), list(range(1, 11)))
+
+
+class ProofTileAspectRatioTest(ProofingModelsBase):
+    """Photos are laid out uncropped, so each tile needs its photo's real
+    aspect ratio; Images uploaded before dimensions were recorded fall back
+    to the 4:5 tile."""
+
+    def setUp(self):
+        super().setUp()
+        self.client = Client()
+        self.client.force_login(self.user)
+        Image.objects.filter(pk=self.image.pk).update(width=1200, height=800)
+        self.legacy = Image.objects.create(gallery=self.gallery, order=1, image='gallery/photos/legacy.webp')
+
+    def _photos(self, response):
+        return {p['id']: p for p in response.context['photos']}
+
+    def test_photo_with_dimensions_carries_its_aspect_ratio(self):
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertEqual(self._photos(response)[self.image.pk]['aspect_ratio'], 1.5)
+
+    def test_photo_without_dimensions_carries_no_aspect_ratio(self):
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertIsNone(self._photos(response)[self.legacy.pk]['aspect_ratio'])
+
+    def test_aspect_ratio_is_rendered_as_valid_css_in_bulgarian(self):
+        """The bg locale formats floats with a decimal comma, which is not a
+        CSS number."""
+        response = self.client.get(reverse('photo_proofing'), HTTP_ACCEPT_LANGUAGE='bg')
+        self.assertContains(response, '--proof-ar: 1.5')
+        self.assertNotContains(response, '--proof-ar: 1,5')
+
+    def test_page_has_no_css_watermark_overlay(self):
+        """Only the watermark baked into the Proof Derivative remains."""
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertNotContains(response, 'proof-watermark')
