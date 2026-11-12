@@ -584,6 +584,12 @@ class ProofingPaginationTest(ProofingModelsBase):
         # Ordinary pagination does not carry the flag along.
         self.assertContains(response, 'href="?filter=marked&amp;page=1" rel="prev"')
 
+    def test_viewer_flag_is_dropped_from_the_url_after_opening(self):
+        # A refresh or Back must not reopen the viewer; filter and page stay.
+        response = self.client.get(reverse('photo_proofing'), {'viewer': 1})
+        self.assertContains(response, "url.searchParams.delete('viewer');")
+        self.assertContains(response, "history.replaceState(history.state, '', url);")
+
     def test_page_opens_without_the_viewer_by_default(self):
         response = self.client.get(reverse('photo_proofing'))
         self.assertContains(response, 'const OPEN_VIEWER = false;')

@@ -889,7 +889,14 @@
 
   refreshCounts();
   resetRovingTabindex();
-  if (OPEN_VIEWER) openViewer(0);
+  if (OPEN_VIEWER) {
+    openViewer(0);
+    // The flag is one-shot: drop it so a refresh or Back doesn't reopen the
+    // viewer. Filter and page stay in the URL.
+    const url = new URL(window.location.href);
+    url.searchParams.delete('viewer');
+    history.replaceState(history.state, '', url);
+  }
 })();
 </script>
 {% endblock %}

@@ -1005,12 +1005,12 @@ class Image(WebPImageFieldsMixin, models.Model):
         max_length=255, blank=True,
         help_text=_('Използва се като алтернативен текст (alt) за тази снимка.'),
     )
-    # convert_image_field_to_webp() rewrites `image.name` to .webp and the
-    # stored size becomes the WebP size, so a resumed upload has nothing left
-    # to recognise an already-uploaded file by unless it is captured here.
     # Dimensions of the stored WebP file, filled by convert_image_field_to_webp().
     width = models.PositiveIntegerField(null=True, blank=True, editable=False)
     height = models.PositiveIntegerField(null=True, blank=True, editable=False)
+    # convert_image_field_to_webp() rewrites `image.name` to .webp and the
+    # stored size becomes the WebP size, so a resumed upload has nothing left
+    # to recognise an already-uploaded file by unless it is captured here.
     source_name = models.CharField(max_length=255, blank=True, verbose_name=_('Име на файла при качване'))
     source_size = models.PositiveBigIntegerField(null=True, blank=True, verbose_name=_('Размер при качване'))
     order = models.PositiveIntegerField(

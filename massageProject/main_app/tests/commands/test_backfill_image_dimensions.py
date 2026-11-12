@@ -67,9 +67,11 @@ class BackfillImageDimensionsTest(TestCase):
         self.assertEqual((present.width, present.height), (700, 1000))
         self.assertIn('1 updated, 0 skipped, 1 failed', output)
 
-    def test_never_converted_file_with_exif_rotation_gets_displayed_dimensions(self):
-        # A legacy JPEG stored as-is (no WebP conversion): landscape pixels,
-        # but EXIF orientation 6 means the browser shows it as a portrait.
+    def test_never_converted_file_with_exif_rotation_gets_stored_dimensions(self):
+        # A legacy JPEG stored as-is (no WebP conversion): landscape pixels
+        # with EXIF orientation 6. The proof derivative is generated without
+        # exif_transpose and without EXIF, so it keeps the raw pixel
+        # orientation; the dimensions must describe the stored file.
         name = default_storage.save(
             'gallery/photos/rotated.jpg', make_uploaded_jpeg_with_orientation('rotated.jpg', (300, 200), 6),
         )
@@ -78,7 +80,7 @@ class BackfillImageDimensionsTest(TestCase):
         self.run_command()
 
         image.refresh_from_db()
-        self.assertEqual((image.width, image.height), (200, 300))
+        self.assertEqual((image.width, image.height), (300, 200))
 
     def test_second_run_changes_nothing(self):
         image = self.make_legacy_image('legacy.jpg', size=(900, 600))
