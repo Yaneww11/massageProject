@@ -70,8 +70,10 @@ class WebPImageFieldsMixin:
                 )
             buffer = BytesIO()
             img.save(buffer, format='WEBP', quality=self.WEBP_QUALITY)
+            size = img.size
         new_name = os.path.splitext(field_file.name)[0] + '.webp'
         setattr(self, field_name, ContentFile(buffer.getvalue(), name=new_name))
+        return size
 
 
 class Service(WebPImageFieldsMixin, models.Model):
@@ -1006,6 +1008,9 @@ class Image(WebPImageFieldsMixin, models.Model):
     # convert_image_field_to_webp() rewrites `image.name` to .webp and the
     # stored size becomes the WebP size, so a resumed upload has nothing left
     # to recognise an already-uploaded file by unless it is captured here.
+    # Dimensions of the stored WebP file, filled by convert_image_field_to_webp().
+    width = models.PositiveIntegerField(null=True, blank=True, editable=False)
+    height = models.PositiveIntegerField(null=True, blank=True, editable=False)
     source_name = models.CharField(max_length=255, blank=True, verbose_name=_('Име на файла при качване'))
     source_size = models.PositiveBigIntegerField(null=True, blank=True, verbose_name=_('Размер при качване'))
     order = models.PositiveIntegerField(
@@ -1023,6 +1028,12 @@ class Image(WebPImageFieldsMixin, models.Model):
 
     def __str__(self):
         return self.alt_text or f"Снимка {self.order}"
+
+    def convert_image_field_to_webp(self, field_name):
+        # Set explicitly rather than via ImageField(width_field=...): that binding
+        # reads the file on every load of a row whose dimensions are still NULL.
+        self.width, self.height = size = super().convert_image_field_to_webp(field_name)
+        return size
 
     def clean(self):
         super().clean()

@@ -103,6 +103,15 @@ class ProofingGalleryUploadViewTest(TestCase):
         self.assertEqual(self.reservation.gallery.images.count(), 2)
         self.assertTrue(self.reservation.need_client_review)
 
+    def test_upload_stores_dimensions_of_the_downscaled_webp(self):
+        self.client.force_login(self.specialist_user)
+        response = self._post(self.reservation, [make_uploaded_jpeg('big.jpg', size=(3000, 2000))])
+        self.assertRedirects(response, reverse('profile_page'))
+        self.reservation.refresh_from_db()
+        image = self.reservation.gallery.images.get()
+        # The longer side is capped at 2560px: 3000x2000 becomes 2560x1707.
+        self.assertEqual((image.width, image.height), (2560, 1707))
+
     def test_specialist_cannot_upload_to_another_specialists_reservation(self):
         self.client.force_login(self.specialist_user)
         response = self._post(self.other_reservation, [make_uploaded_jpeg('a.jpg')])
