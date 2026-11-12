@@ -684,6 +684,8 @@
   function viewerGo(delta) {
     const next = viewerIndex + delta;
     if (viewer.hidden || next < 0 || next >= viewerList.length) return;
+    // The drawer belongs to the photo it was opened on.
+    if (drawer.classList.contains('is-open')) closeDrawer();
     viewerIndex = next;
     renderViewer();
   }
