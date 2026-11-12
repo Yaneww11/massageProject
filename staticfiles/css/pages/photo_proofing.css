@@ -1202,6 +1202,112 @@ body.proof-viewer-open { overflow: hidden; }
     .proof-viewer-next { right: 8px; }
 }
 
+/* ── Phone, hover and touch modes ─────────────────────────
+   Touch tablets: every tile control stays visible (the defaults above).
+   Mouse/trackpad: compare, note and inactive label chips appear on hover or
+   keyboard focus; the mark control, a compare pick, an existing note and
+   attached labels always show. Phone width: the tile keeps only the mark
+   control and the note indicator, labels become dots, and the rest is done
+   in the Photo Viewer, whose bar gets thumb-sized. */
+.proof-label-dots {
+    display: none;
+    gap: 3px;
+}
+
+.proof-label-dot {
+    display: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-color);
+}
+
+.proof-label-dot.is-active { display: block; }
+
+/* Swipe: the frame follows the finger, then eases back into place. */
+.proof-viewer-stage { touch-action: pan-y; }
+
+.proof-viewer-frame { transition: transform 0.25s ease; }
+
+.proof-viewer-frame.is-dragging { transition: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .proof-viewer-frame { transition: none; }
+}
+
+/* "Hide unless hovered" rather than "show on hover", so the disabled
+   chips' dimming (Finalized, Client Preview) is never overridden. */
+@media (hover: hover) and (pointer: fine) {
+    .proof-tile:not(:hover):not(:focus-within):not(.is-comparing) .proof-compare-btn,
+    .proof-tile:not(:hover):not(:focus-within):not(.has-comment) .proof-comment-btn,
+    .proof-tile:not(:hover):not(:focus-within) .proof-label-chip:not(.is-active) {
+        opacity: 0;
+    }
+}
+
+@media (max-width: 600px) {
+    .proof-tile .proof-compare-btn,
+    .proof-tile:not(.has-comment) .proof-comment-btn,
+    .proof-tile.is-marked .proof-label-row {
+        display: none;
+    }
+
+    .proof-mark-btn {
+        width: 32px;
+        height: 32px;
+    }
+
+    .proof-tile-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+
+    .proof-filename { margin-bottom: 0; }
+
+    .proof-tile.is-marked .proof-label-dots { display: flex; }
+
+    /* Viewer bar: labels on their own row, a wide mark button, and icon-only
+       buttons after it (Note, Compare). */
+    .proof-viewer-bar {
+        gap: 8px;
+        padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    }
+
+    .proof-viewer-chips {
+        flex-basis: 100%;
+        order: -1;
+    }
+
+    .proof-viewer-chips:not(:has(.proof-viewer-chip)) { display: none; }
+
+    .proof-viewer-chip { min-height: 40px; }
+
+    #proof-viewer-bar > .proof-viewer-btn {
+        min-height: 48px;
+        justify-content: center;
+    }
+
+    #proof-viewer-bar > .proof-viewer-mark { flex: 1; }
+
+    #proof-viewer-bar > .proof-viewer-btn:not(.proof-viewer-mark) {
+        flex: none;
+        width: 48px;
+        padding: 0;
+    }
+
+    /* Hidden from sight only: the text stays the button's accessible name. */
+    #proof-viewer-bar > .proof-viewer-btn:not(.proof-viewer-mark) .proof-viewer-btn-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+}
+
 /* Printing the page is not a way to get a copy of the photos. */
 @media print {
     .proof-page img {
