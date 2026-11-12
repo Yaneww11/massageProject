@@ -287,6 +287,8 @@
   // tile and acts through the tile's toggles, so grid and viewer agree.
   let viewerList = [];
   let viewerIndex = -1;
+  // The tile the viewer was opened from; focus goes back to it on close.
+  let viewerOrigin = null;
 
   function isMarked(tile) { return tile.classList.contains('is-marked'); }
   function findTile(id) { return tiles.find((t) => t.dataset.photoId === id); }
@@ -617,8 +619,10 @@
       // Labels sort marked photos only, as on the tile.
       chip.disabled = finalized || readOnly || !marked;
     });
-    viewerPrevBtn.hidden = viewerIndex === 0;
-    viewerNextBtn.hidden = viewerIndex === viewerList.length - 1;
+    // Dimmed, not hidden, at the ends: a focused button keeps focus, so a
+    // repeated Enter on it can't fall through to marking the photo.
+    viewerPrevBtn.setAttribute('aria-disabled', String(viewerIndex === 0));
+    viewerNextBtn.setAttribute('aria-disabled', String(viewerIndex === viewerList.length - 1));
     // Never leave focus on a control that just got disabled or hidden.
     const active = document.activeElement;
     if (viewer.contains(active) && active !== viewer && (active.disabled || active.hidden)) viewer.focus();
@@ -634,15 +638,19 @@
     viewer.focus();
   }
 
-  function openViewerOn(tile) { openViewer(visibleTiles().indexOf(tile)); }
+  function openViewerOn(tile) {
+    openViewer(visibleTiles().indexOf(tile));
+    viewerOrigin = tile;
+  }
 
   function closeViewer() {
     if (viewer.hidden) return;
-    const tile = viewerTile();
+    // Opened without a tile (e.g. on page load): fall back to the photo shown.
+    const tile = viewerOrigin || viewerTile();
     viewer.hidden = true;
     document.body.classList.remove('proof-viewer-open');
     viewerIndex = -1;
-    // Back to the grid on the photo last shown, so the client keeps their place.
+    viewerOrigin = null;
     if (tile) {
       const list = visibleTiles();
       setFocusIndex(list, list.indexOf(tile));

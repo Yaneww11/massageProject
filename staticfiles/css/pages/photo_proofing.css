@@ -1083,7 +1083,10 @@ body.proof-viewer-open { overflow: hidden; }
     font-size: 1.8rem;
 }
 
-.proof-viewer-nav[hidden] { display: none; }
+.proof-viewer-nav[aria-disabled="true"] {
+    opacity: 0.3;
+    cursor: default;
+}
 
 .proof-viewer-prev { left: 16px; }
 .proof-viewer-next { right: 16px; }
