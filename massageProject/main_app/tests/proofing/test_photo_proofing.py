@@ -682,3 +682,26 @@ class ProofKeyboardHintTest(ProofingModelsBase):
         self.assertContains(response, '<kbd>Enter</kbd> отвори')
         self.assertContains(response, '<kbd>Space</kbd> маркирай')
         self.assertNotContains(response, '<kbd>Enter</kbd>/<kbd>Space</kbd>')
+
+
+class ProofTileLabelDotsTest(ProofingModelsBase):
+    """At phone width the label chips give way to one dot per PhotoLabel
+    under the tile; only the attached labels' dots are lit."""
+
+    def setUp(self):
+        super().setUp()
+        self.client = Client()
+        self.client.force_login(self.user)
+        self.print_label = PhotoLabel.objects.create(gallery=self.gallery, name='За печат', order=0)
+        self.album_label = PhotoLabel.objects.create(gallery=self.gallery, name='Албум', order=1)
+        proof = ImageProof.objects.create(image=self.image, is_marked=True)
+        proof.labels.add(self.print_label)
+
+    def test_tile_renders_a_lit_dot_for_each_attached_label(self):
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertContains(
+            response, f'class="proof-label-dot is-active" data-label="{self.print_label.pk}"', count=1,
+        )
+        self.assertContains(
+            response, f'class="proof-label-dot" data-label="{self.album_label.pk}"', count=1,
+        )
