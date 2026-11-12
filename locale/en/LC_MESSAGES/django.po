@@ -2518,6 +2518,18 @@ msgstr "Mark"
 msgid "Маркирана"
 msgstr "Marked"
 
+#: templates/pages/photo_proofing.html
+msgid "Бележка"
+msgstr "Note"
+
+#: templates/pages/photo_proofing.html
+msgid "Сравни"
+msgstr "Compare"
+
+#: templates/pages/photo_proofing.html
+msgid "Следваща страница"
+msgstr "Next page"
+
 #: templates/pages/photo_proofing.html:49
 msgid "навигация"
 msgstr "navigate"

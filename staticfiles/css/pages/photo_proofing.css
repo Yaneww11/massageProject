@@ -1163,6 +1163,29 @@ body.proof-viewer-open { overflow: hidden; }
     color: var(--on-primary);
 }
 
+.proof-viewer-note.has-comment,
+.proof-viewer-compare[aria-pressed="true"] {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+/* Shown on the page's last photo when there is a next page. */
+.proof-viewer-page {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    font-family: var(--font-main);
+    font-size: var(--fs-sm);
+    padding: 0.6rem 1.2rem;
+    border-radius: 999px;
+    border: 1px solid var(--accent-color);
+    background: color-mix(in srgb, var(--bg-paper) 85%, transparent);
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+.proof-viewer-page[hidden] { display: none; }
+
 .proof-viewer-btn:disabled,
 .proof-viewer-chip:disabled {
     opacity: 0.5;

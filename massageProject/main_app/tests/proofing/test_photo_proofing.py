@@ -573,6 +573,31 @@ class ProofingPaginationTest(ProofingModelsBase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['page_obj'].number, 2)
 
+    def test_viewer_flag_renders_the_requested_page_and_filter(self):
+        for image in self.images[:70]:
+            self._mark(image)
+        response = self.client.get(reverse('photo_proofing'), {'filter': 'marked', 'page': 2, 'viewer': 1})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['page_obj'].number, 2)
+        self.assertEqual(len(response.context['photos']), 10)
+        self.assertContains(response, 'const OPEN_VIEWER = true;')
+        # Ordinary pagination does not carry the flag along.
+        self.assertContains(response, 'href="?filter=marked&amp;page=1" rel="prev"')
+
+    def test_page_opens_without_the_viewer_by_default(self):
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertContains(response, 'const OPEN_VIEWER = false;')
+
+    def test_viewer_next_page_button_keeps_the_filter_and_sets_the_flag(self):
+        for image in self.images[:70]:
+            self._mark(image)
+        response = self.client.get(reverse('photo_proofing'), {'filter': 'marked'})
+        self.assertContains(response, 'id="proof-viewer-page" href="?filter=marked&amp;page=2&amp;viewer=1"')
+
+    def test_no_viewer_next_page_button_on_the_last_page(self):
+        response = self.client.get(reverse('photo_proofing'), {'page': 2})
+        self.assertNotContains(response, 'id="proof-viewer-page"')
+
 
 class ProofFrameNumberingTest(ProofingModelsBase):
     """Finding 7: frame numbers were derived from the position on the filtered
@@ -673,6 +698,21 @@ class PhotoViewerControlsTest(ProofingModelsBase):
         response = self.client.get(reverse('photo_proofing'))
         self.assertContains(response, 'id="proof-viewer-mark" aria-pressed="false" disabled>')
         self.assertContains(response, f'class="proof-viewer-chip" data-label="{self.label.pk}" disabled>')
+
+    def test_viewer_note_and_compare_buttons_render(self):
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertContains(response, 'id="proof-viewer-note">')
+        self.assertContains(response, 'id="proof-viewer-compare" aria-pressed="false">')
+
+    def test_finalized_page_renders_viewer_compare_disabled_but_note_open(self):
+        ImageProof.objects.create(image=self.image, is_marked=True)
+        self.reservation.finalize_proofing()
+        self.reservation.need_client_review = True
+        self.reservation.save(update_fields=['need_client_review'])
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertContains(response, 'id="proof-viewer-compare" aria-pressed="false" disabled>')
+        # The drawer opens read-only, so the note stays readable.
+        self.assertContains(response, 'id="proof-viewer-note">')
 
 
 class ProofKeyboardHintTest(ProofingModelsBase):

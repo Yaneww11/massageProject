@@ -2426,6 +2426,18 @@ msgstr "Маркирай"
 msgid "Маркирана"
 msgstr "Маркирана"
 
+#: templates/pages/photo_proofing.html
+msgid "Бележка"
+msgstr "Бележка"
+
+#: templates/pages/photo_proofing.html
+msgid "Сравни"
+msgstr "Сравни"
+
+#: templates/pages/photo_proofing.html
+msgid "Следваща страница"
+msgstr "Следваща страница"
+
 #: templates/pages/photo_proofing.html:49
 msgid "навигация"
 msgstr "навигация"

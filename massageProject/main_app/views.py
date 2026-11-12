@@ -1431,6 +1431,9 @@ def _photo_proofing_context(request, reservation, image_url):
         'total_photos': total_photos,
         'marked_total': marked_total,
         'current_filter': current_filter,
+        # Set by the Photo Viewer's "next page" link: open the viewer on
+        # this page's first photo.
+        'open_viewer': request.GET.get('viewer') == '1',
         'watermark_identifier': _proof_watermark_identifier(client, reservation),
         'labels_config': labels_config,
     }
