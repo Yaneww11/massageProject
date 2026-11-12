@@ -4,6 +4,8 @@
     background: var(--bg-light);
     min-height: 60vh;
     padding-bottom: 110px;
+    /* No iOS long-press "Save to Photos" sheet on any image of this page. */
+    -webkit-touch-callout: none;
 }
 
 /* The native `hidden` attribute loses to any author rule that sets

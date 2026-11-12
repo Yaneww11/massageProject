@@ -197,6 +197,14 @@
       .catch(() => ({ ok: false, data: { error: "{% trans 'Възникна грешка. Опитайте отново.' %}" } }));
   }
 
+  // No context menu anywhere on the proofing page ("Save image as…", "Open
+  // image in new tab"), except in the note field, where it carries
+  // spell-check and paste. A deterrent only; the real protection is the
+  // watermarked, downscaled derivative.
+  document.addEventListener('contextmenu', (e) => {
+    if (!e.target.closest('textarea')) e.preventDefault();
+  });
+
   const grid = document.getElementById('proof-grid');
   if (!grid) return;
   const tiles = Array.from(grid.querySelectorAll('.proof-tile'));

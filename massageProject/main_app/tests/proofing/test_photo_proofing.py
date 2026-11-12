@@ -339,6 +339,35 @@ class ProofImageServingViewTest(ProofingModelsBase):
         second_mtime = default_storage.get_modified_time(path)
         self.assertEqual(first_mtime, second_mtime)
 
+    def test_derivative_is_stored_under_the_versioned_path(self):
+        from massageProject.main_app.views import PROOF_DERIVATIVE_VERSION
+        response = self.client.get(reverse('photo_proofing_image', args=[self._token()]))
+        _, files = default_storage.listdir(f'proof_derivatives/{self.image.pk}')
+        self.assertEqual(len(files), 1)
+        self.assertRegex(files[0], rf'^[0-9a-f]{{32}}-v{PROOF_DERIVATIVE_VERSION}\.jpg$')
+        self.assertTrue(response.url.endswith(files[0]))
+
+    def test_pre_version_derivative_is_not_served(self):
+        from massageProject.main_app.views import PROOF_DERIVATIVE_VERSION, _proof_derivative_path
+        current = _proof_derivative_path(self.image.pk, self.user.pk)
+        stale = current.replace(f'-v{PROOF_DERIVATIVE_VERSION}', '')
+        default_storage.save(stale, ContentFile(b'old watermark'))
+        response = self.client.get(reverse('photo_proofing_image', args=[self._token()]))
+        self.assertTrue(default_storage.exists(current))
+        self.assertTrue(response.url.endswith(current))
+
+    def test_long_client_identifier_yields_a_full_size_jpeg(self):
+        self.user.first_name = 'Александра-Мария' * 3
+        self.user.last_name = 'Константинова-Христова' * 2
+        self.user.save()
+        self.client.get(reverse('photo_proofing_image', args=[self._token()]))
+        _, files = default_storage.listdir(f'proof_derivatives/{self.image.pk}')
+        with default_storage.open(f'proof_derivatives/{self.image.pk}/{files[0]}', 'rb') as derivative:
+            served = PILImage.open(derivative)
+            served.load()
+        self.assertEqual(served.format, 'JPEG')
+        self.assertEqual(served.size, (400, 300))
+
     def test_expired_token_is_rejected(self):
         from massageProject.main_app.views import PROOF_IMAGE_MAX_AGE
         token = self._token()
