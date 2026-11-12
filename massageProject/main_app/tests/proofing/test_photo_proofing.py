@@ -647,3 +647,38 @@ class ProofTileAspectRatioTest(ProofingModelsBase):
         """Only the watermark baked into the Proof Derivative remains."""
         response = self.client.get(reverse('photo_proofing'))
         self.assertNotContains(response, 'proof-watermark')
+
+
+class PhotoViewerControlsTest(ProofingModelsBase):
+    """The Photo Viewer's state-changing controls mirror the grid: locked once
+    proofing is finalized."""
+
+    def setUp(self):
+        super().setUp()
+        self.client = Client()
+        self.client.force_login(self.user)
+        self.label = PhotoLabel.objects.create(gallery=self.gallery, name='За печат', order=0)
+
+    def test_open_proofing_renders_viewer_controls_enabled(self):
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertContains(response, 'id="proof-viewer-mark" aria-pressed="false">')
+        self.assertContains(response, f'class="proof-viewer-chip" data-label="{self.label.pk}">')
+
+    def test_finalized_page_renders_viewer_mark_and_labels_disabled(self):
+        ImageProof.objects.create(image=self.image, is_marked=True)
+        self.reservation.finalize_proofing()
+        # Re-open so the client still reaches the finalized page.
+        self.reservation.need_client_review = True
+        self.reservation.save(update_fields=['need_client_review'])
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertContains(response, 'id="proof-viewer-mark" aria-pressed="false" disabled>')
+        self.assertContains(response, f'class="proof-viewer-chip" data-label="{self.label.pk}" disabled>')
+
+
+class ProofKeyboardHintTest(ProofingModelsBase):
+    def test_hint_says_enter_opens_and_space_marks(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertContains(response, '<kbd>Enter</kbd> отвори')
+        self.assertContains(response, '<kbd>Space</kbd> маркирай')
+        self.assertNotContains(response, '<kbd>Enter</kbd>/<kbd>Space</kbd>')

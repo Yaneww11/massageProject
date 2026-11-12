@@ -90,6 +90,12 @@ class ClientPreviewRendersLikeClientPageTest(ClientPreviewTestBase):
         self.assertContains(response, '--proof-ar: 0.8')
         self.assertNotContains(response, 'proof-watermark')
 
+    def test_viewer_mark_and_labels_are_disabled(self):
+        self.client.force_login(self.specialist_user)
+        response = self.client.get(self.preview_url)
+        self.assertContains(response, 'id="proof-viewer-mark" aria-pressed="false" disabled>')
+        self.assertContains(response, f'class="proof-viewer-chip" data-label="{self.label.pk}" disabled>')
+
 
 class ClientPreviewImageTest(ClientPreviewTestBase):
     def test_serves_the_clients_own_proof_derivative(self):

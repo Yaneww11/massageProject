@@ -2406,6 +2406,26 @@ msgstr "Клавиатура:"
 msgid "маркирай"
 msgstr "маркирай"
 
+#: templates/pages/photo_proofing.html
+msgid "отвори"
+msgstr "отвори"
+
+#: templates/pages/photo_proofing.html
+msgid "Предишна снимка"
+msgstr "Предишна снимка"
+
+#: templates/pages/photo_proofing.html
+msgid "Следваща снимка"
+msgstr "Следваща снимка"
+
+#: templates/pages/photo_proofing.html
+msgid "Маркирай"
+msgstr "Маркирай"
+
+#: templates/pages/photo_proofing.html
+msgid "Маркирана"
+msgstr "Маркирана"
+
 #: templates/pages/photo_proofing.html:49
 msgid "навигация"
 msgstr "навигация"

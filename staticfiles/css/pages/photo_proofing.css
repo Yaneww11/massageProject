@@ -973,6 +973,209 @@
     .proof-teaser-card { flex-wrap: wrap; }
 }
 
+/* ── Photo Viewer ─────────────────────────────────────────
+   Above the site header, below the modals (1200) and the comment drawer
+   (1210), which open on top of it. The backdrop is the one fixed color on
+   the page: photos are judged on neutral black whatever the theme. The
+   controls carry their own themed surfaces so they read on black. */
+body.proof-viewer-open { overflow: hidden; }
+
+.proof-viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 1150;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+}
+
+.proof-viewer[hidden] { display: none; }
+
+.proof-viewer:focus { outline: none; }
+
+.proof-viewer-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 12px 16px;
+}
+
+.proof-viewer-title {
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+    background: var(--bg-paper);
+    border-radius: 999px;
+    padding: 0.4em 1em;
+}
+
+.proof-viewer-title strong {
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.proof-viewer-close,
+.proof-viewer-nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: color-mix(in srgb, var(--bg-paper) 85%, transparent);
+    color: var(--text-main);
+    cursor: pointer;
+    line-height: 1;
+}
+
+.proof-viewer-close {
+    width: 44px;
+    height: 44px;
+    font-size: 1.6rem;
+}
+
+/* Fills the space between the bars; the frame fits the photo inside it
+   without cropping. */
+.proof-viewer-stage {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.proof-viewer-frame {
+    position: absolute;
+    inset: 8px 84px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.proof-viewer-img {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-touch-callout: none;
+}
+
+.proof-viewer.is-marked .proof-viewer-img {
+    outline: 3px solid var(--accent-color);
+    outline-offset: -3px;
+}
+
+.proof-viewer.is-finalized .proof-viewer-img { outline-color: var(--success); }
+
+.proof-viewer-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 52px;
+    height: 52px;
+    font-size: 1.8rem;
+}
+
+.proof-viewer-nav[hidden] { display: none; }
+
+.proof-viewer-prev { left: 16px; }
+.proof-viewer-next { right: 16px; }
+
+.proof-viewer-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+}
+
+.proof-viewer-btn {
+    font-family: var(--font-main);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0 1.1rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-paper);
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.proof-viewer-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+}
+
+.proof-viewer-mark[aria-pressed="true"] {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--on-accent);
+}
+
+.proof-viewer-mark[aria-pressed="true"] svg { fill: currentColor; }
+
+.proof-viewer.is-finalized .proof-viewer-mark {
+    background: var(--success);
+    border-color: var(--success);
+    color: var(--on-success);
+}
+
+.proof-viewer-chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+}
+
+.proof-viewer-chip {
+    font-family: var(--font-main);
+    font-size: var(--fs-xs);
+    min-height: 36px;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-paper);
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.proof-viewer-chip.is-active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--on-primary);
+}
+
+.proof-viewer-btn:disabled,
+.proof-viewer-chip:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+    .proof-viewer-frame { inset: 0; }
+    .proof-viewer-nav {
+        width: 44px;
+        height: 44px;
+    }
+    .proof-viewer-prev { left: 8px; }
+    .proof-viewer-next { right: 8px; }
+}
+
 /* Printing the page is not a way to get a copy of the photos. */
 @media print {
     .proof-page img {

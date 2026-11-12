@@ -45,7 +45,7 @@
     {% trans "Тези изображения са с намалена резолюция, воден знак и уникален за вас код за проследяване — предназначени са само за личен преглед." %}
   </p>
   <p class="proof-kbd-hint">
-    {% trans "Клавиатура:" %} <kbd>Enter</kbd>/<kbd>Space</kbd> {% trans "маркирай" %} &middot;
+    {% trans "Клавиатура:" %} <kbd>Enter</kbd> {% trans "отвори" %} &middot; <kbd>Space</kbd> {% trans "маркирай" %} &middot;
     <kbd>&larr;&rarr;&uarr;&darr;</kbd> {% trans "навигация" %} &middot;
     <kbd>C</kbd> {% trans "сравни" %} &middot; <kbd>N</kbd> {% trans "бележка" %}
   </p>
@@ -156,6 +156,33 @@
     </div>
   </div>
 
+  <!-- Photo Viewer: one photo at a time, over the page. Stacks below the
+       modals and the comment drawer, so those can open on top of it. -->
+  <div class="proof-viewer" id="proof-viewer" role="dialog" aria-modal="true" aria-labelledby="proof-viewer-num" tabindex="-1" hidden>
+    <div class="proof-viewer-top" id="proof-viewer-top">
+      <span class="proof-viewer-title"><strong id="proof-viewer-num"></strong> <span id="proof-viewer-pos" class="proof-viewer-pos"></span></span>
+      <button type="button" class="proof-viewer-close" id="proof-viewer-close" aria-label="{% trans 'Затвори' %}">&times;</button>
+    </div>
+    <div class="proof-viewer-stage" id="proof-viewer-stage">
+      <div class="proof-viewer-frame" id="proof-viewer-frame">
+        <img id="proof-viewer-img" class="proof-viewer-img" src="" alt="" draggable="false">
+      </div>
+      <button type="button" class="proof-viewer-nav proof-viewer-prev" id="proof-viewer-prev" aria-label="{% trans 'Предишна снимка' %}">&lsaquo;</button>
+      <button type="button" class="proof-viewer-nav proof-viewer-next" id="proof-viewer-next" aria-label="{% trans 'Следваща снимка' %}">&rsaquo;</button>
+    </div>
+    <div class="proof-viewer-bar" id="proof-viewer-bar">
+      <button type="button" class="proof-viewer-btn proof-viewer-mark" id="proof-viewer-mark" aria-pressed="false"{% if is_finalized or is_preview %} disabled{% endif %}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle></svg>
+        <span class="proof-viewer-btn-label" id="proof-viewer-mark-label">{% trans "Маркирай" %}</span>
+      </button>
+      <div class="proof-viewer-chips" id="proof-viewer-chips">
+        {% for label in labels_config %}
+        <button type="button" class="proof-viewer-chip" data-label="{{ label.key }}"{% if is_finalized or is_preview %} disabled{% endif %}>{{ label.name }}</button>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
   <!-- Per-photo comment drawer -->
   <aside class="proof-comment-drawer" id="proof-comment-drawer" aria-hidden="true">
     <div class="proof-drawer-head">
@@ -179,6 +206,8 @@
 (function () {
   const NOTE_INDICATOR = "{% trans 'Има бележка' %}";
   const MORE_MARKED_TEXT = "{% trans '+ още {count} маркирани на други страници' %}";
+  const VIEWER_MARK_TEXT = "{% trans 'Маркирай' %}";
+  const VIEWER_MARKED_TEXT = "{% trans 'Маркирана' %}";
 
   const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
   {% get_current_language as CURRENT_LANGUAGE %}
@@ -243,6 +272,22 @@
   const drawerSaveBtn = document.getElementById('proof-drawer-save');
   let drawerPhotoId = null;
 
+  const viewer = document.getElementById('proof-viewer');
+  const viewerNum = document.getElementById('proof-viewer-num');
+  const viewerPos = document.getElementById('proof-viewer-pos');
+  const viewerImg = document.getElementById('proof-viewer-img');
+  const viewerCloseBtn = document.getElementById('proof-viewer-close');
+  const viewerPrevBtn = document.getElementById('proof-viewer-prev');
+  const viewerNextBtn = document.getElementById('proof-viewer-next');
+  const viewerMarkBtn = document.getElementById('proof-viewer-mark');
+  const viewerMarkLabel = document.getElementById('proof-viewer-mark-label');
+  const viewerChips = Array.from(viewer.querySelectorAll('.proof-viewer-chip'));
+  // The tiles the viewer steps through (this page, current filter) and the
+  // one it shows. The viewer keeps no photo state of its own: it reads the
+  // tile and acts through the tile's toggles, so grid and viewer agree.
+  let viewerList = [];
+  let viewerIndex = -1;
+
   function isMarked(tile) { return tile.classList.contains('is-marked'); }
   function findTile(id) { return tiles.find((t) => t.dataset.photoId === id); }
 
@@ -259,6 +304,8 @@
     document.querySelectorAll('.proof-label-chip').forEach((chip) => {
       chip.disabled = finalized || readOnly;
     });
+    // Runs after every optimistic update and every rollback.
+    renderViewer();
   }
 
   function toggleMark(tile) {
@@ -346,7 +393,7 @@
     const commentBtn = tile.querySelector('.proof-comment-btn');
     const photoWrap = tile.querySelector('.proof-photo-wrap');
 
-    photoWrap.addEventListener('click', () => toggleMark(tile));
+    photoWrap.addEventListener('click', () => openViewerOn(tile));
     photoWrap.addEventListener('contextmenu', (e) => e.preventDefault());
     photoWrap.querySelector('img').addEventListener('dragstart', (e) => e.preventDefault());
 
@@ -516,7 +563,10 @@
     const list = visibleTiles();
     const idx = list.indexOf(tile);
 
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      openViewerOn(tile);
+    } else if (e.key === ' ') {
       e.preventDefault();
       toggleMark(tile);
     } else if (e.key === 'ArrowRight') {
@@ -540,11 +590,133 @@
     }
   }
 
+  // ── Photo Viewer ──
+  function viewerTile() { return viewerIndex > -1 ? viewerList[viewerIndex] : null; }
+
+  function viewerTileChip(tile, viewerChip) {
+    return tile.querySelector(`.proof-label-chip[data-label="${viewerChip.dataset.label}"]`);
+  }
+
+  function renderViewer() {
+    const tile = viewerTile();
+    if (!tile || viewer.hidden) return;
+    const img = tile.querySelector('.proof-tile-img');
+    if (viewerImg.src !== img.src) viewerImg.src = img.src;
+    viewerImg.alt = img.alt;
+    viewerNum.textContent = tile.dataset.caption;
+    viewerPos.textContent = `${viewerIndex + 1} / ${viewerList.length}`;
+    const marked = isMarked(tile);
+    viewer.classList.toggle('is-marked', marked);
+    viewer.classList.toggle('is-finalized', finalized && marked);
+    viewerMarkBtn.setAttribute('aria-pressed', String(marked));
+    viewerMarkLabel.textContent = marked ? VIEWER_MARKED_TEXT : VIEWER_MARK_TEXT;
+    viewerMarkBtn.disabled = finalized || readOnly;
+    viewerChips.forEach((chip) => {
+      const tileChip = viewerTileChip(tile, chip);
+      chip.classList.toggle('is-active', Boolean(tileChip && tileChip.classList.contains('is-active')));
+      // Labels sort marked photos only, as on the tile.
+      chip.disabled = finalized || readOnly || !marked;
+    });
+    viewerPrevBtn.hidden = viewerIndex === 0;
+    viewerNextBtn.hidden = viewerIndex === viewerList.length - 1;
+    // Never leave focus on a control that just got disabled or hidden.
+    const active = document.activeElement;
+    if (viewer.contains(active) && active !== viewer && (active.disabled || active.hidden)) viewer.focus();
+  }
+
+  function openViewer(index) {
+    viewerList = visibleTiles();
+    if (!viewerList.length) return;
+    viewerIndex = Math.max(0, Math.min(index, viewerList.length - 1));
+    viewer.hidden = false;
+    document.body.classList.add('proof-viewer-open');
+    renderViewer();
+    viewer.focus();
+  }
+
+  function openViewerOn(tile) { openViewer(visibleTiles().indexOf(tile)); }
+
+  function closeViewer() {
+    if (viewer.hidden) return;
+    const tile = viewerTile();
+    viewer.hidden = true;
+    document.body.classList.remove('proof-viewer-open');
+    viewerIndex = -1;
+    // Back to the grid on the photo last shown, so the client keeps their place.
+    if (tile) {
+      const list = visibleTiles();
+      setFocusIndex(list, list.indexOf(tile));
+    }
+  }
+
+  function viewerGo(delta) {
+    const next = viewerIndex + delta;
+    if (viewer.hidden || next < 0 || next >= viewerList.length) return;
+    viewerIndex = next;
+    renderViewer();
+  }
+
+  function viewerToggleMark() {
+    const tile = viewerTile();
+    if (tile) toggleMark(tile);
+  }
+
+  function trapViewerFocus(e) {
+    const focusable = Array.from(viewer.querySelectorAll('button'))
+      .filter((b) => !b.disabled && !b.hidden && b.offsetParent !== null);
+    if (!focusable.length) { e.preventDefault(); return; }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const active = document.activeElement;
+    if (e.shiftKey && (active === first || active === viewer)) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && active === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
+  viewerCloseBtn.addEventListener('click', closeViewer);
+  viewerPrevBtn.addEventListener('click', () => viewerGo(-1));
+  viewerNextBtn.addEventListener('click', () => viewerGo(1));
+  viewerMarkBtn.addEventListener('click', viewerToggleMark);
+  viewerChips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const tile = viewerTile();
+      const tileChip = tile && viewerTileChip(tile, chip);
+      if (tileChip) toggleLabel(tile, tileChip);
+    });
+  });
+  viewerImg.addEventListener('dragstart', (e) => e.preventDefault());
+
+  // Bound to the viewer, not the document: keys pressed while something
+  // stacked above it (the comment drawer) has focus never reach it.
+  viewer.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab') {
+      trapViewerFocus(e);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      viewerGo(1);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      viewerGo(-1);
+    } else if ((e.key === ' ' || e.key === 'Enter') && !e.target.closest('button')) {
+      // On a focused button, Space/Enter presses that button instead.
+      e.preventDefault();
+      if (!e.repeat) viewerToggleMark();
+    }
+  });
+
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
+      // Esc closes only the topmost layer: the viewer sits under the
+      // modals and the drawer.
+      const layerAboveViewer = !finalizeModal.hidden || !compareModal.hidden || drawer.classList.contains('is-open');
       if (!finalizeModal.hidden) finalizeModal.hidden = true;
       if (!compareModal.hidden) compareModal.hidden = true;
       if (drawer.classList.contains('is-open')) closeDrawer();
+      if (!layerAboveViewer) closeViewer();
     }
   });
 
