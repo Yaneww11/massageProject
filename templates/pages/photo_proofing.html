@@ -126,7 +126,7 @@
   {% endif %}
 
   <!-- Finalize modal -->
-  <div class="proof-modal-overlay" id="proof-finalize-modal" hidden>
+  <div class="proof-modal-overlay proof-finalize-modal" id="proof-finalize-modal" hidden>
     <div class="proof-modal" role="dialog" aria-modal="true" aria-labelledby="proof-finalize-title">
       <div class="proof-modal-head">
         <h2 class="proof-modal-title" id="proof-finalize-title">{% trans "Потвърдете избора си" %}</h2>
@@ -136,7 +136,8 @@
       </div>
       <div class="proof-modal-body" id="proof-finalize-list"></div>
       <div class="proof-modal-note">
-        {% trans "След финализиране изборът ви се заключва за обработка. Промени след този момент изискват съгласието на вашия специалист." %}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        <span>{% trans "След финализиране изборът ви се заключва за обработка. Промени след този момент изискват съгласието на вашия специалист." %}</span>
       </div>
       <div class="proof-modal-actions">
         <button type="button" id="proof-finalize-cancel" class="btn btn-outline">{% trans "Откажи" %}</button>
