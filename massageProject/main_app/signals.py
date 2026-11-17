@@ -1,12 +1,12 @@
 import logging
 
 from django.core.files.storage import default_storage
-from django.db.models.signals import pre_delete, pre_save
+from django.db.models.signals import post_delete, pre_delete, pre_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 import sentry_sdk
 
-from massageProject.main_app.models import Image
+from massageProject.main_app.models import Gallery, Image, Reservation
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +46,14 @@ def clear_proof_derivatives_on_image_delete(sender, instance, **kwargs):
     """Otherwise the derivatives are orphaned in the bucket forever — nothing
     else references them once the row is gone."""
     _delete_image_derivatives(instance)
+
+
+@receiver(post_delete, sender=Reservation)
+def delete_gallery_on_reservation_delete(sender, instance, **kwargs):
+    """A reservation's gallery has no other owner, so it goes with the row.
+    Only a real row delete triggers this; cancelling (status 'deleted') keeps it."""
+    if instance.gallery_id:
+        Gallery.objects.filter(pk=instance.gallery_id).delete()
 
 
 UserModel = get_user_model()

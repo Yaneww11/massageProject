@@ -386,7 +386,7 @@ class Reservation(models.Model):
 
     gallery = models.OneToOneField(
         "Gallery",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name='reservations',
         null=True,
         blank=True,
