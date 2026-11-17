@@ -2498,6 +2498,38 @@ msgstr "Keyboard:"
 msgid "маркирай"
 msgstr "mark"
 
+#: templates/pages/photo_proofing.html
+msgid "отвори"
+msgstr "open"
+
+#: templates/pages/photo_proofing.html
+msgid "Предишна снимка"
+msgstr "Previous photo"
+
+#: templates/pages/photo_proofing.html
+msgid "Следваща снимка"
+msgstr "Next photo"
+
+#: templates/pages/photo_proofing.html
+msgid "Маркирай"
+msgstr "Mark"
+
+#: templates/pages/photo_proofing.html
+msgid "Маркирана"
+msgstr "Marked"
+
+#: templates/pages/photo_proofing.html
+msgid "Бележка"
+msgstr "Note"
+
+#: templates/pages/photo_proofing.html
+msgid "Сравни"
+msgstr "Compare"
+
+#: templates/pages/photo_proofing.html
+msgid "Следваща страница"
+msgstr "Next page"
+
 #: templates/pages/photo_proofing.html:49
 msgid "навигация"
 msgstr "navigate"

@@ -80,6 +80,23 @@ class ClientPreviewAccessTest(ClientPreviewTestBase):
             self.assertEqual(self.client.get(self.preview_url).status_code, 404)
 
 
+class ClientPreviewRendersLikeClientPageTest(ClientPreviewTestBase):
+    def test_tiles_carry_aspect_ratio_and_no_css_watermark_overlay(self):
+        Image.objects.filter(pk=self.marked_image.pk).update(width=800, height=1000)
+        self.client.force_login(self.specialist_user)
+        response = self.client.get(self.preview_url)
+        photos = {p['id']: p for p in response.context['photos']}
+        self.assertEqual(photos[self.marked_image.pk]['aspect_ratio'], 0.8)
+        self.assertContains(response, '--proof-ar: 0.8')
+        self.assertNotContains(response, 'proof-watermark')
+
+    def test_viewer_mark_and_labels_are_disabled(self):
+        self.client.force_login(self.specialist_user)
+        response = self.client.get(self.preview_url)
+        self.assertContains(response, 'id="proof-viewer-mark" aria-pressed="false" disabled>')
+        self.assertContains(response, f'class="proof-viewer-chip" data-label="{self.label.pk}" disabled>')
+
+
 class ClientPreviewImageTest(ClientPreviewTestBase):
     def test_serves_the_clients_own_proof_derivative(self):
         self.client.force_login(self.specialist_user)

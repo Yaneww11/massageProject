@@ -339,6 +339,35 @@ class ProofImageServingViewTest(ProofingModelsBase):
         second_mtime = default_storage.get_modified_time(path)
         self.assertEqual(first_mtime, second_mtime)
 
+    def test_derivative_is_stored_under_the_versioned_path(self):
+        from massageProject.main_app.views import PROOF_DERIVATIVE_VERSION
+        response = self.client.get(reverse('photo_proofing_image', args=[self._token()]))
+        _, files = default_storage.listdir(f'proof_derivatives/{self.image.pk}')
+        self.assertEqual(len(files), 1)
+        self.assertRegex(files[0], rf'^[0-9a-f]{{32}}-v{PROOF_DERIVATIVE_VERSION}\.jpg$')
+        self.assertTrue(response.url.endswith(files[0]))
+
+    def test_pre_version_derivative_is_not_served(self):
+        from massageProject.main_app.views import PROOF_DERIVATIVE_VERSION, _proof_derivative_path
+        current = _proof_derivative_path(self.image.pk, self.user.pk)
+        stale = current.replace(f'-v{PROOF_DERIVATIVE_VERSION}', '')
+        default_storage.save(stale, ContentFile(b'old watermark'))
+        response = self.client.get(reverse('photo_proofing_image', args=[self._token()]))
+        self.assertTrue(default_storage.exists(current))
+        self.assertTrue(response.url.endswith(current))
+
+    def test_long_client_identifier_yields_a_full_size_jpeg(self):
+        self.user.first_name = 'Александра-Мария' * 3
+        self.user.last_name = 'Константинова-Христова' * 2
+        self.user.save()
+        self.client.get(reverse('photo_proofing_image', args=[self._token()]))
+        _, files = default_storage.listdir(f'proof_derivatives/{self.image.pk}')
+        with default_storage.open(f'proof_derivatives/{self.image.pk}/{files[0]}', 'rb') as derivative:
+            served = PILImage.open(derivative)
+            served.load()
+        self.assertEqual(served.format, 'JPEG')
+        self.assertEqual(served.size, (400, 300))
+
     def test_expired_token_is_rejected(self):
         from massageProject.main_app.views import PROOF_IMAGE_MAX_AGE
         token = self._token()
@@ -544,6 +573,37 @@ class ProofingPaginationTest(ProofingModelsBase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['page_obj'].number, 2)
 
+    def test_viewer_flag_renders_the_requested_page_and_filter(self):
+        for image in self.images[:70]:
+            self._mark(image)
+        response = self.client.get(reverse('photo_proofing'), {'filter': 'marked', 'page': 2, 'viewer': 1})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['page_obj'].number, 2)
+        self.assertEqual(len(response.context['photos']), 10)
+        self.assertContains(response, 'const OPEN_VIEWER = true;')
+        # Ordinary pagination does not carry the flag along.
+        self.assertContains(response, 'href="?filter=marked&amp;page=1" rel="prev"')
+
+    def test_viewer_flag_is_dropped_from_the_url_after_opening(self):
+        # A refresh or Back must not reopen the viewer; filter and page stay.
+        response = self.client.get(reverse('photo_proofing'), {'viewer': 1})
+        self.assertContains(response, "url.searchParams.delete('viewer');")
+        self.assertContains(response, "history.replaceState(history.state, '', url);")
+
+    def test_page_opens_without_the_viewer_by_default(self):
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertContains(response, 'const OPEN_VIEWER = false;')
+
+    def test_viewer_next_page_button_keeps_the_filter_and_sets_the_flag(self):
+        for image in self.images[:70]:
+            self._mark(image)
+        response = self.client.get(reverse('photo_proofing'), {'filter': 'marked'})
+        self.assertContains(response, 'id="proof-viewer-page" href="?filter=marked&amp;page=2&amp;viewer=1"')
+
+    def test_no_viewer_next_page_button_on_the_last_page(self):
+        response = self.client.get(reverse('photo_proofing'), {'page': 2})
+        self.assertNotContains(response, 'id="proof-viewer-page"')
+
 
 class ProofFrameNumberingTest(ProofingModelsBase):
     """Finding 7: frame numbers were derived from the position on the filtered
@@ -582,3 +642,112 @@ class ProofFrameNumberingTest(ProofingModelsBase):
         Image.objects.filter(pk=self.images[1].pk).update(order=99)
         numbers = self._numbers()
         self.assertEqual(sorted(numbers.values()), list(range(1, 11)))
+
+
+class ProofTileAspectRatioTest(ProofingModelsBase):
+    """Photos are laid out uncropped, so each tile needs its photo's real
+    aspect ratio; Images uploaded before dimensions were recorded fall back
+    to the 4:5 tile."""
+
+    def setUp(self):
+        super().setUp()
+        self.client = Client()
+        self.client.force_login(self.user)
+        Image.objects.filter(pk=self.image.pk).update(width=1200, height=800)
+        self.legacy = Image.objects.create(gallery=self.gallery, order=1, image='gallery/photos/legacy.webp')
+
+    def _photos(self, response):
+        return {p['id']: p for p in response.context['photos']}
+
+    def test_photo_with_dimensions_carries_its_aspect_ratio(self):
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertEqual(self._photos(response)[self.image.pk]['aspect_ratio'], 1.5)
+
+    def test_photo_without_dimensions_carries_no_aspect_ratio(self):
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertIsNone(self._photos(response)[self.legacy.pk]['aspect_ratio'])
+
+    def test_aspect_ratio_is_rendered_as_valid_css_in_bulgarian(self):
+        """The bg locale formats floats with a decimal comma, which is not a
+        CSS number."""
+        response = self.client.get(reverse('photo_proofing'), HTTP_ACCEPT_LANGUAGE='bg')
+        self.assertContains(response, '--proof-ar: 1.5')
+        self.assertNotContains(response, '--proof-ar: 1,5')
+
+    def test_page_has_no_css_watermark_overlay(self):
+        """Only the watermark baked into the Proof Derivative remains."""
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertNotContains(response, 'proof-watermark')
+
+
+class PhotoViewerControlsTest(ProofingModelsBase):
+    """The Photo Viewer's state-changing controls mirror the grid: locked once
+    proofing is finalized."""
+
+    def setUp(self):
+        super().setUp()
+        self.client = Client()
+        self.client.force_login(self.user)
+        self.label = PhotoLabel.objects.create(gallery=self.gallery, name='За печат', order=0)
+
+    def test_open_proofing_renders_viewer_controls_enabled(self):
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertContains(response, 'id="proof-viewer-mark" aria-pressed="false">')
+        self.assertContains(response, f'class="proof-viewer-chip" data-label="{self.label.pk}">')
+
+    def test_finalized_page_renders_viewer_mark_and_labels_disabled(self):
+        ImageProof.objects.create(image=self.image, is_marked=True)
+        self.reservation.finalize_proofing()
+        # Re-open so the client still reaches the finalized page.
+        self.reservation.need_client_review = True
+        self.reservation.save(update_fields=['need_client_review'])
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertContains(response, 'id="proof-viewer-mark" aria-pressed="false" disabled>')
+        self.assertContains(response, f'class="proof-viewer-chip" data-label="{self.label.pk}" disabled>')
+
+    def test_viewer_note_and_compare_buttons_render(self):
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertContains(response, 'id="proof-viewer-note">')
+        self.assertContains(response, 'id="proof-viewer-compare" aria-pressed="false">')
+
+    def test_finalized_page_renders_viewer_compare_disabled_but_note_open(self):
+        ImageProof.objects.create(image=self.image, is_marked=True)
+        self.reservation.finalize_proofing()
+        self.reservation.need_client_review = True
+        self.reservation.save(update_fields=['need_client_review'])
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertContains(response, 'id="proof-viewer-compare" aria-pressed="false" disabled>')
+        # The drawer opens read-only, so the note stays readable.
+        self.assertContains(response, 'id="proof-viewer-note">')
+
+
+class ProofKeyboardHintTest(ProofingModelsBase):
+    def test_hint_says_enter_opens_and_space_marks(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertContains(response, '<kbd>Enter</kbd> отвори')
+        self.assertContains(response, '<kbd>Space</kbd> маркирай')
+        self.assertNotContains(response, '<kbd>Enter</kbd>/<kbd>Space</kbd>')
+
+
+class ProofTileLabelDotsTest(ProofingModelsBase):
+    """At phone width the label chips give way to one dot per PhotoLabel
+    under the tile; only the attached labels' dots are lit."""
+
+    def setUp(self):
+        super().setUp()
+        self.client = Client()
+        self.client.force_login(self.user)
+        self.print_label = PhotoLabel.objects.create(gallery=self.gallery, name='За печат', order=0)
+        self.album_label = PhotoLabel.objects.create(gallery=self.gallery, name='Албум', order=1)
+        proof = ImageProof.objects.create(image=self.image, is_marked=True)
+        proof.labels.add(self.print_label)
+
+    def test_tile_renders_a_lit_dot_for_each_attached_label(self):
+        response = self.client.get(reverse('photo_proofing'))
+        self.assertContains(
+            response, f'class="proof-label-dot is-active" data-label="{self.print_label.pk}"', count=1,
+        )
+        self.assertContains(
+            response, f'class="proof-label-dot" data-label="{self.album_label.pk}"', count=1,
+        )

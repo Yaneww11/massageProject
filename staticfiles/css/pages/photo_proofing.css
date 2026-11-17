@@ -4,6 +4,8 @@
     background: var(--bg-light);
     min-height: 60vh;
     padding-bottom: 110px;
+    /* No iOS long-press "Save to Photos" sheet on any image of this page. */
+    -webkit-touch-callout: none;
 }
 
 /* The native `hidden` attribute loses to any author rule that sets
@@ -120,9 +122,9 @@
 
 /* ── Protection notice ───────────────────────────────────── */
 .proof-protection-note {
-    max-width: 1200px;
+    max-width: 1680px;
     margin: 1rem auto 0;
-    padding: 0 1.5rem;
+    padding: 0 clamp(12px, 2.5vw, 32px);
     font-size: var(--fs-xs);
     color: var(--text-muted);
     display: flex;
@@ -136,9 +138,9 @@
 
 /* ── Keyboard hint ────────────────────────────────────────  */
 .proof-kbd-hint {
-    max-width: 1200px;
+    max-width: 1680px;
     margin: 0.35rem auto 0;
-    padding: 0 1.5rem;
+    padding: 0 clamp(12px, 2.5vw, 32px);
     font-size: var(--fs-xs);
     color: var(--text-muted);
 }
@@ -156,17 +158,47 @@
     .proof-kbd-hint { display: none; }
 }
 
-/* ── Grid & proof-sleeve tiles ───────────────────────────── */
+/* ── Justified grid of uncropped photos ──────────────────── */
+/* CSS-only justified rows: every tile starts at its photo's width at the
+   target row height (--proof-row-h) and grows in proportion to its aspect
+   ratio (--proof-ar, set per tile; 4:5 when the dimensions are unknown), so
+   all photos in a row end up the same height. The ::after filler soaks up
+   the free space of the last row so it is not stretched. */
 .proof-grid {
-    max-width: 1200px;
+    --proof-row-h: 300px;
+    --proof-gap: 10px;
+    max-width: 1680px;
     margin: 0 auto;
-    padding: 1.5rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-    gap: 1.75rem;
+    padding: clamp(12px, 2.5vw, 32px);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem var(--proof-gap);
+}
+
+.proof-grid::after {
+    content: "";
+    flex-grow: 1000000;
+}
+
+@media (max-width: 1200px) {
+    .proof-grid { --proof-row-h: 250px; }
+}
+
+@media (max-width: 960px) {
+    .proof-grid { --proof-row-h: 220px; --proof-gap: 8px; }
+}
+
+@media (max-width: 600px) {
+    .proof-grid { --proof-row-h: 190px; --proof-gap: 6px; row-gap: 0.5rem; }
 }
 
 .proof-tile {
+    --proof-ar: 0.8;
+    flex-grow: calc(var(--proof-ar) * 100);
+    flex-basis: calc(var(--proof-ar) * var(--proof-row-h));
+    /* A tile left alone on a row may grow, but not into a huge photo. */
+    max-width: min(100%, calc(var(--proof-ar) * var(--proof-row-h) * 1.5));
+    min-width: 0;
     outline: none;
     animation: proof-tile-in 0.5s ease both;
     animation-delay: calc(var(--proof-i, 0) * 40ms);
@@ -183,50 +215,32 @@
 
 .proof-tile[hidden] { display: none; }
 
-.proof-tile:focus-visible .proof-tile-frame {
-    box-shadow: 0 0 0 3px var(--accent-color), var(--shadow-md);
+.proof-tile:focus-visible .proof-photo-wrap {
+    box-shadow: 0 0 0 3px var(--accent-color);
 }
 
+/* No horizontal chrome around the photo: any fixed padding or border here
+   would make portraits and landscapes in one row differ in height. */
 .proof-tile-frame {
     position: relative;
-    background: var(--bg-paper);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: 8px 8px 0;
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-}
-
-/* Perforated proof-sheet edge */
-.proof-tile-frame::before {
-    content: "";
-    position: absolute;
-    top: -1px;
-    left: 12px;
-    right: 12px;
-    height: 1px;
-    background-image: repeating-linear-gradient(
-        to right,
-        var(--border-color) 0 6px,
-        transparent 6px 12px
-    );
-}
-
-.proof-tile.is-marked .proof-tile-frame {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
-}
-
-.proof-tile.is-finalized .proof-tile-frame {
-    border-color: var(--success);
 }
 
 .proof-photo-wrap {
     position: relative;
-    border-radius: calc(var(--radius-md) - 3px) calc(var(--radius-md) - 3px) 0 0;
+    border-radius: var(--radius-sm);
     overflow: hidden;
-    aspect-ratio: 4 / 5;
+    aspect-ratio: var(--proof-ar);
+    background: var(--bg-sunken);
     cursor: pointer;
+    transition: var(--transition);
+}
+
+.proof-tile.is-marked .proof-photo-wrap {
+    box-shadow: 0 0 0 2px var(--accent-color);
+}
+
+.proof-tile.is-finalized .proof-photo-wrap {
+    box-shadow: 0 0 0 2px var(--success);
 }
 
 .proof-tile-img {
@@ -239,33 +253,14 @@
     pointer-events: none;
 }
 
-/* Repeating traceable watermark */
-.proof-watermark {
-    position: absolute;
-    inset: -20%;
-    display: flex;
-    flex-wrap: wrap;
-    align-content: space-around;
-    justify-content: space-around;
-    transform: rotate(-18deg);
-    pointer-events: none;
-    user-select: none;
-    overflow: hidden;
-}
-
-.proof-watermark span {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    white-space: nowrap;
-    color: rgba(255, 255, 255, 0.55);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
-}
-
-/* Grease-pencil circle annotation, drawn on when marked */
+/* Grease-pencil circle around the frame number, drawn on when marked */
 .proof-grease-circle {
     position: absolute;
-    inset: 6%;
+    top: -6px;
+    left: -9px;
+    width: calc(100% + 18px);
+    height: calc(100% + 12px);
+    overflow: visible;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.3s ease;
@@ -276,12 +271,12 @@
 .proof-grease-circle path {
     fill: none;
     stroke: var(--accent-color);
-    stroke-width: 3;
+    stroke-width: 2.2;
     stroke-linecap: round;
-    stroke-dasharray: 340;
-    stroke-dashoffset: 340;
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25));
-    transition: stroke-dashoffset 0.5s ease;
+    stroke-dasharray: 320;
+    stroke-dashoffset: 320;
+    vector-effect: non-scaling-stroke;
+    transition: stroke-dashoffset 0.45s ease;
 }
 
 .proof-tile.is-marked .proof-grease-circle path { stroke-dashoffset: 0; }
@@ -414,18 +409,24 @@
 .proof-tile.is-finalized .proof-finalized-ribbon { display: flex; }
 .proof-tile.is-finalized .proof-compare-btn { display: none; }
 
-/* Footer: filename + labels */
+/* Footer: frame number + labels */
 .proof-tile-footer {
-    padding: 0.6rem 0.35rem 0.75rem;
+    padding: 0.5rem 2px 0;
+    min-width: 0;
 }
 
 .proof-filename {
-    display: block;
+    position: relative;
+    display: inline-block;
     font-size: var(--fs-xs);
     color: var(--text-muted);
     font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    padding: 0 0.35rem;
     margin-bottom: 0.4rem;
 }
+
+.proof-tile.is-marked .proof-filename { color: var(--text-main); }
 
 .proof-label-row {
     display: none;
@@ -459,7 +460,7 @@
 }
 
 .proof-empty {
-    grid-column: 1 / -1;
+    flex-basis: 100%;
 }
 
 .proof-empty,
@@ -637,88 +638,148 @@
 
 .proof-modal {
     background: var(--bg-paper);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
     max-width: 540px;
     width: 100%;
-    max-height: 82vh;
+    max-height: 88vh;
+    max-height: 88dvh;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .proof-modal-head {
-    padding: 1.5rem 1.5rem 1rem;
+    padding: 1.75rem 2rem 1.25rem;
     border-bottom: 1px solid var(--border-color);
 }
 
 .proof-modal-title {
     font-family: var(--font-heading);
-    font-size: var(--fs-2xl);
+    font-size: var(--fs-3xl);
+    line-height: 1.2;
     color: var(--primary-color);
-    margin: 0 0 0.3rem;
+    margin: 0 0 0.5rem;
 }
 
 .proof-modal-sub {
-    font-size: var(--fs-sm);
+    font-size: var(--fs-base);
+    line-height: 1.55;
     color: var(--text-muted);
     margin: 0;
 }
 
-.proof-modal-body {
-    padding: 1rem 1.5rem;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+.proof-modal-sub strong {
+    color: var(--text-main);
+    font-weight: 600;
 }
 
-.proof-modal-body img {
-    max-width: 100%;
-    height: 100%;
+/* Finalize: the marked photos as a contact sheet the client can actually
+   recognise, not a list of 44px chips. */
+.proof-finalize-modal .proof-modal { max-width: 720px; }
+
+.proof-modal-body {
+    padding: 1.5rem 2rem;
+    overflow-y: auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.25rem 1rem;
+    align-content: start;
 }
 
 .proof-summary-row {
     display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 0.6rem;
-    background: var(--bg-light);
-    border-radius: var(--radius-md);
+    flex-direction: column;
+    gap: 0.6rem;
+    min-width: 0;
 }
 
 .proof-summary-thumb {
-    width: 44px;
-    height: 44px;
-    border-radius: var(--radius-sm);
+    width: 100%;
+    aspect-ratio: 4 / 3;
     object-fit: cover;
-    flex-shrink: 0;
+    border-radius: var(--radius-md);
+    background: var(--bg-raised);
+    display: block;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+/* A single pick gets the full width, shown whole rather than cropped. */
+.proof-summary-row:only-child { grid-column: 1 / -1; }
+
+.proof-summary-row:only-child .proof-summary-thumb {
+    aspect-ratio: auto;
+    max-height: 340px;
+    object-fit: contain;
 }
 
 .proof-summary-meta {
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
+    gap: 0.2rem;
     min-width: 0;
+    font-size: var(--fs-base);
+    color: var(--text-main);
 }
 
 .proof-summary-labels {
-    font-size: var(--fs-xs);
+    font-size: var(--fs-sm);
     color: var(--accent-color);
 }
 
+.proof-modal-body .proof-summary-more {
+    grid-column: 1 / -1;
+    padding: 0;
+    font-size: var(--fs-sm);
+}
+
 .proof-modal-note {
-    padding: 0.85rem 1.5rem;
-    background: var(--bg-light);
-    font-size: var(--fs-xs);
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 1rem 2rem;
+    background: var(--bg-raised);
+    font-size: var(--fs-sm);
+    line-height: 1.6;
     color: var(--text-muted);
     border-top: 1px solid var(--border-color);
 }
 
+.proof-modal-note svg {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin-top: 0.15rem;
+    color: var(--accent-color);
+}
+
 .proof-modal-actions {
-    padding: 1.25rem 1.5rem;
+    padding: 1.25rem 2rem 1.5rem;
     display: flex;
     justify-content: flex-end;
     gap: 0.75rem;
+    border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 640px) {
+    .proof-finalize-modal { padding: 0.75rem; }
+    .proof-finalize-modal .proof-modal-head { padding: 1.25rem 1.25rem 1rem; }
+    .proof-finalize-modal .proof-modal-title { font-size: var(--fs-2xl); }
+    .proof-modal-body {
+        padding: 1.25rem;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 1rem 0.75rem;
+    }
+    .proof-modal-note { padding: 1rem 1.25rem; }
+    .proof-finalize-modal .proof-modal-actions {
+        padding: 1rem 1.25rem calc(1rem + env(safe-area-inset-bottom));
+        flex-direction: column-reverse;
+    }
+    .proof-finalize-modal .proof-modal-actions .btn { width: 100%; }
 }
 
 /* Compare-two view */
@@ -970,4 +1031,346 @@
 
 @media (max-width: 560px) {
     .proof-teaser-card { flex-wrap: wrap; }
+}
+
+/* ── Photo Viewer ─────────────────────────────────────────
+   Above the site header, below the modals (1200) and the comment drawer
+   (1210), which open on top of it. The backdrop is the one fixed color on
+   the page: photos are judged on neutral black whatever the theme. The
+   controls carry their own themed surfaces so they read on black. */
+body.proof-viewer-open { overflow: hidden; }
+
+.proof-viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 1150;
+    background: var(--photo-viewer-backdrop);
+    display: flex;
+    flex-direction: column;
+}
+
+.proof-viewer[hidden] { display: none; }
+
+.proof-viewer:focus { outline: none; }
+
+.proof-viewer-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 12px 16px;
+}
+
+.proof-viewer-title {
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+    background: var(--bg-paper);
+    border-radius: 999px;
+    padding: 0.4em 1em;
+}
+
+.proof-viewer-title strong {
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.proof-viewer-close,
+.proof-viewer-nav {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    background: color-mix(in srgb, var(--bg-paper) 85%, transparent);
+    color: var(--text-main);
+    cursor: pointer;
+    line-height: 1;
+}
+
+.proof-viewer-close {
+    width: 44px;
+    height: 44px;
+    font-size: 1.6rem;
+}
+
+/* Fills the space between the bars; the frame fits the photo inside it
+   without cropping. */
+.proof-viewer-stage {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.proof-viewer-frame {
+    position: absolute;
+    inset: 8px 84px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.proof-viewer-img {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-touch-callout: none;
+}
+
+.proof-viewer.is-marked .proof-viewer-img {
+    outline: 3px solid var(--accent-color);
+    outline-offset: -3px;
+}
+
+.proof-viewer.is-finalized .proof-viewer-img { outline-color: var(--success); }
+
+.proof-viewer-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 52px;
+    height: 52px;
+    font-size: 1.8rem;
+}
+
+.proof-viewer-nav[aria-disabled="true"] {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.proof-viewer-prev { left: 16px; }
+.proof-viewer-next { right: 16px; }
+
+.proof-viewer-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom));
+}
+
+.proof-viewer-btn {
+    font-family: var(--font-main);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0 1.1rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-paper);
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.proof-viewer-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+}
+
+.proof-viewer-mark[aria-pressed="true"] {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--on-accent);
+}
+
+.proof-viewer-mark[aria-pressed="true"] svg { fill: currentColor; }
+
+.proof-viewer.is-finalized .proof-viewer-mark {
+    background: var(--success);
+    border-color: var(--success);
+    color: var(--on-success);
+}
+
+.proof-viewer-chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+}
+
+.proof-viewer-chip {
+    font-family: var(--font-main);
+    font-size: var(--fs-xs);
+    min-height: 36px;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-paper);
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.proof-viewer-chip.is-active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--on-primary);
+}
+
+.proof-viewer-note.has-comment,
+.proof-viewer-compare[aria-pressed="true"] {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
+/* Shown on the page's last photo when there is a next page. */
+.proof-viewer-page {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    font-family: var(--font-main);
+    font-size: var(--fs-sm);
+    padding: 0.6rem 1.2rem;
+    border-radius: 999px;
+    border: 1px solid var(--accent-color);
+    background: color-mix(in srgb, var(--bg-paper) 85%, transparent);
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+.proof-viewer-page[hidden] { display: none; }
+
+.proof-viewer-btn:disabled,
+.proof-viewer-chip:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+    .proof-viewer-frame { inset: 0; }
+    .proof-viewer-nav {
+        width: 44px;
+        height: 44px;
+    }
+    .proof-viewer-prev { left: 8px; }
+    .proof-viewer-next { right: 8px; }
+}
+
+/* ── Phone, hover and touch modes ─────────────────────────
+   Touch tablets: every tile control stays visible (the defaults above).
+   Mouse/trackpad: compare, note and inactive label chips appear on hover or
+   keyboard focus; the mark control, a compare pick, an existing note and
+   attached labels always show. Phone width: the tile keeps only the mark
+   control and the note indicator, labels become dots, and the rest is done
+   in the Photo Viewer, whose bar gets thumb-sized. */
+.proof-label-dots {
+    display: none;
+    gap: 3px;
+}
+
+.proof-label-dot {
+    display: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-color);
+}
+
+.proof-label-dot.is-active { display: block; }
+
+/* Swipe: the frame follows the finger, then eases back into place. */
+.proof-viewer-stage { touch-action: pan-y; }
+
+.proof-viewer-frame { transition: transform 0.25s ease; }
+
+.proof-viewer-frame.is-dragging { transition: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    .proof-viewer-frame { transition: none; }
+}
+
+/* "Hide unless hovered" rather than "show on hover", so the disabled
+   chips' dimming (Finalized, Client Preview) is never overridden. */
+@media (hover: hover) and (pointer: fine) {
+    .proof-tile:not(:hover):not(:focus-within):not(.is-comparing) .proof-compare-btn,
+    .proof-tile:not(:hover):not(:focus-within):not(.has-comment) .proof-comment-btn,
+    .proof-tile:not(:hover):not(:focus-within) .proof-label-chip:not(.is-active) {
+        opacity: 0;
+    }
+}
+
+@media (max-width: 600px) {
+    .proof-tile .proof-compare-btn,
+    .proof-tile:not(.has-comment) .proof-comment-btn,
+    .proof-tile.is-marked .proof-label-row {
+        display: none;
+    }
+
+    .proof-mark-btn {
+        width: 32px;
+        height: 32px;
+    }
+
+    .proof-tile-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+
+    .proof-filename { margin-bottom: 0; }
+
+    .proof-tile.is-marked .proof-label-dots { display: flex; }
+
+    /* Viewer bar: labels on their own row, a wide mark button, and icon-only
+       buttons after it (Note, Compare). */
+    .proof-viewer-bar {
+        gap: 8px;
+        padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    }
+
+    .proof-viewer-chips {
+        flex-basis: 100%;
+        order: -1;
+    }
+
+    .proof-viewer-chips:not(:has(.proof-viewer-chip)) { display: none; }
+
+    .proof-viewer-chip { min-height: 40px; }
+
+    #proof-viewer-bar > .proof-viewer-btn {
+        min-height: 48px;
+        justify-content: center;
+    }
+
+    #proof-viewer-bar > .proof-viewer-mark { flex: 1; }
+
+    #proof-viewer-bar > .proof-viewer-btn:not(.proof-viewer-mark) {
+        flex: none;
+        width: 48px;
+        padding: 0;
+    }
+
+    /* Hidden from sight only: the text stays the button's accessible name. */
+    #proof-viewer-bar > .proof-viewer-btn:not(.proof-viewer-mark) .proof-viewer-btn-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+}
+
+/* Printing the page is not a way to get a copy of the photos. */
+@media print {
+    .proof-page img {
+        visibility: hidden;
+    }
 }

@@ -1252,9 +1252,15 @@ def _proof_image_token(image_id, user_id):
     return signing.dumps({'image_id': image_id, 'user_id': user_id}, salt=PROOF_IMAGE_SALT)
 
 
+# Bump when the watermark changes: derivatives are cached by path, so a new
+# version is what makes every client get a freshly watermarked copy. Older
+# files stay in the image's folder and are evicted with it (signals.py).
+PROOF_DERIVATIVE_VERSION = 2
+
+
 def _proof_derivative_path(image_id, user_id):
     digest = hashlib.sha256(f'{image_id}:{user_id}:{settings.SECRET_KEY}'.encode()).hexdigest()[:32]
-    return f'proof_derivatives/{image_id}/{digest}.jpg'
+    return f'proof_derivatives/{image_id}/{digest}-v{PROOF_DERIVATIVE_VERSION}.jpg'
 
 
 def _generate_proof_derivative(image, user, watermark_identifier):
@@ -1270,15 +1276,26 @@ def _generate_proof_derivative(image, user, watermark_identifier):
     width, height = original.size
 
     layer = PILImage.new('RGBA', (width * 2, height * 2), (0, 0, 0, 0))
+    font_size = max(width // 40, 14)
     try:
-        font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', size=max(width // 40, 14))
+        font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', size=font_size)
     except OSError:
-        font = ImageFont.load_default()
+        font = ImageFont.load_default(size=font_size)
     draw = ImageDraw.Draw(layer)
-    step_x, step_y = 320, 160
-    for y in range(0, layer.height, step_y):
-        for x in range(0, layer.width, step_x):
-            draw.text((x, y), watermark_identifier, fill=(255, 255, 255, 90), font=font)
+    # Spacing follows the identifier's rendered width, so a long client name
+    # never overprints itself and the tracking code stays legible. Rows are
+    # staggered (brick pattern) so no clean diagonal strip is left bare.
+    stroke = max(font_size // 14, 1)
+    step_x = int(draw.textlength(watermark_identifier, font=font)) + font_size * 3
+    step_y = font_size * 4
+    for row, y in enumerate(range(0, layer.height, step_y)):
+        offset = step_x // 2 if row % 2 else 0
+        for x in range(-offset, layer.width, step_x):
+            # White text with a dark outline reads on bright and dark areas alike.
+            draw.text(
+                (x, y), watermark_identifier, font=font, fill=(255, 255, 255, 110),
+                stroke_width=stroke, stroke_fill=(0, 0, 0, 80),
+            )
     layer = layer.rotate(-30, expand=False, resample=PILImage.BICUBIC)
     layer = layer.crop((width // 2, height // 2, width // 2 + width, height // 2 + height))
 
@@ -1393,6 +1410,9 @@ def _photo_proofing_context(request, reservation, image_url):
             'number': frame_numbers.get(img.pk),
             'url': image_url(img.pk),
             'alt': img.alt_text,
+            # Drives the uncropped tile; None (dimensions not yet recorded)
+            # makes the tile fall back to a 4:5 crop.
+            'aspect_ratio': round(img.width / img.height, 4) if img.width and img.height else None,
             'is_marked': proof.is_marked if proof else False,
             'comment': proof.comment if proof else '',
             'label_keys': [label.pk for label in proof.labels.all()] if proof else [],
@@ -1411,6 +1431,9 @@ def _photo_proofing_context(request, reservation, image_url):
         'total_photos': total_photos,
         'marked_total': marked_total,
         'current_filter': current_filter,
+        # Set by the Photo Viewer's "next page" link: open the viewer on
+        # this page's first photo.
+        'open_viewer': request.GET.get('viewer') == '1',
         'watermark_identifier': _proof_watermark_identifier(client, reservation),
         'labels_config': labels_config,
     }

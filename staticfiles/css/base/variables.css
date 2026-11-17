@@ -25,6 +25,7 @@
     --error: #E59A95;           /* Muted Rose - error text, borders, fills */
     --error-light: #251312;     /* Dark wash behind error/cancel hover states */
     --on-error: #000000;        /* Legible text on an --error fill */
+    --photo-viewer-backdrop: #000000; /* Fixed neutral black behind the Photo Viewer (not themed) */
 
     /* Typography */
     --font-main: 'Montserrat', sans-serif;
