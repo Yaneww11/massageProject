@@ -1255,7 +1255,9 @@ def _proof_image_token(image_id, user_id):
 # Bump when the watermark changes: derivatives are cached by path, so a new
 # version is what makes every client get a freshly watermarked copy. Older
 # files stay in the image's folder and are evicted with it (signals.py).
-PROOF_DERIVATIVE_VERSION = 3
+
+PROOF_DERIVATIVE_VERSION = 4
+
 
 # Bundled, not a system font: shared hosting has no DejaVu and Pillow's
 # built-in fallback font has no Cyrillic, so client names rendered as boxes.
@@ -1264,7 +1266,14 @@ WATERMARK_FONT_PATH = os.path.join(os.path.dirname(__file__), 'fonts', 'DejaVuSa
 
 def _proof_derivative_path(image_id, user_id):
     digest = hashlib.sha256(f'{image_id}:{user_id}:{settings.SECRET_KEY}'.encode()).hexdigest()[:32]
-    return f'proof_derivatives/{image_id}/{digest}-v{PROOF_DERIVATIVE_VERSION}.jpg'
+    return f'proof_derivatives/{image_id}/{digest}-v{PROOF_DERIVATIVE_VERSION}.webp'
+
+
+def _watermark_font_size(width, height):
+    """Sized off the shorter side, so a landscape frame gets the same text as
+    a portrait one. Sizing off the width made landscape text ~1.5x larger,
+    big enough to cover faces."""
+    return max(min(width, height) // 40, 14)
 
 
 def _generate_proof_derivative(image, user, watermark_identifier):
@@ -1280,7 +1289,7 @@ def _generate_proof_derivative(image, user, watermark_identifier):
     width, height = original.size
 
     layer = PILImage.new('RGBA', (width * 2, height * 2), (0, 0, 0, 0))
-    font_size = max(width // 40, 14)
+    font_size = _watermark_font_size(width, height)
     try:
         font = ImageFont.truetype(WATERMARK_FONT_PATH, size=font_size)
     except OSError:
@@ -1305,7 +1314,7 @@ def _generate_proof_derivative(image, user, watermark_identifier):
 
     watermarked = PILImage.alpha_composite(original.convert('RGBA'), layer).convert('RGB')
     buffer = BytesIO()
-    watermarked.save(buffer, format='JPEG', quality=82)
+    watermarked.save(buffer, format='WEBP', quality=80)
     buffer.seek(0)
     default_storage.save(path, ContentFile(buffer.read()))
     return path
