@@ -344,7 +344,7 @@ class ProofImageServingViewTest(ProofingModelsBase):
         response = self.client.get(reverse('photo_proofing_image', args=[self._token()]))
         _, files = default_storage.listdir(f'proof_derivatives/{self.image.pk}')
         self.assertEqual(len(files), 1)
-        self.assertRegex(files[0], rf'^[0-9a-f]{{32}}-v{PROOF_DERIVATIVE_VERSION}\.jpg$')
+        self.assertRegex(files[0], rf'^[0-9a-f]{{32}}-v{PROOF_DERIVATIVE_VERSION}\.webp$')
         self.assertTrue(response.url.endswith(files[0]))
 
     def test_pre_version_derivative_is_not_served(self):
@@ -356,7 +356,7 @@ class ProofImageServingViewTest(ProofingModelsBase):
         self.assertTrue(default_storage.exists(current))
         self.assertTrue(response.url.endswith(current))
 
-    def test_long_client_identifier_yields_a_full_size_jpeg(self):
+    def test_long_client_identifier_yields_a_full_size_webp(self):
         self.user.first_name = 'Александра-Мария' * 3
         self.user.last_name = 'Константинова-Христова' * 2
         self.user.save()
@@ -365,8 +365,13 @@ class ProofImageServingViewTest(ProofingModelsBase):
         with default_storage.open(f'proof_derivatives/{self.image.pk}/{files[0]}', 'rb') as derivative:
             served = PILImage.open(derivative)
             served.load()
-        self.assertEqual(served.format, 'JPEG')
+        self.assertEqual(served.format, 'WEBP')
         self.assertEqual(served.size, (400, 300))
+
+    def test_landscape_and_portrait_get_the_same_watermark_size(self):
+        from massageProject.main_app.views import _watermark_font_size
+        self.assertEqual(_watermark_font_size(1600, 1067), _watermark_font_size(1067, 1600))
+        self.assertEqual(_watermark_font_size(1600, 1067), 26)
 
     def test_expired_token_is_rejected(self):
         from massageProject.main_app.views import PROOF_IMAGE_MAX_AGE
